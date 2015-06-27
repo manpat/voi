@@ -16,59 +16,11 @@
 #include <cstdio>
 #include <map>
 
-enum {
-	RENDER_QUEUE_PORTAL = Ogre::RENDER_QUEUE_6,
-	RENDER_QUEUE_PORTALSCENE = Ogre::RENDER_QUEUE_7,
-};
-
-class StencilQueueListener : public Ogre::RenderQueueListener {
-public:
-	StencilQueueListener(){}
-	~StencilQueueListener(){}
-
-	void renderQueueStarted(uint8_t queueId, const Ogre::String& invocation, bool& skipThisInvocation) override { 
-		if(queueId == RENDER_QUEUE_PORTAL){
-			auto rs = Ogre::Root::getSingleton().getRenderSystem();
-			rs->clearFrameBuffer(Ogre::FBT_STENCIL, Ogre::ColourValue::Black, 1.0, 0xFF);
-			rs->setStencilCheckEnabled(true);
-			rs->_setColourBufferWriteEnabled(false, false, false, false);
-			rs->setStencilBufferParams(
-				Ogre::CMPF_ALWAYS_PASS, // compare
-				0x1, // refvalue
-				0xFFFFFFFF, // compare mask
-				0xFFFFFFFF, // write mask
-				Ogre::SOP_REPLACE, Ogre::SOP_KEEP, // stencil fail, depth fail
-				Ogre::SOP_REPLACE, // stencil pass + depth pass
-				false); // two-sided operation? no
-
-		}else if(queueId == RENDER_QUEUE_PORTALSCENE){
-			auto rs = Ogre::Root::getSingleton().getRenderSystem();
-			rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
-			rs->_setColourBufferWriteEnabled(true, true, true, true);
-			rs->setStencilCheckEnabled(true);
-			rs->setStencilBufferParams(Ogre::CMPF_EQUAL, 0x1, 0xFFFFFFFF, 0xFFFFFFFF,
-				Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, false);
-		}
-	}
-
-	void renderQueueEnded(uint8_t queueId, const Ogre::String& invocation, bool& repeatThisInvocation) override {
-		if(queueId == RENDER_QUEUE_PORTAL){
-			auto rs = Ogre::Root::getSingleton().getRenderSystem();
-			rs->setStencilCheckEnabled(false);
-			rs->setStencilBufferParams();
-
-		}else if(queueId == RENDER_QUEUE_PORTALSCENE){
-			auto rs = Ogre::Root::getSingleton().getRenderSystem();
-			rs->setStencilCheckEnabled(false);
-			rs->setStencilBufferParams();
-		}
-	}
-};
-
+// Helper for input
 template<typename K, typename V>
-V findin(const std::map<K,V>& m, K k, V dv){
-	auto it = m.find(k);
-	if(it == m.end()) return dv;
+V findin(const std::map<K,V>& m, K key, V defaultValue){
+	auto it = m.find(key);
+	if(it == m.end()) return defaultValue;
 
 	return it->second;
 }
@@ -108,6 +60,7 @@ int main(){
 
 		ogreRoot->initialise(false, "", "");
 
+		// This is for informing Ogre of SDL2's opengl context
 		Ogre::NameValuePairList windowParams;
 		#ifdef WINDOWS
 		SDL_SysWMinfo wmInfo;
@@ -159,26 +112,23 @@ int main(){
 		Ogre::SceneNode* sceneNode = nullptr;
 		{
 			Ogre::ManualObject* thing = nullptr;
-			Ogre::ManualObject* portal = nullptr;
 			Ogre::String objName = "Steve";
 			thing = scene->createManualObject(objName);
-			portal = scene->createManualObject("Portal");
-			thing->setDynamic(false /* Static geometry */);
-			portal->setDynamic(false /* Static geometry */);
+			thing->setDynamic(false); // Static geometry
 
 			float p = 1.0, m = -1.0;
 			float mix = 0.3f;
 			auto colour = Ogre::ColourValue(.8,.1,.1,1);
-			auto c2 = colour*(1.f-mix) + Ogre::ColourValue(1,1,1,1)*mix;
+			auto c2 = colour*(1.f-mix) + Ogre::ColourValue::White*mix;
 
-			thing->begin("BaseWhiteNoLighting", Ogre::RenderOperation::OT_TRIANGLE_LIST);
-				thing->position(m,m,m);
+			thing->begin("BaseWhiteNoLighting" /* Material name*/, Ogre::RenderOperation::OT_TRIANGLE_LIST);
+				thing->position(m,m,m); // Vertex 0 (The point)
 				thing->colour(colour);
-				thing->position(m,p,m);
+				thing->position(m,p,m); // Vertex 1 (Up)
 				thing->colour(c2);
-				thing->position(p,m,m);
+				thing->position(p,m,m); // Vertex 2 (Right)
 				thing->colour(colour);
-				thing->position(m,m,p);
+				thing->position(m,m,p); // Vertex 3 (Toward camera)
 				thing->colour(colour);
 
 				thing->triangle(0, 1, 2);
@@ -187,74 +137,17 @@ int main(){
 				thing->triangle(1, 3, 2);
 			thing->end();
 
-			portal->begin("PortalStencil", Ogre::RenderOperation::OT_TRIANGLE_LIST);
-				portal->position(m,m,0.f);
-				portal->colour(Ogre::ColourValue::White);
-				portal->position(p,p,0.f);
-				portal->colour(Ogre::ColourValue::White);
-				portal->position(m,p,0.f);
-				portal->colour(Ogre::ColourValue::White);
-				portal->position(p,m,0.f);
-				portal->colour(Ogre::ColourValue::White);
-
-				portal->triangle(0,1,2);
-				portal->triangle(0,3,1);
-			portal->end();
-
 			Ogre::String meshName = "Dave";
-			Ogre::String resGroup = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
 			thing->convertToMesh(meshName);
 
-			auto spread = 0.8f;
 			sceneNode = rootNode->createChildSceneNode();
-			for(int y = 0; y <= 10; y++)
-				for(int x = 0; x <= 10; x++){
-					auto ent = scene->createEntity(meshName);
-					ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
-					auto entNode = sceneNode->createChildSceneNode();
-					entNode->attachObject(ent);
-					entNode->scale(0.3f, 0.3f, 0.3f);
-					entNode->translate((x-5)*spread, (y-5)*spread, -10.f);
-				}
 
-			portal->convertToMesh("PortalMesh");
-
-			auto portalNode = rootNode->createChildSceneNode();
-			portalNode->translate(0, 0, -3.f);
-
-			// Portal surface
-			Ogre::Entity* ent = scene->createEntity("PortalMesh");
-			ent->setRenderQueueGroup(RENDER_QUEUE_PORTAL); // Stencil first
-			ent->getSubEntity(0)->getMaterial()->setDepthCheckEnabled(true);
-			ent->getSubEntity(0)->getMaterial()->setDepthWriteEnabled(false);
-
-			stencilNode = portalNode->createChildSceneNode();
-			stencilNode->attachObject(ent);
-
-			auto portalGap = 2.0f;
-
-			auto leftEnt = scene->createEntity(meshName);
-			auto entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, -1.0));
-			entNode->attachObject(leftEnt);
-			entNode->yaw(Ogre::Radian(M_PI));
-
-			auto rightEnt = scene->createEntity(meshName);
-			entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, -1.0));
-			entNode->attachObject(rightEnt);
-			entNode->yaw(Ogre::Radian(M_PI/2.0));
-
-			auto backLeftEnt = scene->createEntity(meshName);
-			entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, 3.0));
-			entNode->attachObject(backLeftEnt);
-			entNode->yaw(Ogre::Radian(-M_PI/2.0));
-
-			auto backRightEnt = scene->createEntity(meshName);
-			entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, 3.0));
-			entNode->attachObject(backRightEnt);
-			// entNode->yaw(Ogre::Radian(0.f));
+			auto ent = scene->createEntity(meshName);
+			auto entNode = sceneNode->createChildSceneNode();
+			entNode->attachObject(ent);
+			entNode->scale(0.3f, 0.3f, 0.3f);
+			entNode->translate(0.f, 0.f, -4.f);
 		}
-
-		scene->addRenderQueueListener(new StencilQueueListener());
 
 		window->setActive(true);
 		window->setAutoUpdated(false);
