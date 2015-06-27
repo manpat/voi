@@ -10,6 +10,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
+#include "app.h"
+#include "camera.h" // Temporary
+
 #include <memory>
 #include <exception>
 #include <string>
@@ -75,85 +78,19 @@ V findin(const std::map<K,V>& m, K k, V dv){
 
 int main(){
 	try{
-		enum {
-			WIDTH = 800,
-			HEIGHT = 600
-		};
-
 		/////////////////////////////// TODO: SDL CHECKS GO HERE ////////////////////////////////
-		SDL_Init(SDL_INIT_VIDEO);
-		auto sdlwindow = SDL_CreateWindow("TitleTitleTitle",
-                          SDL_WINDOWPOS_UNDEFINED,
-                          SDL_WINDOWPOS_UNDEFINED,
-                          WIDTH, HEIGHT,
-                          SDL_WINDOW_OPENGL);
-
-		auto sdlglcontext = SDL_GL_CreateContext(sdlwindow);
-
-		SDL_WarpMouseInWindow(sdlwindow, WIDTH/2, HEIGHT/2);
-		SDL_ShowCursor(false);
+		App app;
+		app.Run();
+		// return 0;
 		/////////////////////////////// TODO: SDL CHECKS GO HERE ////////////////////////////////
 
-		Ogre::String pluginFileName("plugins.cfg"), configFileName(""), logFileName("ogre.log");
-		std::unique_ptr<Ogre::Root> ogreRoot(new Ogre::Root(pluginFileName, configFileName, logFileName));
+		auto window = app.window;
+		auto sceneManager = app.sceneManager;
+		auto rootNode = app.rootNode;
+		auto& ogreRoot = app.ogreRoot;
 
-		auto renderSystemList = ogreRoot->getAvailableRenderers();
-		if(renderSystemList.size() == 0){
-			Ogre::LogManager::getSingleton().logMessage("Sorry, no rendersystem was found.");
-			return 1;
-		}
-
-		auto renderSystem = renderSystemList[0];
-		ogreRoot->setRenderSystem(renderSystem);
-
-		ogreRoot->initialise(false, "", "");
-
-		Ogre::NameValuePairList windowParams;
-		#ifdef WINDOWS
-		SDL_SysWMinfo wmInfo;
-		SDL_VERSION(&wmInfo.version);
-		SDL_GetWMInfo(&wmInfo);
-
-		size_t winHandle = reinterpret_cast<size_t>(wmInfo.window);
-		size_t winGlContext = reinterpret_cast<size_t>(wmInfo.hglrc);
-
-		windowParams["externalWindowHandle"] = StringConverter::toString(winHandle);
-		windowParams["externalGLContext"] = StringConverter::toString(winGlContext);
-		#else
-		windowParams["currentGLContext"] = std::string("True");
-		#endif
-
-		windowParams["FSAA"] = "0";
-		windowParams["vsync"] = "true";
-		// I'm pretty sure none of the createRenderWindow parameters actually do anything
-		auto window = ogreRoot->createRenderWindow("", WIDTH, HEIGHT, false /*fullscreen*/, &windowParams);
-
-		auto scene = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "ASceneManager");
-		auto rootNode = scene->getRootSceneNode();
-
-		auto camera = scene->createCamera("Steve");
-		auto cameraNode = rootNode->createChildSceneNode("CameraName");
-		cameraNode->attachObject(camera);
-
-		// Camera/Viewport setup
-		{
-			auto size = 1.f;
-			auto start = (1.f-size)*0.5f;
-			auto viewport = window->addViewport(camera, 
-				100 /*z order*/, 
-				start /* left */, start /* top */,
-				size /* width */, size /* height */);
-
-			viewport->setAutoUpdated(true);
-			auto g = 0.1;
-			viewport->setBackgroundColour(Ogre::ColourValue(g,g,g));
-			camera->setAspectRatio(
-				static_cast<float>(viewport->getActualWidth())
-				/ static_cast<float>(viewport->getActualHeight()));
-
-			camera->setNearClipDistance(0.1f);
-			camera->setFarClipDistance (1000.f);
-		}
+		auto camera = app.camera->ogreCamera;
+		auto cameraNode = app.camera->cameraNode;
 
 		Ogre::SceneNode* stencilNode = nullptr;
 		Ogre::SceneNode* sceneNode = nullptr;
@@ -161,15 +98,15 @@ int main(){
 			Ogre::ManualObject* thing = nullptr;
 			Ogre::ManualObject* portal = nullptr;
 			Ogre::String objName = "Steve";
-			thing = scene->createManualObject(objName);
-			portal = scene->createManualObject("Portal");
+			thing = sceneManager->createManualObject(objName);
 			thing->setDynamic(false /* Static geometry */);
+			portal = sceneManager->createManualObject("Portal");
 			portal->setDynamic(false /* Static geometry */);
 
 			float p = 1.0, m = -1.0;
 			float mix = 0.3f;
 			auto colour = Ogre::ColourValue(.8,.1,.1,1);
-			auto c2 = colour*(1.f-mix) + Ogre::ColourValue(1,1,1,1)*mix;
+			auto c2 = colour*(1.f-mix) + Ogre::ColourValue::White*mix;
 
 			thing->begin("BaseWhiteNoLighting", Ogre::RenderOperation::OT_TRIANGLE_LIST);
 				thing->position(m,m,m);
@@ -209,7 +146,7 @@ int main(){
 			sceneNode = rootNode->createChildSceneNode();
 			for(int y = 0; y <= 10; y++)
 				for(int x = 0; x <= 10; x++){
-					auto ent = scene->createEntity(meshName);
+					auto ent = sceneManager->createEntity(meshName);
 					ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
 					auto entNode = sceneNode->createChildSceneNode();
 					entNode->attachObject(ent);
@@ -223,7 +160,7 @@ int main(){
 			portalNode->translate(0, 0, -3.f);
 
 			// Portal surface
-			Ogre::Entity* ent = scene->createEntity("PortalMesh");
+			Ogre::Entity* ent = sceneManager->createEntity("PortalMesh");
 			ent->setRenderQueueGroup(RENDER_QUEUE_PORTAL); // Stencil first
 			ent->getSubEntity(0)->getMaterial()->setDepthCheckEnabled(true);
 			ent->getSubEntity(0)->getMaterial()->setDepthWriteEnabled(false);
@@ -233,28 +170,28 @@ int main(){
 
 			auto portalGap = 2.0f;
 
-			auto leftEnt = scene->createEntity(meshName);
+			auto leftEnt = sceneManager->createEntity(meshName);
 			auto entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, -1.0));
 			entNode->attachObject(leftEnt);
 			entNode->yaw(Ogre::Radian(M_PI));
 
-			auto rightEnt = scene->createEntity(meshName);
+			auto rightEnt = sceneManager->createEntity(meshName);
 			entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, -1.0));
 			entNode->attachObject(rightEnt);
 			entNode->yaw(Ogre::Radian(M_PI/2.0));
 
-			auto backLeftEnt = scene->createEntity(meshName);
+			auto backLeftEnt = sceneManager->createEntity(meshName);
 			entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, 3.0));
 			entNode->attachObject(backLeftEnt);
 			entNode->yaw(Ogre::Radian(-M_PI/2.0));
 
-			auto backRightEnt = scene->createEntity(meshName);
+			auto backRightEnt = sceneManager->createEntity(meshName);
 			entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, 3.0));
 			entNode->attachObject(backRightEnt);
 			// entNode->yaw(Ogre::Radian(0.f));
 		}
 
-		scene->addRenderQueueListener(new StencilQueueListener());
+		sceneManager->addRenderQueueListener(new StencilQueueListener());
 
 		window->setActive(true);
 		window->setAutoUpdated(false);
@@ -312,7 +249,7 @@ int main(){
 				mdx = mx / ww * 2.f - 1.f;
 				mdy =-my / wh * 2.f + 1.f;
 
-				SDL_WarpMouseInWindow(sdlwindow, WIDTH/2, HEIGHT/2);
+				SDL_WarpMouseInWindow(app.sdlWindow, WIDTH/2, HEIGHT/2);
 			}
 
 			t += dt;
@@ -329,17 +266,23 @@ int main(){
 			auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
 			cameraNode->setOrientation(ori);
 
+			float boost = 1.f;
+
+			if(findin(keyStates, (int)SDLK_LSHIFT, 0)){
+				boost = 2.f;
+			}
+
 			// Move with WASD, based on look direction
 			if(findin(keyStates, (int)SDLK_w, 0)){
-				cameraNode->translate(-oriYaw.zAxis() * dt);
+				cameraNode->translate(-oriYaw.zAxis() * dt * boost);
 			}else if(findin(keyStates, (int)SDLK_s, 0)){
-				cameraNode->translate(oriYaw.zAxis() * dt);
+				cameraNode->translate(oriYaw.zAxis() * dt * boost);
 			}
 
 			if(findin(keyStates, (int)SDLK_a, 0)){
-				cameraNode->translate(-oriYaw.xAxis() * dt);
+				cameraNode->translate(-oriYaw.xAxis() * dt * boost);
 			}else if(findin(keyStates, (int)SDLK_d, 0)){
-				cameraNode->translate(oriYaw.xAxis() * dt);
+				cameraNode->translate(oriYaw.xAxis() * dt * boost);
 			}
 
 			// Close window on ESC
@@ -349,7 +292,7 @@ int main(){
 			}
 
 			ogreRoot->renderOneFrame();
-			SDL_GL_SwapWindow(sdlwindow);
+			SDL_GL_SwapWindow(app.sdlWindow);
 
 			// Clear all ChangedThisFrameFlag's from keyStates
 			for(auto& kv: keyStates){
