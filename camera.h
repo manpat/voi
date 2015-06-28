@@ -10,6 +10,9 @@ public:
 	Ogre::SceneNode* cameraNode;
 	Ogre::Viewport* viewport;
 
+	float cameraYaw = 0.f;
+	float cameraPitch = 0.f;
+
 public:
 	Camera(std::string name = "main");
 	~Camera();

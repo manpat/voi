@@ -6,8 +6,16 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
+#include <OGRE/OgreRenderSystem.h>
+#include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreManualObject.h>
+#include <OGRE/OgreEntity.h>
+#include <OGRE/OgreSubEntity.h>
+
 #include "app.h"
 #include "camera.h"
+#include "helpers.h"
+#include "portals.h"
 
 App* App::instance = nullptr;
 
@@ -30,6 +38,13 @@ App::App(){
 	InitOgre();
 
 	camera = std::make_shared<Camera>();
+
+	Init();
+
+	window->setActive(true);
+	window->setAutoUpdated(false);
+
+	ogreRoot->clearEventTimes();
 }
 
 App::~App(){
@@ -123,16 +138,20 @@ void App::Run(){
 	auto begin = high_resolution_clock::now();
 	float dt = 0.f;
 
-	Init();
+	while(!window->isClosed()){
+		window->update(false);
 
-	while(true){
 		Update(dt);
+
+		ogreRoot->renderOneFrame();
+		SDL_GL_SwapWindow(sdlWindow);
 
 		auto end = high_resolution_clock::now();
 		dt = duration_cast<duration<float>>(end - begin).count();
+		begin = end;
 
-		std::cerr << dt << std::endl;
-		break;
+		// std::cerr << dt << std::endl;
+		// break;
 	}
 }
 
@@ -165,7 +184,105 @@ void App::Run(){
 	                           
 */
 void App::Init(){
+	Ogre::SceneNode* stencilNode = nullptr;
+	Ogre::SceneNode* sceneNode = nullptr;
 
+	Ogre::ManualObject* thing = nullptr;
+	Ogre::ManualObject* portal = nullptr;
+	Ogre::String objName = "Steve";
+	thing = sceneManager->createManualObject(objName);
+	thing->setDynamic(false /* Static geometry */);
+	portal = sceneManager->createManualObject("Portal");
+	portal->setDynamic(false /* Static geometry */);
+
+	float p = 1.0, m = -1.0;
+	float mix = 0.3f;
+	auto colour = Ogre::ColourValue(.8,.1,.1,1);
+	auto c2 = colour*(1.f-mix) + Ogre::ColourValue::White*mix;
+
+	thing->begin("BaseWhiteNoLighting", Ogre::RenderOperation::OT_TRIANGLE_LIST);
+		thing->position(m,m,m);
+		thing->colour(colour);
+		thing->position(m,p,m);
+		thing->colour(c2);
+		thing->position(p,m,m);
+		thing->colour(colour);
+		thing->position(m,m,p);
+		thing->colour(colour);
+
+		thing->triangle(0, 1, 2);
+		thing->triangle(0, 2, 3);
+		thing->triangle(0, 3, 1);
+		thing->triangle(1, 3, 2);
+	thing->end();
+
+	portal->begin("PortalStencil", Ogre::RenderOperation::OT_TRIANGLE_LIST);
+		portal->position(m,m,0.f);
+		portal->colour(Ogre::ColourValue::White);
+		portal->position(p,p,0.f);
+		portal->colour(Ogre::ColourValue::White);
+		portal->position(m,p,0.f);
+		portal->colour(Ogre::ColourValue::White);
+		portal->position(p,m,0.f);
+		portal->colour(Ogre::ColourValue::White);
+
+		portal->triangle(0,1,2);
+		portal->triangle(0,3,1);
+	portal->end();
+
+	Ogre::String meshName = "Dave";
+	Ogre::String resGroup = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+	thing->convertToMesh(meshName);
+
+	auto spread = 0.8f;
+	sceneNode = rootNode->createChildSceneNode();
+	for(int y = 0; y <= 10; y++)
+		for(int x = 0; x <= 10; x++){
+			auto ent = sceneManager->createEntity(meshName);
+			ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
+			auto entNode = sceneNode->createChildSceneNode();
+			entNode->attachObject(ent);
+			entNode->scale(0.3f, 0.3f, 0.3f);
+			entNode->translate((x-5)*spread, (y-5)*spread, -10.f);
+		}
+
+	portal->convertToMesh("PortalMesh");
+
+	auto portalNode = rootNode->createChildSceneNode();
+	portalNode->translate(0, 0, -3.f);
+
+	// Portal surface
+	Ogre::Entity* ent = sceneManager->createEntity("PortalMesh");
+	ent->setRenderQueueGroup(RENDER_QUEUE_PORTAL); // Stencil first
+	ent->getSubEntity(0)->getMaterial()->setDepthCheckEnabled(true);
+	ent->getSubEntity(0)->getMaterial()->setDepthWriteEnabled(false);
+
+	stencilNode = portalNode->createChildSceneNode();
+	stencilNode->attachObject(ent);
+
+	auto portalGap = 2.0f;
+
+	auto leftEnt = sceneManager->createEntity(meshName);
+	auto entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, -1.0));
+	entNode->attachObject(leftEnt);
+	entNode->yaw(Ogre::Radian(M_PI));
+
+	auto rightEnt = sceneManager->createEntity(meshName);
+	entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, -1.0));
+	entNode->attachObject(rightEnt);
+	entNode->yaw(Ogre::Radian(M_PI/2.0));
+
+	auto backLeftEnt = sceneManager->createEntity(meshName);
+	entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, 3.0));
+	entNode->attachObject(backLeftEnt);
+	entNode->yaw(Ogre::Radian(-M_PI/2.0));
+
+	auto backRightEnt = sceneManager->createEntity(meshName);
+	entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, 3.0));
+	entNode->attachObject(backRightEnt);
+	// entNode->yaw(Ogre::Radian(0.f));
+
+	sceneManager->addRenderQueueListener(new StencilQueueListener());
 }
 
 /*
@@ -182,5 +299,82 @@ void App::Init(){
 	             88                                                    
 */
 void App::Update(float dt){
+	SDL_Event e;
+	while(SDL_PollEvent(&e)){
+		if(e.type == SDL_QUIT
+		|| e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE){
 
+			window->destroy();
+			break;
+		}
+
+		// TODO: Release mouse on lose focus
+
+		switch(e.type){
+		case SDL_KEYUP:
+			keyStates[e.key.keysym.sym] = 0 | ChangedThisFrameFlag;
+			break;
+
+		case SDL_KEYDOWN:
+			if(e.key.repeat == 0) keyStates[e.key.keysym.sym] = 1 | ChangedThisFrameFlag;
+			break;
+		}
+	}
+
+	float mdx = 0.f, mdy = 0.f;
+	// Get mouse delta from center, convert to range (-1, 1), 
+	//	move mouse back to center
+	{
+		int mx, my;
+		SDL_GetMouseState(&mx, &my);
+		auto ww = (float) WIDTH;
+		auto wh = (float) HEIGHT;
+
+		mdx = mx / ww * 2.f - 1.f;
+		mdy =-my / wh * 2.f + 1.f;
+
+		SDL_WarpMouseInWindow(sdlWindow, WIDTH/2, HEIGHT/2);
+	}
+
+	auto nyaw =  -mdx * 2.0 * M_PI * dt * 7.f;
+	auto npitch = mdy * 2.0 * M_PI * dt * 7.f;	
+	if(abs(camera->cameraPitch + npitch) < M_PI/4.0f) { // Convoluted clamp
+		camera->cameraPitch += npitch;
+	}
+	camera->cameraYaw += nyaw;
+
+	// Rotate camera
+	auto oriYaw = Ogre::Quaternion(Ogre::Radian(camera->cameraYaw), Ogre::Vector3::UNIT_Y);
+	auto ori = Ogre::Quaternion(Ogre::Radian(camera->cameraPitch), oriYaw.xAxis()) * oriYaw;
+	camera->cameraNode->setOrientation(ori);
+
+	float boost = 1.f;
+
+	if(findin(keyStates, (int)SDLK_LSHIFT, 0)){
+		boost = 2.f;
+	}
+
+	// Move with WASD, based on look direction
+	if(findin(keyStates, (int)SDLK_w, 0)){
+		camera->cameraNode->translate(-oriYaw.zAxis() * dt * boost);
+	}else if(findin(keyStates, (int)SDLK_s, 0)){
+		camera->cameraNode->translate(oriYaw.zAxis() * dt * boost);
+	}
+
+	if(findin(keyStates, (int)SDLK_a, 0)){
+		camera->cameraNode->translate(-oriYaw.xAxis() * dt * boost);
+	}else if(findin(keyStates, (int)SDLK_d, 0)){
+		camera->cameraNode->translate(oriYaw.xAxis() * dt * boost);
+	}
+
+	// Close window on ESC
+	if(findin(keyStates, (int)SDLK_ESCAPE, 0)){
+		window->destroy();
+		return;
+	}
+
+	// Clear all ChangedThisFrameFlag's from keyStates
+	for(auto& kv: keyStates){
+		kv.second &= ~ChangedThisFrameFlag;
+	}
 }

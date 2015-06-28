@@ -26,6 +26,12 @@ public:
 
 	std::shared_ptr<Camera> camera;
 
+	std::map<int, int> keyStates;
+	// This flag is for indicating that a key changed during a frame
+	//	Can be used for triggering things that should only happen once per 
+	//	key press.
+	enum {ChangedThisFrameFlag = 1<<8};
+
 public:
 	App();
 	~App();
