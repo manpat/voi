@@ -13,6 +13,7 @@
 #include <OGRE/OgreSubEntity.h>
 
 #include "app.h"
+#include "input.h"
 #include "camera.h"
 #include "helpers.h"
 #include "portals.h"
@@ -37,6 +38,7 @@ App::App(){
 
 	InitOgre();
 
+	input = std::make_shared<Input>();
 	camera = std::make_shared<Camera>();
 
 	Init();
@@ -143,6 +145,10 @@ void App::Run(){
 
 		Update(dt);
 
+		for(auto hook: frameEndHooks){
+			hook();
+		}
+
 		ogreRoot->renderOneFrame();
 		SDL_GL_SwapWindow(sdlWindow);
 
@@ -154,6 +160,41 @@ void App::Run(){
 		// break;
 	}
 }
+
+/*
+	                                                          
+	88        88                         88                   
+	88        88                         88                   
+	88        88                         88                   
+	88aaaaaaaa88  ,adPPYba,   ,adPPYba,  88   ,d8  ,adPPYba,  
+	88""""""""88 a8"     "8a a8"     "8a 88 ,a8"   I8[    ""  
+	88        88 8b       d8 8b       d8 8888[      `"Y8ba,   
+	88        88 "8a,   ,a8" "8a,   ,a8" 88`"Yba,  aa    ]8I  
+	88        88  `"YbbdP"'   `"YbbdP"'  88   `Y8a `"YbbdP"'  
+	                                                          
+	                                                          
+*/
+void App::RegisterSDLHook(SDLEventHook h){
+	if(!h) return;
+	sdlEventHooks.push_back(h);
+}
+
+void App::RemoveSDLHook(SDLEventHook h){
+	if(!h) return;
+	std::cerr << "Hook removal not implemented" << std::endl;
+}
+
+void App::RegisterFrameEndHook(FrameEndHook h){
+	if(!h) return;
+	frameEndHooks.push_back(h);
+}
+
+void App::RemoveFrameEndHook(FrameEndHook h){
+	if(!h) return;
+	std::cerr << "Hook removal not implemented" << std::endl;
+}
+
+
 
 /*
 	                                                                                                            
@@ -308,17 +349,11 @@ void App::Update(float dt){
 			break;
 		}
 
-		// TODO: Release mouse on lose focus
-
-		switch(e.type){
-		case SDL_KEYUP:
-			keyStates[e.key.keysym.sym] = 0 | ChangedThisFrameFlag;
-			break;
-
-		case SDL_KEYDOWN:
-			if(e.key.repeat == 0) keyStates[e.key.keysym.sym] = 1 | ChangedThisFrameFlag;
-			break;
+		for(auto evh: sdlEventHooks){
+			evh(e);
 		}
+
+		// TODO: Release mouse on lose focus
 	}
 
 	float mdx = 0.f, mdy = 0.f;
@@ -350,31 +385,26 @@ void App::Update(float dt){
 
 	float boost = 1.f;
 
-	if(findin(keyStates, (int)SDLK_LSHIFT, 0)){
+	if(Input::GetKey(SDLK_LSHIFT)){
 		boost = 2.f;
 	}
 
 	// Move with WASD, based on look direction
-	if(findin(keyStates, (int)SDLK_w, 0)){
+	if(Input::GetKey(SDLK_w)){
 		camera->cameraNode->translate(-oriYaw.zAxis() * dt * boost);
-	}else if(findin(keyStates, (int)SDLK_s, 0)){
+	}else if(Input::GetKey(SDLK_s)){
 		camera->cameraNode->translate(oriYaw.zAxis() * dt * boost);
 	}
 
-	if(findin(keyStates, (int)SDLK_a, 0)){
+	if(Input::GetKey(SDLK_a)){
 		camera->cameraNode->translate(-oriYaw.xAxis() * dt * boost);
-	}else if(findin(keyStates, (int)SDLK_d, 0)){
+	}else if(Input::GetKey(SDLK_d)){
 		camera->cameraNode->translate(oriYaw.xAxis() * dt * boost);
 	}
 
 	// Close window on ESC
-	if(findin(keyStates, (int)SDLK_ESCAPE, 0)){
+	if(Input::GetKeyDown(SDLK_ESCAPE)){
 		window->destroy();
 		return;
-	}
-
-	// Clear all ChangedThisFrameFlag's from keyStates
-	for(auto& kv: keyStates){
-		kv.second &= ~ChangedThisFrameFlag;
 	}
 }

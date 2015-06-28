@@ -4,8 +4,10 @@
 #include <OGRE/OgreRoot.h>
 #include <SDL2/SDL.h>
 #include <memory>
+#include <vector>
 
 class Camera;
+class Input;
 
 enum {
 	WIDTH = 800,
@@ -13,6 +15,10 @@ enum {
 };
 
 class App {
+public:
+	typedef void (*SDLEventHook)(const SDL_Event&);
+	typedef void (*FrameEndHook)();
+
 public:
 	static App* instance;
 
@@ -25,12 +31,10 @@ public:
 	Ogre::SceneNode* rootNode;
 
 	std::shared_ptr<Camera> camera;
+	std::shared_ptr<Input> input;
 
-	std::map<int, int> keyStates;
-	// This flag is for indicating that a key changed during a frame
-	//	Can be used for triggering things that should only happen once per 
-	//	key press.
-	enum {ChangedThisFrameFlag = 1<<8};
+	std::vector<SDLEventHook> sdlEventHooks;
+	std::vector<FrameEndHook> frameEndHooks;
 
 public:
 	App();
@@ -38,6 +42,12 @@ public:
 
 	static App* GetSingleton();
 	void Run();
+
+	void RegisterSDLHook(SDLEventHook);
+	void RemoveSDLHook(SDLEventHook);
+
+	void RegisterFrameEndHook(FrameEndHook);
+	void RemoveFrameEndHook(FrameEndHook);
 
 protected:
 	void InitOgre();

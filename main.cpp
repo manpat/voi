@@ -2,8 +2,7 @@
 
 int main(){
 	try{
-		App app;
-		app.Run();
+		App().Run();
 
 	}catch(const Ogre::Exception& e){
 		return 1;
