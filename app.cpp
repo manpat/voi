@@ -184,17 +184,25 @@ void App::RemoveSDLHook(SDLEventHook h){
 	std::cerr << "Hook removal not implemented" << std::endl;
 }
 
-void App::RegisterFrameEndHook(FrameEndHook h){
+void App::RegisterFrameBeginHook(Hook h){
 	if(!h) return;
-	frameEndHooks.push_back(h);
+	frameBeginHooks.push_back(h);
 }
 
-void App::RemoveFrameEndHook(FrameEndHook h){
+void App::RemoveFrameBeginHook(Hook h){
 	if(!h) return;
 	std::cerr << "Hook removal not implemented" << std::endl;
 }
 
+void App::RegisterFrameEndHook(Hook h){
+	if(!h) return;
+	frameEndHooks.push_back(h);
+}
 
+void App::RemoveFrameEndHook(Hook h){
+	if(!h) return;
+	std::cerr << "Hook removal not implemented" << std::endl;
+}
 
 /*
 	                                                                                                            
@@ -304,22 +312,22 @@ void App::Init(){
 	auto portalGap = 2.0f;
 
 	auto leftEnt = sceneManager->createEntity(meshName);
-	auto entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, -1.0));
+	auto entNode = portalNode->createChildSceneNode(vec3(-portalGap, 0.f, -1.0));
 	entNode->attachObject(leftEnt);
 	entNode->yaw(Ogre::Radian(M_PI));
 
 	auto rightEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, -1.0));
+	entNode = portalNode->createChildSceneNode(vec3(portalGap, 0.f, -1.0));
 	entNode->attachObject(rightEnt);
 	entNode->yaw(Ogre::Radian(M_PI/2.0));
 
 	auto backLeftEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(Ogre::Vector3(-portalGap, 0.f, 3.0));
+	entNode = portalNode->createChildSceneNode(vec3(-portalGap, 0.f, 3.0));
 	entNode->attachObject(backLeftEnt);
 	entNode->yaw(Ogre::Radian(-M_PI/2.0));
 
 	auto backRightEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(Ogre::Vector3(portalGap, 0.f, 3.0));
+	entNode = portalNode->createChildSceneNode(vec3(portalGap, 0.f, 3.0));
 	entNode->attachObject(backRightEnt);
 	// entNode->yaw(Ogre::Radian(0.f));
 
@@ -356,30 +364,21 @@ void App::Update(float dt){
 		// TODO: Release mouse on lose focus
 	}
 
-	float mdx = 0.f, mdy = 0.f;
-	// Get mouse delta from center, convert to range (-1, 1), 
-	//	move mouse back to center
-	{
-		int mx, my;
-		SDL_GetMouseState(&mx, &my);
-		auto ww = (float) WIDTH;
-		auto wh = (float) HEIGHT;
-
-		mdx = mx / ww * 2.f - 1.f;
-		mdy =-my / wh * 2.f + 1.f;
-
-		SDL_WarpMouseInWindow(sdlWindow, WIDTH/2, HEIGHT/2);
+	for(auto hook: frameBeginHooks){
+		hook();
 	}
 
-	auto nyaw =  -mdx * 2.0 * M_PI * dt * 7.f;
-	auto npitch = mdy * 2.0 * M_PI * dt * 7.f;	
+	auto md = Input::GetMouseDelta();
+
+	auto nyaw =  -md.x * 2.0 * M_PI * dt * 7.f;
+	auto npitch = md.y * 2.0 * M_PI * dt * 7.f;	
 	if(abs(camera->cameraPitch + npitch) < M_PI/4.0f) { // Convoluted clamp
 		camera->cameraPitch += npitch;
 	}
 	camera->cameraYaw += nyaw;
 
 	// Rotate camera
-	auto oriYaw = Ogre::Quaternion(Ogre::Radian(camera->cameraYaw), Ogre::Vector3::UNIT_Y);
+	auto oriYaw = Ogre::Quaternion(Ogre::Radian(camera->cameraYaw), vec3::UNIT_Y);
 	auto ori = Ogre::Quaternion(Ogre::Radian(camera->cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->setOrientation(ori);
 

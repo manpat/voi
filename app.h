@@ -17,7 +17,7 @@ enum {
 class App {
 public:
 	typedef void (*SDLEventHook)(const SDL_Event&);
-	typedef void (*FrameEndHook)();
+	typedef void (*Hook)();
 
 public:
 	static App* instance;
@@ -34,7 +34,8 @@ public:
 	std::shared_ptr<Input> input;
 
 	std::vector<SDLEventHook> sdlEventHooks;
-	std::vector<FrameEndHook> frameEndHooks;
+	std::vector<Hook> frameBeginHooks;
+	std::vector<Hook> frameEndHooks;
 
 public:
 	App();
@@ -46,8 +47,11 @@ public:
 	void RegisterSDLHook(SDLEventHook);
 	void RemoveSDLHook(SDLEventHook);
 
-	void RegisterFrameEndHook(FrameEndHook);
-	void RemoveFrameEndHook(FrameEndHook);
+	void RegisterFrameBeginHook(Hook);
+	void RemoveFrameBeginHook(Hook);
+
+	void RegisterFrameEndHook(Hook);
+	void RemoveFrameEndHook(Hook);
 
 protected:
 	void InitOgre();

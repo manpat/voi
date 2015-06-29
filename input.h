@@ -3,10 +3,12 @@
 
 #include <SDL2/SDL.h>
 #include <map>
+#include "helpers.h"
 
 class Input {
 public:
 	static std::map<int, int> keyStates;
+	static vec2 mouseDelta;
 
 	// This flag is for indicating that a key changed during a frame
 	//	Can be used for triggering things that should only happen once per 
@@ -21,6 +23,9 @@ public:
 	Input();
 	~Input();
 
+	// Returns mouse delta since last frame
+	static vec2 GetMouseDelta();
+
 	// Returns if a key is pressed
 	static bool GetKey(int k);
 
@@ -31,6 +36,7 @@ public:
 	static bool GetKeyUp(int k);
 
 protected:
+	static void FrameBeginHook();
 	static void EventHook(const SDL_Event&);
 	static void FrameEndHook();
 };
