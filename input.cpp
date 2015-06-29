@@ -3,7 +3,7 @@
 #include "app.h"
 
 std::map<int,int> Input::keyStates;
-vec2 Input::mouseDelta;
+vec2 Input::mouseDelta = vec2::ZERO;
 
 Input::Input(){
 	App::GetSingleton()->RegisterSDLHook(&EventHook);
@@ -52,14 +52,15 @@ void Input::FrameBeginHook(){
 
 	int mx, my;
 	SDL_GetMouseState(&mx, &my);
-	// TODO: Remove hard coded width and height
-	auto ww = (float) WIDTH;
-	auto wh = (float) HEIGHT;
 
-	mouseDelta.x = mx / ww * 2.f - 1.f;
-	mouseDelta.y =-my / wh * 2.f + 1.f;
+	auto ww = App::GetSingleton()->GetWindowWidth();
+	auto wh = App::GetSingleton()->GetWindowHeight();
 
-	SDL_WarpMouseInWindow(App::GetSingleton()->sdlWindow, WIDTH/2, HEIGHT/2);
+	mouseDelta.x = mx / static_cast<float>(ww) * 2.f - 1.f;
+	mouseDelta.y =-my / static_cast<float>(wh) * 2.f + 1.f;
+
+	if(App::GetSingleton()->IsInFocus())
+		SDL_WarpMouseInWindow(App::GetSingleton()->sdlWindow, ww/2, wh/2);
 }
 
 void Input::FrameEndHook(){

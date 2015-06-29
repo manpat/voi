@@ -36,6 +36,7 @@ public:
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<Hook> frameBeginHooks;
 	std::vector<Hook> frameEndHooks;
+	bool inFocus;
 
 public:
 	App();
@@ -44,6 +45,7 @@ public:
 	static App* GetSingleton();
 	void Run();
 
+	// Hooks
 	void RegisterSDLHook(SDLEventHook);
 	void RemoveSDLHook(SDLEventHook);
 
@@ -52,6 +54,12 @@ public:
 
 	void RegisterFrameEndHook(Hook);
 	void RemoveFrameEndHook(Hook);
+
+	// Getters
+	int GetWindowWidth() const;
+	int GetWindowHeight() const;
+
+	bool IsInFocus() const;
 
 protected:
 	void InitOgre();

@@ -47,6 +47,7 @@ App::App(){
 	window->setAutoUpdated(false);
 
 	ogreRoot->clearEventTimes();
+	inFocus = true;
 }
 
 App::~App(){
@@ -143,6 +144,31 @@ void App::Run(){
 	while(!window->isClosed()){
 		window->update(false);
 
+		SDL_Event e;
+		while(SDL_PollEvent(&e)){
+			if(e.type == SDL_QUIT
+			|| e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE){
+
+				window->destroy();
+				break;
+			}else if(e.type == SDL_WINDOWEVENT){
+				if(e.window.event == SDL_WINDOWEVENT_ENTER){
+					inFocus = true;
+				}else if(e.window.event == SDL_WINDOWEVENT_LEAVE){
+					inFocus = false;
+				}
+			}
+
+			for(auto evh: sdlEventHooks){
+				evh(e);
+			}
+
+			// TODO: Release mouse on lose focus
+		}
+
+		for(auto hook: frameBeginHooks){
+			hook();
+		}
 		Update(dt);
 
 		for(auto hook: frameEndHooks){
@@ -202,6 +228,31 @@ void App::RegisterFrameEndHook(Hook h){
 void App::RemoveFrameEndHook(Hook h){
 	if(!h) return;
 	std::cerr << "Hook removal not implemented" << std::endl;
+}
+
+/*
+	                                                                         
+	  ,ad8888ba,                                                             
+	 d8"'    `"8b              ,d      ,d                                    
+	d8'                        88      88                                    
+	88             ,adPPYba, MM88MMM MM88MMM ,adPPYba, 8b,dPPYba, ,adPPYba,  
+	88      88888 a8P_____88   88      88   a8P_____88 88P'   "Y8 I8[    ""  
+	Y8,        88 8PP"""""""   88      88   8PP""""""" 88          `"Y8ba,   
+	 Y8a.    .a88 "8b,   ,aa   88,     88,  "8b,   ,aa 88         aa    ]8I  
+	  `"Y88888P"   `"Ybbd8"'   "Y888   "Y888 `"Ybbd8"' 88         `"YbbdP"'  
+	                                                                         
+	                                                                         
+*/
+int App::GetWindowWidth() const {
+	return WIDTH;
+}
+
+int App::GetWindowHeight() const {
+	return HEIGHT;
+}
+
+bool App::IsInFocus() const {
+	return inFocus;
 }
 
 /*
@@ -348,26 +399,6 @@ void App::Init(){
 	             88                                                    
 */
 void App::Update(float dt){
-	SDL_Event e;
-	while(SDL_PollEvent(&e)){
-		if(e.type == SDL_QUIT
-		|| e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE){
-
-			window->destroy();
-			break;
-		}
-
-		for(auto evh: sdlEventHooks){
-			evh(e);
-		}
-
-		// TODO: Release mouse on lose focus
-	}
-
-	for(auto hook: frameBeginHooks){
-		hook();
-	}
-
 	auto md = Input::GetMouseDelta();
 
 	auto nyaw =  -md.x * 2.0 * M_PI * dt * 7.f;
