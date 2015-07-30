@@ -2,6 +2,7 @@
 #include <chrono>
 #include <string>
 #include <typeinfo>
+#include <cmath>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -11,6 +12,8 @@
 #include <OGRE/OgreManualObject.h>
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreSubEntity.h>
+#include <OGRE/OgreResourceGroupManager.h>
+#include <OGRE/OgreRenderQueueInvocation.h>
 
 #include "app.h"
 #include "input.h"
@@ -121,6 +124,9 @@ void App::InitOgre(){
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "ASceneManager");
 	rootNode = sceneManager->getRootSceneNode();
+
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Meshes", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 }
 
 /*
@@ -284,8 +290,14 @@ bool App::IsInFocus() const {
 	                           
 */
 void App::Init(){
+	rqis = ogreRoot->createRenderQueueInvocationSequence("Lol");
+	rqis->add(Ogre::RENDER_QUEUE_MAIN, "Main");
+	rqis->add(RENDER_QUEUE_PORTAL, "Portal");
+	rqis->add(RENDER_QUEUE_PORTALSCENE, "PortalScene");
+
+	camera->viewport->setRenderQueueInvocationSequenceName("Lol");
+
 	Ogre::SceneNode* stencilNode = nullptr;
-	Ogre::SceneNode* sceneNode = nullptr;
 
 	Ogre::ManualObject* thing = nullptr;
 	Ogre::ManualObject* portal = nullptr;
@@ -303,7 +315,7 @@ void App::Init(){
 	thing->begin("BaseWhiteNoLighting", Ogre::RenderOperation::OT_TRIANGLE_LIST);
 		thing->position(m,m,m);
 		thing->colour(colour);
-		thing->position(m,p,m);
+		thing->position(m,p*2,m);
 		thing->colour(c2);
 		thing->position(p,m,m);
 		thing->colour(colour);
@@ -319,35 +331,56 @@ void App::Init(){
 	portal->begin("PortalStencil", Ogre::RenderOperation::OT_TRIANGLE_LIST);
 		portal->position(m,m,0.f);
 		portal->colour(Ogre::ColourValue::White);
-		portal->position(p,p,0.f);
+		portal->position(p,p*2,0.f);
 		portal->colour(Ogre::ColourValue::White);
-		portal->position(m,p,0.f);
+		portal->position(m,p*2,0.f);
 		portal->colour(Ogre::ColourValue::White);
 		portal->position(p,m,0.f);
 		portal->colour(Ogre::ColourValue::White);
 
 		portal->triangle(0,1,2);
 		portal->triangle(0,3,1);
+
+		// Opposite direction
+		portal->triangle(0,2,1);
+		portal->triangle(0,1,3);
 	portal->end();
 
 	Ogre::String meshName = "Dave";
-	Ogre::String resGroup = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
 	thing->convertToMesh(meshName);
 
-	auto spread = 0.8f;
-	sceneNode = rootNode->createChildSceneNode();
-	for(int y = 0; y <= 10; y++)
-		for(int x = 0; x <= 10; x++){
-			auto ent = sceneManager->createEntity(meshName);
-			ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
-			auto entNode = sceneNode->createChildSceneNode();
-			entNode->attachObject(ent);
-			entNode->scale(0.3f, 0.3f, 0.3f);
-			entNode->translate((x-5)*spread, (y-5)*spread, -10.f);
-		}
+	{
+		auto spread = 0.8f;
+		sceneNode2 = rootNode->createChildSceneNode();
+		for(int y = 0; y <= 10; y++)
+			for(int x = 0; x <= 10; x++){
+				auto ent = sceneManager->createEntity("Icosphere.mesh");
+				ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
+				auto entNode = sceneNode2->createChildSceneNode();
+				entNode->attachObject(ent);
+				entNode->scale(0.3f, 0.3f, 0.3f);
+				entNode->translate((x-5)*spread, (y-5)*spread, -10.f);
+			}
+
+		auto ent = sceneManager->createEntity("Icosphere.mesh");
+		ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
+		auto entNode = sceneNode2->createChildSceneNode();
+		entNode->attachObject(ent);
+		entNode->scale(2.f, 2.f, 2.f);
+		entNode->translate(0, 0, 5.f);
+
+		auto cnode = sceneNode2->createChildSceneNode();
+		auto courtyard = sceneManager->createEntity("Courtyard2", "Plane.mesh");
+		courtyard->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
+		cnode->attachObject(courtyard);
+		cnode->scale(0.25, 0.25, 0.25);
+		cnode->translate(0, -1.0, 20.0);
+		
+	}
 
 	portal->convertToMesh("PortalMesh");
 
+	sceneNode1 = rootNode->createChildSceneNode();
 	auto portalNode = rootNode->createChildSceneNode();
 	portalNode->translate(0, 0, -3.f);
 
@@ -362,8 +395,10 @@ void App::Init(){
 
 	auto portalGap = 2.0f;
 
+	Ogre::SceneNode* entNode;
+
 	auto leftEnt = sceneManager->createEntity(meshName);
-	auto entNode = portalNode->createChildSceneNode(vec3(-portalGap, 0.f, -1.0));
+	entNode = portalNode->createChildSceneNode(vec3(-portalGap, 0.f, -1.0));
 	entNode->attachObject(leftEnt);
 	entNode->yaw(Ogre::Radian(M_PI));
 
@@ -372,17 +407,14 @@ void App::Init(){
 	entNode->attachObject(rightEnt);
 	entNode->yaw(Ogre::Radian(M_PI/2.0));
 
-	auto backLeftEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(vec3(-portalGap, 0.f, 3.0));
-	entNode->attachObject(backLeftEnt);
-	entNode->yaw(Ogre::Radian(-M_PI/2.0));
+	sceneQueueListener = new StencilQueueListener(camera->ogreCamera);
+	sceneManager->addRenderQueueListener(sceneQueueListener);
 
-	auto backRightEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(vec3(portalGap, 0.f, 3.0));
-	entNode->attachObject(backRightEnt);
-	// entNode->yaw(Ogre::Radian(0.f));
-
-	sceneManager->addRenderQueueListener(new StencilQueueListener());
+	auto cnode = sceneNode1->createChildSceneNode();
+	auto courtyard = sceneManager->createEntity("Courtyard", "Plane.mesh");
+	cnode->attachObject(courtyard);
+	cnode->scale(0.25, 0.25, 0.25);
+	cnode->translate(0, -1.0, -2.0);
 }
 
 /*
@@ -436,5 +468,41 @@ void App::Update(float dt){
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
 		window->destroy();
 		return;
+	}
+
+	if(Input::GetKeyDown('1')){
+		sceneNode1->flipVisibility();
+	}
+	if(Input::GetKeyDown('2')){
+		sceneNode2->flipVisibility();
+	}
+	if(Input::GetKeyDown('f')){
+		static bool flipped = false;
+		rqis->clear();
+
+		if(flipped){
+			rqis->add(Ogre::RENDER_QUEUE_MAIN, "Main");
+			rqis->add(RENDER_QUEUE_PORTAL, "Portal");
+			rqis->add(RENDER_QUEUE_PORTALSCENE, "PortalScene");
+		}else{
+			rqis->add(RENDER_QUEUE_PORTALSCENE, "Main");
+			rqis->add(RENDER_QUEUE_PORTAL, "Portal");
+			rqis->add(Ogre::RENDER_QUEUE_MAIN, "PortalScene");
+		}
+		flipped = !flipped;
+	}
+
+	auto playerPos = camera->cameraNode->getPosition();
+	auto portalPos = vec3(0,0,-3.0);
+	auto diff = playerPos - portalPos;
+	auto portalNormal = vec3(0,0,1.0);
+
+	auto pside = diff.dotProduct(portalNormal);
+	auto dist = portalPos.dotProduct(portalNormal);
+
+	if(pside < 0){
+		sceneQueueListener->portalClip = Ogre::Plane(portalNormal, dist);
+	}else{
+		sceneQueueListener->portalClip = Ogre::Plane(-portalNormal,-dist);
 	}
 }

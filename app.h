@@ -8,6 +8,7 @@
 
 class Camera;
 class Input;
+class StencilQueueListener;
 
 enum {
 	WIDTH = 800,
@@ -30,6 +31,11 @@ public:
 	Ogre::RenderWindow* window;
 	Ogre::SceneNode* rootNode;
 
+	Ogre::SceneNode* sceneNode1;
+	Ogre::SceneNode* sceneNode2;
+
+	Ogre::RenderQueueInvocationSequence* rqis;
+
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
 
@@ -37,6 +43,8 @@ public:
 	std::vector<Hook> frameBeginHooks;
 	std::vector<Hook> frameEndHooks;
 	bool inFocus;
+
+	StencilQueueListener* sceneQueueListener;
 
 public:
 	App();

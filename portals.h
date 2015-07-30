@@ -3,6 +3,7 @@
 
 #include <OGRE/OgreRenderQueueListener.h>
 #include <OGRE/OgreRenderSystem.h>
+#include <OGRE/OgreCamera.h>
 #include <string>
 
 enum {
@@ -12,11 +13,15 @@ enum {
 
 class StencilQueueListener : public Ogre::RenderQueueListener {
 public:
-	StencilQueueListener(){}
+	Ogre::Camera* camera;
+	Ogre::Plane portalClip;
+
+public:
+	StencilQueueListener(Ogre::Camera* c) : camera(c){}
 	~StencilQueueListener(){}
 
 	void renderQueueStarted(uint8_t queueId, const std::string& invocation, bool& skipThisInvocation) override { 
-		if(queueId == RENDER_QUEUE_PORTAL){
+		if(invocation == "Portal"){
 			auto rs = Ogre::Root::getSingleton().getRenderSystem();
 			rs->clearFrameBuffer(Ogre::FBT_STENCIL, Ogre::ColourValue::Black, 1.0, 0xFF);
 			rs->setStencilCheckEnabled(true);
@@ -30,23 +35,26 @@ public:
 				Ogre::SOP_REPLACE, // stencil pass + depth pass
 				false); // two-sided operation? no
 
-		}else if(queueId == RENDER_QUEUE_PORTALSCENE){
+
+		}else if(invocation == "PortalScene"){
 			auto rs = Ogre::Root::getSingleton().getRenderSystem();
 			rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
 			rs->_setColourBufferWriteEnabled(true, true, true, true);
 			rs->setStencilCheckEnabled(true);
 			rs->setStencilBufferParams(Ogre::CMPF_EQUAL, 0x1, 0xFFFFFFFF, 0xFFFFFFFF,
 				Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, false);
+
+			rs->addClipPlane(portalClip);
 		}
 	}
 
 	void renderQueueEnded(uint8_t queueId, const std::string& invocation, bool& repeatThisInvocation) override {
-		if(queueId == RENDER_QUEUE_PORTAL){
+		if(invocation == "Portal"){
 			auto rs = Ogre::Root::getSingleton().getRenderSystem();
 			rs->setStencilCheckEnabled(false);
 			rs->setStencilBufferParams();
 
-		}else if(queueId == RENDER_QUEUE_PORTALSCENE){
+		}else if(invocation == "PortalScene"){
 			auto rs = Ogre::Root::getSingleton().getRenderSystem();
 			rs->setStencilCheckEnabled(false);
 			rs->setStencilBufferParams();
