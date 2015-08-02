@@ -7,9 +7,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
+#include <OGRE/OgreRoot.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreRenderWindow.h>
 #include <OGRE/OgreManualObject.h>
+#include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreResourceGroupManager.h>
@@ -292,20 +294,20 @@ bool App::IsInFocus() const {
 void App::Init(){
 	rqis = ogreRoot->createRenderQueueInvocationSequence("Lol");
 	rqis->add(Ogre::RENDER_QUEUE_MAIN, "Main");
+	rqis->add(RENDER_QUEUE_PORTALFRAME, "Main");
 	rqis->add(RENDER_QUEUE_PORTAL, "Portal");
 	rqis->add(RENDER_QUEUE_PORTALSCENE, "PortalScene");
+	rqis->add(RENDER_QUEUE_PORTALFRAME, "PortalScene");
 
 	camera->viewport->setRenderQueueInvocationSequenceName("Lol");
 
-	Ogre::SceneNode* stencilNode = nullptr;
+	sceneManager->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
 
 	Ogre::ManualObject* thing = nullptr;
 	Ogre::ManualObject* portal = nullptr;
 	Ogre::String objName = "Steve";
 	thing = sceneManager->createManualObject(objName);
 	thing->setDynamic(false /* Static geometry */);
-	portal = sceneManager->createManualObject("Portal");
-	portal->setDynamic(false /* Static geometry */);
 
 	float p = 1.0, m = -1.0;
 	float mix = 0.3f;
@@ -327,24 +329,6 @@ void App::Init(){
 		thing->triangle(0, 3, 1);
 		thing->triangle(1, 3, 2);
 	thing->end();
-
-	portal->begin("PortalStencil", Ogre::RenderOperation::OT_TRIANGLE_LIST);
-		portal->position(m,m,0.f);
-		portal->colour(Ogre::ColourValue::White);
-		portal->position(p,p*2,0.f);
-		portal->colour(Ogre::ColourValue::White);
-		portal->position(m,p*2,0.f);
-		portal->colour(Ogre::ColourValue::White);
-		portal->position(p,m,0.f);
-		portal->colour(Ogre::ColourValue::White);
-
-		portal->triangle(0,1,2);
-		portal->triangle(0,3,1);
-
-		// Opposite direction
-		portal->triangle(0,2,1);
-		portal->triangle(0,1,3);
-	portal->end();
 
 	Ogre::String meshName = "Dave";
 	thing->convertToMesh(meshName);
@@ -370,51 +354,39 @@ void App::Init(){
 		entNode->translate(0, 0, 5.f);
 
 		auto cnode = sceneNode2->createChildSceneNode();
-		auto courtyard = sceneManager->createEntity("Courtyard2", "Plane.mesh");
+		auto courtyard = sceneManager->createEntity("Courtyard2", "Courtyard.mesh");
 		courtyard->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE);
 		cnode->attachObject(courtyard);
 		cnode->scale(0.25, 0.25, 0.25);
 		cnode->translate(0, -1.0, 20.0);
-		
 	}
-
-	portal->convertToMesh("PortalMesh");
 
 	sceneNode1 = rootNode->createChildSceneNode();
 	auto portalNode = rootNode->createChildSceneNode();
 	portalNode->translate(0, 0, -3.f);
 
-	// Portal surface
-	Ogre::Entity* ent = sceneManager->createEntity("PortalMesh");
-	ent->setRenderQueueGroup(RENDER_QUEUE_PORTAL); // Stencil first
-	ent->getSubEntity(0)->getMaterial()->setDepthCheckEnabled(true);
-	ent->getSubEntity(0)->getMaterial()->setDepthWriteEnabled(false);
+	constexpr int repetitions = 4;
+	for(int z = -repetitions; z <= repetitions; z++)
+		for(int x = -repetitions; x <= repetitions; x++){
+			auto cnode = sceneNode1->createChildSceneNode();
+			auto courtyard = sceneManager->createEntity("Courtyard.mesh");
+			cnode->attachObject(courtyard);
+			cnode->scale(0.25, 0.25, 0.25); // 42/4 21 10.5
+			cnode->translate(x*21.0, -1.0, z*21.0-2.0);
+		}
+		
+	auto door = sceneManager->createEntity("mergeDoor.mesh");
+	auto entNode = portalNode->createChildSceneNode();
+	door->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME);
+	entNode->attachObject(door);
+	// entNode->scale(0.25, 0.25, 0.25);
+	entNode->scale(0.35, 0.35, 0.35);
+	entNode->translate(0, -1.0, 0);
 
-	stencilNode = portalNode->createChildSceneNode();
-	stencilNode->attachObject(ent);
-
-	auto portalGap = 2.0f;
-
-	Ogre::SceneNode* entNode;
-
-	auto leftEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(vec3(-portalGap, 0.f, -1.0));
-	entNode->attachObject(leftEnt);
-	entNode->yaw(Ogre::Radian(M_PI));
-
-	auto rightEnt = sceneManager->createEntity(meshName);
-	entNode = portalNode->createChildSceneNode(vec3(portalGap, 0.f, -1.0));
-	entNode->attachObject(rightEnt);
-	entNode->yaw(Ogre::Radian(M_PI/2.0));
+	Portalify(door);
 
 	sceneQueueListener = new StencilQueueListener(camera->ogreCamera);
 	sceneManager->addRenderQueueListener(sceneQueueListener);
-
-	auto cnode = sceneNode1->createChildSceneNode();
-	auto courtyard = sceneManager->createEntity("Courtyard", "Plane.mesh");
-	cnode->attachObject(courtyard);
-	cnode->scale(0.25, 0.25, 0.25);
-	cnode->translate(0, -1.0, -2.0);
 }
 
 /*
@@ -445,10 +417,10 @@ void App::Update(float dt){
 	auto ori = Ogre::Quaternion(Ogre::Radian(camera->cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->setOrientation(ori);
 
-	float boost = 1.f;
+	float boost = 2.f;
 
 	if(Input::GetKey(SDLK_LSHIFT)){
-		boost = 2.f;
+		boost = 4.f;
 	}
 
 	// Move with WASD, based on look direction
@@ -470,24 +442,22 @@ void App::Update(float dt){
 		return;
 	}
 
-	if(Input::GetKeyDown('1')){
-		sceneNode1->flipVisibility();
-	}
-	if(Input::GetKeyDown('2')){
-		sceneNode2->flipVisibility();
-	}
 	if(Input::GetKeyDown('f')){
 		static bool flipped = false;
 		rqis->clear();
 
 		if(flipped){
 			rqis->add(Ogre::RENDER_QUEUE_MAIN, "Main");
+			rqis->add(RENDER_QUEUE_PORTALFRAME, "Main");
 			rqis->add(RENDER_QUEUE_PORTAL, "Portal");
 			rqis->add(RENDER_QUEUE_PORTALSCENE, "PortalScene");
+			rqis->add(RENDER_QUEUE_PORTALFRAME, "PortalScene");
 		}else{
 			rqis->add(RENDER_QUEUE_PORTALSCENE, "Main");
+			rqis->add(RENDER_QUEUE_PORTALFRAME, "Main");
 			rqis->add(RENDER_QUEUE_PORTAL, "Portal");
 			rqis->add(Ogre::RENDER_QUEUE_MAIN, "PortalScene");
+			rqis->add(RENDER_QUEUE_PORTALFRAME, "PortalScene");
 		}
 		flipped = !flipped;
 	}
@@ -505,4 +475,21 @@ void App::Update(float dt){
 	}else{
 		sceneQueueListener->portalClip = Ogre::Plane(-portalNormal,-dist);
 	}
+}
+
+void App::Portalify(Ogre::Entity* e){
+	/////// The following process should happen during scene loading
+	// subMeshes is an std::unordered_map<string, ushort>
+	auto subMeshes = e->getMesh()->getSubMeshNameMap();
+	auto doorpit = subMeshes.find("Portal");
+	if(doorpit == subMeshes.end()) {
+		std::cout << "No portal surface found" << std::endl;
+	}else{
+		// This assumes that subMeshes and subEntities match one to one
+		auto portalEnt = e->getSubEntity(doorpit->second);
+		portalEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL);
+		portalEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1, 0.1, 0.1)); // Skycolor
+		portalEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE);
+	}
+	////////////////////////////////////////////////////////
 }

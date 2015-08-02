@@ -1,0 +1,17 @@
+On automatically setting up render queue groups
+	SceneNode::getChildIterator -> map<string, Node*>::iterator
+
+	// | This will probably only return the immediately attached children
+	// v so the scene will have to be recursed with SceneNode::getChildIterator
+
+	SceneNode::getAttachedObjectIterator -> map<string, MovableObject*>::iterator
+	MovableObject::setRenderQueueGroup
+	// or if we're testing submeshes cast to Entity
+
+	// Static geometry can have render queue group batch set
+	SceneManager::createStaticGeometry
+	StaticGeometry::(addEntity|addSceneNode)
+
+
+Blender2Ogre appears to only export submeshes if they have a separate material
+	It also appears to name the submeshes after their materials

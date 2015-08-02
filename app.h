@@ -1,7 +1,6 @@
 #ifndef APP_H
 #define APP_H
 
-#include <OGRE/OgreRoot.h>
 #include <SDL2/SDL.h>
 #include <memory>
 #include <vector>
@@ -13,6 +12,15 @@ class StencilQueueListener;
 enum {
 	WIDTH = 800,
 	HEIGHT = 600
+};
+
+namespace Ogre {
+	class Root;
+	class Entity;
+	class SceneNode;
+	class SceneManager;
+	class RenderWindow;
+	class RenderQueueInvocationSequence;
 };
 
 class App {
@@ -74,6 +82,8 @@ protected:
 
 	void Init();
 	void Update(float dt);
+
+	void Portalify(Ogre::Entity*);
 };
 
 #endif

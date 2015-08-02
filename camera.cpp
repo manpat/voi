@@ -1,4 +1,8 @@
+#include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreViewport.h>
+#include <OGRE/OgreCamera.h>
 
 #include "camera.h"
 #include "app.h"
@@ -11,6 +15,7 @@ Camera::Camera(string name){
 	ogreCamera = app->sceneManager->createCamera(name);
 	cameraNode = app->rootNode->createChildSceneNode(name);
 	cameraNode->attachObject(ogreCamera);
+	cameraNode->translate(0, 0, 21.0);
 
 	auto size = 1.f;
 	auto start = (1.f-size)*0.5f;

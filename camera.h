@@ -1,8 +1,13 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <OGRE/OgreCamera.h>
 #include <string>
+
+namespace Ogre {
+	class Camera;
+	class SceneNode;
+	class Viewport;
+}
 
 class Camera {
 public:
