@@ -5,9 +5,11 @@
 #include <memory>
 #include <vector>
 
+#include "common.h"
+
 class Camera;
 class Input;
-class StencilQueueListener;
+class PortalManager;
 
 enum {
 	WIDTH = 800,
@@ -42,17 +44,14 @@ public:
 	Ogre::SceneNode* sceneNode1;
 	Ogre::SceneNode* sceneNode2;
 
-	Ogre::RenderQueueInvocationSequence* rqis;
-
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
+	std::shared_ptr<PortalManager> portalManager;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<Hook> frameBeginHooks;
 	std::vector<Hook> frameEndHooks;
 	bool inFocus;
-
-	StencilQueueListener* sceneQueueListener;
 
 public:
 	App();
@@ -83,7 +82,9 @@ protected:
 	void Init();
 	void Update(float dt);
 
-	void Portalify(Ogre::Entity*);
+	void Portalify(Ogre::Entity*,int,int);
+
+	void SetLayer(uint i = 0);
 };
 
 #endif
