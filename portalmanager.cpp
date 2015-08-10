@@ -62,8 +62,9 @@ void PortalManager::renderQueueStarted(uint8_t queueId, const std::string& invoc
 		}else{
 			Ogre::Plane nplane{
 				-portal.clip.normal,
-				-portal.clip.d
+				portal.clip.d // I don't know why this works
 			};
+
 			rs->addClipPlane(nplane);
 		}
 	}
@@ -74,7 +75,6 @@ void PortalManager::renderQueueEnded(uint8_t queueId, const std::string& invocat
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 	rs->setStencilCheckEnabled(false);
 	rs->setStencilBufferParams();
-	rs->resetClipPlanes();
 
 	if(invocation == "PrepPrt"){
 		// Prepare portal drawing
@@ -82,6 +82,8 @@ void PortalManager::renderQueueEnded(uint8_t queueId, const std::string& invocat
 	}else if(invocation == "PrepPrtScn"){
 		// Prepare portal scene drawing
 		rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
+	}else if(invocationType == "PtS"){
+		rs->resetClipPlanes();
 	}
 }
 
