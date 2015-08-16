@@ -2,7 +2,7 @@
 #include "input.h"
 #include "app.h"
 
-std::map<int,int> Input::keyStates;
+std::map<s32,s32> Input::keyStates;
 vec2 Input::mouseDelta = vec2::ZERO;
 
 Input::Input(){
@@ -50,14 +50,14 @@ void Input::FrameBeginHook(){
 	// Get mouse delta from center, convert to range (-1, 1), 
 	//	move mouse back to center
 
-	int mx, my;
+	s32 mx, my;
 	SDL_GetMouseState(&mx, &my);
 
 	auto ww = App::GetSingleton()->GetWindowWidth();
 	auto wh = App::GetSingleton()->GetWindowHeight();
 
-	mouseDelta.x = mx / static_cast<float>(ww) * 2.f - 1.f;
-	mouseDelta.y =-my / static_cast<float>(wh) * 2.f + 1.f;
+	mouseDelta.x = mx / static_cast<f32>(ww) * 2.f - 1.f;
+	mouseDelta.y =-my / static_cast<f32>(wh) * 2.f + 1.f;
 
 	if(App::GetSingleton()->IsInFocus())
 		SDL_WarpMouseInWindow(App::GetSingleton()->sdlWindow, ww/2, wh/2);
@@ -87,17 +87,17 @@ vec2 Input::GetMouseDelta(){
 	return mouseDelta;
 }
 
-bool Input::GetKey(int k){
+bool Input::GetKey(s32 k){
 	// Get only the raw "up or down" state
-	return findin(keyStates, k, 0) & 1;
+	return findin(keyStates, k) & 1;
 }
 
-bool Input::GetKeyDown(int k){
+bool Input::GetKeyDown(s32 k){
 	// Get state and return if it is down and has changed this frame
-	return findin(keyStates, k, 0) == (Input::ChangedThisFrameFlag|Input::Down);
+	return findin(keyStates, k) == (Input::ChangedThisFrameFlag|Input::Down);
 }
 
-bool Input::GetKeyUp(int k){
+bool Input::GetKeyUp(s32 k){
 	// Get state and return if it is up and has changed this frame
-	return findin(keyStates, k, 0) == (Input::ChangedThisFrameFlag|Input::Up);
+	return findin(keyStates, k) == (Input::ChangedThisFrameFlag|Input::Up);
 }

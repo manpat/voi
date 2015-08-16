@@ -75,8 +75,8 @@ public:
 	void RemoveFrameEndHook(Hook);
 
 	// Getters
-	int GetWindowWidth() const;
-	int GetWindowHeight() const;
+	s32 GetWindowWidth() const;
+	s32 GetWindowHeight() const;
 
 	bool IsInFocus() const;
 
@@ -84,11 +84,11 @@ protected:
 	void InitOgre();
 
 	void Init();
-	void Update(float dt);
+	void Update(f32 dt);
 
-	void Portalify(Ogre::Entity*,int,int);
+	void Portalify(Ogre::Entity*,s32,s32);
 
-	void SetLayer(uint i = 0);
+	void SetLayer(u32 i = 0);
 };
 
 #endif

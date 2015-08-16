@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include <string>
+#include "common.h"
 
 namespace Ogre {
 	class Camera;
@@ -15,8 +16,8 @@ public:
 	Ogre::SceneNode* cameraNode;
 	Ogre::Viewport* viewport;
 
-	float cameraYaw = 0.f;
-	float cameraPitch = 0.f;
+	f32 cameraYaw = 0.f;
+	f32 cameraPitch = 0.f;
 
 public:
 	Camera(std::string name = "main");

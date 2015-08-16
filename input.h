@@ -6,7 +6,7 @@
 
 class Input {
 public:
-	static std::map<int, int> keyStates;
+	static std::map<s32, s32> keyStates;
 	static vec2 mouseDelta;
 
 	// This flag is for indicating that a key changed during a frame
@@ -26,13 +26,13 @@ public:
 	static vec2 GetMouseDelta();
 
 	// Returns if a key is pressed
-	static bool GetKey(int k);
+	static bool GetKey(s32 k);
 
 	// Returns if a key was pressed this frame
-	static bool GetKeyDown(int k);
+	static bool GetKeyDown(s32 k);
 
 	// Returns if a key was released this frame
-	static bool GetKeyUp(int k);
+	static bool GetKeyUp(s32 k);
 
 protected:
 	static void FrameBeginHook();

@@ -1,7 +1,7 @@
 #include "app.h"
 #include <OGRE/OgreException.h>
 
-int main(){
+s32 main(){
 	try{
 		App().Run();
 

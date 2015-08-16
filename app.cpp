@@ -122,6 +122,7 @@ void App::InitOgre(){
 	rootNode = sceneManager->getRootSceneNode();
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Meshes", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 }
 
@@ -141,7 +142,7 @@ void App::InitOgre(){
 void App::Run(){
 	using namespace std::chrono;
 	auto begin = high_resolution_clock::now();
-	float dt = 0.f;
+	f32 dt = 0.f;
 
 	while(!window->isClosed()){
 		window->update(false);
@@ -181,7 +182,7 @@ void App::Run(){
 		SDL_GL_SwapWindow(sdlWindow);
 
 		auto end = high_resolution_clock::now();
-		dt = duration_cast<duration<float>>(end - begin).count();
+		dt = duration_cast<duration<f32>>(end - begin).count();
 		begin = end;
 
 		if(shouldQuit) {
@@ -247,11 +248,11 @@ void App::RemoveFrameEndHook(Hook h){
 
 
 */
-int App::GetWindowWidth() const {
+s32 App::GetWindowWidth() const {
 	return WIDTH;
 }
 
-int App::GetWindowHeight() const {
+s32 App::GetWindowHeight() const {
 	return HEIGHT;
 }
 

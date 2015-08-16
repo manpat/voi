@@ -19,12 +19,12 @@ PortalManager::PortalManager(Ogre::Root* root, std::shared_ptr<Camera>& c)
 	SetLayer(0);
 }
 
-void PortalManager::renderQueueStarted(uint8_t queueId, const std::string& invocation, bool& skipThisInvocation) {
+void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) {
 	auto invocationType = invocation.substr(0,3);
+	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 
 	if(invocationType == "Prt"){
 		auto layer = std::stol(invocation.substr(3));
-		auto rs = Ogre::Root::getSingleton().getRenderSystem();
 
 		rs->setStencilCheckEnabled(true);
 		rs->_setColourBufferWriteEnabled(false, false, false, false);
@@ -37,14 +37,18 @@ void PortalManager::renderQueueStarted(uint8_t queueId, const std::string& invoc
 			Ogre::SOP_REPLACE, // stencil pass + depth pass
 			false); // two-sided operation? no
 
+	}else if(queueId == RENDER_QUEUE_PARTICLES){
+		rs->setStencilCheckEnabled(false);
+		rs->setStencilBufferParams(Ogre::CMPF_ALWAYS_PASS, 0, 0, 0,
+			Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, false);
+
 	}else if(invocationType == "PtS"){
 		auto portalId = std::stol(invocation.substr(3));
 		auto& portal = portals[portalId];
-		auto rs = Ogre::Root::getSingleton().getRenderSystem();
-		auto layer = (int)queueId - RENDER_QUEUE_PORTALSCENE;
+		auto layer = (s32)queueId - RENDER_QUEUE_PORTALSCENE;
 
 		if(layer < 0){
-			layer = (int)queueId - RENDER_QUEUE_PORTALFRAME;
+			layer = (s32)queueId - RENDER_QUEUE_PORTALFRAME;
 		}
 
 		rs->_setColourBufferWriteEnabled(true, true, true, true);
@@ -67,10 +71,11 @@ void PortalManager::renderQueueStarted(uint8_t queueId, const std::string& invoc
 
 			rs->addClipPlane(nplane);
 		}
+
 	}
 }
 
-void PortalManager::renderQueueEnded(uint8_t queueId, const std::string& invocation, bool& repeatThisInvocation) {
+void PortalManager::renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) {
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 	rs->setStencilCheckEnabled(false);
@@ -87,18 +92,18 @@ void PortalManager::renderQueueEnded(uint8_t queueId, const std::string& invocat
 	}
 }
 
-void PortalManager::SetLayer(int l){
+void PortalManager::SetLayer(s32 l){
 	assert(l < numLayers);
 
 	rqis->clear();
 	rqis->add(RENDER_QUEUE_PORTALSCENE+l, "Main");
 
-	using PType = std::pair<int, Portal*>;
+	using PType = std::pair<s32, Portal*>;
 	static std::vector<PType> visiblePortals;
 	visiblePortals.clear();
 
 	for(auto& p: portals){
-		int layer = -1;
+		s32 layer = -1;
 		if(p.layer[0] == l){
 			layer = p.layer[1];
 
@@ -118,6 +123,7 @@ void PortalManager::SetLayer(int l){
 		rqis->add(RENDER_QUEUE_PORTAL+p.second->id, "Prt"+std::to_string(p.first));
 	}
 
+	rqis->add(RENDER_QUEUE_PARTICLES, "");
 	rqis->add(1, "PrepPrtScn");
 
 	for(auto p: visiblePortals){
@@ -126,10 +132,11 @@ void PortalManager::SetLayer(int l){
 		rqis->add(RENDER_QUEUE_PORTALSCENE+p.first, scenestr);
 		rqis->add(RENDER_QUEUE_PORTALFRAME+p.first, scenestr);
 	}
+	
 }
 
-int PortalManager::AddPortal(Ogre::SubEntity* ent, int l0, int l1){
-	auto id = (int)portals.size();
+s32 PortalManager::AddPortal(Ogre::SubEntity* ent, s32 l0, s32 l1){
+	auto id = (s32)portals.size();
 	assert(id < 10);
 
 	ent->getParent()->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);

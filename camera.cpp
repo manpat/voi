@@ -30,8 +30,8 @@ Camera::Camera(string name){
 	viewport->setBackgroundColour(Ogre::ColourValue(g,g,g)); // TODO: Expose
 
 	ogreCamera->setAspectRatio(
-		static_cast<float>(viewport->getActualWidth())
-		/ static_cast<float>(viewport->getActualHeight()));
+		static_cast<f32>(viewport->getActualWidth())
+		/ static_cast<f32>(viewport->getActualHeight()));
 
 	ogreCamera->setNearClipDistance(0.1f); // TODO: Expose
 	ogreCamera->setFarClipDistance (1000.f); // TODO: Expose

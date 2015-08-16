@@ -1,3 +1,4 @@
+*.so*
 
 # Ignore Pat's build stuff
 makefile
