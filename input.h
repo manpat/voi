@@ -2,8 +2,7 @@
 #define INPUT_H
 
 #include <SDL2/SDL.h>
-#include <map>
-#include "helpers.h"
+#include "common.h"
 
 class Input {
 public:

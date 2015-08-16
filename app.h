@@ -55,6 +55,8 @@ public:
 	std::vector<Hook> frameEndHooks;
 	bool inFocus;
 
+	bool shouldQuit;
+
 public:
 	App();
 	~App();
