@@ -105,7 +105,7 @@ void App::InitOgre(){
 
 	// TODO: Factor out into window module
 	Ogre::NameValuePairList windowParams;
-#ifdef WINDOWS
+#ifdef _WIN32
 	SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
 	SDL_GetWMInfo(&wmInfo);
@@ -122,7 +122,7 @@ void App::InitOgre(){
 	windowParams["FSAA"] = "0";
 	windowParams["vsync"] = "true";
 	// I'm pretty sure none of the createRenderWindow parameters actually do anything
-	window = ogreRoot->createRenderWindow("", WIDTH, HEIGHT, false /*fullscreen*/, &windowParams);
+	window = ogreRoot->createRenderWindow("", 0, 0, false /*fullscreen*/, &windowParams);
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "ASceneManager");
 	rootNode = sceneManager->getRootSceneNode();
@@ -293,36 +293,6 @@ bool App::IsInFocus() const {
 */
 void App::Init(){
 	sceneManager->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
-
-	Ogre::ManualObject* thing = nullptr;
-	Ogre::ManualObject* portal = nullptr;
-	Ogre::String objName = "Steve";
-	thing = sceneManager->createManualObject(objName);
-	thing->setDynamic(false /* Static geometry */);
-
-	float p = 1.0, m = -1.0;
-	float mix = 0.3f;
-	auto colour = Ogre::ColourValue(.8,.1,.1,1);
-	auto c2 = colour*(1.f-mix) + Ogre::ColourValue::White*mix;
-
-	thing->begin("BaseWhiteNoLighting", Ogre::RenderOperation::OT_TRIANGLE_LIST);
-		thing->position(m,m,m);
-		thing->colour(colour);
-		thing->position(m,p*2,m);
-		thing->colour(c2);
-		thing->position(p,m,m);
-		thing->colour(colour);
-		thing->position(m,m,p);
-		thing->colour(colour);
-
-		thing->triangle(0, 1, 2);
-		thing->triangle(0, 2, 3);
-		thing->triangle(0, 3, 1);
-		thing->triangle(1, 3, 2);
-	thing->end();
-
-	Ogre::String meshName = "Dave";
-	thing->convertToMesh(meshName);
 
 	{
 		auto spread = 0.8f;

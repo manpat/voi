@@ -15,7 +15,7 @@ PortalManager::PortalManager(Ogre::Root* root, std::shared_ptr<Camera>& c)
 	rqis = root->createRenderQueueInvocationSequence("Lol");
 	camera->viewport->setRenderQueueInvocationSequenceName("Lol");
 
-	numLayers = 2;
+	numLayers = 3;
 	SetLayer(0);
 }
 
