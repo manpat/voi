@@ -9,7 +9,6 @@
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreRenderWindow.h>
-#include <OGRE/OgreResourceGroupManager.h>
 
 #include "app.h"
 #include "input.h"
@@ -120,10 +119,6 @@ void App::InitOgre(){
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "ASceneManager");
 	rootNode = sceneManager->getRootSceneNode();
-
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Meshes", "FileSystem");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Particles", "FileSystem");
-	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 }
 
 /*

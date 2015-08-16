@@ -42,9 +42,10 @@ public:
 	PortalManager(Ogre::Root*, std::shared_ptr<Camera>&);
 
 	void SetLayer(s32);
-	s32 AddPortal(Ogre::SubEntity*, s32 l0, s32 l1);
 
-	Ogre::Plane portalClip;
+	// Note: AddPortal assumes that the portal submesh's normal lies along the Z-axis
+	//	local to the parent mesh
+	s32 AddPortal(Ogre::SubEntity*, s32 l0, s32 l1);
 
 protected:
 	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;

@@ -15,3 +15,8 @@ On automatically setting up render queue groups
 
 Blender2Ogre appears to only export submeshes if they have a separate material
 	It also appears to name the submeshes after their materials
+
+Portal frame rendering is inconsistent
+	Only sometimes rendered on both sides
+
+Portal rendering seems to fail when camera is near the plane

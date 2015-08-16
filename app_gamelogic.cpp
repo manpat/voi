@@ -7,6 +7,7 @@
 #include "app.h"
 #include "input.h"
 #include "camera.h"
+#include "sceneparser.h"
 #include "portalmanager.h"
 
 /*
@@ -26,6 +27,7 @@ void App::Init(){
 	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
 	sceneManager->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
 
+#if 0
 	{
 		auto spread = 0.8f;
 		sceneNode2 = rootNode->createChildSceneNode();
@@ -72,7 +74,8 @@ void App::Init(){
 	auto doorNode = portalNode->createChildSceneNode();
 	doorNode->attachObject(door);
 	doorNode->scale(0.35, 0.35, 0.35);
-	doorNode->translate(0, -1.0, 0);
+	doorNode->translate(-0.707, -1.0, 0.707	);
+	doorNode->yaw(Ogre::Radian(M_PI/4.0));
 
 	auto door2 = sceneManager->createEntity("mergeGate.mesh");
 	auto door2Node = portalNode->createChildSceneNode();
@@ -89,6 +92,10 @@ void App::Init(){
 
 	Portalify(door, 0, 1);
 	Portalify(door2, 1, 2);
+#endif
+
+	auto sceneloader = SceneParser{};
+	sceneloader.Load("TestScene.scene", sceneManager);
 
 	sceneManager->addRenderQueueListener(portalManager.get());
 	portalManager->SetLayer(0);

@@ -142,10 +142,11 @@ s32 PortalManager::AddPortal(Ogre::SubEntity* ent, s32 l0, s32 l1){
 	ent->getParent()->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
 	ent->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
 
-	auto portalNode = static_cast<Ogre::SceneNode*>(ent->getParent()->getParentNode());
+	auto portalNode = ent->getParent()->getParentSceneNode();
 	// This is not the best but it's good enough for now
 	auto pos = portalNode->_getDerivedPosition();
-	auto normal = vec3::UNIT_Z;
+	auto ori = portalNode->_getDerivedOrientation();
+	auto normal = ori * vec3::UNIT_Z;
 	normal.normalise();
 
 	auto length = pos.dotProduct(normal);

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<scene formatVersion="1.0.0" generator="Ogitor SceneBuilder 0.5.4">
+    <resourceLocations>
+        <resourceLocation type="FileSystem" name=".//Meshes/" />
+    </resourceLocations>
+    <environment>
+        <scenemanager name="SceneManager" id="523354400" type="OctreeSceneManager" />
+        <colourAmbient r="0.5" g="0.5" b="0.5" a="1" />
+        <fog mode="none" start="0" end="1000" density="0">
+            <colour r="0.5" g="0.5" b="0.5" a="1" />
+        </fog>
+        <viewport name="Viewport1" id="2000000002" index="1">
+            <colour r="0" g="0" b="0" a="1" />
+        </viewport>
+        <camera name="intViewCamera1" viewMode="0" polyMode="3" fov="1">
+            <clipping near="0.1" far="9000" />
+            <position x="2.87678" y="8.18485" z="-4.06895" />
+            <rotation qw="0.991028" qx="-0.0964298" qy="0.0921331" qz="0.00899456" />
+        </camera>
+    </environment>
+    <nodes>
+        <!-- <node name="Cube#0" id="443842176">
+            <position x="0" y="3" z="-5" />
+            <rotation qw="1" qx="0" qy="0" qz="0" />
+            <scale x="1" y="1" z="1" />
+            <entity name="Cube#0" meshFile="Cube.mesh" castShadows="false">
+                <subentity index="0" materialName="Material" />
+                <userData>
+                    <property type="12" name="IsPortal" data="true" />
+                </userData>
+            </entity>
+        </node> -->
+        <node name="Node#0" id="454816544">
+            <position x="0" y="1" z="-12.0" />
+            <rotation qw="1" qx="0" qy="0" qz="0" />
+            <scale x="1" y="1" z="1" />
+            <node name="Icosphere#1" id="587213504">
+                <position x="0" y="3.0093" z="0" />
+                <rotation qw="1" qx="0" qy="0" qz="0" />
+                <scale x="1" y="1" z="1" />
+                <entity name="Icosphere#1" meshFile="Icosphere.mesh" castShadows="false">
+                    <subentity index="0" materialName="Material" />
+                </entity>
+            </node>
+            <node name="Icosphere#0" id="513602912">
+                <position x="0" y="0" z="0" />
+                <rotation qw="1" qx="0" qy="0" qz="0" />
+                <scale x="1" y="1" z="1" />
+                <entity name="Icosphere#0" meshFile="Icosphere.mesh" castShadows="false">
+                    <subentity index="0" materialName="Material" />
+                </entity>
+            </node>
+            <userData>
+                <property type="9" name="TestProperty" data="5 0.8 2" />
+                <property type="6" name="AnotherProperty" data="536" />
+            </userData>
+        </node>
+        <node name="Courtyard" id="926325824">
+            <position x="0" y="0" z="0" />
+            <rotation qw="1" qx="0" qy="0" qz="0" />
+            <scale x="0.25" y="0.25" z="0.25" />
+            <entity name="Courtyard" meshFile="Courtyard.mesh" castShadows="false">
+                <subentity index="0" materialName="Courtyard" />
+            </entity>
+        </node>
+    </nodes>
+</scene>
