@@ -5,6 +5,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_syswm.h>
 
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreRenderSystem.h>
@@ -83,7 +84,11 @@ App* App::GetSingleton(){
 	                                           "Y8bbdP"
 */
 void App::InitOgre(){
+#ifdef _DEBUG
+	Ogre::String pluginFileName("plugins_d.cfg"), configFileName(""), logFileName("ogre_d.log");
+#else
 	Ogre::String pluginFileName("plugins.cfg"), configFileName(""), logFileName("ogre.log");
+#endif
 	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, configFileName, logFileName));
 
 	auto renderSystemList = ogreRoot->getAvailableRenderers();
@@ -101,13 +106,13 @@ void App::InitOgre(){
 #ifdef _WIN32
 	SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
-	SDL_GetWMInfo(&wmInfo);
+	SDL_GetWindowWMInfo(sdlWindow, &wmInfo);
 
-	size_t winHandle = reinterpret_cast<size_t>(wmInfo.window);
-	size_t winGlContext = reinterpret_cast<size_t>(wmInfo.hglrc);
+	size_t winHandle = reinterpret_cast<size_t>(wmInfo.info.win.window);
+	size_t winGlContext = reinterpret_cast<size_t>(wglGetCurrentContext());
 
-	windowParams["externalWindowHandle"] = StringConverter::toString(winHandle);
-	windowParams["externalGLContext"] = StringConverter::toString(winGlContext);
+	windowParams["externalWindowHandle"] = std::to_string(winHandle);
+	windowParams["externalGLContext"] = std::to_string(winGlContext);
 #else
 	windowParams["currentGLContext"] = std::string("True");
 #endif

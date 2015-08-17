@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <map>
+#include <memory>
 #include <cstdint>
 #include <OGRE/OgreVector2.h>
 #include <OGRE/OgreVector3.h>

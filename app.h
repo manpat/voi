@@ -14,8 +14,6 @@ class PortalManager;
 enum {
 	WIDTH = 800,
 	HEIGHT = 600
-	// WIDTH = 1360,
-	// HEIGHT = 768
 };
 
 namespace Ogre {
