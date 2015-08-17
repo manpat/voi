@@ -84,11 +84,18 @@ App* App::GetSingleton(){
 	                                           "Y8bbdP"
 */
 void App::InitOgre(){
-#ifdef _DEBUG
-	Ogre::String pluginFileName("plugins_d.cfg"), configFileName(""), logFileName("ogre_d.log");
-#else
-	Ogre::String pluginFileName("plugins.cfg"), configFileName(""), logFileName("ogre.log");
-#endif
+	#ifdef _WIN32
+		#ifdef _DEBUG
+			Ogre::String pluginFileName("plugins_win_d.cfg"), 
+				configFileName(""), logFileName("ogre_d.log");
+		#else
+			Ogre::String pluginFileName("plugins_win.cfg"), 
+				configFileName(""), logFileName("ogre.log");
+		#endif
+	#else
+		Ogre::String pluginFileName("plugins_linux.cfg"), 
+			configFileName(""), logFileName("ogre.log");
+	#endif
 	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, configFileName, logFileName));
 
 	auto renderSystemList = ogreRoot->getAvailableRenderers();
@@ -122,7 +129,7 @@ void App::InitOgre(){
 	// I'm pretty sure none of the createRenderWindow parameters actually do anything
 	window = ogreRoot->createRenderWindow("", 0, 0, false /*fullscreen*/, &windowParams);
 
-	sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "ASceneManager");
+	sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();
 }
 

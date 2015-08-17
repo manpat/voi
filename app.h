@@ -41,9 +41,6 @@ public:
 	Ogre::RenderWindow* window;
 	Ogre::SceneNode* rootNode;
 
-	Ogre::SceneNode* sceneNode1;
-	Ogre::SceneNode* sceneNode2;
-
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
 	std::shared_ptr<PortalManager> portalManager;

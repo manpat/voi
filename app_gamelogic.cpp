@@ -25,12 +25,12 @@
 */
 void App::Init(){
 	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
-	sceneManager->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
+	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
 
 #if 0
 	{
 		auto spread = 0.8f;
-		sceneNode2 = rootNode->createChildSceneNode();
+		auto sceneNode2 = rootNode->createChildSceneNode();
 		for(s32 y = 0; y <= 10; y++)
 			for(s32 x = 0; x <= 10; x++){
 				auto ent = sceneManager->createEntity("Icosphere.mesh");
@@ -56,7 +56,7 @@ void App::Init(){
 		cnode->translate(0, -1.0, 20.0);
 	}
 
-	sceneNode1 = rootNode->createChildSceneNode();
+	auto sceneNode1 = rootNode->createChildSceneNode();
 	auto portalNode = rootNode->createChildSceneNode();
 	portalNode->translate(0, 0, -3.f);
 

@@ -59,7 +59,7 @@ void SceneParser::Load(std::string filename, Ogre::SceneManager* sceneManager) {
 	for(auto& rl: resourceLocations){
 		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(rl.dir, rl.type);
 	}
-	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Meshes", "FileSystem");
+	// Ogre::ResourceGroupManager::getS3ingleton().addResourceLocation("Meshes", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -88,8 +88,8 @@ void SceneParser::ConstructScene(Ogre::SceneManager* sceneManager){
 	for(auto& n = nodeQueue.front(); nodeQueue.size() > 1; nodeQueue.pop(), n = nodeQueue.front()){
 		auto& ndef = *n.ndef;
 		auto node = n.parent->createChildSceneNode(ndef.name, ndef.position, ndef.rotation);
-
 		node->setScale(ndef.scale);
+
 		if(ndef.entity){
 			// If entities were stored in a queue like nodes, then they could be
 			//	iterated through to find portals
