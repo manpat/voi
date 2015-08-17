@@ -15,7 +15,7 @@ PortalManager::PortalManager(Ogre::Root* root, std::shared_ptr<Camera>& c)
 	rqis = root->createRenderQueueInvocationSequence("Lol");
 	camera->viewport->setRenderQueueInvocationSequenceName("Lol");
 
-	numLayers = 3;
+	numLayers = 1;
 	SetLayer(0);
 }
 
@@ -93,7 +93,7 @@ void PortalManager::renderQueueEnded(u8 queueId, const std::string& invocation, 
 }
 
 void PortalManager::SetLayer(s32 l){
-	assert(l < numLayers);
+	assert(l < (s32)numLayers);
 
 	rqis->clear();
 	rqis->add(RENDER_QUEUE_PORTALSCENE+l, "Main");
@@ -158,5 +158,6 @@ s32 PortalManager::AddPortal(Ogre::SubEntity* ent, s32 l0, s32 l1){
 		clip
 	});
 
+	numLayers = std::max((u32)std::max(l0, l1)+1, numLayers);
 	return id;
 }

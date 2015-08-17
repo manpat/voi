@@ -27,8 +27,12 @@ void App::Init(){
 	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
 
-#if 0
+#if 1
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Meshes", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Particles", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 	{
+
 		auto spread = 0.8f;
 		auto sceneNode2 = rootNode->createChildSceneNode();
 		for(s32 y = 0; y <= 10; y++)
@@ -53,7 +57,7 @@ void App::Init(){
 		courtyard->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+1);
 		cnode->attachObject(courtyard);
 		cnode->scale(0.25, 0.25, 0.25);
-		cnode->translate(0, -1.0, 20.0);
+		cnode->translate(0, 0.0, 20.0);
 	}
 
 	auto sceneNode1 = rootNode->createChildSceneNode();
@@ -67,35 +71,35 @@ void App::Init(){
 			auto courtyard = sceneManager->createEntity("Courtyard.mesh");
 			cnode->attachObject(courtyard);
 			cnode->scale(0.25, 0.25, 0.25); // 42/4 21 10.5
-			cnode->translate(x*21.0, -1.0, z*21.0-2.0);
+			cnode->translate(x*21.0, 0.0, z*21.0-2.0);
 		}
 
 	auto door = sceneManager->createEntity("mergeDoor.mesh");
 	auto doorNode = portalNode->createChildSceneNode();
 	doorNode->attachObject(door);
 	doorNode->scale(0.35, 0.35, 0.35);
-	doorNode->translate(-0.707, -1.0, 0.707	);
+	doorNode->translate(-0.707, 0.0, 0.707);
 	doorNode->yaw(Ogre::Radian(M_PI/4.0));
 
 	auto door2 = sceneManager->createEntity("mergeGate.mesh");
 	auto door2Node = portalNode->createChildSceneNode();
 	door2Node->attachObject(door2);
 	door2Node->scale(0.4, 0.4, 0.4);
-	door2Node->translate(10.0, -1.0, 0);
+	door2Node->translate(10.0, 0.0, 0);
 
 	auto l3ent = sceneManager->createEntity("Icosphere.mesh");
 	l3ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+2);
 
 	auto l3entNode = rootNode->createChildSceneNode();
 	l3entNode->attachObject(l3ent);
-	l3entNode->translate(10.0, 0.0, -6.0);
+	l3entNode->translate(10.0, 1.0, -6.0);
 
 	Portalify(door, 0, 1);
 	Portalify(door2, 1, 2);
 #endif
 
-	SceneParser sceneloader;
-	sceneloader.Load("TestScene.scene", sceneManager);
+	// SceneParser sceneloader;
+	// sceneloader.Load("TestScene.scene", sceneManager);
 
 	sceneManager->addRenderQueueListener(portalManager.get());
 	portalManager->SetLayer(0);
@@ -159,8 +163,9 @@ void App::Update(f32 dt){
 	}
 
 	if(Input::GetKeyDown('f')){
-		static bool flipped = false;
-		portalManager->SetLayer((s32)(flipped = !flipped));
+		static s32 layer = 0;
+		layer = (layer+1)%portalManager->GetNumLayers();
+		portalManager->SetLayer(layer);
 	}
 }
 

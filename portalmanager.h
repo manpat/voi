@@ -42,6 +42,7 @@ public:
 	PortalManager(Ogre::Root*, std::shared_ptr<Camera>&);
 
 	void SetLayer(s32);
+	u32 GetNumLayers() const {return numLayers;}
 
 	// Note: AddPortal assumes that the portal submesh's normal lies along the Z-axis
 	//	local to the parent mesh

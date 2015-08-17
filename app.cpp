@@ -157,7 +157,7 @@ void App::Run(){
 		SDL_Event e;
 		while(SDL_PollEvent(&e)){
 			if(e.type == SDL_QUIT
-			|| e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE){
+			||(e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)){
 
 				window->destroy();
 				break;
