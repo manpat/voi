@@ -20,8 +20,10 @@ SceneParser::~SceneParser(){
 	for(auto& n: nodes)
 		nodeQueue.push(&n);
 
-	for(auto& n = nodeQueue.front(); nodeQueue.size() > 0; n = nodeQueue.front()){
+	while(nodeQueue.size() > 0){
+		auto& n = nodeQueue.front();
 		nodeQueue.pop();
+		
 		for(auto& cn : n->nodes){
 			nodeQueue.push(&cn);
 		}
@@ -86,7 +88,8 @@ void SceneParser::ConstructScene(Ogre::SceneManager* sceneManager){
 		nodeQueue.push({rootNode, &ndef});
 	}
 
-	for(auto& n = nodeQueue.front(); nodeQueue.size() > 0; n = nodeQueue.front()){
+	while(nodeQueue.size() > 0){
+		auto& n = nodeQueue.front();
 		nodeQueue.pop();
 		
 		auto& ndef = *n.ndef;

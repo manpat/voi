@@ -96,13 +96,13 @@ void App::Init(){
 
 	Portalify(door, 0, 1);
 	Portalify(door2, 1, 2);
+
+#else
+	SceneParser sceneloader;
+	sceneloader.Load("TestScene.scene", sceneManager);
 #endif
 
-	// SceneParser sceneloader;
-	// sceneloader.Load("TestScene.scene", sceneManager);
-
 	sceneManager->addRenderQueueListener(portalManager.get());
-	portalManager->SetLayer(0);
 
 	auto psystem = sceneManager->createParticleSystem("Dust", "Environment/Dust");
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
