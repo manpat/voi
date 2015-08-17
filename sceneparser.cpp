@@ -23,7 +23,7 @@ SceneParser::~SceneParser(){
 	while(nodeQueue.size() > 0){
 		auto& n = nodeQueue.front();
 		nodeQueue.pop();
-		
+
 		for(auto& cn : n->nodes){
 			nodeQueue.push(&cn);
 		}
@@ -60,10 +60,10 @@ void SceneParser::Load(std::string filename, Ogre::SceneManager* sceneManager) {
 
 	// Init resource locations
 	for(auto& rl: resourceLocations){
-		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(rl.dir, rl.type);
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/"+rl.dir, rl.type);
 	}
-	// Ogre::ResourceGroupManager::getS3ingleton().addResourceLocation("Meshes", "FileSystem");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Particles", "FileSystem");
+	// Ogre::ResourceGroupManager::getS3ingleton().addResourceLocation("GameData/Meshes", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	// Construct scene

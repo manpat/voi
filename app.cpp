@@ -120,6 +120,7 @@ void App::InitOgre(){
 
 	windowParams["externalWindowHandle"] = std::to_string(winHandle);
 	windowParams["externalGLContext"] = std::to_string(winGlContext);
+	windowParams["externalGLControl"] = "True";
 #else
 	windowParams["currentGLContext"] = std::string("True");
 #endif

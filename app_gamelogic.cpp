@@ -27,9 +27,10 @@ void App::Init(){
 	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
 
-#if 1
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Meshes", "FileSystem");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("Particles", "FileSystem");
+#if 0
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Meshes", "FileSystem");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 	{
 
@@ -99,7 +100,7 @@ void App::Init(){
 
 #else
 	SceneParser sceneloader;
-	sceneloader.Load("TestScene.scene", sceneManager);
+	sceneloader.Load("GameData/TestScene2.scene", sceneManager);
 #endif
 
 	sceneManager->addRenderQueueListener(portalManager.get());
