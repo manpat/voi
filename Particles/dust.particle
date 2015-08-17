@@ -7,7 +7,7 @@ particle_system Environment/Dust {
 	quota 10000
 
 	emitter Ellipsoid {
-		emission_rate 400
+		emission_rate 1000
 		time_to_live 8
 		direction 0 0 -1.0
 		velocity_min 0.005

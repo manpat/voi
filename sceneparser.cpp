@@ -6,12 +6,13 @@
 #include <OGRE/OgreResourceGroupManager.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
+#include <rapidxml_print.hpp>
 
 using namespace rapidxml;
 
 static void error(const std::string& e){
 	std::cerr << ("Error: " + e) << std::endl;
-	throw "SceneParser error";
+	//throw "SceneParser error";
 }
 
 SceneParser::~SceneParser(){
@@ -19,7 +20,7 @@ SceneParser::~SceneParser(){
 	for(auto& n: nodes)
 		nodeQueue.push(&n);
 
-	for(auto n = nodeQueue.front(); nodeQueue.size() > 0; nodeQueue.pop(), n = nodeQueue.front()){
+	for(auto& n = nodeQueue.front(); nodeQueue.size() > 1; nodeQueue.pop(), n = nodeQueue.front()){
 		for(auto& cn : n->nodes){
 			nodeQueue.push(&cn);
 		}
@@ -36,7 +37,7 @@ void SceneParser::Load(std::string filename, Ogre::SceneManager* sceneManager) {
 
 	// Load document
 	file.seekg(0, file.end);
-	auto len = file.tellg();
+	u64 len = file.tellg();
 	file.seekg(0, file.beg);
 
 	auto data = new char[len+1l];
@@ -49,7 +50,7 @@ void SceneParser::Load(std::string filename, Ogre::SceneManager* sceneManager) {
 	doc.parse<0>(data);
 
 	// Construct tree
-	auto node = doc.first_node();
+	auto node = doc.first_node("scene");
 	resourceLocations = ParseResourceLocations(node->first_node("resourceLocations"));
 	nodes = ParseNodes(node->first_node("nodes"));
 	delete[] data;
@@ -75,11 +76,16 @@ void SceneParser::ConstructScene(Ogre::SceneManager* sceneManager){
 	};
 	std::queue<NodeParentPair> nodeQueue;
 
+	if (nodes.size() == 0){
+		error("Trying to construct empty scene");
+		return;
+	}
+
 	for(auto& ndef: nodes){
 		nodeQueue.push({rootNode, &ndef});
 	}
 
-	for(auto& n = nodeQueue.front(); nodeQueue.size() > 0; nodeQueue.pop(), n = nodeQueue.front()){
+	for(auto& n = nodeQueue.front(); nodeQueue.size() > 1; nodeQueue.pop(), n = nodeQueue.front()){
 		auto& ndef = *n.ndef;
 		auto node = n.parent->createChildSceneNode(ndef.name, ndef.position, ndef.rotation);
 

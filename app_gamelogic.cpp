@@ -94,7 +94,7 @@ void App::Init(){
 	Portalify(door2, 1, 2);
 #endif
 
-	auto sceneloader = SceneParser{};
+	SceneParser sceneloader;
 	sceneloader.Load("TestScene.scene", sceneManager);
 
 	sceneManager->addRenderQueueListener(portalManager.get());
