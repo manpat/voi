@@ -95,14 +95,15 @@ void App::Init(){
 	l3entNode->attachObject(l3ent);
 	l3entNode->translate(10.0, 1.0, -6.0);
 
-	Portalify(door, 0, 1);
-	Portalify(door2, 1, 2);
+	portalManager->AddPortal(door, 0, 1);
+	portalManager->AddPortal(door2, 1, 2);
 
 #else
 	SceneParser sceneloader;
-	sceneloader.Load("GameData/TestScene2.scene", sceneManager);
+	sceneloader.Load("GameData/TestScene.scene", this);
 #endif
 
+	portalManager->SetLayer(0);
 	sceneManager->addRenderQueueListener(portalManager.get());
 
 	auto psystem = sceneManager->createParticleSystem("Dust", "Environment/Dust");
@@ -168,24 +169,4 @@ void App::Update(f32 dt){
 		layer = (layer+1)%portalManager->GetNumLayers();
 		portalManager->SetLayer(layer);
 	}
-}
-
-void App::Portalify(Ogre::Entity* e, s32 l0, s32 l1){
-	/////// The following process should happen during scene loading
-	// subMeshes is an std::unordered_map<string, ushort>
-	auto subMeshes = e->getMesh()->getSubMeshNameMap();
-	auto doorpit = subMeshes.find("Portal");
-	if(doorpit == subMeshes.end()) {
-		std::cout << "No portal surface found" << std::endl;
-
-		return;
-	}else{
-		// This assumes that subMeshes and subEntities match one to one
-		auto portalEnt = e->getSubEntity(doorpit->second);
-		portalEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1, 0.1, 0.1)); // Skycolor
-		portalEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
-
-		portalManager->AddPortal(portalEnt, l0, l1);
-	}
-	////////////////////////////////////////////////////////
 }

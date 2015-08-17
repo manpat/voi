@@ -1,4 +1,3 @@
-#include "sceneparser.h"
 #include <fstream>
 #include <iostream>
 #include <queue>
@@ -6,7 +5,10 @@
 #include <OGRE/OgreResourceGroupManager.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
-#include <rapidxml_print.hpp>
+
+#include "sceneparser.h"
+#include "portalmanager.h"
+#include "app.h"
 
 using namespace rapidxml;
 
@@ -34,7 +36,7 @@ SceneParser::~SceneParser(){
 	}
 }
 
-void SceneParser::Load(std::string filename, Ogre::SceneManager* sceneManager) {
+void SceneParser::Load(std::string filename, App* app) {
 	std::fstream file(filename);
 	if(!file) throw "File open failed";
 
@@ -60,18 +62,18 @@ void SceneParser::Load(std::string filename, Ogre::SceneManager* sceneManager) {
 
 	// Init resource locations
 	for(auto& rl: resourceLocations){
-		Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/"+rl.dir, rl.type);
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(rl.dir, rl.type);
 	}
 	// Ogre::ResourceGroupManager::getS3ingleton().addResourceLocation("GameData/Meshes", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	// Construct scene
-	ConstructScene(sceneManager);
+	ConstructScene(app);
 }
 
-void SceneParser::ConstructScene(Ogre::SceneManager* sceneManager){
-	auto rootNode = sceneManager->getRootSceneNode();
+void SceneParser::ConstructScene(App* app){
+	auto rootNode = app->rootNode;
 
 	struct NodeParentPair {
 		Ogre::SceneNode* parent;
@@ -100,9 +102,26 @@ void SceneParser::ConstructScene(Ogre::SceneManager* sceneManager){
 			// If entities were stored in a queue like nodes, then they could be
 			//	iterated through to find portals
 			auto& entdef = *ndef.entity;
-			auto ent = sceneManager->createEntity(entdef.name, entdef.mesh);
+			auto ent = app->sceneManager->createEntity(entdef.name, entdef.mesh);
 			node->attachObject(ent);
 
+			// Set layer
+			auto layerStr = findin(entdef.userData, std::string("Layer"));
+			auto layer = std::stol(layerStr);
+			assert(layer < 10);
+
+			// Test if contains portal
+			if(findin(entdef.userData, std::string("IsPortal")) == "true"){
+				auto dstlayerStr = findin(entdef.userData, std::string("DstLayer"), std::string("1"));
+				auto dstlayer = std::stol(dstlayerStr);
+				assert(dstlayer < 10);
+
+				app->portalManager->AddPortal(ent, layer, dstlayer);
+			}else{
+				ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+layer);
+			}
+
+			// Set user data
 			auto& uob = ent->getUserObjectBindings();
 			for(auto& pair: ndef.userData){
 				uob.setUserAny(pair.first, Ogre::Any(pair.second));

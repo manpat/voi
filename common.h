@@ -10,7 +10,7 @@
 #include <OGRE/OgreQuaternion.h>
 
 template<typename K, typename V>
-V findin(const std::map<K,V>& m, K k, V dv = V(0)){
+V findin(const std::map<K,V>& m, K k, V dv = V()){
 	auto it = m.find(k);
 	if(it == m.end()) return dv;
 

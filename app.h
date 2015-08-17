@@ -80,10 +80,6 @@ protected:
 
 	void Init();
 	void Update(f32 dt);
-
-	void Portalify(Ogre::Entity*,s32,s32);
-
-	void SetLayer(u32 i = 0);
 };
 
 #endif

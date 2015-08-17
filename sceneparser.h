@@ -8,6 +8,8 @@ namespace Ogre {
 	class SceneManager;
 }
 
+class App;
+
 class SceneParser {
 	using UserData = std::map<std::string, std::string>;
 
@@ -46,10 +48,10 @@ public:
 
 	~SceneParser();
 
-	void Load(std::string filename, Ogre::SceneManager*);
+	void Load(std::string filename, App*);
 
 protected:
-	void ConstructScene(Ogre::SceneManager*);
+	void ConstructScene(App*);
 
 	std::vector<ResourceLocation> ParseResourceLocations(rapidxml::xml_node<>* node);
 	std::vector<Node> ParseNodes(rapidxml::xml_node<>* node);

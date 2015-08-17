@@ -37,6 +37,7 @@ protected:
 	std::shared_ptr<Camera> camera;
 	std::vector<Portal> portals;
 	u32 numLayers;
+	u32 currentLayer;
 
 public:
 	PortalManager(Ogre::Root*, std::shared_ptr<Camera>&);
@@ -46,7 +47,7 @@ public:
 
 	// Note: AddPortal assumes that the portal submesh's normal lies along the Z-axis
 	//	local to the parent mesh
-	s32 AddPortal(Ogre::SubEntity*, s32 l0, s32 l1);
+	void AddPortal(Ogre::Entity*, s32 l0, s32 l1);
 
 protected:
 	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;

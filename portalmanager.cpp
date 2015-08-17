@@ -45,11 +45,7 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 	}else if(invocationType == "PtS"){
 		auto portalId = std::stol(invocation.substr(3));
 		auto& portal = portals[portalId];
-		auto layer = (s32)queueId - RENDER_QUEUE_PORTALSCENE;
-
-		if(layer < 0){
-			layer = (s32)queueId - RENDER_QUEUE_PORTALFRAME;
-		}
+		s32 layer = (portal.layer[0] == (s32)currentLayer)?portal.layer[1]:portal.layer[0];
 
 		rs->_setColourBufferWriteEnabled(true, true, true, true);
 		rs->setStencilCheckEnabled(true);
@@ -71,7 +67,6 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 
 			rs->addClipPlane(nplane);
 		}
-
 	}
 }
 
@@ -94,6 +89,7 @@ void PortalManager::renderQueueEnded(u8 queueId, const std::string& invocation, 
 
 void PortalManager::SetLayer(s32 l){
 	assert(l < (s32)numLayers);
+	currentLayer = l;
 
 	rqis->clear();
 	rqis->add(RENDER_QUEUE_PORTALSCENE+l, "Main");
@@ -103,6 +99,8 @@ void PortalManager::SetLayer(s32 l){
 	visiblePortals.clear();
 
 	for(auto& p: portals){
+		// Test if portal exists in the new layer and if so
+		//	get it's destination layer
 		s32 layer = -1;
 		if(p.layer[0] == l){
 			layer = p.layer[1];
@@ -111,38 +109,60 @@ void PortalManager::SetLayer(s32 l){
 			layer = p.layer[0];
 		}
 
+		// if the portal IS in the new layer
 		if(layer != -1){
+			// Queue it's frame to be rendered
 			rqis->add(RENDER_QUEUE_PORTALFRAME+p.id, "Main");
 			visiblePortals.push_back(PType(layer, &p));
 		}
 	}
 
+	// Prepare for portal drawing by clearing the stencil buffer
 	rqis->add(1, "PrepPrt");
 
+	// Draw each portal to the stencil buffer with a ref value of 
+	//	the dstlayer 
 	for(auto p: visiblePortals){
 		rqis->add(RENDER_QUEUE_PORTAL+p.second->id, "Prt"+std::to_string(p.first));
 	}
 
 	rqis->add(RENDER_QUEUE_PARTICLES, "");
+
+	// Prepare for portal scene drawing by clearing the depth buffer
 	rqis->add(1, "PrepPrtScn");
 
+	// Draw each portal scene masked by dstlayer in the stencilbuffer.
+	//	Then draw the portal frame 'behind' the portal
 	for(auto p: visiblePortals){
 		auto scenestr = "PtS"+std::to_string(p.second->id);
 
 		rqis->add(RENDER_QUEUE_PORTALSCENE+p.first, scenestr);
-		rqis->add(RENDER_QUEUE_PORTALFRAME+p.first, scenestr);
+		rqis->add(RENDER_QUEUE_PORTALFRAME+p.second->id, scenestr);
 	}
-	
 }
 
-s32 PortalManager::AddPortal(Ogre::SubEntity* ent, s32 l0, s32 l1){
+void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 	auto id = (s32)portals.size();
 	assert(id < 10);
 
-	ent->getParent()->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
-	ent->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
+	// Get subentity with name Portal
+	Ogre::SubEntity* portalEnt = nullptr;
+	auto subMeshes = ent->getMesh()->getSubMeshNameMap(); // std::unordered_map<string, ushort>
+	auto subMeshIt = subMeshes.find("Portal");
+	if(subMeshIt == subMeshes.end()) {
+		// No portal surface found
+		return;
+	}
 
-	auto portalNode = ent->getParent()->getParentSceneNode();
+	// This assumes that subMeshes and subEntities match one to one
+	portalEnt = ent->getSubEntity(subMeshIt->second);
+	portalEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1, 0.1, 0.1)); // Skycolor
+	portalEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
+
+	ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
+	portalEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
+
+	auto portalNode = ent->getParentSceneNode();
 	// This is not the best but it's good enough for now
 	auto pos = portalNode->_getDerivedPosition();
 	auto ori = portalNode->_getDerivedOrientation();
@@ -159,5 +179,4 @@ s32 PortalManager::AddPortal(Ogre::SubEntity* ent, s32 l0, s32 l1){
 	});
 
 	numLayers = std::max((u32)std::max(l0, l1)+1, numLayers);
-	return id;
 }

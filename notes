@@ -18,5 +18,6 @@ Blender2Ogre appears to only export submeshes if they have a separate material
 
 Portal frame rendering is inconsistent
 	Only sometimes rendered on both sides
+	Portal frames in dst layers aren't always rendered
 
 Portal rendering seems to fail when camera is near the plane
