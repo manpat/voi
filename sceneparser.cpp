@@ -45,11 +45,11 @@ void SceneParser::Load(std::string filename, App* app) {
 	u64 len = file.tellg();
 	file.seekg(0, file.beg);
 
-	auto data = new char[len+1l];
-	data[len] = 0;
+	auto data = new char[len + 1l];
+	memset(data, 0, len + 1l);
 	file.read(data, len);
 	file.close();
-	
+
 	// Parse xml
 	xml_document<> doc;
 	doc.parse<0>(data);

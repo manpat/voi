@@ -65,7 +65,7 @@ void App::Init(){
 	auto portalNode = rootNode->createChildSceneNode();
 	portalNode->translate(0, 0, -3.f);
 
-	constexpr s32 repetitions = 4;
+	s32 repetitions = 4;
 	for(s32 z = -repetitions; z <= repetitions; z++)
 		for(s32 x = -repetitions; x <= repetitions; x++){
 			auto cnode = sceneNode1->createChildSceneNode();
