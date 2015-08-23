@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "common.h"
+#include "audiomanager.h"
 
 class Camera;
 class Input;
@@ -52,6 +53,7 @@ public:
 	Ogre::SceneManager* sceneManager;
 	Ogre::RenderWindow* window;
 	Ogre::SceneNode* rootNode;
+	AudioManager* audioManager;
 
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;

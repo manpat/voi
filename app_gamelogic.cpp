@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "sceneparser.h"
 #include "portalmanager.h"
+#include "audiomanager.h"
 
 /*
 
@@ -111,6 +112,8 @@ void App::Init(){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
+	audioManager = new AudioManager();
+
 	camera->cameraNode->setPosition(0, 1.75, 0);
 	auto g = 0.1;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
@@ -162,6 +165,11 @@ void App::Update(f32 dt){
 	}else if(Input::GetKey(SDLK_d)){
 		camera->cameraNode->translate(oriYaw.xAxis() * dt * boost);
 	}
+
+	audioManager->playNote(128);
+	
+	// Update Audio
+	audioManager->update(dt);
 
 	// Close window on ESC
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
