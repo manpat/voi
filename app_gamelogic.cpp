@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "sceneparser.h"
 #include "portalmanager.h"
+#include "audiomanager.h"
 
 /*
 
@@ -110,6 +111,8 @@ void App::Init(){
 	auto psystem = sceneManager->createParticleSystem("Dust", "Environment/Dust");
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
+
+	audioManager = new AudioManager();
 }
 
 /*
@@ -158,6 +161,11 @@ void App::Update(f32 dt){
 	}else if(Input::GetKey(SDLK_d)){
 		camera->cameraNode->translate(oriYaw.xAxis() * dt * boost);
 	}
+
+	audioManager->playNote(128);
+	
+	// Update Audio
+	audioManager->update(dt);
 
 	// Close window on ESC
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
