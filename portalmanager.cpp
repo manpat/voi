@@ -112,7 +112,7 @@ void PortalManager::SetLayer(s32 l){
 		}
 
 		// if the portal IS in the new layer
-		if(layer != -1){
+		if(layer >= 0){
 			// Queue it's frame to be rendered
 			rqis->add(RENDER_QUEUE_PORTALFRAME+p.id, "Main");
 			visiblePortals.push_back(PType(layer, &p));
@@ -128,7 +128,7 @@ void PortalManager::SetLayer(s32 l){
 		rqis->add(RENDER_QUEUE_PORTAL+p.second->id, "Prt"+std::to_string(p.first));
 	}
 
-	rqis->add(RENDER_QUEUE_PARTICLES, "");
+	rqis->add(RENDER_QUEUE_PARTICLES, "dummy");
 
 	// Prepare for portal scene drawing by clearing the depth buffer
 	rqis->add(1, "PrepPrtScn");

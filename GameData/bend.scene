@@ -58,6 +58,9 @@
             <scale x="1" y="1" z="1" />
             <entity name="Icosphere#0" meshFile="Icosphere.mesh" castShadows="false">
                 <subentity index="0" materialName="Material" />
+                <userData>
+                    <property type="2" name="Layer" data="0" />
+                </userData>
             </entity>
         </node>
     </nodes>

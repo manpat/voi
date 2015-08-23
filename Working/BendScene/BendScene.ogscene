@@ -99,7 +99,7 @@
   <OBJECT object_id="2000000002" name="Viewport1" typename="Viewport">
     <PROPERTY id="camera::clipdistance" type="8" value="0.1 9000"></PROPERTY>
     <PROPERTY id="camera::fov" type="6" value="1"></PROPERTY>
-    <PROPERTY id="camera::orientation" type="13" value="0.983149 -0.165629 0.0762951 0.012853"></PROPERTY>
+    <PROPERTY id="camera::orientation" type="13" value="0.983148 -0.165629 0.076295 0.012853"></PROPERTY>
     <PROPERTY id="camera::polymode" type="2" value="3"></PROPERTY>
     <PROPERTY id="camera::position" type="9" value="8.97379 8.38258 14.9274"></PROPERTY>
     <PROPERTY id="camera::viewmode" type="2" value="0"></PROPERTY>
@@ -189,6 +189,7 @@
     <PROPERTY id="subentitycount" type="2" value="1"></PROPERTY>
     <PROPERTY id="updatescript" type="7" value=""></PROPERTY>
     <CUSTOMPROPERTIES>
+      <PROPERTY id="Layer" type="2" value="0" autooptiontype="0"></PROPERTY>
     </CUSTOMPROPERTIES>
   </OBJECT>
 
