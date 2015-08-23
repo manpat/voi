@@ -92,6 +92,7 @@ protected:
 
 	void Init();
 	void Update(f32 dt);
+	void Terminate();
 };
 
 #endif

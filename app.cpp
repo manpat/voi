@@ -23,7 +23,7 @@ App::App(){
 	instance = this;
 
 	SDL_Init(SDL_INIT_VIDEO);
-	sdlWindow = SDL_CreateWindow("TitleTitleTitle",
+	sdlWindow = SDL_CreateWindow("Anomalia",
 					SDL_WINDOWPOS_UNDEFINED,
 					SDL_WINDOWPOS_UNDEFINED,
 					WIDTH, HEIGHT,
@@ -185,7 +185,7 @@ void App::Run(){
 		// Call the appropriate update function depending on game state
 		switch (gameState) {
 			case GameState::MAIN_MENU:
-				Menu::Inst().Update();
+				Menu::Inst().Update(this, dt);
 				break;
 			case GameState::PLAYING:
 				Update(dt);
@@ -274,18 +274,18 @@ void App::SetGameState(GameState gs) {
 
 	// Changing to main menu
 	if (gs == GameState::MAIN_MENU) {
-		Menu::Inst().Init();
-	} else {
+		Menu::Inst().Init(this);
+	} else if (gameState == GameState::MAIN_MENU) {
 		// Changing away from main menu
-		Menu::Inst().Uninit();
+		Menu::Inst().Terminate(this);
 	}
 
 	// Changing to playing
 	if (gs == GameState::PLAYING) {
 		Init();
-	} else {
+	} else if (gameState == GameState::PLAYING) {
 		// Changing away from playing
-		//Uninit();
+		//Terminate();
 	}
 
 	// Finally set the actual game state

@@ -15,7 +15,7 @@ Camera::Camera(string name){
 	ogreCamera = app->sceneManager->createCamera(name);
 	cameraNode = app->rootNode->createChildSceneNode(name);
 	cameraNode->attachObject(ogreCamera);
-	cameraNode->translate(0, 1.0, 0);
+	cameraNode->translate(0, 0, 0);
 
 	auto size = 1.f;
 	auto start = (1.f-size)*0.5f;
@@ -34,7 +34,7 @@ Camera::Camera(string name){
 		/ static_cast<f32>(viewport->getActualHeight()));
 
 	ogreCamera->setNearClipDistance(0.1f); // TODO: Expose
-	ogreCamera->setFarClipDistance (1000.f); // TODO: Expose
+	ogreCamera->setFarClipDistance(1000.f); // TODO: Expose
 }
 
 Camera::~Camera(){
