@@ -100,7 +100,7 @@ void App::Init(){
 
 #else
 	SceneParser sceneloader;
-	sceneloader.Load("GameData/TestScene.scene", this);
+	sceneloader.Load("GameData/bend.scene", this);
 #endif
 
 	portalManager->SetLayer(0);

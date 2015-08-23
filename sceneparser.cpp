@@ -111,14 +111,14 @@ void SceneParser::ConstructScene(App* app){
 			assert(layer < 10);
 
 			// Test if contains portal
+			ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+layer);
+
 			if(findin(entdef.userData, std::string("IsPortal")) == "true"){
 				auto dstlayerStr = findin(entdef.userData, std::string("DstLayer"), std::string("1"));
 				auto dstlayer = std::stol(dstlayerStr);
 				assert(dstlayer < 10);
 
 				app->portalManager->AddPortal(ent, layer, dstlayer);
-			}else{
-				ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+layer);
 			}
 
 			// Set user data
