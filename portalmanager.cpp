@@ -183,12 +183,6 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
 
 	auto mesh = GetOgreSubMeshVertices(portalSubmesh);
-	std::cout << ent->getName() << " portal mesh data: \n\t";
-	for(auto& v: mesh){
-		std::cout << v << " ";
-	}
-	std::cout << std::endl;
-
 	auto forward = vec3::UNIT_Z;
 	auto posOffset = vec3::ZERO;
 	for(u32 i = 0; i < mesh.size()-2; i++){
@@ -202,10 +196,7 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 		}
 	}
 
-	std::cout << ent->getName() << " forward: " << forward << std::endl;
-
 	auto portalNode = ent->getParentSceneNode();
-	// This is not the best but it's good enough for now
 	auto pos = portalNode->_getDerivedPosition() + posOffset;
 	auto ori = portalNode->_getDerivedOrientation();
 	auto normal = ori * forward;
