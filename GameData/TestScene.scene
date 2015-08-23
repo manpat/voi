@@ -15,8 +15,8 @@
         </viewport>
         <camera name="intViewCamera1" viewMode="0" polyMode="3" fov="1">
             <clipping near="0.1" far="9000" />
-            <position x="5.75185" y="15.8768" z="18.6509" />
-            <rotation qw="0.905449" qx="-0.422208" qy="-0.0395397" qz="-0.0184153" />
+            <position x="-9.33605" y="4.47138" z="9.97994" />
+            <rotation qw="0.950178" qx="-0.0820789" qy="-0.299591" qz="-0.0258529" />
         </camera>
     </environment>
     <nodes>
@@ -28,20 +28,6 @@
                 <subentity index="0" materialName="Material" />
                 <userData>
                     <property type="2" name="Layer" data="1" />
-                </userData>
-            </entity>
-        </node>
-        <node name="mergeGate#0" id="599755520">
-            <position x="5" y="0" z="3" />
-            <rotation qw="0.707107" qx="0" qy="-0.707107" qz="0" />
-            <scale x="0.618718" y="0.618718" z="0.42152" />
-            <entity name="mergeGate#0" meshFile="mergeGate.mesh" castShadows="false">
-                <subentity index="0" materialName="Gate" />
-                <subentity index="1" materialName="Portal" />
-                <userData>
-                    <property type="2" name="Layer" data="1" />
-                    <property type="12" name="IsPortal" data="true" />
-                    <property type="2" name="DstLayer" data="2" />
                 </userData>
             </entity>
         </node>
@@ -59,8 +45,33 @@
                 </userData>
             </entity>
         </node>
+        <node name="mergeGate#0" id="599755520">
+            <position x="5" y="0" z="3" />
+            <rotation qw="0.707107" qx="0" qy="-0.707107" qz="0" />
+            <scale x="0.618718" y="0.618718" z="0.42152" />
+            <entity name="mergeGate#0" meshFile="mergeGate.mesh" castShadows="false">
+                <subentity index="0" materialName="Gate" />
+                <subentity index="1" materialName="Portal" />
+                <userData>
+                    <property type="2" name="Layer" data="1" />
+                    <property type="12" name="IsPortal" data="true" />
+                    <property type="2" name="DstLayer" data="2" />
+                </userData>
+            </entity>
+        </node>
+        <node name="Courtyard#0" id="708110400">
+            <position x="0" y="0" z="-18" />
+            <rotation qw="1" qx="0" qy="0" qz="0" />
+            <scale x="0.3" y="0.3" z="0.3" />
+            <entity name="Courtyard#0" meshFile="Courtyard.mesh" castShadows="false">
+                <subentity index="0" materialName="Courtyard" />
+                <userData>
+                    <property type="2" name="Layer" data="1" />
+                </userData>
+            </entity>
+        </node>
         <node name="Icosphere#0Copy#0" id="787492288">
-            <position x="0" y="1" z="-7" />
+            <position x="0" y="1" z="-18" />
             <rotation qw="1" qx="0" qy="0" qz="0" />
             <scale x="1" y="1" z="1" />
             <entity name="Icosphere#0Copy#0" meshFile="Icosphere.mesh" castShadows="false">

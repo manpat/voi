@@ -1,10 +1,12 @@
 #include <OGRE/OgreRenderQueueInvocation.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreSubEntity.h>
+#include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreCamera.h>
 #include <OGRE/OgreRoot.h>
 #include "portalmanager.h"
+#include "meshinfo.h"
 #include "camera.h"
 
 #include <cassert>
@@ -146,27 +148,67 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 	assert(id < 10);
 
 	// Get subentity with name Portal
-	Ogre::SubEntity* portalEnt = nullptr;
-	auto subMeshes = ent->getMesh()->getSubMeshNameMap(); // std::unordered_map<string, ushort>
-	auto subMeshIt = subMeshes.find("Portal");
-	if(subMeshIt == subMeshes.end()) {
+	Ogre::SubEntity* portalSubEnt = nullptr;
+	Ogre::SubMesh* portalSubmesh = nullptr;
+	auto portalMesh = ent->getMesh();
+
+	auto subMeshes = portalMesh->getSubMeshNameMap(); // std::unordered_map<string, ushort>
+	auto subMeshIt = subMeshes.find("Portal"); // Find submesh with name Portal
+	if(subMeshIt == subMeshes.end()) { // If failed
+		// Get submesh with material of name Portal
+		for(auto& sm: subMeshes){ 
+			if(portalMesh->getSubMesh(sm.second)->getMaterialName() == "Portal"){
+				portalSubEnt = ent->getSubEntity(sm.second);
+				break;
+			}
+		}
+
 		// No portal surface found
-		return;
+		if(!portalSubEnt) {
+			std::cout << "No portal surfaces found in " << ent->getName() << std::endl;
+			return;
+		}
+	}else{
+		//
+		portalSubEnt = ent->getSubEntity(subMeshIt->second);
 	}
 
-	// This assumes that subMeshes and subEntities match one to one
-	portalEnt = ent->getSubEntity(subMeshIt->second);
-	portalEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1, 0.1, 0.1)); // Skycolor
-	portalEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
+	portalSubmesh = portalSubEnt->getSubMesh();
 
-	ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
-	portalEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
+	// This assumes that subMeshes and subEntities match one to one
+	portalSubEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1, 0.1, 0.1)); // Skycolor
+	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
+
+	// ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
+	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
+
+	auto mesh = GetOgreSubMeshVertices(portalSubmesh);
+	std::cout << ent->getName() << " portal mesh data: \n\t";
+	for(auto& v: mesh){
+		std::cout << v << " ";
+	}
+	std::cout << std::endl;
+
+	auto forward = vec3::UNIT_Z;
+	auto posOffset = vec3::ZERO;
+	for(u32 i = 0; i < mesh.size()-2; i++){
+		posOffset = mesh[i];
+		auto p1 = mesh[i+1] - mesh[i];
+		auto p2 = mesh[i+2] - mesh[i];
+		auto cross = p1.crossProduct(p2);
+		if(cross.length() > 0.9){
+			forward = cross.normalisedCopy();
+			break;
+		}
+	}
+
+	std::cout << ent->getName() << " forward: " << forward << std::endl;
 
 	auto portalNode = ent->getParentSceneNode();
 	// This is not the best but it's good enough for now
-	auto pos = portalNode->_getDerivedPosition();
+	auto pos = portalNode->_getDerivedPosition() + posOffset;
 	auto ori = portalNode->_getDerivedOrientation();
-	auto normal = ori * vec3::UNIT_Z;
+	auto normal = ori * forward;
 	normal.normalise();
 
 	auto length = pos.dotProduct(normal);

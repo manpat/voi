@@ -14,7 +14,7 @@
     </FILESYSTEMLINKS>
   <CAMERASPEED value="1"></CAMERASPEED>
   <CAMERAPOSITIONS count="0">
-    <OPTION id="0" position="5.75185 15.8768 18.6509" orientation="0.905449 -0.422208 -0.0395397 -0.0184153"></OPTION>
+    <OPTION id="0" position="-9.45999 4.36254 8.81135" orientation="0.950179 -0.082079 -0.299592 -0.0258529"></OPTION>
   </CAMERAPOSITIONS>
     <LAYERS>
       <LAYER id="0" name="Layer 0" visible="true"></LAYER>
@@ -100,9 +100,9 @@
   <OBJECT object_id="2000000002" name="Viewport1" typename="Viewport">
     <PROPERTY id="camera::clipdistance" type="8" value="0.1 9000"></PROPERTY>
     <PROPERTY id="camera::fov" type="6" value="1"></PROPERTY>
-    <PROPERTY id="camera::orientation" type="13" value="0.905449 -0.422208 -0.0395397 -0.0184153"></PROPERTY>
+    <PROPERTY id="camera::orientation" type="13" value="0.950178 -0.0820789 -0.299591 -0.0258529"></PROPERTY>
     <PROPERTY id="camera::polymode" type="2" value="3"></PROPERTY>
-    <PROPERTY id="camera::position" type="9" value="5.75185 15.8768 18.6509"></PROPERTY>
+    <PROPERTY id="camera::position" type="9" value="-9.45999 4.36254 8.81135"></PROPERTY>
     <PROPERTY id="camera::viewmode" type="2" value="0"></PROPERTY>
     <PROPERTY id="colour" type="11" value="0 0 0 1"></PROPERTY>
     <PROPERTY id="index" type="2" value="1"></PROPERTY>
@@ -136,29 +136,6 @@
     </CUSTOMPROPERTIES>
   </OBJECT>
 
-  <OBJECT object_id="599755520" name="mergeGate#0" typename="Entity" parentnode="SceneManager">
-    <PROPERTY id="autotracktarget" type="7" value="None"></PROPERTY>
-    <PROPERTY id="castshadows" type="12" value="false"></PROPERTY>
-    <PROPERTY id="layer" type="2" value="0"></PROPERTY>
-    <PROPERTY id="locked" type="12" value="false"></PROPERTY>
-    <PROPERTY id="meshfile" type="7" value="mergeGate"></PROPERTY>
-    <PROPERTY id="orientation" type="13" value="0.707107 0 -0.707107 0"></PROPERTY>
-    <PROPERTY id="position" type="9" value="5 0 3"></PROPERTY>
-    <PROPERTY id="renderingdistance" type="6" value="5000"></PROPERTY>
-    <PROPERTY id="scale" type="9" value="0.618718 0.618718 0.42152"></PROPERTY>
-    <PROPERTY id="subentity0::material" type="7" value="Gate"></PROPERTY>
-    <PROPERTY id="subentity0::visible" type="12" value="true"></PROPERTY>
-    <PROPERTY id="subentity1::material" type="7" value="Portal"></PROPERTY>
-    <PROPERTY id="subentity1::visible" type="12" value="true"></PROPERTY>
-    <PROPERTY id="subentitycount" type="2" value="2"></PROPERTY>
-    <PROPERTY id="updatescript" type="7" value=""></PROPERTY>
-    <CUSTOMPROPERTIES>
-      <PROPERTY id="Layer" type="2" value="1" autooptiontype="0"></PROPERTY>
-      <PROPERTY id="IsPortal" type="12" value="true" autooptiontype="0"></PROPERTY>
-      <PROPERTY id="DstLayer" type="2" value="2" autooptiontype="0"></PROPERTY>
-    </CUSTOMPROPERTIES>
-  </OBJECT>
-
   <OBJECT object_id="516886592" name="portal" typename="Entity" parentnode="SceneManager">
     <PROPERTY id="autotracktarget" type="7" value="None"></PROPERTY>
     <PROPERTY id="castshadows" type="12" value="false"></PROPERTY>
@@ -182,6 +159,48 @@
     </CUSTOMPROPERTIES>
   </OBJECT>
 
+  <OBJECT object_id="599755520" name="mergeGate#0" typename="Entity" parentnode="SceneManager">
+    <PROPERTY id="autotracktarget" type="7" value="None"></PROPERTY>
+    <PROPERTY id="castshadows" type="12" value="false"></PROPERTY>
+    <PROPERTY id="layer" type="2" value="0"></PROPERTY>
+    <PROPERTY id="locked" type="12" value="false"></PROPERTY>
+    <PROPERTY id="meshfile" type="7" value="mergeGate"></PROPERTY>
+    <PROPERTY id="orientation" type="13" value="0.707107 0 -0.707107 0"></PROPERTY>
+    <PROPERTY id="position" type="9" value="5 0 3"></PROPERTY>
+    <PROPERTY id="renderingdistance" type="6" value="5000"></PROPERTY>
+    <PROPERTY id="scale" type="9" value="0.618718 0.618718 0.42152"></PROPERTY>
+    <PROPERTY id="subentity0::material" type="7" value="Gate"></PROPERTY>
+    <PROPERTY id="subentity0::visible" type="12" value="true"></PROPERTY>
+    <PROPERTY id="subentity1::material" type="7" value="Portal"></PROPERTY>
+    <PROPERTY id="subentity1::visible" type="12" value="true"></PROPERTY>
+    <PROPERTY id="subentitycount" type="2" value="2"></PROPERTY>
+    <PROPERTY id="updatescript" type="7" value=""></PROPERTY>
+    <CUSTOMPROPERTIES>
+      <PROPERTY id="Layer" type="2" value="1" autooptiontype="0"></PROPERTY>
+      <PROPERTY id="IsPortal" type="12" value="true" autooptiontype="0"></PROPERTY>
+      <PROPERTY id="DstLayer" type="2" value="2" autooptiontype="0"></PROPERTY>
+    </CUSTOMPROPERTIES>
+  </OBJECT>
+
+  <OBJECT object_id="708110400" name="Courtyard#0" typename="Entity" parentnode="SceneManager">
+    <PROPERTY id="autotracktarget" type="7" value="None"></PROPERTY>
+    <PROPERTY id="castshadows" type="12" value="false"></PROPERTY>
+    <PROPERTY id="layer" type="2" value="0"></PROPERTY>
+    <PROPERTY id="locked" type="12" value="false"></PROPERTY>
+    <PROPERTY id="meshfile" type="7" value="Courtyard"></PROPERTY>
+    <PROPERTY id="orientation" type="13" value="1 0 0 0"></PROPERTY>
+    <PROPERTY id="position" type="9" value="0 0 -18"></PROPERTY>
+    <PROPERTY id="renderingdistance" type="6" value="5000"></PROPERTY>
+    <PROPERTY id="scale" type="9" value="0.3 0.3 0.3"></PROPERTY>
+    <PROPERTY id="subentity0::material" type="7" value="Courtyard"></PROPERTY>
+    <PROPERTY id="subentity0::visible" type="12" value="true"></PROPERTY>
+    <PROPERTY id="subentitycount" type="2" value="1"></PROPERTY>
+    <PROPERTY id="updatescript" type="7" value=""></PROPERTY>
+    <CUSTOMPROPERTIES>
+      <PROPERTY id="Layer" type="2" value="1" autooptiontype="0"></PROPERTY>
+    </CUSTOMPROPERTIES>
+  </OBJECT>
+
   <OBJECT object_id="787492288" name="Icosphere#0Copy#0" typename="Entity" parentnode="SceneManager">
     <PROPERTY id="autotracktarget" type="7" value="None"></PROPERTY>
     <PROPERTY id="castshadows" type="12" value="false"></PROPERTY>
@@ -189,7 +208,7 @@
     <PROPERTY id="locked" type="12" value="false"></PROPERTY>
     <PROPERTY id="meshfile" type="7" value="Icosphere"></PROPERTY>
     <PROPERTY id="orientation" type="13" value="1 0 0 0"></PROPERTY>
-    <PROPERTY id="position" type="9" value="0 1 -7"></PROPERTY>
+    <PROPERTY id="position" type="9" value="0 1 -18"></PROPERTY>
     <PROPERTY id="renderingdistance" type="6" value="5000"></PROPERTY>
     <PROPERTY id="scale" type="9" value="1 1 1"></PROPERTY>
     <PROPERTY id="subentity0::material" type="7" value="Material"></PROPERTY>
