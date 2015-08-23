@@ -106,7 +106,10 @@ void SceneParser::ConstructScene(App* app){
 			node->attachObject(ent);
 
 			// Set layer
-			auto layerStr = findin(entdef.userData, std::string("Layer"));
+			auto layerStr = findin(entdef.userData, std::string("Layer"), std::string());
+			if(layerStr.size() == 0){
+				throw entdef.name + " is missing layer property";
+			}
 			auto layer = std::stol(layerStr);
 			assert(layer < 10);
 

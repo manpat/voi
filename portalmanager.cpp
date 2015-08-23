@@ -112,7 +112,7 @@ void PortalManager::SetLayer(s32 l){
 		}
 
 		// if the portal IS in the new layer
-		if(layer != -1){
+		if(layer >= 0){
 			// Queue it's frame to be rendered
 			rqis->add(RENDER_QUEUE_PORTALFRAME+p.id, "Main");
 			visiblePortals.push_back(PType(layer, &p));
@@ -128,7 +128,7 @@ void PortalManager::SetLayer(s32 l){
 		rqis->add(RENDER_QUEUE_PORTAL+p.second->id, "Prt"+std::to_string(p.first));
 	}
 
-	rqis->add(RENDER_QUEUE_PARTICLES, "");
+	rqis->add(RENDER_QUEUE_PARTICLES, "dummy");
 
 	// Prepare for portal scene drawing by clearing the depth buffer
 	rqis->add(1, "PrepPrtScn");
@@ -183,12 +183,6 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
 
 	auto mesh = GetOgreSubMeshVertices(portalSubmesh);
-	std::cout << ent->getName() << " portal mesh data: \n\t";
-	for(auto& v: mesh){
-		std::cout << v << " ";
-	}
-	std::cout << std::endl;
-
 	auto forward = vec3::UNIT_Z;
 	auto posOffset = vec3::ZERO;
 	for(u32 i = 0; i < mesh.size()-2; i++){
@@ -202,10 +196,7 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 		}
 	}
 
-	std::cout << ent->getName() << " forward: " << forward << std::endl;
-
 	auto portalNode = ent->getParentSceneNode();
-	// This is not the best but it's good enough for now
 	auto pos = portalNode->_getDerivedPosition() + posOffset;
 	auto ori = portalNode->_getDerivedOrientation();
 	auto normal = ori * forward;

@@ -30,7 +30,7 @@ std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh* sm){
 	f32* vecPtr = nullptr;
 	auto idxStart = indexData->indexStart;
 	for(u64 i = idxStart; i < indexData->indexCount+idxStart; i++){
-		auto idx = ((use32bitindexes)?idx32[i]:(u32)idx16[i])+idxStart*0;
+		auto idx = (use32bitindexes)?idx32[i]:(u32)idx16[i];
 
 		posElem->baseVertexPointerToElement(vertex+idx*vbuf->getVertexSize(), &vecPtr);
 		vertices.push_back(vec3(vecPtr[0], vecPtr[1], vecPtr[2]));

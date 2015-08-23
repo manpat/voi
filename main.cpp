@@ -1,6 +1,7 @@
 #include "app.h"
 #include <OGRE/OgreException.h>
 #include <rapidxml.hpp>
+#include <string>
 
 #ifdef _WIN32
 	#undef main
@@ -18,14 +19,18 @@ s32 main(int argc, char** argv){
 		std::cout << "std Exception!\n" << e.what() << std::endl;
 		std::cin.get();
 		return 2;
-	}catch(const char* e){
+	}catch(const std::string& e){
 		std::cout << "FUCK Exception!\n" << e << std::endl;
 		std::cin.get();
 		return 3;
+	}catch(const char* e){
+		std::cout << "FUCK Exception!\n" << e << std::endl;
+		std::cin.get();
+		return 4;
 	}catch(...){
 		std::cout << "HOLY SHIT SOME FUCKED UP SHIT HAPPENED HOLY SHIT!" << std::endl;
 		std::cin.get();
-		return 4;
+		return 5;
 	}
 
 	return 0;

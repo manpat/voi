@@ -1,6 +1,6 @@
 particle_system Environment/Dust {
 	material Particle/Additive
-	bilboard_type point
+	billboard_type point
 	particle_height 0.03
 	particle_width 0.03
 	cull_each false

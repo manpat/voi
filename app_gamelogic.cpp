@@ -24,6 +24,7 @@
 
 */
 void App::Init(){
+	std::cout << "App Init" << std::endl;
 	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
 
