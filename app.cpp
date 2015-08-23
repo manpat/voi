@@ -15,6 +15,7 @@
 #include "input.h"
 #include "camera.h"
 #include "common.h"
+#include "menu.h"
 
 App* App::instance = nullptr;
 
@@ -39,10 +40,10 @@ App::App(){
 	input = std::make_shared<Input>();
 	camera = std::make_shared<Camera>();
 
-	Init();
-
 	window->setActive(true);
 	window->setAutoUpdated(false);
+
+	SetGameState(GameState::MAIN_MENU);
 
 	ogreRoot->clearEventTimes();
 	inFocus = true;
@@ -180,7 +181,15 @@ void App::Run(){
 		for(auto hook: frameBeginHooks){
 			hook();
 		}
-		Update(dt);
+
+		// Call the appropriate update function depending on game state
+		switch (gameState) {
+			case GameState::MAIN_MENU:
+				Menu::Inst().Update();
+				break;
+			case GameState::PLAYING:
+				Update(dt);
+		}
 
 		for(auto hook: frameEndHooks){
 			hook();
@@ -245,6 +254,46 @@ void App::RemoveFrameEndHook(Hook h){
 
 /*
 
+	 ad88888ba
+	d8"     "8b              ,d      ,d
+	Y8,                      88      88
+	`Y8aaaaa,    ,adPPYba, MM88MMM MM88MMM ,adPPYba, 8b,dPPYba, ,adPPYba,
+	  `"""""8b, a8P_____88   88      88   a8P_____88 88P'   "Y8 I8[    ""
+	        `8b 8PP"""""""   88      88   8PP""""""" 88          `"Y8ba,
+	Y8a     a8P "8b,   ,aa   88,     88,  "8b,   ,aa 88         aa    ]8I
+	 "Y88888P"   `"Ybbd8"'   "Y888   "Y888 `"Ybbd8"' 88         `"YbbdP"'
+
+
+*/
+
+void App::SetGameState(GameState gs) {
+	// Don't bother if already in game state
+	if (gs == gameState) {
+		return;
+	}
+
+	// Changing to main menu
+	if (gs == GameState::MAIN_MENU) {
+		Menu::Inst().Init();
+	} else {
+		// Changing away from main menu
+		Menu::Inst().Uninit();
+	}
+
+	// Changing to playing
+	if (gs == GameState::PLAYING) {
+		Init();
+	} else {
+		// Changing away from playing
+		//Uninit();
+	}
+
+	// Finally set the actual game state
+	gameState = gs;
+}
+
+/*
+
 	  ,ad8888ba,
 	 d8"'    `"8b              ,d      ,d
 	d8'                        88      88
@@ -256,6 +305,11 @@ void App::RemoveFrameEndHook(Hook h){
 
 
 */
+
+App::GameState App::GetGameState() const {
+	return gameState;
+}
+
 s32 App::GetWindowWidth() const {
 	return WIDTH;
 }
