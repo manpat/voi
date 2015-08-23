@@ -30,6 +30,18 @@ public:
 	typedef void (*SDLEventHook)(const SDL_Event&);
 	typedef void (*Hook)();
 
+	enum class GameState : u8 {
+		MAIN_MENU,
+		PLAYING,
+		PAUSED
+	};
+
+	void SetGameState(GameState);
+	GameState GetGameState() const; // Getter
+
+private:
+	GameState gameState;
+
 public:
 	static App* instance;
 
