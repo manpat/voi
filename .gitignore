@@ -1,6 +1,7 @@
 # Ignore Pat's build stuff
 makefile
 build
+lib/
 *.so*
 *.o
 *.log

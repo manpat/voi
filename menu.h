@@ -2,8 +2,8 @@
 #define MENU_H
 
 namespace Ogre {
-	SceneNode;
-	ManualObject;
+	class SceneNode;
+	class ManualObject;
 }
 
 class App;

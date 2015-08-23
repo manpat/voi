@@ -189,6 +189,9 @@ void App::Run(){
 				break;
 			case GameState::PLAYING:
 				Update(dt);
+				break;
+			case GameState::PAUSED:
+				throw("Paused state not implemented");
 		}
 
 		for(auto hook: frameEndHooks){
