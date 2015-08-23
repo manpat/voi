@@ -1,6 +1,11 @@
 #ifndef MENU_H
 #define MENU_H
 
+namespace Ogre {
+	class SceneNode;
+	class ManualObject;
+}
+
 class App;
 
 class Menu {
@@ -10,13 +15,16 @@ public:
 		return inst;
 	}
 
-	void Init();
-	void Uninit();
-	void Update();
+	void Init(App*);
+	void Terminate(App*);
+	void Update(App*, float/*f32*/);
 
 private:
 	Menu() {}
 
+	Ogre::SceneNode* m_node;
+	Ogre::ManualObject* m_quad;
+	float m_delta;
 };
 
 #endif // MENU_H

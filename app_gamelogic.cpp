@@ -113,6 +113,10 @@ void App::Init(){
 	camera->cameraNode->attachObject(psystem);
 
 	audioManager = new AudioManager();
+
+	camera->cameraNode->setPosition(0, 1.75, 0);
+	auto g = 0.1;
+	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 }
 
 /*
@@ -171,6 +175,7 @@ void App::Update(f32 dt){
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
 		shouldQuit = true;
 		return;
+		//SetGameState(App::GameState::MAIN_MENU);
 	}
 
 	if(Input::GetKeyDown('f')){
@@ -178,4 +183,8 @@ void App::Update(f32 dt){
 		layer = (layer+1)%portalManager->GetNumLayers();
 		portalManager->SetLayer(layer);
 	}
+}
+
+void App::Terminate() {
+	//Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 }
