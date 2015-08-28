@@ -23,6 +23,10 @@ App::App(){
 	instance = this;
 
 	SDL_Init(SDL_INIT_VIDEO);
+
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); 
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
 	sdlWindow = SDL_CreateWindow("Anomalia",
 					SDL_WINDOWPOS_UNDEFINED,
 					SDL_WINDOWPOS_UNDEFINED,
