@@ -11,6 +11,7 @@
 class Camera;
 class Input;
 class PortalManager;
+class EntityManager;
 
 enum {
 	WIDTH = 800,
@@ -58,6 +59,7 @@ public:
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
 	std::shared_ptr<PortalManager> portalManager;
+	std::shared_ptr<EntityManager> entityManager;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<Hook> frameBeginHooks;

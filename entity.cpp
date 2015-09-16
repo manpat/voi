@@ -2,7 +2,7 @@
 #include "component.h"
 
 void Entity::Init(){
-
+	
 }
 
 void Entity::Destroy(){

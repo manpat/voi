@@ -12,10 +12,12 @@
 #include <OGRE/OgreRenderWindow.h>
 
 #include "app.h"
+#include "menu.h"
 #include "input.h"
 #include "camera.h"
 #include "common.h"
-#include "menu.h"
+
+#include "entitymanager.h"
 
 App* App::instance = nullptr;
 
@@ -43,6 +45,7 @@ App::App(){
 
 	input = std::make_shared<Input>();
 	camera = std::make_shared<Camera>();
+	entityManager = std::make_shared<EntityManager>();
 
 	window->setActive(true);
 	window->setAutoUpdated(false);
@@ -197,6 +200,8 @@ void App::Run(){
 			case GameState::PAUSED:
 				throw("Paused state not implemented");
 		}
+
+		entityManager->Update();
 
 		for(auto hook: frameEndHooks){
 			hook();
