@@ -2,11 +2,11 @@ Coding Guidelines
 =================
 - Opening braces on same line as statement
 - Tabs not spaces
-- No usings at global scope in headers. 
+- No `using`s at global scope in headers. 
   - Using statements in source files are fine
   - Type aliases in classes and in namespaces are fine
 - In headers enums should declared as enum classes so as to avoid polluting global namespace and to avoid ambiguities
-  - If an enums that can’t be enum classes (e.g. bitflags, constant values), should be contained in an enclosing scope - for example a class, struct or namespace.
+  - Enums that can’t be enum classes (e.g. bitflags, constant values), should be contained in an enclosing scope - for example a class, struct or namespace.
 - Only function definitions allowed in headers are setters and getters
   - Exceptions are source file-local classes and functor objects
 - Template member functions should be defined in “.inl” files and “#include”d at the end of the header. This is purely to keep the header clean
@@ -30,7 +30,6 @@ Source Control
 
 File Formats
 ============
-
 Directory Structure and File Naming 
 -----------------------------------
 - Directories should be lowercase and should contain no spaces
