@@ -46,4 +46,4 @@ private:
 	bool running = false;
 };
 
-#endif//AUDIOMANAGER_H
+#endif //AUDIOMANAGER_H

@@ -20,7 +20,7 @@ public:
 	void Update(App*, float/*f32*/);
 
 private:
-	Menu() {}
+	Menu() : m_node{nullptr}, m_quad{nullptr}, m_delta{0.f} {};
 
 	Ogre::SceneNode* m_node;
 	Ogre::ManualObject* m_quad;
