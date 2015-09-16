@@ -16,7 +16,7 @@ void Menu::Init(App* app) {
 
 	if (m_quad == nullptr) {
 		m_quad = app->sceneManager->createManualObject("MenuQuad");
-		m_quad->begin("MenuMat", Ogre::RenderOperation::OT_TRIANGLE_STRIP);
+		m_quad->begin("MenuMat", Ogre::RenderOperation::OT_TRIANGLE_FAN);
 
 		m_quad->position(-1.5, -1.0, 0.0);
 		m_quad->textureCoord(0, 1);
@@ -34,7 +34,6 @@ void Menu::Init(App* app) {
 		m_quad->index(1);
 		m_quad->index(2);
 		m_quad->index(3);
-		m_quad->index(0);
 
 		m_quad->end();
 	}
