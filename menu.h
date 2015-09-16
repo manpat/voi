@@ -1,6 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include <iostream>
+
 namespace Ogre {
 	class SceneNode;
 	class ManualObject;
@@ -10,10 +12,7 @@ class App;
 
 class Menu {
 public:
-	static Menu& Inst() {
-		static Menu inst;	
-		return inst;
-	}
+	static Menu& Inst();
 
 	void Init(App*);
 	void Terminate(App*);
