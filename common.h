@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <map>
+#include <cmath>
 #include <memory>
 #include <cstdint>
 #include <OGRE/OgreVector2.h>
@@ -35,7 +36,7 @@ using s64 = int64_t;
 using f32 = float;
 using f64 = double;
 
-#ifdef _WIN32
+#ifndef M_PI
 #define M_PI 3.14159265359
 #endif
 

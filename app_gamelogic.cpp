@@ -11,6 +11,10 @@
 #include "portalmanager.h"
 #include "audiomanager.h"
 
+#include "entity.h"
+#include "component.h"
+#include "entitymanager.h"
+
 /*
 
 	88             88
