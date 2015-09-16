@@ -26,7 +26,14 @@ struct Entity {
 	std::unordered_map<std::string, std::string> userdata; // TODO: Make better
 	u32 id;
 
+	// Whether or not this should recieve updates
+	bool enabled;
+	// Whether or not this is in use (flag to aid pooling)
+	bool active;
+
 	// TODO: Add reference to ogre entity somewhere here
+	// TODO: Add methods for manipulating ogre entity
+	//	entity name, transform
 
 	// Init resets Entity to default state and cleans up previous data.
 	// 	To help with pooling
@@ -54,12 +61,14 @@ struct Entity {
 
 	// SendMessage broadcasts a message to attached components
 	template<class... A>
-	void SendMessage(std::string /* temp */, A...);
+	void SendMessage(std::string /* ??? */, A...);
 
 	// SendMessageRecurse broadcasts a message to attached components
 	//	and child entities
 	template<class... A>
-	void SendMessageRecurse(std::string /* temp */, A...);
+	void SendMessageRecurse(std::string /* ??? */, A...);
 };
+
+#include "entity.inl"
 
 #endif

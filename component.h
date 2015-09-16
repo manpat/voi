@@ -4,6 +4,7 @@
 #include <string>
 
 #include "common.h"
+#include "opaquetype.h"
 
 // Is an interface
 // Updatable
@@ -31,10 +32,10 @@ struct Component {
 
 	// OnUpdate is called once per frame if the component is enabled
 	// TODO: figure out exactly what needs to be passed to OnUpdate, maybe nothing
-	virtual void OnUpdate(f32 dt) {};
+	virtual void OnUpdate(/*f32 dt*/) {};
 
 	// OnMessage is called when SendMessage is called on the owning entity 
-	virtual void OnMessage(std::string /* ???? */) {};
+	virtual void OnMessage(std::string, const OpaqueType&) {};
 };
 
 #endif

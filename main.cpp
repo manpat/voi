@@ -8,7 +8,6 @@
 #endif
 s32 main(int argc, char** argv){
 	try{
-		std::cout << "FUCK YOU PIECE OF SHIT MOTHERFUCKER" << std::endl;
 		App().Run();
 
 	}catch(const Ogre::Exception& e){

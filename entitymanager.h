@@ -1,6 +1,8 @@
 #ifndef ENTITYMANAGER_H
 #define ENTITYMANAGER_H
 
+#include <vector>
+
 #include "common.h"
 
 // Handles updating
@@ -8,8 +10,13 @@
 
 // List/Pool of entities
 
-struct EntityManager {
+struct Entity;
 
+struct EntityManager {
+	std::vector<Entity*> entities;
+
+	// Update updates all active entites
+	void Update();
 };
 
 #endif
