@@ -62,11 +62,11 @@ void Menu::Update(App* app, f32 dt) {
 		m_delta = 0.f;
 	}
 
-	auto nyaw = cos(m_delta) * 0.02f * dt;
-	auto npitch = cos(m_delta * 2) * 0.02f * dt;
+	auto nyaw = cos(m_delta) * 0.02f;
+	auto npitch = cos(m_delta * 2) * 0.02f;
 
-	app->camera->cameraPitch += npitch;
-	app->camera->cameraYaw += nyaw;
+	app->camera->cameraPitch = npitch;
+	app->camera->cameraYaw = nyaw;
 	
 	auto oriYaw = Ogre::Quaternion(Ogre::Radian(app->camera->cameraYaw), vec3::UNIT_Y);
 	auto ori = Ogre::Quaternion(Ogre::Radian(app->camera->cameraPitch), oriYaw.xAxis()) * oriYaw;
