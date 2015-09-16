@@ -6,12 +6,13 @@ template<class C, class... A>
 C* Entity::AddComponent(A... args) {
 	auto c = new C{args...};
 	AddComponent(c);
-	
+
 	return c;
 }
 
 template<class C>
 C* Entity::FindComponent(){
+	throw "Not implemented";
 	return nullptr;
 }
 

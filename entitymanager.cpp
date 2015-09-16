@@ -8,11 +8,19 @@ EntityManager::EntityManager() {
 }
 
 EntityManager::~EntityManager(){
-	
+	delete Entity::messagePool;
+	Entity::messagePool = nullptr;
 }
 
 void EntityManager::Update(){
 	Entity::messagePool->Update();
 
-	// Update all entities
+	for(auto e: entities){
+		// Don't bother checking active because it's guaranteed that
+		//	all entities will be.
+		// Pooling not implemented
+		if(e->enabled /*&& e->active*/){
+			e->Update();
+		}
+	}
 }

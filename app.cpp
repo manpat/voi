@@ -16,10 +16,14 @@
 #include "input.h"
 #include "camera.h"
 #include "common.h"
+#include "apptime.h"
 
 #include "entitymanager.h"
 
 App* App::instance = nullptr;
+
+f64 AppTime::deltaTime = 0.0;
+f64 AppTime::appTime = 0.0;
 
 App::App(){
 	instance = this;
@@ -158,7 +162,9 @@ void App::InitOgre(){
 void App::Run(){
 	using namespace std::chrono;
 	auto begin = high_resolution_clock::now();
-	f32 dt = 0.f;
+
+	AppTime::appTime = 0.0;
+	AppTime::deltaTime = 0.0;
 
 	while(!window->isClosed()){
 		window->update(false);
@@ -192,10 +198,10 @@ void App::Run(){
 		// Call the appropriate update function depending on game state
 		switch (gameState) {
 			case GameState::MAIN_MENU:
-				Menu::Inst().Update(this, dt);
+				Menu::Inst().Update(this, AppTime::deltaTime);
 				break;
 			case GameState::PLAYING:
-				Update(dt);
+				Update();
 				break;
 			case GameState::PAUSED:
 				throw("Paused state not implemented");
@@ -211,7 +217,8 @@ void App::Run(){
 		SDL_GL_SwapWindow(sdlWindow);
 
 		auto end = high_resolution_clock::now();
-		dt = duration_cast<duration<f32>>(end - begin).count();
+		AppTime::deltaTime = duration_cast<duration<f64>>(end - begin).count();
+		AppTime::appTime += AppTime::deltaTime;
 		begin = end;
 
 		if(shouldQuit) {

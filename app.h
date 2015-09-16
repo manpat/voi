@@ -95,7 +95,7 @@ protected:
 	void InitOgre();
 
 	void Init();
-	void Update(f32 dt);
+	void Update();
 	void Terminate();
 };
 

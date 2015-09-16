@@ -7,6 +7,7 @@
 #include "app.h"
 #include "input.h"
 #include "camera.h"
+#include "apptime.h"
 #include "sceneparser.h"
 #include "portalmanager.h"
 #include "audiomanager.h"
@@ -136,11 +137,11 @@ void App::Init(){
 	             88
 	             88
 */
-void App::Update(f32 dt){
+void App::Update(){
 	auto md = Input::GetMouseDelta();
 
-	auto nyaw =  -md.x * 2.0 * M_PI * dt * 7.f;
-	auto npitch = md.y * 2.0 * M_PI * dt * 7.f;
+	auto nyaw =  -md.x * 2.0 * M_PI * AppTime::deltaTime * 7.f;
+	auto npitch = md.y * 2.0 * M_PI * AppTime::deltaTime * 7.f;
 	if(abs(camera->cameraPitch + npitch) < M_PI/4.0f) { // Convoluted clamp
 		camera->cameraPitch += npitch;
 	}
@@ -159,21 +160,21 @@ void App::Update(f32 dt){
 
 	// Move with WASD, based on look direction
 	if(Input::GetKey(SDLK_w)){
-		camera->cameraNode->translate(-oriYaw.zAxis() * dt * boost);
+		camera->cameraNode->translate(-oriYaw.zAxis() * AppTime::deltaTime * boost);
 	}else if(Input::GetKey(SDLK_s)){
-		camera->cameraNode->translate(oriYaw.zAxis() * dt * boost);
+		camera->cameraNode->translate(oriYaw.zAxis() * AppTime::deltaTime * boost);
 	}
 
 	if(Input::GetKey(SDLK_a)){
-		camera->cameraNode->translate(-oriYaw.xAxis() * dt * boost);
+		camera->cameraNode->translate(-oriYaw.xAxis() * AppTime::deltaTime * boost);
 	}else if(Input::GetKey(SDLK_d)){
-		camera->cameraNode->translate(oriYaw.xAxis() * dt * boost);
+		camera->cameraNode->translate(oriYaw.xAxis() * AppTime::deltaTime * boost);
 	}
 
 	audioManager->playNote(128);
 	
 	// Update Audio
-	audioManager->update(dt);
+	audioManager->update(AppTime::deltaTime);
 
 	// Close window on ESC
 	if(Input::GetKeyDown(SDLK_ESCAPE)){

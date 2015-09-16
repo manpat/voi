@@ -7,21 +7,23 @@
 FramePool* Entity::messagePool = nullptr;
 
 void Entity::Init(){
-	
+	throw "Not implemented";
 }
 
 void Entity::Destroy(){
-
+	throw "Not implemented";
 }
 
 void Entity::Update(){
-
+	throw "Not implemented";
 }
 
 void Entity::AddComponent(Component* c){
 	if(!c) return;
 
 	components.push_back(c);
+	c->entity = this;
+	c->enabled = true;
 	c->OnAwake();
 }
 
