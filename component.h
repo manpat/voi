@@ -23,6 +23,9 @@ struct Component {
 	bool enabled;
 
 
+	Component();
+	virtual ~Component();
+
 	// OnAwake is called after the component has been initialised and attached to 
 	//	an entity
 	virtual void OnAwake() {};
@@ -35,7 +38,7 @@ struct Component {
 	virtual void OnUpdate(/*f32 dt*/) {};
 
 	// OnMessage is called when SendMessage is called on the owning entity 
-	virtual void OnMessage(std::string, const OpaqueType&) {};
+	virtual void OnMessage(const std::string&, const OpaqueType&) {};
 };
 
 #endif

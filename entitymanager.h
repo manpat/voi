@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "common.h"
-#include "pool.h"
 
 // Handles updating
 // Entity queries
@@ -15,7 +14,6 @@ struct Entity;
 
 struct EntityManager {
 	std::vector<Entity*> entities;
-	FramePool messagePool;
 
 	EntityManager();
 	~EntityManager();

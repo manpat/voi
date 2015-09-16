@@ -18,8 +18,11 @@
 // Message Distribution
 
 struct Component;
+struct FramePool;
 
 struct Entity {
+	static FramePool* messagePool;
+
 	std::vector<Component*> components;
 	std::vector<Entity*> children;
 	Entity* parent;
@@ -61,12 +64,12 @@ struct Entity {
 
 	// SendMessage broadcasts a message to attached components
 	template<class... A>
-	void SendMessage(std::string /* ??? */, A...);
+	void SendMessage(const std::string&, A...);
 
 	// SendMessageRecurse broadcasts a message to attached components
 	//	and child entities
 	template<class... A>
-	void SendMessageRecurse(std::string /* ??? */, A...);
+	void SendMessageRecurse(const std::string&, A...);
 };
 
 #include "entity.inl"
