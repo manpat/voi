@@ -4,18 +4,20 @@
 #include "common.h"
 
 struct OpaqueType {
-	const char* name;
-	size_t hash;
-	void* data;
+	const char* name = "nullptr";
+	size_t hash = 0;
+	void* data = nullptr;
+
+	OpaqueType() = default;
 
 	template<class C>
-	OpaqueType(C* = nullptr);
+	OpaqueType(C*);
 
 	template<class C>
 	void Set(C*);
 
 	template<class C>
-	C* Get();
+	C* Get() const;
 };
 
 #include "opaquetype.inl"

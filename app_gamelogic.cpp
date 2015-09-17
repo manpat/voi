@@ -171,7 +171,7 @@ void App::Update(){
 		camera->cameraNode->translate(oriYaw.xAxis() * AppTime::deltaTime * boost);
 	}
 
-	audioManager->playNote(128);
+	// audioManager->playNote(128);
 	
 	// Update Audio
 	audioManager->update(AppTime::deltaTime);

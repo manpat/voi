@@ -21,9 +21,11 @@ void OpaqueType::Set(T* d){
 }
 
 template<class T>
-T* OpaqueType::Get(){
+T* OpaqueType::Get() const{
 	if(typeid(T).hash_code() != hash) 
 		throw std::string("OpaqueType type mismatch: Get<") + typeid(T).name() + "> {" + name + "}";
+		// TODO: optionally this could return nullptr for mismatch
+		// maybe add an option
 
 	return static_cast<T*>(data);
 }

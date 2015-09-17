@@ -16,15 +16,14 @@ struct Entity;
 
 struct Component {
 	// This is the owning entity
-	Entity* entity;
-	// Unique identifier
-	u32 id;
+	Entity* entity = nullptr;
+	// Unique identifier, id 0 is invalid
+	// TODO: Find somewhere to put the id counter
+	u32 id = 0;
 	// This determines whether OnUpdate is triggered
-	bool enabled;
+	bool enabled = true;
 
-
-	Component();
-	virtual ~Component();
+	virtual ~Component() {}
 
 	// OnAwake is called after the component has been initialised and attached to 
 	//	an entity
@@ -34,8 +33,7 @@ struct Component {
 	virtual void OnDestroy() {};
 
 	// OnUpdate is called once per frame if the component is enabled
-	// TODO: figure out exactly what needs to be passed to OnUpdate, maybe nothing
-	virtual void OnUpdate(/*f32 dt*/) {};
+	virtual void OnUpdate() {};
 
 	// OnMessage is called when SendMessage is called on the owning entity 
 	virtual void OnMessage(const std::string&, const OpaqueType&) {};

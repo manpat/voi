@@ -27,12 +27,13 @@ struct Entity {
 	std::vector<Entity*> children;
 	Entity* parent;
 	std::unordered_map<std::string, std::string> userdata; // TODO: Make better
+
+	// Unique identifier, id 0 is invalid
+	//	id 0 can be used for pooling
 	u32 id;
 
 	// Whether or not this should recieve updates
 	bool enabled;
-	// Whether or not this is in use (flag to aid pooling)
-	bool active;
 
 	// TODO: Add reference to ogre entity somewhere here
 	// TODO: Add methods for manipulating ogre entity

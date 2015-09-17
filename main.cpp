@@ -1,7 +1,8 @@
 #include "app.h"
 #include <OGRE/OgreException.h>
-#include <rapidxml.hpp>
 #include <string>
+
+extern void unittest_Entity();
 
 #ifdef _WIN32
 	#undef main
@@ -9,6 +10,7 @@
 s32 main(int argc, char** argv){
 	try{
 		App().Run();
+		// unittest_Entity();
 
 	}catch(const Ogre::Exception& e){
 		std::cout << "OGRE Exception!\n" << e.what() << std::endl;

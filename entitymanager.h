@@ -14,9 +14,14 @@ struct Entity;
 
 struct EntityManager {
 	std::vector<Entity*> entities;
+	u32 entityIdCounter;
 
 	EntityManager();
 	~EntityManager();
+
+	Entity* CreateEntity();
+	void DestroyEntity(Entity*);
+	Entity* FindEntity(const std::string& name);
 
 	// Update updates all active entites
 	void Update();
