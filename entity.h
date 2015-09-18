@@ -17,6 +17,10 @@
 // Component Queries/Operations
 // Message Distribution
 
+namespace Ogre {
+	class Entity;
+}
+
 struct Component;
 struct FramePool;
 
@@ -27,6 +31,8 @@ struct Entity {
 	std::vector<Entity*> children;
 	Entity* parent;
 	std::unordered_map<std::string, std::string> userdata; // TODO: Make better
+
+	Ogre::Entity* ogreEntity;
 
 	// Unique identifier, id 0 is invalid
 	//	id 0 can be used for pooling

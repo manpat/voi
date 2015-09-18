@@ -9,8 +9,8 @@ extern void unittest_Entity();
 #endif
 s32 main(int argc, char** argv){
 	try{
-		App().Run();
-		// unittest_Entity();
+		// App().Run();
+		unittest_Entity();
 
 	}catch(const Ogre::Exception& e){
 		std::cout << "OGRE Exception!\n" << e.what() << std::endl;

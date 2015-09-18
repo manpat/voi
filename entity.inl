@@ -16,18 +16,31 @@ C* Entity::FindComponent(){
 	return nullptr;
 }
 
+template<size_t C, class F, class... T>
+struct ArgumentPackImpl {
+	using type = std::tuple<F, T...>;
+};
+template<class F, class... T>
+struct ArgumentPackImpl<1, F, T...> {
+	using type = F;
+};
+
+template<class... T>
+using ArgumentPack = typename ArgumentPackImpl<sizeof...(T), T...>::type;
+
 template<class... A>
 void Entity::SendMessage(const std::string& type, A... args){
 	OpaqueType ot;
 
 	// Packet valid till next frame
-	auto packet = messagePool->New<std::tuple<A...>>(args...);
+	auto packet = messagePool->New<ArgumentPack<A...>>(args...);
 	ot.Set(packet);
 
 	for(auto c: components){
 		c->OnMessage(type, ot);
 	}
 }
+// The no-argument definition in source entity.cpp
 
 template<class... A>
 void Entity::SendMessageRecurse(const std::string& type, A... args){
