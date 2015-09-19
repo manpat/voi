@@ -6,8 +6,10 @@
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
 
-#include "sceneparser.h"
 #include "portalmanager.h"
+#include "entitymanager.h"
+#include "sceneparser.h"
+#include "entity.h"
 #include "app.h"
 
 using namespace rapidxml;
@@ -74,9 +76,11 @@ void SceneParser::Load(std::string filename, App* app) {
 
 void SceneParser::ConstructScene(App* app){
 	auto rootNode = app->rootNode;
+	auto entMgr = app->entityManager;
 
 	struct NodeParentPair {
-		Ogre::SceneNode* parent;
+		Ogre::SceneNode* parentNode;
+		Entity* parent;
 		Node* ndef;
 	};
 	std::queue<NodeParentPair> nodeQueue;
@@ -87,7 +91,7 @@ void SceneParser::ConstructScene(App* app){
 	}
 
 	for(auto& ndef: nodes){
-		nodeQueue.push({rootNode, &ndef});
+		nodeQueue.push({rootNode, nullptr, &ndef});
 	}
 
 	while(nodeQueue.size() > 0){
@@ -95,18 +99,27 @@ void SceneParser::ConstructScene(App* app){
 		nodeQueue.pop();
 		
 		auto& ndef = *n.ndef;
-		auto node = n.parent->createChildSceneNode(ndef.name, ndef.position, ndef.rotation);
+		auto node = n.parentNode->createChildSceneNode(ndef.name, ndef.position, ndef.rotation);
 		node->setScale(ndef.scale);
+
+		Entity* ent = nullptr;
 
 		if(ndef.entity){
 			// If entities were stored in a queue like nodes, then they could be
 			//	iterated through to find portals
 			auto& entdef = *ndef.entity;
-			auto ent = app->sceneManager->createEntity(entdef.name, entdef.mesh);
-			node->attachObject(ent);
+			auto ogreent = app->sceneManager->createEntity(entdef.name, entdef.mesh);
+			node->attachObject(ogreent);
+
+			ent = entMgr->CreateEntity();
+			ent->ogreEntity = ogreent;
+			ent->ogreSceneNode = node;
+			if(n.parent){
+				n.parent->AddChild(ent);
+			}
 
 			// Set layer
-			auto layerStr = findin(entdef.userData, std::string("Layer"), std::string());
+			auto layerStr = findin(entdef.userData, std::string{"Layer"}, std::string{});
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
@@ -114,25 +127,27 @@ void SceneParser::ConstructScene(App* app){
 			assert(layer < 10);
 
 			// Test if contains portal
-			ent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+layer);
-
+			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+layer);
 			if(findin(entdef.userData, std::string("IsPortal")) == "true"){
-				auto dstlayerStr = findin(entdef.userData, std::string("DstLayer"), std::string("1"));
+				auto dstlayerStr = findin(entdef.userData, std::string{"DstLayer"}, std::string{"1"});
 				auto dstlayer = std::stol(dstlayerStr);
 				assert(dstlayer < 10);
 
-				app->portalManager->AddPortal(ent, layer, dstlayer);
+				app->portalManager->AddPortal(ogreent, layer, dstlayer);
 			}
 
 			// Set user data
-			auto& uob = ent->getUserObjectBindings();
+			auto& uob = ogreent->getUserObjectBindings();
+			uob.setUserAny(Ogre::Any{ent});
+
 			for(auto& pair: ndef.userData){
-				uob.setUserAny(pair.first, Ogre::Any(pair.second));
+				// uob.setUserAny(pair.first, Ogre::Any(pair.second));
+				ent->userdata[pair.first] = pair.second;
 			}
 		}
 
 		for(auto& child: ndef.nodes){
-			nodeQueue.push({node, &child});
+			nodeQueue.push({node, ent, &child});
 		}
 	}
 }
@@ -195,7 +210,7 @@ auto SceneParser::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	return nodes;
 }
 
-auto SceneParser::ParseEntity(xml_node<>* node) -> Entity* {
+auto SceneParser::ParseEntity(xml_node<>* node) -> EntityDef* {
 	auto nameattr = node->first_attribute("name");
 	auto meshattr = node->first_attribute("meshFile");
 	auto udnode = node->first_node("userData");
@@ -204,7 +219,7 @@ auto SceneParser::ParseEntity(xml_node<>* node) -> Entity* {
 		error("Malformed entity");
 		return nullptr;
 	}
-	auto e = new Entity;
+	auto e = new EntityDef;
 	e->name = nameattr->value();
 	e->mesh = meshattr->value();
 	e->userData = udnode?ParseUserData(udnode):UserData{};
@@ -218,7 +233,7 @@ auto SceneParser::ParseEntity(xml_node<>* node) -> Entity* {
 			continue;
 		}
 
-		e->subEntities.push_back(SubEntity{
+		e->subEntities.push_back(SubEntityDef{
 			(unsigned) std::strtol(index->value(), nullptr, 10),
 			material->value()
 		});

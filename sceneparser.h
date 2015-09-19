@@ -23,14 +23,14 @@ class SceneParser {
 		UserData userData;
 	};
 
-	struct SubEntity {
+	struct SubEntityDef {
 		unsigned index;
 		std::string materialName;
 	};
 
-	struct Entity : Object {
+	struct EntityDef : Object {
 		std::string mesh;
-		std::vector<SubEntity> subEntities;
+		std::vector<SubEntityDef> subEntities;
 	};
 
 public:
@@ -39,7 +39,7 @@ public:
 		vec3 position;
 		vec3 scale;
 
-		Entity* entity;
+		EntityDef* entity;
 		std::vector<Node> nodes;
 	};
 
@@ -55,7 +55,7 @@ protected:
 
 	std::vector<ResourceLocation> ParseResourceLocations(rapidxml::xml_node<>* node);
 	std::vector<Node> ParseNodes(rapidxml::xml_node<>* node);
-	Entity* ParseEntity(rapidxml::xml_node<>* node);
+	EntityDef* ParseEntity(rapidxml::xml_node<>* node);
 
 	vec3 ParseVec(rapidxml::xml_node<>*);
 	quat ParseQuaternion(rapidxml::xml_node<>*);

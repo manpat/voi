@@ -1,8 +1,11 @@
-#include "entity.h"
 #include "component.h"
+#include "entity.h"
 #include "pool.h"
 
 #include <algorithm>
+
+#include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreEntity.h>
 
 FramePool* Entity::messagePool = nullptr;
 
