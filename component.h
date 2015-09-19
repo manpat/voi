@@ -2,6 +2,7 @@
 #define COMPONENT_H
 
 #include <string>
+#include <typeinfo>
 
 #include "common.h"
 #include "opaquetype.h"
@@ -20,9 +21,13 @@ struct Component {
 	// Unique identifier, id 0 is invalid
 	// TODO: Find somewhere to put the id counter
 	u32 id = 0;
+	// This is for fast type comparisons
+	size_t typeHash = 0; 
 	// This determines whether OnUpdate is triggered
 	bool enabled = true;
 
+	template<class C>
+	Component(C* c) : typeHash{typeid(C).hash_code()} {}
 	virtual ~Component() {}
 
 	// OnAwake is called after the component has been initialised and attached to 
@@ -37,6 +42,11 @@ struct Component {
 
 	// OnMessage is called when SendMessage is called on the owning entity 
 	virtual void OnMessage(const std::string&, const OpaqueType&) {};
+
+	template<class C>
+	bool IsType() const { return typeid(C).hash_code() == typeHash; }
+
+	bool SameType(Component*) const;
 };
 
 #endif

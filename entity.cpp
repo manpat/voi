@@ -45,11 +45,15 @@ void Entity::RemoveComponent(Component* c){
 	auto it = std::find(components.begin(), components.end(), c);
 	if(it == components.end()) return;
 
-	// TODO: TEST THIS!!
 	c->OnDestroy();
 
 	*it = components.back();
 	components.pop_back();
+}
+
+void Entity::DestroyComponent(Component* c){
+	if(!c) return;
+	RemoveComponent(c);
 	delete c;
 }
 
@@ -67,7 +71,8 @@ void Entity::SendMessage(const std::string& type){
 
 void unittest_Entity(){
 	struct ComponentA : Component {
-		ComponentA(int _x) : x(_x) {}
+		ComponentA(int _x) : Component{this}, x(_x) {}
+		~ComponentA() { std::cout << "A Destructor\n"; }
 		void OnAwake() { std::cout   << "A OnAwake\n"; }
 		void OnDestroy() { std::cout << "A OnDestroy\n"; }
 		void OnUpdate() { std::cout  << "A OnUpdate\n"; }
@@ -75,8 +80,12 @@ void unittest_Entity(){
 			std::cout << "A OnMessage " << type << "\t";
 			auto data = ot.Get<std::tuple<int,int,int,int>>(false);
 
-			if(!data) return;
+			if(!data) {
+				std::cout << "A Unexpected message data type " << ot.name << "\n";
+				return;
+			}
 
+			std::cout << "A ";
 			std::cout << std::get<0>(*data) << " ";
 			std::cout << std::get<1>(*data) << " ";
 			std::cout << std::get<2>(*data) << " ";
@@ -87,23 +96,20 @@ void unittest_Entity(){
 		int x;
 	};
 	struct ComponentB : Component {
-		ComponentB(int _x) : x(_x) {}
+		ComponentB(int _x) : Component{this}, x(_x) {}
 		void OnAwake() { std::cout   << "B OnAwake\n"; }
 		void OnDestroy() { std::cout << "B OnDestroy\n"; }
 		void OnUpdate() { std::cout  << "B OnUpdate\n"; }
 		void OnMessage(const std::string& type, const OpaqueType& ot) {
 			std::cout << "B OnMessage " << type << "\t";
-			auto data = ot.Get<std::tuple<int,float,int,int>>(false /* Non fatal */);
+			auto data = ot.Get<float>(false /* Non fatal */);
 
 			if(!data){
-				std::cout << "Unexpected message data type " << ot.name << "\n";
+				std::cout << "B Unexpected message data type " << ot.name << "\n";
 				return;
 			}
 
-			std::cout << std::get<0>(*data) << " ";
-			std::cout << std::get<1>(*data) << " ";
-			std::cout << std::get<2>(*data) << " ";
-			std::cout << std::get<3>(*data) << " ";
+			std::cout << "B " << *data << " ";
 			std::cout << x << "\n";
 		}
 
@@ -112,13 +118,27 @@ void unittest_Entity(){
 
 	EntityManager emgr {};
 	auto e1 = emgr.CreateEntity();
-	e1->AddComponent<ComponentA>(5);
-	e1->AddComponent<ComponentA>(6);
-	e1->AddComponent<ComponentB>(7);
+	auto c1 = e1->AddComponent<ComponentA>(5);
+	auto c2 = e1->AddComponent<ComponentA>(6);
+	auto c3 = e1->AddComponent<ComponentB>(7);
 
+	std::cout << std::boolalpha;
+	std::cout << "c1 Is ComponentA? " << c1->IsType<ComponentA>() << "\n";
+	std::cout << "c1 Is ComponentB? " << c1->IsType<ComponentB>() << "\n";
+	std::cout << "c3 Is ComponentA? " << c3->IsType<ComponentA>() << "\n";
+	std::cout << "c3 Is ComponentB? " << c3->IsType<ComponentB>() << "\n";
+
+	std::cout << "c1 SameType as c2? " << c1->SameType(c2) << "\n";
+	std::cout << "c1 SameType as c3? " << c1->SameType(c3) << "\n";
+
+	std::cout << "\n";
 	emgr.Update();
-	e1->SendMessage("blah", 1, 2, 3, 4);
-	e1->SendMessage("blah", 1);
-	e1->SendMessage("blah");
+	e1->SendMessage("four", 1, 2, 3, 4);
+	e1->SendMessage("one ", 1.f);
+	e1->SendMessage("null");
+	e1->SendMessage("comp", c1);
+	emgr.Update();
+	e1->RemoveComponent(c1);
+	e1->RemoveComponent(c2);
 	emgr.Update();
 }

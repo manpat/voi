@@ -59,11 +59,12 @@ struct Entity {
 	//	of types A... or void. Returns new component
 	template<class C, class... A>
 	C* AddComponent(A...);
-
 	// AddComponent attaches an already constructed component
 	void AddComponent(Component*);
 	// RemoveComponent removes a component if it is attached
 	void RemoveComponent(Component*);
+	// DestroyComponent removes a component and deletes it if it is attached
+	void DestroyComponent(Component*);
 
 	// FindComponent returns a component of type C or nullptr
 	template<class C>

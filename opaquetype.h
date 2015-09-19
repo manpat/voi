@@ -17,7 +17,7 @@
 // Do NOT use hardcoded strings or hashes to compare type information
 
 struct OpaqueType {
-	const char* name = "nullptr";
+	std::string name = "nullptr";
 	size_t hash = 0;
 	void* data = nullptr;
 

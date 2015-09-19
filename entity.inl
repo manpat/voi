@@ -35,7 +35,7 @@ void Entity::SendMessage(const std::string& type, A... args){
 	// Packet valid till next frame
 	auto packet = messagePool->New<ArgumentPack<A...>>(args...);
 	ot.Set(packet);
-
+	
 	for(auto c: components){
 		c->OnMessage(type, ot);
 	}
