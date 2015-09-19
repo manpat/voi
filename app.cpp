@@ -62,6 +62,8 @@ App::App(){
 }
 
 App::~App(){
+	// This ensures that all entities are destroyed appropriately before ogre shuts down
+	entityManager.reset();
 	instance = nullptr;
 }
 

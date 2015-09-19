@@ -87,7 +87,7 @@ void Entity::DestroyChild(Entity* e){
 	// Remove e from children
 	auto end = children.end();
 	auto it = std::remove(children.begin(), end, e);
-	
+
 	// If it wasn't a child, give up
 	if(it == end) return;
 
@@ -206,17 +206,17 @@ void Entity::SetScale(const vec3& n) {
 
 
 /*
-	                                                                             
-	88        88             88            888888888888                          
-	88        88             ""   ,d            88                        ,d     
-	88        88                  88            88                        88     
-	88        88 8b,dPPYba,  88 MM88MMM         88  ,adPPYba, ,adPPYba, MM88MMM  
-	88        88 88P'   `"8a 88   88            88 a8P_____88 I8[    ""   88     
-	88        88 88       88 88   88            88 8PP"""""""  `"Y8ba,    88     
-	Y8a.    .a8P 88       88 88   88,           88 "8b,   ,aa aa    ]8I   88,    
-	 `"Y8888Y"'  88       88 88   "Y888         88  `"Ybbd8"' `"YbbdP"'   "Y888  
-	                                                                             
-	                                                                             
+
+	88        88             88            888888888888
+	88        88             ""   ,d            88                        ,d
+	88        88                  88            88                        88
+	88        88 8b,dPPYba,  88 MM88MMM         88  ,adPPYba, ,adPPYba, MM88MMM
+	88        88 88P'   `"8a 88   88            88 a8P_____88 I8[    ""   88
+	88        88 88       88 88   88            88 8PP"""""""  `"Y8ba,    88
+	Y8a.    .a8P 88       88 88   88,           88 "8b,   ,aa aa    ]8I   88,
+	 `"Y8888Y"'  88       88 88   "Y888         88  `"Ybbd8"' `"YbbdP"'   "Y888
+
+
 */
 void unittest_Entity(){
 	struct ComponentA : Component {
@@ -252,7 +252,7 @@ void unittest_Entity(){
 		void OnUpdate()  { std::cout << "B " << id << " OnUpdate\n"; }
 		void OnMessage(const std::string& type, const OpaqueType& ot) {
 			std::cout << "B " << id << " OnMessage " << type << "\t";
-			
+
 			if(type == "comp"){
 				auto c = *ot.Get<ComponentA*>(/* default true: will throw on type mismatch */);
 				std::cout << "B recieved a ComponentA with x: " << c->x << "\n";
