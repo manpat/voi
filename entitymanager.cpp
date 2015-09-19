@@ -25,8 +25,15 @@ Entity* EntityManager::CreateEntity(){
 	return e;
 }
 
-void EntityManager::DestroyEntity(Entity*){
-	throw "Not Implemented";
+// TODO: Verify that this does what I think it does
+void EntityManager::DestroyEntity(Entity* e){
+	if(!e) return;
+
+	auto end = entities.end();
+	entities.erase(std::remove(entities.begin(), end, e), end);
+
+	e->Destroy();
+	delete e;
 }
 
 Entity* EntityManager::FindEntity(const std::string& name){

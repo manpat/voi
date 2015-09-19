@@ -43,10 +43,6 @@ struct Entity {
 	// Whether or not this should recieve updates
 	bool enabled;
 
-	// TODO: Add reference to ogre entity somewhere here
-	// TODO: Add methods for manipulating ogre entity
-	//	entity name, transform
-
 	// Init resets Entity to default state and cleans up previous data.
 	// 	To help with pooling
 	void Init();
@@ -61,6 +57,8 @@ struct Entity {
 	void AddChild(Entity*);
 	// RemoveChild detaches a child entity but does not destroy it
 	void RemoveChild(Entity*);
+	// DestroyChild detaches and destroys a child entity
+	void DestroyChild(Entity*);
 
 	// AddComponent<C,A...> constructs a component with type C with arguments
 	//	of types A... or void. Returns new component
@@ -102,6 +100,19 @@ struct Entity {
 	const vec3& GetGlobalScale() const;
 
 	const mat4& GetFullTransform() const;
+
+	// Names seem to be immutable
+	// void SetName(const std::string&);
+	void SetPosition(const vec3&);
+	void SetGlobalPosition(const vec3&);
+	void SetOrientation(const quat&);
+	void SetGlobalOrientation(const quat&);
+	void SetScale(const vec3&);
+	// void SetGlobalScale(const vec3&);
+
+	// void SetFullTransform(const mat4&);
+
+	// TODO: Add coordinate conversion
 };
 
 #include "entity.inl"

@@ -1,9 +1,12 @@
+#include "entitymanager.h"
 #include "component.h"
 #include "entity.h"
 #include "pool.h"
+#include "app.h"
 
 #include <algorithm>
 
+#include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreEntity.h>
 
@@ -24,7 +27,22 @@ void Entity::Destroy(){
 		c->OnDestroy();
 		delete c;
 	}
-	// TODO: Destroy children
+
+	// TODO: TEST
+
+	// This will recurse and destroy all leaf nodes first
+	//	Note that circular references will kill this
+	for(auto e: children){
+		App::instance->entityManager->DestroyEntity(e);
+	}
+
+	if(ogreSceneNode){
+		ogreSceneNode->removeAndDestroyAllChildren();
+		App::instance->sceneManager->destroySceneNode(ogreSceneNode);
+	}
+
+	if(ogreEntity)
+		App::instance->sceneManager->destroyEntity(ogreEntity);
 }
 
 void Entity::Update(){
@@ -39,21 +57,47 @@ void Entity::AddChild(Entity* e){
 
 	children.push_back(e);
 	e->parent = this;
-	// TODO: Ogre parent
+
+	if(ogreSceneNode)
+		ogreSceneNode->addChild(e->ogreSceneNode);
 }
 
 void Entity::RemoveChild(Entity* e){
 	if(!e) return;
 
+	// Remove e from children
 	auto end = children.end();
 	auto it = std::remove(children.begin(), end, e);
 
+	// If it wasn't a child, give up
 	if(it == end) return;
 
 	children.erase(it, end);
-	// Only reset parent if e is actually a child
+
+	// Reset parent if e is actually a child
 	e->parent = nullptr;
-	// TODO: Ogre parent
+
+	if(ogreSceneNode)
+		ogreSceneNode->removeChild(e->ogreSceneNode);
+}
+
+void Entity::DestroyChild(Entity* e){
+	if(!e) return;
+
+	// Remove e from children
+	auto end = children.end();
+	auto it = std::remove(children.begin(), end, e);
+	
+	// If it wasn't a child, give up
+	if(it == end) return;
+
+	children.erase(it, end);
+
+	if(ogreSceneNode)
+		ogreSceneNode->removeChild(e->ogreSceneNode);
+
+	// Destroy it
+	App::instance->entityManager->DestroyEntity(e);
 }
 
 void Entity::AddComponent(Component* c){
@@ -101,44 +145,79 @@ const std::string& Entity::GetName() const {
 	if(!ogreEntity) throw "Tried to get name of Entity with no Ogre::Entity";
 	return ogreEntity->getName();
 }
-
 const vec3& Entity::GetPosition() const {
 	if(!ogreSceneNode) throw "Tried to get local position of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->getPosition();
 }
-
 const vec3& Entity::GetGlobalPosition() const {
 	if(!ogreSceneNode) throw "Tried to get position of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->_getDerivedPosition();
 }
-
 const quat& Entity::GetOrientation() const {
 	if(!ogreSceneNode) throw "Tried to get orientation of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->getOrientation();
 }
-
 const quat& Entity::GetGlobalOrientation() const {
 	if(!ogreSceneNode) throw "Tried to get orientation of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->_getDerivedOrientation();
 }
-
 const vec3& Entity::GetScale() const {
 	if(!ogreSceneNode) throw "Tried to get scale of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->getScale();
 }
-
 const vec3& Entity::GetGlobalScale() const {
 	if(!ogreSceneNode) throw "Tried to get scale of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->_getDerivedScale();
 }
-
 const mat4& Entity::GetFullTransform() const {
 	if(!ogreSceneNode) throw "Tried to get transform of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->_getFullTransform();
 }
 
-#include "entitymanager.h"
 
+void Entity::SetPosition(const vec3& n) {
+	if(!ogreSceneNode) throw "Tried to set local position of Entity with no Ogre::SceneNode";
+	ogreSceneNode->setPosition(n);
+}
+void Entity::SetGlobalPosition(const vec3& n) {
+	if(!ogreSceneNode) throw "Tried to set position of Entity with no Ogre::SceneNode";
+	ogreSceneNode->_setDerivedPosition(n);
+}
+void Entity::SetOrientation(const quat& n) {
+	if(!ogreSceneNode) throw "Tried to set orientation of Entity with no Ogre::SceneNode";
+	ogreSceneNode->setOrientation(n);
+}
+void Entity::SetGlobalOrientation(const quat& n) {
+	if(!ogreSceneNode) throw "Tried to set orientation of Entity with no Ogre::SceneNode";
+	ogreSceneNode->_setDerivedOrientation(n);
+}
+void Entity::SetScale(const vec3& n) {
+	if(!ogreSceneNode) throw "Tried to set scale of Entity with no Ogre::SceneNode";
+	ogreSceneNode->setScale(n);
+}
+// void Entity::SetGlobalScale(const vec3& n) {
+// 	if(!ogreSceneNode) throw "Tried to set scale of Entity with no Ogre::SceneNode";
+// 	ogreSceneNode->_setDerivedScale(n);
+// }
+// void Entity::SetFullTransform(const mat4& n) {
+// 	if(!ogreSceneNode) throw "Tried to set transform of Entity with no Ogre::SceneNode";
+// 	ogreSceneNode->_setFullTransform(n);
+// }
+
+
+/*
+	                                                                             
+	88        88             88            888888888888                          
+	88        88             ""   ,d            88                        ,d     
+	88        88                  88            88                        88     
+	88        88 8b,dPPYba,  88 MM88MMM         88  ,adPPYba, ,adPPYba, MM88MMM  
+	88        88 88P'   `"8a 88   88            88 a8P_____88 I8[    ""   88     
+	88        88 88       88 88   88            88 8PP"""""""  `"Y8ba,    88     
+	Y8a.    .a8P 88       88 88   88,           88 "8b,   ,aa aa    ]8I   88,    
+	 `"Y8888Y"'  88       88 88   "Y888         88  `"Ybbd8"' `"YbbdP"'   "Y888  
+	                                                                             
+	                                                                             
+*/
 void unittest_Entity(){
 	struct ComponentA : Component {
 		ComponentA(int _x) : Component{this}, x(_x) {}
