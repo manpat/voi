@@ -66,16 +66,23 @@ struct Entity {
 	// DestroyComponent removes a component and deletes it if it is attached
 	void DestroyComponent(Component*);
 
-	// FindComponent returns a component of type C or nullptr
+	// FindComponent returns the first component of type C or nullptr
 	template<class C>
 	C* FindComponent();
 
 	// SendMessage broadcasts a message to attached components
+	// If zero arguments are given, a nullptr packet is sent to OnMessage
+	// If one argument is given, a copy of that argument is sent to OnMessage
+	// If more than one argument is given, a std::tuple of all arguments is sent to OnMessage
+	// 
+	// For example: entity->SendMessage("messageType", 1, 2, 3.f, 'a'); sends the 
+	//	packet std::tuple<s32, s32, f32, char>
 	template<class... A>
-	void SendMessage(const std::string&, A...);
+	void SendMessage(const std::string&, A... arguments);
 
 	// SendMessageRecurse broadcasts a message to attached components
 	//	and child entities
+	// See SendMessage
 	template<class... A>
 	void SendMessageRecurse(const std::string&, A...);
 };
