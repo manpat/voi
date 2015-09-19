@@ -30,8 +30,32 @@ void Entity::Update(){
 	}
 }
 
+void Entity::AddChild(Entity* e){
+	if(!e) return;
+	if(e->parent) throw "Tried to child an entity that already has a parent";
+
+	children.push_back(e);
+	e->parent = this;
+	// TODO: Ogre parent
+}
+
+void Entity::RemoveChild(Entity* e){
+	if(!e) return;
+
+	auto end = children.end();
+	auto it = std::remove(children.begin(), end, e);
+
+	if(it == end) return;
+
+	children.erase(it, end);
+	// Only reset parent if e is actually a child
+	e->parent = nullptr;
+	// TODO: Ogre parent
+}
+
 void Entity::AddComponent(Component* c){
 	if(!c) return;
+	if(c->entity) throw "Tried to add a component already attached to another entity";
 
 	components.push_back(c);
 	c->entity = this;
@@ -42,12 +66,12 @@ void Entity::AddComponent(Component* c){
 void Entity::RemoveComponent(Component* c){
 	if(!c) return;
 
-	auto it = std::find(components.begin(), components.end(), c);
-	if(it == components.end()) return;
+	auto end = components.end();
+	auto it = std::remove(components.begin(), end, c);
 
-	*it = components.back();
-	components.pop_back();
+	if(it == end) return;
 
+	components.erase(it, end);
 	c->OnRemove();
 	c->entity = nullptr;
 }

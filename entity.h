@@ -19,6 +19,7 @@
 
 namespace Ogre {
 	class Entity;
+	class SceneNode;
 }
 
 struct Component;
@@ -33,6 +34,7 @@ struct Entity {
 	std::unordered_map<std::string, std::string> userdata; // TODO: Make better
 
 	Ogre::Entity* ogreEntity;
+	Ogre::SceneNode* ogreSceneNode;
 
 	// Unique identifier, id 0 is invalid
 	//	id 0 can be used for pooling
@@ -55,13 +57,18 @@ struct Entity {
 	// Update updates all attached and active components
 	void Update();
 
+	// AddChild attaches a child entity
+	void AddChild(Entity*);
+	// RemoveChild detaches a child entity but does not destroy it
+	void RemoveChild(Entity*);
+
 	// AddComponent<C,A...> constructs a component with type C with arguments
 	//	of types A... or void. Returns new component
 	template<class C, class... A>
 	C* AddComponent(A...);
 	// AddComponent attaches an already constructed component
 	void AddComponent(Component*);
-	// RemoveComponent removes a component if it is attached
+	// RemoveComponent removes a component if it is attached but does not destroy it
 	void RemoveComponent(Component*);
 	// DestroyComponent removes a component and deletes it if it is attached
 	void DestroyComponent(Component*);
