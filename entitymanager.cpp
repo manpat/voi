@@ -20,7 +20,7 @@ EntityManager::~EntityManager(){
 Entity* EntityManager::CreateEntity(){
 	auto e = new Entity{};
 	e->Init();
-	e->id = ++entityIdCounter; // Smallest id is 1
+	e->id = ++entityIdCounter; // Smallest valid id is 1
 	entities.push_back(e);
 	return e;
 }

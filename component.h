@@ -16,6 +16,8 @@
 struct Entity;
 
 struct Component {
+	static u32 componentIdCounter;
+
 	// This is the owning entity
 	Entity* entity = nullptr;
 	// Unique identifier, id 0 is invalid
@@ -27,14 +29,17 @@ struct Component {
 	bool enabled = true;
 
 	template<class C>
-	Component(C* c) : typeHash{typeid(C).hash_code()} {}
+	Component(C* c) : id{++componentIdCounter}, typeHash{typeid(C).hash_code()} {}
 	virtual ~Component() {}
 
 	// OnAwake is called after the component has been initialised and attached to 
 	//	an entity
 	virtual void OnAwake() {};
 	
-	// OnDestroy is called after the owning entity calls RemoveComponent or is destroyed
+	// OnRemove is called after the owning entity calls RemoveComponent
+	virtual void OnRemove() {};
+	
+	// OnDestroy is called before the component is destroyed
 	virtual void OnDestroy() {};
 
 	// OnUpdate is called once per frame if the component is enabled

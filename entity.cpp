@@ -45,15 +45,18 @@ void Entity::RemoveComponent(Component* c){
 	auto it = std::find(components.begin(), components.end(), c);
 	if(it == components.end()) return;
 
-	c->OnDestroy();
-
 	*it = components.back();
 	components.pop_back();
+
+	c->OnRemove();
+	c->entity = nullptr;
 }
 
 void Entity::DestroyComponent(Component* c){
 	if(!c) return;
 	RemoveComponent(c);
+
+	c->OnDestroy();
 	delete c;
 }
 
@@ -72,12 +75,13 @@ void Entity::SendMessage(const std::string& type){
 void unittest_Entity(){
 	struct ComponentA : Component {
 		ComponentA(int _x) : Component{this}, x(_x) {}
-		~ComponentA() { std::cout << "A Destructor\n"; }
-		void OnAwake() { std::cout   << "A OnAwake\n"; }
-		void OnDestroy() { std::cout << "A OnDestroy\n"; }
-		void OnUpdate() { std::cout  << "A OnUpdate\n"; }
+		~ComponentA()    { std::cout << "A " << id << " Destructor\n"; }
+		void OnAwake()   { std::cout << "A " << id << " OnAwake\n"; }
+		void OnRemove()  { std::cout << "A " << id << " OnRemove\n"; }
+		void OnDestroy() { std::cout << "A " << id << " OnDestroy\n"; }
+		void OnUpdate()  { std::cout << "A " << id << " OnUpdate\n"; }
 		void OnMessage(const std::string& type, const OpaqueType& ot) {
-			std::cout << "A OnMessage " << type << "\t";
+			std::cout << "A " << id << " OnMessage " << type << "\t";
 			auto data = ot.Get<std::tuple<int,int,int,int>>(false);
 
 			if(!data) {
@@ -97,23 +101,27 @@ void unittest_Entity(){
 	};
 	struct ComponentB : Component {
 		ComponentB(int _x) : Component{this}, x(_x) {}
-		void OnAwake() { std::cout   << "B OnAwake\n"; }
-		void OnDestroy() { std::cout << "B OnDestroy\n"; }
-		void OnUpdate() { std::cout  << "B OnUpdate\n"; }
+		void OnAwake()   { std::cout << "B " << id << " OnAwake\n"; }
+		void OnDestroy() { std::cout << "B " << id << " OnDestroy\n"; }
+		void OnUpdate()  { std::cout << "B " << id << " OnUpdate\n"; }
 		void OnMessage(const std::string& type, const OpaqueType& ot) {
-			std::cout << "B OnMessage " << type << "\t";
-			auto data = ot.Get<float>(false /* Non fatal */);
-
-			if(!data){
-				std::cout << "B Unexpected message data type " << ot.name << "\n";
-				return;
+			std::cout << "B " << id << " OnMessage " << type << "\t";
+			
+			if(type == "comp"){
+				auto c = *ot.Get<ComponentA*>(/* default true: will throw on type mismatch */);
+				std::cout << "B recieved a ComponentA with x: " << c->x << "\n";
+			}else{
+				std::cout << "B recieved type " << ot.name << "\n";
 			}
-
-			std::cout << "B " << *data << " ";
-			std::cout << x << "\n";
 		}
 
 		float x;
+	};
+	struct ComponentC : Component {
+		ComponentC() : Component{this} {}
+		void OnMessage(const std::string& type, const OpaqueType&){
+			std::cout << "C " << id << " OnMessage " << type << "\n";
+		}
 	};
 
 	EntityManager emgr {};
@@ -136,14 +144,29 @@ void unittest_Entity(){
 	std::cout << "e->FindComponent<ComponentB> != c2? " << (e->FindComponent<ComponentB>() != (Component*)c2) << "\n";
 	std::cout << "e->FindComponent<ComponentB> == c3? " << (e->FindComponent<ComponentB>() == (Component*)c3) << "\n";
 
-	std::cout << "\n";
+	std::cout << "\nUpdate\n";
 	emgr.Update();
 	e->SendMessage("four", 1, 2, 3, 4);
 	e->SendMessage("one ", 1.f);
 	e->SendMessage("null");
 	e->SendMessage("comp", c1);
+
+	std::cout << "\nUpdate\n";
 	emgr.Update();
 	e->RemoveComponent(c1);
-	e->RemoveComponent(c2);
+	e->DestroyComponent(c2);
+	e->AddComponent<ComponentC>();
+	// c2 is invalid here
+	// c1 is still valid
+	// e has two active components: [c3, ComponentC{}]
+
+	std::cout << "\nUpdate\n";
+	emgr.Update();
+	e->AddComponent(c1);
+	e->DestroyComponent(c3);
+	e->SendMessageRecurse("test", 'a', "123");
+	// c1 is the only valid component here
+
+	std::cout << "\nUpdate\n";
 	emgr.Update();
 }
