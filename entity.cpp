@@ -17,6 +17,8 @@ void Entity::Init(){
 	children = {};
 	parent = nullptr;
 	userdata = {};
+	ogreEntity = nullptr;
+	ogreSceneNode = nullptr;
 	// id set by entity manager
 
 	enabled = true;
@@ -33,7 +35,7 @@ void Entity::Destroy(){
 	// This will recurse and destroy all leaf nodes first
 	//	Note that circular references will kill this
 	for(auto e: children){
-		App::instance->entityManager->DestroyEntity(e);
+		EntityManager::instance->DestroyEntity(e);
 	}
 
 	if(ogreSceneNode){
@@ -97,7 +99,7 @@ void Entity::DestroyChild(Entity* e){
 		ogreSceneNode->removeChild(e->ogreSceneNode);
 
 	// Destroy it
-	App::instance->entityManager->DestroyEntity(e);
+	EntityManager::instance->DestroyEntity(e);
 }
 
 void Entity::AddComponent(Component* c){
@@ -107,7 +109,9 @@ void Entity::AddComponent(Component* c){
 	components.push_back(c);
 	c->entity = this;
 	c->enabled = true;
-	c->OnAwake();
+	c->OnInit();
+
+	EntityManager::instance->newComponents.push_back(c);
 }
 
 void Entity::RemoveComponent(Component* c){
@@ -222,6 +226,7 @@ void unittest_Entity(){
 	struct ComponentA : Component {
 		ComponentA(int _x) : Component{this}, x(_x) {}
 		~ComponentA()    { std::cout << "A " << id << " Destructor\n"; }
+		void OnInit()    { std::cout << "A " << id << " OnInit\n"; }
 		void OnAwake()   { std::cout << "A " << id << " OnAwake\n"; }
 		void OnRemove()  { std::cout << "A " << id << " OnRemove\n"; }
 		void OnDestroy() { std::cout << "A " << id << " OnDestroy\n"; }
@@ -247,6 +252,7 @@ void unittest_Entity(){
 	};
 	struct ComponentB : Component {
 		ComponentB(int _x) : Component{this}, x(_x) {}
+		void OnInit()    { std::cout << "B " << id << " OnInit\n"; }
 		void OnAwake()   { std::cout << "B " << id << " OnAwake\n"; }
 		void OnDestroy() { std::cout << "B " << id << " OnDestroy\n"; }
 		void OnUpdate()  { std::cout << "B " << id << " OnUpdate\n"; }

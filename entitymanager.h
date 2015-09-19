@@ -2,6 +2,7 @@
 #define ENTITYMANAGER_H
 
 #include <vector>
+#include <queue>
 
 #include "common.h"
 
@@ -11,9 +12,13 @@
 // List/Pool of entities
 
 struct Entity;
+struct Component;
 
 struct EntityManager {
+	static EntityManager* instance;
+
 	std::vector<Entity*> entities;
+	std::vector<Component*> newComponents;
 	u32 entityIdCounter;
 
 	EntityManager();

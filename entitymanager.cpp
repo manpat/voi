@@ -1,15 +1,21 @@
 #include "entitymanager.h"
+#include "component.h"
 #include "entity.h"
 #include "pool.h"
+
+EntityManager* EntityManager::instance = nullptr;
 
 EntityManager::EntityManager(): entityIdCounter{0} {
 	// 1MB per framebuffer, 1MB swap
 	Entity::messagePool = new FramePool{1u<<20};
+
+	instance = this;
 }
 
 EntityManager::~EntityManager(){
 	delete Entity::messagePool;
 	Entity::messagePool = nullptr;
+	instance = nullptr;
 
 	for(auto e: entities){
 		e->Destroy();
@@ -42,6 +48,12 @@ Entity* EntityManager::FindEntity(const std::string& name){
 
 void EntityManager::Update(){
 	Entity::messagePool->Update();
+
+	newComponents.erase(std::remove(newComponents.begin(), newComponents.end(), nullptr), newComponents.end());
+	for(auto c: newComponents){
+		c->OnAwake();
+	}
+	newComponents.clear();
 
 	for(auto e: entities){
 		// Don't bother checking active because it's guaranteed that

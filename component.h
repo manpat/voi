@@ -32,8 +32,11 @@ struct Component {
 	Component(C* c) : id{++componentIdCounter}, typeHash{typeid(C).hash_code()} {}
 	virtual ~Component() {}
 
-	// OnAwake is called after the component has been initialised and attached to 
+	// OnInit is called after the component has been initialised and attached to 
 	//	an entity
+	virtual void OnInit() {};
+
+	// OnAwake is called before the before the first update after initialisation
 	virtual void OnAwake() {};
 	
 	// OnRemove is called after the owning entity calls RemoveComponent
