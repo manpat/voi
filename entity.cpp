@@ -117,10 +117,10 @@ void unittest_Entity(){
 	};
 
 	EntityManager emgr {};
-	auto e1 = emgr.CreateEntity();
-	auto c1 = e1->AddComponent<ComponentA>(5);
-	auto c2 = e1->AddComponent<ComponentA>(6);
-	auto c3 = e1->AddComponent<ComponentB>(7);
+	auto e = emgr.CreateEntity();
+	auto c1 = e->AddComponent<ComponentA>(5);
+	auto c2 = e->AddComponent<ComponentA>(6);
+	auto c3 = e->AddComponent<ComponentB>(7);
 
 	std::cout << std::boolalpha;
 	std::cout << "c1 Is ComponentA? " << c1->IsType<ComponentA>() << "\n";
@@ -132,13 +132,18 @@ void unittest_Entity(){
 	std::cout << "c1 SameType as c3? " << c1->SameType(c3) << "\n";
 
 	std::cout << "\n";
+	std::cout << "e->FindComponent<ComponentA> == c1? " << (e->FindComponent<ComponentA>() == (Component*)c1) << "\n";
+	std::cout << "e->FindComponent<ComponentB> != c2? " << (e->FindComponent<ComponentB>() != (Component*)c2) << "\n";
+	std::cout << "e->FindComponent<ComponentB> == c3? " << (e->FindComponent<ComponentB>() == (Component*)c3) << "\n";
+
+	std::cout << "\n";
 	emgr.Update();
-	e1->SendMessage("four", 1, 2, 3, 4);
-	e1->SendMessage("one ", 1.f);
-	e1->SendMessage("null");
-	e1->SendMessage("comp", c1);
+	e->SendMessage("four", 1, 2, 3, 4);
+	e->SendMessage("one ", 1.f);
+	e->SendMessage("null");
+	e->SendMessage("comp", c1);
 	emgr.Update();
-	e1->RemoveComponent(c1);
-	e1->RemoveComponent(c2);
+	e->RemoveComponent(c1);
+	e->RemoveComponent(c2);
 	emgr.Update();
 }

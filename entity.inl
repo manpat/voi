@@ -12,8 +12,13 @@ C* Entity::AddComponent(A... args) {
 
 template<class C>
 C* Entity::FindComponent(){
-	throw "Not implemented";
-	return nullptr;
+	auto it = std::find_if(components.begin(), components.end(), [](const Component* c){
+		return c->IsType<C>();	
+	});
+
+	if(it == components.end()) return nullptr;
+
+	return static_cast<C*>(*it);
 }
 
 template<size_t C, class F, class... T>
@@ -35,7 +40,7 @@ void Entity::SendMessage(const std::string& type, A... args){
 	// Packet valid till next frame
 	auto packet = messagePool->New<ArgumentPack<A...>>(args...);
 	ot.Set(packet);
-	
+
 	for(auto c: components){
 		c->OnMessage(type, ot);
 	}
