@@ -8,6 +8,8 @@
 #include <OGRE/OgreVector2.h>
 #include <OGRE/OgreVector3.h>
 #include <OGRE/OgreVector4.h>
+#include <OGRE/OgreMatrix3.h>
+#include <OGRE/OgreMatrix4.h>
 #include <OGRE/OgreQuaternion.h>
 
 template<typename K, typename V>
@@ -22,6 +24,8 @@ using vec2 = Ogre::Vector2;
 using vec3 = Ogre::Vector3;
 using vec4 = Ogre::Vector4;
 using quat = Ogre::Quaternion;
+using mat3 = Ogre::Matrix3;
+using mat4 = Ogre::Matrix4;
 
 using u8  = uint8_t;
 using u16 = uint16_t;

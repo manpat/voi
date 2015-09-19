@@ -108,6 +108,11 @@ void App::Init(){
 #else
 	SceneParser sceneloader;
 	sceneloader.Load("GameData/bend.scene", this);
+
+	for(auto& e: entityManager->entities){
+		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
+	}
+	std::cout << std::endl;
 #endif
 
 	portalManager->SetLayer(0);

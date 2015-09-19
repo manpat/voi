@@ -97,6 +97,46 @@ void Entity::SendMessage(const std::string& type){
 }
 // SendMessage with arguments defined in entity.inl
 
+const std::string& Entity::GetName() const {
+	if(!ogreEntity) throw "Tried to get name of Entity with no Ogre::Entity";
+	return ogreEntity->getName();
+}
+
+const vec3& Entity::GetPosition() const {
+	if(!ogreSceneNode) throw "Tried to get local position of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->getPosition();
+}
+
+const vec3& Entity::GetGlobalPosition() const {
+	if(!ogreSceneNode) throw "Tried to get position of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getDerivedPosition();
+}
+
+const quat& Entity::GetOrientation() const {
+	if(!ogreSceneNode) throw "Tried to get orientation of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->getOrientation();
+}
+
+const quat& Entity::GetGlobalOrientation() const {
+	if(!ogreSceneNode) throw "Tried to get orientation of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getDerivedOrientation();
+}
+
+const vec3& Entity::GetScale() const {
+	if(!ogreSceneNode) throw "Tried to get scale of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->getScale();
+}
+
+const vec3& Entity::GetGlobalScale() const {
+	if(!ogreSceneNode) throw "Tried to get scale of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getDerivedScale();
+}
+
+const mat4& Entity::GetFullTransform() const {
+	if(!ogreSceneNode) throw "Tried to get transform of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getFullTransform();
+}
+
 #include "entitymanager.h"
 
 void unittest_Entity(){

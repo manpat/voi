@@ -216,6 +216,10 @@ void App::Run(){
 		ogreRoot->renderOneFrame();
 		SDL_GL_SwapWindow(sdlWindow);
 
+		auto newTitle = "Anomalia " + std::to_string(window->getLastFPS()) 
+			+ "fps\tTriangles: " + std::to_string(window->getTriangleCount());
+		SDL_SetWindowTitle(sdlWindow, newTitle.data());
+
 		auto end = high_resolution_clock::now();
 		AppTime::deltaTime = duration_cast<duration<f64>>(end - begin).count();
 		AppTime::appTime += AppTime::deltaTime;

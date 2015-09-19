@@ -92,6 +92,16 @@ struct Entity {
 	// See SendMessage
 	template<class... A>
 	void SendMessageRecurse(const std::string&, A...);
+
+	const std::string& GetName() const;
+	const vec3& GetPosition() const;
+	const vec3& GetGlobalPosition() const;
+	const quat& GetOrientation() const;
+	const quat& GetGlobalOrientation() const;
+	const vec3& GetScale() const;
+	const vec3& GetGlobalScale() const;
+
+	const mat4& GetFullTransform() const;
 };
 
 #include "entity.inl"
