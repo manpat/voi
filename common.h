@@ -23,9 +23,9 @@ V findin(const std::map<K,V>& m, K k, V dv = V()){
 using vec2 = Ogre::Vector2;
 using vec3 = Ogre::Vector3;
 using vec4 = Ogre::Vector4;
-using quat = Ogre::Quaternion;
 using mat3 = Ogre::Matrix3;
 using mat4 = Ogre::Matrix4;
+using quat = Ogre::Quaternion;
 
 using u8  = uint8_t;
 using u16 = uint16_t;

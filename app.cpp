@@ -19,15 +19,11 @@
 #include "apptime.h"
 
 #include "entitymanager.h"
+#include "physicsmanager.h"
 
-App* App::instance = nullptr;
-
-f64 AppTime::deltaTime = 0.0;
-f64 AppTime::appTime = 0.0;
+template<> App* Singleton<App>::instance = nullptr;
 
 App::App(){
-	instance = this;
-
 	SDL_Init(SDL_INIT_VIDEO);
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); 
@@ -50,6 +46,7 @@ App::App(){
 	input = std::make_shared<Input>();
 	camera = std::make_shared<Camera>();
 	entityManager = std::make_shared<EntityManager>();
+	physicsManager = std::make_shared<PhysicsManager>();
 
 	window->setActive(true);
 	window->setAutoUpdated(false);
@@ -64,24 +61,6 @@ App::App(){
 App::~App(){
 	// This ensures that all entities are destroyed appropriately before ogre shuts down
 	entityManager.reset();
-	instance = nullptr;
-}
-
-/*
-
-	  ,ad8888ba,                      ad88888ba  88                         88
-	 d8"'    `"8b              ,d    d8"     "8b ""                         88              ,d
-	d8'                        88    Y8,                                    88              88
-	88             ,adPPYba, MM88MMM `Y8aaaaa,   88 8b,dPPYba,   ,adPPYb,d8 88  ,adPPYba, MM88MMM ,adPPYba,  8b,dPPYba,
-	88      88888 a8P_____88   88      `"""""8b, 88 88P'   `"8a a8"    `Y88 88 a8P_____88   88   a8"     "8a 88P'   `"8a
-	Y8,        88 8PP"""""""   88            `8b 88 88       88 8b       88 88 8PP"""""""   88   8b       d8 88       88
-	 Y8a.    .a88 "8b,   ,aa   88,   Y8a     a8P 88 88       88 "8a,   ,d88 88 "8b,   ,aa   88,  "8a,   ,a8" 88       88
-	  `"Y88888P"   `"Ybbd8"'   "Y888  "Y88888P"  88 88       88  `"YbbdP"Y8 88  `"Ybbd8"'   "Y888 `"YbbdP"'  88       88
-	                                                             aa,    ,88
-	                                                              "Y8bbdP"
-*/
-App* App::GetSingleton(){
-	return App::instance;
 }
 
 /*
@@ -210,6 +189,7 @@ void App::Run(){
 		}
 
 		entityManager->Update();
+		physicsManager->Update();
 
 		for(auto hook: frameEndHooks){
 			hook();
@@ -223,9 +203,10 @@ void App::Run(){
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
 
 		auto end = high_resolution_clock::now();
-		AppTime::deltaTime = duration_cast<duration<f64>>(end - begin).count();
-		AppTime::appTime += AppTime::deltaTime;
+		auto dt = duration_cast<duration<f64>>(end - begin).count();
 		begin = end;
+
+		AppTime::Update(dt);
 
 		if(shouldQuit) {
 			window->destroy();
@@ -331,7 +312,7 @@ void App::SetGameState(GameState gs) {
 
 */
 
-App::GameState App::GetGameState() const {
+auto App::GetGameState() const -> GameState {
 	return gameState;
 }
 

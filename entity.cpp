@@ -35,16 +35,16 @@ void Entity::Destroy(){
 	// This will recurse and destroy all leaf nodes first
 	//	Note that circular references will kill this
 	for(auto e: children){
-		EntityManager::instance->DestroyEntity(e);
+		EntityManager::GetSingleton()->DestroyEntity(e);
 	}
 
 	if(ogreSceneNode){
 		ogreSceneNode->removeAndDestroyAllChildren();
-		App::instance->sceneManager->destroySceneNode(ogreSceneNode);
+		App::GetSingleton()->sceneManager->destroySceneNode(ogreSceneNode);
 	}
 
 	if(ogreEntity)
-		App::instance->sceneManager->destroyEntity(ogreEntity);
+		App::GetSingleton()->sceneManager->destroyEntity(ogreEntity);
 }
 
 void Entity::Update(){
@@ -99,7 +99,7 @@ void Entity::DestroyChild(Entity* e){
 		ogreSceneNode->removeChild(e->ogreSceneNode);
 
 	// Destroy it
-	EntityManager::instance->DestroyEntity(e);
+	EntityManager::GetSingleton()->DestroyEntity(e);
 }
 
 void Entity::AddComponent(Component* c){
@@ -111,7 +111,7 @@ void Entity::AddComponent(Component* c){
 	c->enabled = true;
 	c->OnInit();
 
-	EntityManager::instance->newComponents.push_back(c);
+	EntityManager::GetSingleton()->newComponents.push_back(c);
 }
 
 void Entity::RemoveComponent(Component* c){

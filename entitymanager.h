@@ -5,6 +5,7 @@
 #include <queue>
 
 #include "common.h"
+#include "singleton.h"
 
 // Handles updating
 // Entity queries
@@ -14,9 +15,7 @@
 struct Entity;
 struct Component;
 
-struct EntityManager {
-	static EntityManager* instance;
-
+struct EntityManager : Singleton<EntityManager> {
 	std::vector<Entity*> entities;
 	std::vector<Component*> newComponents;
 	u32 entityIdCounter;

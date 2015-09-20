@@ -6,12 +6,14 @@
 #include <vector>
 
 #include "common.h"
-#include "audiomanager.h"
+#include "singleton.h"
 
-class Camera;
 class Input;
+class Camera;
+class AudioManager;
 class PortalManager;
 class EntityManager;
+class PhysicsManager;
 
 enum {
 	WIDTH = 800,
@@ -20,15 +22,12 @@ enum {
 
 namespace Ogre {
 	class Root;
-	class Entity;
 	class SceneNode;
 	class SceneManager;
 	class RenderWindow;
-	class RenderQueueInvocationSequence;
 };
 
-class App {
-public:
+struct App : Singleton<App> {
 	typedef void (*SDLEventHook)(const SDL_Event&);
 	typedef void (*Hook)();
 
@@ -38,15 +37,6 @@ public:
 		PAUSED
 	};
 
-	void SetGameState(GameState);
-	GameState GetGameState() const; // Getter
-
-private:
-	GameState gameState;
-
-public:
-	static App* instance;
-
 	SDL_Window* sdlWindow;
 	void* sdlGLContext;
 
@@ -54,12 +44,13 @@ public:
 	Ogre::SceneManager* sceneManager;
 	Ogre::RenderWindow* window;
 	Ogre::SceneNode* rootNode;
-	AudioManager* audioManager;
 
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
+	std::shared_ptr<AudioManager> audioManager;
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;
+	std::shared_ptr<PhysicsManager> physicsManager;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<Hook> frameBeginHooks;
@@ -68,11 +59,13 @@ public:
 
 	bool shouldQuit;
 
+private:
+	GameState gameState;
+
 public:
 	App();
 	~App();
 
-	static App* GetSingleton();
 	void Run();
 
 	// Hooks
@@ -85,9 +78,13 @@ public:
 	void RegisterFrameEndHook(Hook);
 	void RemoveFrameEndHook(Hook);
 
+	// Setters
+	void SetGameState(GameState);
+
 	// Getters
 	s32 GetWindowWidth() const;
 	s32 GetWindowHeight() const;
+	GameState GetGameState() const;
 
 	bool IsInFocus() const;
 

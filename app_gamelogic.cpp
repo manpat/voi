@@ -122,7 +122,7 @@ void App::Init(){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
-	audioManager = new AudioManager();
+	audioManager = std::make_shared<AudioManager>();
 
 	camera->cameraNode->setPosition(0, 1.75, 0);
 	auto g = 0.1;

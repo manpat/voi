@@ -3,12 +3,12 @@
 #include "entity.h"
 #include "pool.h"
 
-EntityManager* EntityManager::instance = nullptr;
+template<>
+EntityManager* Singleton<EntityManager>::instance = nullptr;
 
 EntityManager::EntityManager(): entityIdCounter{0} {
 	// 1MB per framebuffer, 1MB swap
 	Entity::messagePool = new FramePool{1u<<20};
-
 	instance = this;
 }
 
