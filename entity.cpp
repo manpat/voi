@@ -129,8 +129,8 @@ void Entity::RemoveComponent(Component* c){
 
 void Entity::DestroyComponent(Component* c){
 	if(!c) return;
-	RemoveComponent(c);
 
+	RemoveComponent(c);
 	c->OnDestroy();
 	delete c;
 }

@@ -9,8 +9,9 @@
 #include "camera.h"
 #include "apptime.h"
 #include "sceneparser.h"
-#include "portalmanager.h"
 #include "audiomanager.h"
+#include "portalmanager.h"
+#include "physicsmanager.h"
 
 #include "entity.h"
 #include "component.h"
@@ -113,6 +114,9 @@ void App::Init(){
 		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
 	}
 	std::cout << std::endl;
+
+	// entityManager->entities[0]->AddComponent<BoxColliderComponent>();
+	// entityManager->entities[1]->AddComponent<BoxColliderComponent>()->force = vec3{0,-10,0};
 #endif
 
 	portalManager->SetLayer(0);
