@@ -70,13 +70,15 @@ extern "C" void SetTransformCallback(const NewtonBody* body, const f32* nmat, in
 	ent->SetGlobalOrientation(ori);
 }
 
-extern "C" void ApplyGravityCallback(const NewtonBody* body, f32 dt, int){
+extern "C" void ApplyForceCallback(const NewtonBody* body, f32 dt, int){
 	auto comp = static_cast<Component*>(NewtonBodyGetUserData(body));
 
 	if(comp->IsType<ColliderComponent>()){
 		auto col = static_cast<ColliderComponent*>(comp);
-		NewtonBodySetForce(body, &col->force.x);
+		NewtonBodySetVelocity(body, &col->velocity.x);
+		NewtonBodyAddForce(body, &col->force.x);
 		col->force = vec3::ZERO;
+		col->velocity = vec3::ZERO;
 	}
 }
 
@@ -92,7 +94,7 @@ void ColliderComponent::OnInit() {
 
 	NewtonBodySetUserData(body, this);
 	NewtonBodySetTransformCallback(body, SetTransformCallback);
-	NewtonBodySetForceAndTorqueCallback(body, ApplyGravityCallback);
+	NewtonBodySetForceAndTorqueCallback(body, ApplyForceCallback);
 }
 
 void ColliderComponent::OnDestroy() {

@@ -130,7 +130,7 @@ void App::Init(){
 	player->ogreSceneNode->addChild(camera->cameraNode);
 
 	player->AddComponent<Player>();
-	auto playerCollider = player->AddComponent<CapsuleColliderComponent>();
+	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(true);
 	playerCollider->ConstrainUpright();
 	// playerCollider->force = vec3(0, -10, 0);
 

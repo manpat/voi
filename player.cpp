@@ -1,4 +1,5 @@
 #include "portalmanager.h"
+#include "physicsmanager.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -10,8 +11,10 @@
 //	All ogre stuff should be handled by camera wrapper
 #include <OGRE/OgreSceneNode.h>
 
-void Player::OnInit() {
+void Player::OnAwake() {
 	std::cout << "New player" << std::endl;
+	collider = entity->FindComponent<ColliderComponent>();
+	if(!collider) throw "Player requires a collider component";
 }
 
 void Player::OnUpdate() {
@@ -39,18 +42,21 @@ void Player::OnUpdate() {
 	}
 
 	// Move with WASD, based on look direction
-	// TODO: Don't use ogreSceneNode directly
+	auto velocity = vec3::ZERO;
+
 	if(Input::GetKey(SDLK_w)){
-		entity->ogreSceneNode->translate(-oriYaw.zAxis() * AppTime::deltaTime * boost);
+		velocity -= oriYaw.zAxis() * boost;
 	}else if(Input::GetKey(SDLK_s)){
-		entity->ogreSceneNode->translate(oriYaw.zAxis() * AppTime::deltaTime * boost);
+		velocity += oriYaw.zAxis() * boost;
 	}
 
 	if(Input::GetKey(SDLK_a)){
-		entity->ogreSceneNode->translate(-oriYaw.xAxis() * AppTime::deltaTime * boost);
+		velocity -= oriYaw.xAxis() * boost;
 	}else if(Input::GetKey(SDLK_d)){
-		entity->ogreSceneNode->translate(oriYaw.xAxis() * AppTime::deltaTime * boost);
+		velocity += oriYaw.xAxis() * boost;
 	}
+
+	collider->velocity = velocity;
 
 	if(Input::GetKeyDown('f')){
 		static s32 layer = 0;

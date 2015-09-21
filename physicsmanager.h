@@ -26,6 +26,7 @@ struct ColliderComponent : Component {
 	bool dynamic = false;
 
 	vec3 force = vec3::ZERO;
+	vec3 velocity = vec3::ZERO;
 
 	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}
 	void OnInit() override;
