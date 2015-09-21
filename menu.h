@@ -19,11 +19,9 @@ public:
 	void Update(App*, f32);
 
 private:
-	Menu() : m_node{nullptr}, m_quad{nullptr}, m_delta{0.f} {};
-
-	Ogre::SceneNode* m_node;
-	Ogre::ManualObject* m_quad;
-	f32 m_delta;
+	Ogre::SceneNode* m_node = nullptr;
+	Ogre::ManualObject* m_quad = nullptr;
+	f32 m_delta = 0.f;
 };
 
 #endif // MENU_H

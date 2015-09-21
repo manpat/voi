@@ -1,3 +1,4 @@
+#include "portalmanager.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -15,6 +16,7 @@ void Player::OnInit() {
 
 void Player::OnUpdate() {
 	auto camera = App::GetSingleton()->camera;
+	auto portalManager = App::GetSingleton()->portalManager;
 
 	auto md = Input::GetMouseDelta();
 
@@ -48,5 +50,11 @@ void Player::OnUpdate() {
 		entity->ogreSceneNode->translate(-oriYaw.xAxis() * AppTime::deltaTime * boost);
 	}else if(Input::GetKey(SDLK_d)){
 		entity->ogreSceneNode->translate(oriYaw.xAxis() * AppTime::deltaTime * boost);
+	}
+
+	if(Input::GetKeyDown('f')){
+		static s32 layer = 0;
+		layer = (layer+1)%portalManager->GetNumLayers();
+		portalManager->SetLayer(layer);
 	}
 }

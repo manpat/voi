@@ -30,11 +30,11 @@ public:
 	AudioManager();
 	~AudioManager();
 
-	void update(u64);
-	void playNote(u8);
-	FmodSystemRef getSystem();
-	FMOD::ChannelGroup* getMasterChannelGroup() { return mastergroup; }
-	bool isRunning() const { return running; };
+	void Update();
+	void PlayNote(u8);
+	FmodSystemRef GetSystem();
+	FMOD::ChannelGroup* GetMasterChannelGroup() { return mastergroup; }
+	bool IsRunning() const { return running; };
 
 	u8 BPM;
 

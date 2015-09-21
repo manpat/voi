@@ -53,10 +53,8 @@ struct App : Singleton<App> {
 	std::shared_ptr<PhysicsManager> physicsManager;
 
 	std::vector<SDLEventHook> sdlEventHooks;
-	std::vector<Hook> frameBeginHooks;
-	std::vector<Hook> frameEndHooks;
-	bool inFocus;
 
+	bool inFocus;
 	bool shouldQuit;
 
 private:
@@ -71,12 +69,6 @@ public:
 	// Hooks
 	void RegisterSDLHook(SDLEventHook);
 	void RemoveSDLHook(SDLEventHook);
-
-	void RegisterFrameBeginHook(Hook);
-	void RemoveFrameBeginHook(Hook);
-
-	void RegisterFrameEndHook(Hook);
-	void RemoveFrameEndHook(Hook);
 
 	// Setters
 	void SetGameState(GameState);

@@ -32,14 +32,14 @@ AudioManager::~AudioManager() {
 	running = false;
 }
 
-void AudioManager::update(u64 dt) {
+void AudioManager::Update() {
 	cfmod(system->update());
 }
 
-void AudioManager::playNote(u8 degree) {
+void AudioManager::PlayNote(u8 degree) {
 	synth->scheduler->NoteOn(degree);
 }
 
-FmodSystemRef AudioManager::getSystem() {
+FmodSystemRef AudioManager::GetSystem() {
 	return FmodSystemRef{ system };
 }

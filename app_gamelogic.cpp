@@ -132,7 +132,7 @@ void App::Init(){
 	player->AddComponent<Player>();
 	auto playerCollider = player->AddComponent<CapsuleColliderComponent>();
 	playerCollider->ConstrainUpright();
-	playerCollider->force = vec3(0, -10, 0);
+	// playerCollider->force = vec3(0, -10, 0);
 
 	portalManager->SetLayer(0);
 	sceneManager->addRenderQueueListener(portalManager.get());
@@ -141,9 +141,7 @@ void App::Init(){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
-	audioManager = std::make_shared<AudioManager>();
-
-	camera->cameraNode->setPosition(0, 1.75, 0);
+	camera->cameraNode->setPosition(0, 1.2, 0);
 	auto g = 0.1;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 }
@@ -162,24 +160,17 @@ void App::Init(){
 	             88
 */
 void App::Update(){
-
-	// audioManager->playNote(128);
-	
-	// Update Audio
-	audioManager->update(AppTime::deltaTime);
+	input->Update();
+	entityManager->Update();
+	physicsManager->Update();
+	audioManager->Update();
 
 	// Close window on ESC
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
 		shouldQuit = true;
-		return;
-		//SetGameState(App::GameState::MAIN_MENU);
 	}
 
-	if(Input::GetKeyDown('f')){
-		static s32 layer = 0;
-		layer = (layer+1)%portalManager->GetNumLayers();
-		portalManager->SetLayer(layer);
-	}
+	input->EndFrame();
 }
 
 void App::Terminate() {

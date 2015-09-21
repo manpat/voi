@@ -69,15 +69,12 @@ void Menu::Update(App* app, f32 dt) {
 
 	auto nyaw = cos(m_delta) * 0.02f;
 	auto npitch = cos(m_delta * 2) * 0.02f;
-
-	app->camera->cameraPitch = npitch;
-	app->camera->cameraYaw = nyaw;
 	
-	auto oriYaw = Ogre::Quaternion(Ogre::Radian(app->camera->cameraYaw), vec3::UNIT_Y);
-	auto ori = Ogre::Quaternion(Ogre::Radian(app->camera->cameraPitch), oriYaw.xAxis()) * oriYaw;
+	auto oriYaw = Ogre::Quaternion(Ogre::Radian(nyaw), vec3::UNIT_Y);
+	auto ori = Ogre::Quaternion(Ogre::Radian(npitch), oriYaw.xAxis()) * oriYaw;
 	app->camera->cameraNode->setOrientation(ori);
 
-	m_delta += 0.001f;
+	m_delta += dt * 0.25f;
 
 	if (Input::GetKey(SDLK_RETURN)) {
 		//App::GetSingleton()->gameState = App::GameState::PLAYING;

@@ -18,6 +18,7 @@
 #include "common.h"
 #include "apptime.h"
 
+#include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
 
@@ -45,6 +46,7 @@ App::App(){
 
 	input = std::make_shared<Input>();
 	camera = std::make_shared<Camera>();
+	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();
 
@@ -172,28 +174,19 @@ void App::Run(){
 			// TODO: Release mouse on lose focus
 		}
 
-		for(auto hook: frameBeginHooks){
-			hook();
-		}
-
 		// Call the appropriate update function depending on game state
+		// TODO: Remove this
 		switch (gameState) {
 			case GameState::MAIN_MENU:
 				Menu::Inst().Update(this, AppTime::deltaTime);
 				break;
 			case GameState::PLAYING:
-				Update();
 				break;
 			case GameState::PAUSED:
 				throw("Paused state not implemented");
 		}
 
-		entityManager->Update();
-		physicsManager->Update();
-
-		for(auto hook: frameEndHooks){
-			hook();
-		}
+		Update();
 
 		ogreRoot->renderOneFrame();
 		SDL_GL_SwapWindow(sdlWindow);
@@ -234,26 +227,6 @@ void App::RegisterSDLHook(SDLEventHook h){
 }
 
 void App::RemoveSDLHook(SDLEventHook h){
-	if(!h) return;
-	std::cerr << "Hook removal not implemented" << std::endl;
-}
-
-void App::RegisterFrameBeginHook(Hook h){
-	if(!h) return;
-	frameBeginHooks.push_back(h);
-}
-
-void App::RemoveFrameBeginHook(Hook h){
-	if(!h) return;
-	std::cerr << "Hook removal not implemented" << std::endl;
-}
-
-void App::RegisterFrameEndHook(Hook h){
-	if(!h) return;
-	frameEndHooks.push_back(h);
-}
-
-void App::RemoveFrameEndHook(Hook h){
 	if(!h) return;
 	std::cerr << "Hook removal not implemented" << std::endl;
 }

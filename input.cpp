@@ -7,14 +7,10 @@ vec2 Input::mouseDelta = vec2::ZERO;
 
 Input::Input(){
 	App::GetSingleton()->RegisterSDLHook(&EventHook);
-	App::GetSingleton()->RegisterFrameBeginHook(&FrameBeginHook);
-	App::GetSingleton()->RegisterFrameEndHook(&FrameEndHook);
 }
 
 Input::~Input(){
 	App::GetSingleton()->RemoveSDLHook(&EventHook);
-	App::GetSingleton()->RemoveFrameBeginHook(&FrameBeginHook);
-	App::GetSingleton()->RemoveFrameEndHook(&FrameEndHook);
 }
 
 /*
@@ -46,7 +42,7 @@ void Input::EventHook(const SDL_Event& e){
 	}
 }
 
-void Input::FrameBeginHook(){
+void Input::Update(){
 	// Get mouse delta from center, convert to range (-1, 1), 
 	//	move mouse back to center
 
@@ -63,7 +59,7 @@ void Input::FrameBeginHook(){
 		SDL_WarpMouseInWindow(App::GetSingleton()->sdlWindow, ww/2, wh/2);
 }
 
-void Input::FrameEndHook(){
+void Input::EndFrame(){
 	// Clear all ChangedThisFrameFlag's from keyStates
 	for(auto& kv: keyStates){
 		kv.second &= ~Input::ChangedThisFrameFlag;

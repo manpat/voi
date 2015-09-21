@@ -34,10 +34,11 @@ public:
 	// Returns if a key was released this frame
 	static bool GetKeyUp(s32 k);
 
+	static void Update();
+	static void EndFrame();
+	
 protected:
-	static void FrameBeginHook();
 	static void EventHook(const SDL_Event&);
-	static void FrameEndHook();
 };
 
 #endif
