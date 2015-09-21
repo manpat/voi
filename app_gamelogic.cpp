@@ -116,7 +116,7 @@ void App::Init(){
 	std::cout << std::endl;
 
 	// entityManager->entities[0]->AddComponent<BoxColliderComponent>();
-	// entityManager->entities[1]->AddComponent<BoxColliderComponent>()->force = vec3{0,-10,0};
+	entityManager->entities[0]->AddComponent<BoxColliderComponent>(true)->force = vec3{0,-100,0};
 #endif
 
 	portalManager->SetLayer(0);

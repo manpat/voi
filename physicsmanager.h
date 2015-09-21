@@ -20,14 +20,32 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 	void Update();
 };
 
-struct BoxColliderComponent : Component {
+struct ColliderComponent : Component {
 	NewtonBody* body = nullptr;
 	NewtonCollision* collider = nullptr;
+	bool dynamic = false;
+
 	vec3 force = vec3::ZERO;
 
-	BoxColliderComponent() : Component{this} {}
-	void OnInit() override;
+
+	ColliderComponent(bool dynamic = false) : Component{this}, dynamic{dynamic} {}
+	void OnAwake() override;
 	void OnDestroy() override;
+
+	virtual void CreateCollider() = 0;
+	virtual void SetMassMatrix() = 0;
+};
+
+struct BoxColliderComponent : ColliderComponent {
+	BoxColliderComponent(bool dynamic = false) : ColliderComponent{dynamic} {}
+	void CreateCollider() override;
+	void SetMassMatrix() override;
+};
+
+struct StaticMeshColliderComponent : ColliderComponent {
+	StaticMeshColliderComponent() : ColliderComponent{dynamic} {}
+	void CreateCollider() override;
+	void SetMassMatrix() override;
 };
 
 #endif

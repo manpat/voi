@@ -60,40 +60,51 @@ extern "C" void SetTransformCallback(const NewtonBody* body, const f32* nmat, in
 	auto ent = comp->entity;
 
 	auto mat = F32ArrayToOgreMat(nmat);
+
 	vec3 position, scale;
 	quat ori;
 
 	mat.decomposition(position, scale, ori);
-	ent->SetPosition(position);
-
-	// std::cout << "Entity " << ent->id << " moved" << std::endl;
+	ent->SetGlobalPosition(position);
+	ent->SetScale(scale);
+	ent->SetGlobalOrientation(ori);
 }
 
 extern "C" void ApplyGravityCallback(const NewtonBody* body, f32 dt, int){
 	auto comp = static_cast<Component*>(NewtonBodyGetUserData(body));
-	// auto ent = comp->entity;
 
-	// TODO: This could be factored into a switch 
-	//	when there are more collider types
-	// Alternatively, a base Collider component could be used instead
-	if(comp->IsType<BoxColliderComponent>()){
-		auto boxc = static_cast<BoxColliderComponent*>(comp);
-		NewtonBodyAddForce(body, &boxc->force.x);
-		boxc->force = vec3::ZERO;
+	if(comp->IsType<ColliderComponent>()){
+		auto col = static_cast<ColliderComponent*>(comp);
+		NewtonBodySetForce(body, &col->force.x);
+		col->force = vec3::ZERO;
 	}
 }
 
-void BoxColliderComponent::OnInit() {
+void ColliderComponent::OnAwake() {
 	auto world = PhysicsManager::GetSingleton()->world;
-	auto omat = entity->GetFullTransform();
+	mat4 omat = entity->GetFullTransform();
+	omat = omat.transpose();
 
-	f32 nmat[16];
-	OgreMatToF32Array(omat, nmat);
+	CreateCollider();
+	body = NewtonCreateBody(world, collider, omat[0]);
 
+	if(dynamic) SetMassMatrix();
+
+	NewtonBodySetUserData(body, this);
+	NewtonBodySetTransformCallback(body, SetTransformCallback);
+	NewtonBodySetForceAndTorqueCallback(body, ApplyGravityCallback);
+}
+
+void ColliderComponent::OnDestroy() {
+	// TODO: Destroy newton body/collider
+}
+
+void BoxColliderComponent::CreateCollider() {
+	auto world = PhysicsManager::GetSingleton()->world;
 	collider = NewtonCreateBox(world, 1, 1, 1, 0, nullptr);
-	body = NewtonCreateBody(world, collider, nmat);
+}
 
-	// Zero mass is a static object
+void BoxColliderComponent::SetMassMatrix() {
 	f32 mass = 1.;
 	f32 lx = 1.;
 	f32 ly = 1.;
@@ -103,13 +114,13 @@ void BoxColliderComponent::OnInit() {
 	f32 Ixx = mass * (ly*ly + lz*lz) / 12;
 	f32 Iyy = mass * (lx*lx + lz*lz) / 12;
 	f32 Izz = mass * (lx*lx + ly*ly) / 12;
+
 	NewtonBodySetMassMatrix(body, mass, Ixx, Iyy, Izz);
-
-	NewtonBodySetUserData(body, this);
-	NewtonBodySetTransformCallback(body, SetTransformCallback);
-	NewtonBodySetForceAndTorqueCallback(body, ApplyGravityCallback);
 }
 
-void BoxColliderComponent::OnDestroy() {
 
+void StaticMeshColliderComponent::CreateCollider() {
+	auto world = PhysicsManager::GetSingleton()->world;
 }
+
+void StaticMeshColliderComponent::SetMassMatrix() {}
