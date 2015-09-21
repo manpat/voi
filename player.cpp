@@ -33,16 +33,18 @@ void Player::OnUpdate() {
 	// Rotate camera
 	auto oriYaw = Ogre::Quaternion(Ogre::Radian(cameraYaw), vec3::UNIT_Y);
 	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
-	camera->cameraNode->setOrientation(ori);
+	camera->cameraNode->_setDerivedOrientation(ori);
 
 	f32 boost = 2.f;
 
 	if(Input::GetKey(SDLK_LSHIFT)){
-		boost = 4.f;
+		boost = 6.f;
 	}
 
 	// Move with WASD, based on look direction
-	auto velocity = vec3::ZERO;
+	auto velocity = collider->velocity;
+	velocity.x = 0.;
+	velocity.z = 0.;
 
 	if(Input::GetKey(SDLK_w)){
 		velocity -= oriYaw.zAxis() * boost;

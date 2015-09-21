@@ -23,7 +23,6 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 struct ColliderComponent : Component {
 	NewtonBody* body = nullptr;
 	NewtonCollision* collider = nullptr;
-	bool dynamic = false;
 
 	vec3 force = vec3::ZERO;
 	vec3 velocity = vec3::ZERO;
@@ -34,21 +33,31 @@ struct ColliderComponent : Component {
 
 	void ConstrainUpright();
 
+	// TODO: Functions for getting and setting body properties
+	//	velocity, damping, etc...
+
 protected:
+	bool dynamic = false;
+
 	virtual void CreateCollider() = 0;
 	virtual void SetMassMatrix() = 0;
 };
 
 struct BoxColliderComponent : ColliderComponent {
-	BoxColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
+	BoxColliderComponent(const vec3& _size = vec3{1.f}, bool _dynamic = false) : ColliderComponent{_dynamic}, size{_size} {}
 	void CreateCollider() override;
 	void SetMassMatrix() override;
+
+	vec3 size;
 };
 
 struct CapsuleColliderComponent : ColliderComponent {
-	CapsuleColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
+	CapsuleColliderComponent(f32 _radius = 1.f, f32 _height = 2.f, bool _dynamic = false) 
+		: ColliderComponent{_dynamic}, radius{_radius}, height{_height} {}
 	void CreateCollider() override;
 	void SetMassMatrix() override;
+
+	f32 radius, height;
 };
 
 // This is for level meshes and stuff that doesn't move ever.

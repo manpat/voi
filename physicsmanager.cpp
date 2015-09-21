@@ -3,14 +3,7 @@
 #include "entity.h"
 #include "app.h"
 
-void OgreMatToF32Array(const mat4& m, f32 o[16]){
-	for(u8 i = 0; i < 4; i++){
-		o[4*0+i] = m[i][0];
-		o[4*1+i] = m[i][1];
-		o[4*2+i] = m[i][2];
-		o[4*3+i] = m[i][3];
-	}
-}
+// This transposes the matrix as well
 mat4 F32ArrayToOgreMat(const f32* arr){
 	mat4 o;
 	for(u8 i = 0; i < 4; i++){
@@ -19,7 +12,6 @@ mat4 F32ArrayToOgreMat(const f32* arr){
 		o[2][i] = arr[i*4+2];
 		o[3][i] = arr[i*4+3];
 	}
-
 	return o;
 }
 
@@ -68,6 +60,12 @@ extern "C" void SetTransformCallback(const NewtonBody* body, const f32* nmat, in
 	ent->SetGlobalPosition(position);
 	ent->SetScale(scale);
 	ent->SetGlobalOrientation(ori);
+
+	// Update collider velocity
+	if(comp->IsType<ColliderComponent>()){
+		auto col = static_cast<ColliderComponent*>(comp);
+		NewtonBodyGetVelocity(col->body, &col->velocity.x);
+	}
 }
 
 extern "C" void ApplyForceCallback(const NewtonBody* body, f32 dt, int){
@@ -75,8 +73,10 @@ extern "C" void ApplyForceCallback(const NewtonBody* body, f32 dt, int){
 
 	if(comp->IsType<ColliderComponent>()){
 		auto col = static_cast<ColliderComponent*>(comp);
+		auto force = col->force + vec3{0, -30., 0}; // Gravity
+
 		NewtonBodySetVelocity(body, &col->velocity.x);
-		NewtonBodyAddForce(body, &col->force.x);
+		NewtonBodyAddForce(body, &force.x);
 		col->force = vec3::ZERO;
 		col->velocity = vec3::ZERO;
 	}
@@ -107,20 +107,17 @@ void ColliderComponent::ConstrainUpright(){
 
 void BoxColliderComponent::CreateCollider() {
 	auto world = PhysicsManager::GetSingleton()->world;
-	collider = NewtonCreateBox(world, 1, 1, 1, 0, nullptr);
+	collider = NewtonCreateBox(world, size.x, size.y, size.z, 0, nullptr);
 }
 
 void BoxColliderComponent::SetMassMatrix() {
 	// TODO: Make members
 	f32 mass = 1.;
-	f32 lx = 1.;
-	f32 ly = 1.;
-	f32 lz = 1.;
 
 	// http://newtondynamics.com/wiki/index.php5?title=NewtonBodySetMassMatrix
-	f32 Ixx = mass * (ly*ly + lz*lz) / 12;
-	f32 Iyy = mass * (lx*lx + lz*lz) / 12;
-	f32 Izz = mass * (lx*lx + ly*ly) / 12;
+	f32 Ixx = mass * (size.y*size.y + size.z*size.z) / 12;
+	f32 Iyy = mass * (size.x*size.x + size.z*size.z) / 12;
+	f32 Izz = mass * (size.x*size.x + size.y*size.y) / 12;
 
 	NewtonBodySetMassMatrix(body, mass, Ixx, Iyy, Izz);
 }
@@ -137,10 +134,7 @@ void CapsuleColliderComponent::CreateCollider() {
 	transform.makeTransform(vec3::ZERO, vec3(1,1,1), rotation);
 	transform = transform.transpose();
 
-	// TODO: Make members
-	f32 r = 1.f, h = 2.f;
-
-	collider = NewtonCreateCapsule(world, r, h, 0, transform[0]);
+	collider = NewtonCreateCapsule(world, radius, height, 0, transform[0]);
 }
 
 void CapsuleColliderComponent::SetMassMatrix() {

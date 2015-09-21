@@ -117,7 +117,7 @@ void App::Init(){
 	std::cout << std::endl;
 
 	// entityManager->entities[0]->AddComponent<BoxColliderComponent>();
-	entityManager->entities[0]->AddComponent<BoxColliderComponent>(true)->force = vec3{0,-100,0};
+	entityManager->entities[0]->AddComponent<BoxColliderComponent>(vec3{2.}, true)->force = vec3{0,-100,0};
 #endif
 
 	auto player = entityManager->CreateEntity();
@@ -130,9 +130,17 @@ void App::Init(){
 	player->ogreSceneNode->addChild(camera->cameraNode);
 
 	player->AddComponent<Player>();
-	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(true);
+	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(2.f, 2.f, true);
 	playerCollider->ConstrainUpright();
 	// playerCollider->force = vec3(0, -10, 0);
+
+	auto angDamping = vec3{1.0};
+	NewtonBodySetAngularDamping(playerCollider->body, &angDamping.x);
+
+	auto ground = entityManager->CreateEntity();
+	ground->ogreSceneNode = rootNode->createChildSceneNode();
+	ground->ogreSceneNode->setPosition(0,-1,0);
+	ground->AddComponent<BoxColliderComponent>(vec3{1000., 1., 1000.}, false);
 
 	portalManager->SetLayer(0);
 	sceneManager->addRenderQueueListener(portalManager.get());
