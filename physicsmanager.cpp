@@ -80,7 +80,7 @@ extern "C" void ApplyGravityCallback(const NewtonBody* body, f32 dt, int){
 	}
 }
 
-void ColliderComponent::OnAwake() {
+void ColliderComponent::OnInit() {
 	auto world = PhysicsManager::GetSingleton()->world;
 	mat4 omat = entity->GetFullTransform();
 	omat = omat.transpose();
@@ -99,12 +99,17 @@ void ColliderComponent::OnDestroy() {
 	// TODO: Destroy newton body/collider
 }
 
+void ColliderComponent::ConstrainUpright(){
+	NewtonConstraintCreateUpVector(PhysicsManager::GetSingleton()->world, &vec3::UNIT_Y.x, body);
+}
+
 void BoxColliderComponent::CreateCollider() {
 	auto world = PhysicsManager::GetSingleton()->world;
 	collider = NewtonCreateBox(world, 1, 1, 1, 0, nullptr);
 }
 
 void BoxColliderComponent::SetMassMatrix() {
+	// TODO: Make members
 	f32 mass = 1.;
 	f32 lx = 1.;
 	f32 ly = 1.;
@@ -119,8 +124,42 @@ void BoxColliderComponent::SetMassMatrix() {
 }
 
 
-void StaticMeshColliderComponent::CreateCollider() {
+void CapsuleColliderComponent::CreateCollider() {
 	auto world = PhysicsManager::GetSingleton()->world;
+	quat rotation;
+	mat4 transform;
+
+	// This is required because for some reason Newton capsules
+	//	lie along the x-axis
+	rotation.FromAngleAxis(Ogre::Radian(M_PI/2.0), vec3::UNIT_Z);
+	transform.makeTransform(vec3::ZERO, vec3(1,1,1), rotation);
+	transform = transform.transpose();
+
+	// TODO: Make members
+	f32 r = 1.f, h = 2.f;
+
+	collider = NewtonCreateCapsule(world, r, h, 0, transform[0]);
+}
+
+void CapsuleColliderComponent::SetMassMatrix() {
+	// TODO: Make members
+	f32 mass = 1.;
+	f32 lx = 1.;
+	f32 ly = 1.;
+	f32 lz = 1.;
+
+	// http://newtondynamics.com/wiki/index.php5?title=NewtonBodySetMassMatrix
+	f32 Ixx = mass * (ly*ly + lz*lz) / 12;
+	f32 Iyy = mass * (lx*lx + lz*lz) / 12;
+	f32 Izz = mass * (lx*lx + ly*ly) / 12;
+
+	NewtonBodySetMassMatrix(body, mass, Ixx, Iyy, Izz);
+}
+
+
+// TODO: this
+void StaticMeshColliderComponent::CreateCollider() {
+	// auto world = PhysicsManager::GetSingleton()->world;
 }
 
 void StaticMeshColliderComponent::SetMassMatrix() {}

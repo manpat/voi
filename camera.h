@@ -12,15 +12,12 @@ namespace Ogre {
 
 class Camera {
 public:
-	Ogre::Camera* ogreCamera;
-	Ogre::SceneNode* cameraNode;
-	Ogre::Viewport* viewport;
-
-	f32 cameraYaw = 0.f;
-	f32 cameraPitch = 0.f;
+	Ogre::Camera* ogreCamera = nullptr;
+	Ogre::SceneNode* cameraNode = nullptr;
+	Ogre::Viewport* viewport = nullptr;
 
 public:
-	Camera(std::string name = "main");
+	Camera(std::string name = "MainCamera");
 	~Camera();
 
 };

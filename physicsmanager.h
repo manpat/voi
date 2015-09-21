@@ -27,25 +27,35 @@ struct ColliderComponent : Component {
 
 	vec3 force = vec3::ZERO;
 
-
-	ColliderComponent(bool dynamic = false) : Component{this}, dynamic{dynamic} {}
-	void OnAwake() override;
+	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}
+	void OnInit() override;
 	void OnDestroy() override;
 
+	void ConstrainUpright();
+
+protected:
 	virtual void CreateCollider() = 0;
 	virtual void SetMassMatrix() = 0;
 };
 
 struct BoxColliderComponent : ColliderComponent {
-	BoxColliderComponent(bool dynamic = false) : ColliderComponent{dynamic} {}
+	BoxColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
 	void CreateCollider() override;
 	void SetMassMatrix() override;
 };
 
-struct StaticMeshColliderComponent : ColliderComponent {
-	StaticMeshColliderComponent() : ColliderComponent{dynamic} {}
+struct CapsuleColliderComponent : ColliderComponent {
+	CapsuleColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
 	void CreateCollider() override;
 	void SetMassMatrix() override;
 };
+
+// This is for level meshes and stuff that doesn't move ever.
+struct StaticMeshColliderComponent : ColliderComponent {
+	StaticMeshColliderComponent() : ColliderComponent{false} {}
+	void CreateCollider() override;
+	void SetMassMatrix() override;
+};
+
 
 #endif

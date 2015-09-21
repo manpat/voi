@@ -55,7 +55,7 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 			Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, false);
 
 		// TODO: Make good
-		auto playerPos = camera->cameraNode->getPosition();
+		auto playerPos = camera->cameraNode->_getDerivedPosition();
 		auto side = portal.clip.getSide(playerPos);
 
 		if(side == Ogre::Plane::NEGATIVE_SIDE){

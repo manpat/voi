@@ -6,6 +6,7 @@
 
 #include "app.h"
 #include "input.h"
+#include "player.h"
 #include "camera.h"
 #include "apptime.h"
 #include "sceneparser.h"
@@ -119,6 +120,20 @@ void App::Init(){
 	entityManager->entities[0]->AddComponent<BoxColliderComponent>(true)->force = vec3{0,-100,0};
 #endif
 
+	auto player = entityManager->CreateEntity();
+	player->ogreSceneNode = rootNode->createChildSceneNode();
+	player->ogreSceneNode->setPosition(0,1,0);
+
+	// TODO: This should really be an Entity::AddChild
+	// Camera should be a component of a child entity
+	camera->cameraNode->getParentSceneNode()->removeChild(camera->cameraNode);
+	player->ogreSceneNode->addChild(camera->cameraNode);
+
+	player->AddComponent<Player>();
+	auto playerCollider = player->AddComponent<CapsuleColliderComponent>();
+	playerCollider->ConstrainUpright();
+	playerCollider->force = vec3(0, -10, 0);
+
 	portalManager->SetLayer(0);
 	sceneManager->addRenderQueueListener(portalManager.get());
 
@@ -147,38 +162,6 @@ void App::Init(){
 	             88
 */
 void App::Update(){
-	auto md = Input::GetMouseDelta();
-
-	auto nyaw =  -md.x * 2.0 * M_PI * AppTime::deltaTime * 7.f;
-	auto npitch = md.y * 2.0 * M_PI * AppTime::deltaTime * 7.f;
-	if(abs(camera->cameraPitch + npitch) < M_PI/4.0f) { // Convoluted clamp
-		camera->cameraPitch += npitch;
-	}
-	camera->cameraYaw += nyaw;
-
-	// Rotate camera
-	auto oriYaw = Ogre::Quaternion(Ogre::Radian(camera->cameraYaw), vec3::UNIT_Y);
-	auto ori = Ogre::Quaternion(Ogre::Radian(camera->cameraPitch), oriYaw.xAxis()) * oriYaw;
-	camera->cameraNode->setOrientation(ori);
-
-	f32 boost = 2.f;
-
-	if(Input::GetKey(SDLK_LSHIFT)){
-		boost = 4.f;
-	}
-
-	// Move with WASD, based on look direction
-	if(Input::GetKey(SDLK_w)){
-		camera->cameraNode->translate(-oriYaw.zAxis() * AppTime::deltaTime * boost);
-	}else if(Input::GetKey(SDLK_s)){
-		camera->cameraNode->translate(oriYaw.zAxis() * AppTime::deltaTime * boost);
-	}
-
-	if(Input::GetKey(SDLK_a)){
-		camera->cameraNode->translate(-oriYaw.xAxis() * AppTime::deltaTime * boost);
-	}else if(Input::GetKey(SDLK_d)){
-		camera->cameraNode->translate(oriYaw.xAxis() * AppTime::deltaTime * boost);
-	}
 
 	// audioManager->playNote(128);
 	

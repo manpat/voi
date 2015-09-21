@@ -6,6 +6,8 @@ lib/
 *.o
 *.log
 
+# I'm declaring *.shit to be the extention for reference code from other branches
+*.shit
 *.zip
 *.7z
 *.tar
