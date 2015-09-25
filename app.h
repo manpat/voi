@@ -1,7 +1,6 @@
 #ifndef APP_H
 #define APP_H
 
-#include <SDL2/SDL.h>
 #include <memory>
 #include <vector>
 
@@ -12,8 +11,8 @@ class Input;
 class Camera;
 class AudioManager;
 class PortalManager;
-class EntityManager;
-class PhysicsManager;
+struct EntityManager;
+struct PhysicsManager;
 
 enum {
 	WIDTH = 800,
@@ -26,6 +25,9 @@ namespace Ogre {
 	class SceneManager;
 	class RenderWindow;
 };
+
+struct SDL_Window;
+union SDL_Event;
 
 struct App : Singleton<App> {
 	typedef void (*SDLEventHook)(const SDL_Event&);

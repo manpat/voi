@@ -1,7 +1,10 @@
 #include "physicsmanager.h"
+#include "meshinfo.h"
 #include "apptime.h"
 #include "entity.h"
 #include "app.h"
+
+#include <OGRE/OgreEntity.h>
 
 // This transposes the matrix as well
 mat4 F32ArrayToOgreMat(const f32* arr){
@@ -18,6 +21,10 @@ mat4 F32ArrayToOgreMat(const f32* arr){
 template<>
 PhysicsManager* Singleton<PhysicsManager>::instance = nullptr;
 
+extern "C" void BodyLeaveWorldCallback(const NewtonBody* const body, int threadIndex);
+extern "C" s32 FilterCollision(const NewtonMaterial* mat, const NewtonBody* b1, const NewtonBody* b2, s32);
+extern "C" void CollisionCallback (const NewtonJoint* const contact, f32 timestep, int);
+
 PhysicsManager::PhysicsManager(f32 refreshRate)
 	: timestep{1.f/refreshRate}, accumulator{0.f} {
 
@@ -29,6 +36,9 @@ PhysicsManager::PhysicsManager(f32 refreshRate)
 	NewtonSetSolverModel(world, 1);
 
 	enabledCollisionGroups = 0xff;
+
+	NewtonSetBodyLeaveWorldEvent(world, BodyLeaveWorldCallback);
+	NewtonMaterialSetCollisionCallback(world, 0, 0, this, FilterCollision, CollisionCallback);
 }
 
 PhysicsManager::~PhysicsManager(){
@@ -45,6 +55,34 @@ void PhysicsManager::Update(){
 		NewtonUpdate(world, timestep);
 		accumulator -= timestep;
 	}
+}
+
+extern "C" s32 FilterCollision(const NewtonMaterial* mat, const NewtonBody* b1, const NewtonBody* b2, s32){
+	auto ud = NewtonMaterialGetMaterialPairUserData(mat);
+	auto physMan = static_cast<PhysicsManager*>(ud);
+
+	auto ud1 = NewtonBodyGetUserData(b1);
+	auto ud2 = NewtonBodyGetUserData(b2);
+	auto collider1 = static_cast<Component*>(ud1)->As<ColliderComponent>();
+	auto collider2 = static_cast<Component*>(ud2)->As<ColliderComponent>();
+
+	return (s32)((collider1->collisionGroups 
+		& collider2->collisionGroups & physMan->enabledCollisionGroups) > 0);
+}
+
+extern "C" void CollisionCallback (const NewtonJoint* const contact, f32, int){
+	auto ud1 = NewtonBodyGetUserData(NewtonJointGetBody0(contact));
+	auto ud2 = NewtonBodyGetUserData(NewtonJointGetBody1(contact));
+	auto collider1 = static_cast<Component*>(ud1)->As<ColliderComponent>();
+	auto collider2 = static_cast<Component*>(ud2)->As<ColliderComponent>();
+
+	std::cout << "Collide " << collider1->id << " -> " << collider2->id << std::endl;
+}
+
+extern "C" void BodyLeaveWorldCallback(const NewtonBody* const body, int) {
+	mat4 trans = mat4::getTrans(vec3{0,0,0}).transpose();
+
+	NewtonBodySetMatrix(body, trans[0]);
 }
 
 extern "C" void SetTransformCallback(const NewtonBody* body, const f32* nmat, int){
@@ -105,6 +143,10 @@ void ColliderComponent::ConstrainUpright(){
 	NewtonConstraintCreateUpVector(PhysicsManager::GetSingleton()->world, &vec3::UNIT_Y.x, body);
 }
 
+void ColliderComponent::SetTrigger(bool trigger){
+	NewtonCollisionSetAsTriggerVolume(collider, trigger);
+}
+
 void BoxColliderComponent::CreateCollider() {
 	auto world = PhysicsManager::GetSingleton()->world;
 	collider = NewtonCreateBox(world, size.x, size.y, size.z, 0, nullptr);
@@ -153,9 +195,42 @@ void CapsuleColliderComponent::SetMassMatrix() {
 }
 
 
-// TODO: this
-void StaticMeshColliderComponent::CreateCollider() {
-	// auto world = PhysicsManager::GetSingleton()->world;
+void SphereColliderComponent::CreateCollider() {
+	auto world = PhysicsManager::GetSingleton()->world;
+	collider = NewtonCreateSphere(world, radius, radius, radius, 0, nullptr);
 }
 
+void SphereColliderComponent::SetMassMatrix() {
+	// TODO: Make members
+	f32 mass = 1.;
+	f32 lx = 1.;
+	f32 ly = 1.;
+	f32 lz = 1.;
+
+	// http://newtondynamics.com/wiki/index.php5?title=NewtonBodySetMassMatrix
+	f32 Ixx = mass * (ly*ly + lz*lz) / 12;
+	f32 Iyy = mass * (lx*lx + lz*lz) / 12;
+	f32 Izz = mass * (lx*lx + ly*ly) / 12;
+
+	NewtonBodySetMassMatrix(body, mass, Ixx, Iyy, Izz);
+}
+
+
+void StaticMeshColliderComponent::CreateCollider() {
+	auto world = PhysicsManager::GetSingleton()->world;
+	collider = NewtonCreateTreeCollision(world, 0);
+
+	// Temporary
+	auto sm = entity->ogreEntity->getMesh()->getSubMesh(0);
+	auto smVertices = GetOgreSubMeshVertices(sm);
+
+	NewtonTreeCollisionBeginBuild(collider);
+	for(u32 i = 0; i < smVertices.size()/3; i++){
+		NewtonTreeCollisionAddFace(collider, 3, &smVertices[i*3].x, sizeof(vec3), 1);
+	}
+
+	NewtonTreeCollisionEndBuild(collider, 1);
+}
+
+// Does nothing because colliders are static by default
 void StaticMeshColliderComponent::SetMassMatrix() {}

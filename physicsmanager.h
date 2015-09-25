@@ -26,12 +26,14 @@ struct ColliderComponent : Component {
 
 	vec3 force = vec3::ZERO;
 	vec3 velocity = vec3::ZERO;
+	u32 collisionGroups = 1<<0;
 
 	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}
 	void OnInit() override;
 	void OnDestroy() override;
 
 	void ConstrainUpright();
+	void SetTrigger(bool);
 
 	// TODO: Functions for getting and setting body properties
 	//	velocity, damping, etc...
@@ -49,6 +51,14 @@ struct BoxColliderComponent : ColliderComponent {
 	void SetMassMatrix() override;
 
 	vec3 size;
+};
+
+struct SphereColliderComponent : ColliderComponent {
+	SphereColliderComponent(f32 r = 1.f, bool _dynamic = false) : ColliderComponent{_dynamic}, radius{r} {}
+	void CreateCollider() override;
+	void SetMassMatrix() override;
+
+	f32 radius;
 };
 
 struct CapsuleColliderComponent : ColliderComponent {

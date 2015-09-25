@@ -54,7 +54,15 @@ struct Component {
 	template<class C>
 	bool IsType() const { return typeid(C).hash_code() == typeHash; }
 
+	template<class C>
+	const C* As(bool fatal = true) const {
+		if(!IsType<C>()) return nullptr;
+		return static_cast<const C*>(this);
+	}
+
 	bool SameType(Component*) const;
+
+
 };
 
 #endif

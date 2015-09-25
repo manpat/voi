@@ -20,6 +20,7 @@ void Player::OnAwake() {
 void Player::OnUpdate() {
 	auto camera = App::GetSingleton()->camera;
 	auto portalManager = App::GetSingleton()->portalManager;
+	auto physicsManager = App::GetSingleton()->physicsManager;
 
 	auto md = Input::GetMouseDelta();
 
@@ -64,5 +65,6 @@ void Player::OnUpdate() {
 		static s32 layer = 0;
 		layer = (layer+1)%portalManager->GetNumLayers();
 		portalManager->SetLayer(layer);
+		physicsManager->enabledCollisionGroups = 1<<layer;
 	}
 }
