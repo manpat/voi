@@ -1,3 +1,4 @@
+#include "entitymotionstate.h"
 #include "physicsmanager.h"
 #include "meshinfo.h"
 #include "apptime.h"
@@ -37,7 +38,7 @@ PhysicsManager::~PhysicsManager(){
 }
 
 void PhysicsManager::Update(){
-	world->stepSimulation(timestep, 10);
+	world->stepSimulation(AppTime::deltaTime, 10);
 }
 
 // extern "C" s32 FilterCollision(const NewtonMaterial* mat, const NewtonBody* b1, const NewtonBody* b2, s32){
@@ -104,14 +105,21 @@ void PhysicsManager::Update(){
 // }
 
 void ColliderComponent::OnInit() {
-	// auto world = PhysicsManager::GetSingleton()->world;
-	// mat4 omat = entity->GetFullTransform();
-	// omat = omat.transpose();
+	auto world = PhysicsManager::GetSingleton()->world;
 
-	// CreateCollider();
-	// body = NewtonCreateBody(world, collider, omat[0]);
+	CreateCollider();
+	motionState = new EntityMotionState(entity);
 
-	// if(dynamic) SetMassMatrix();
+	btScalar mass = 0.;
+	btVector3 inertia {0,0,0};
+	if(dynamic) {
+		mass = 1.;
+		collider->calculateLocalInertia(mass, inertia);
+	}
+
+	body = new RigidBody{mass, motionState, collider, inertia};
+
+	world->addRigidBody(body);
 
 	// NewtonBodySetUserData(body, this);
 	// NewtonBodySetTransformCallback(body, SetTransformCallback);
@@ -119,11 +127,11 @@ void ColliderComponent::OnInit() {
 }
 
 void ColliderComponent::OnDestroy() {
-	// TODO: Destroy newton body/collider
+	// TODO: Destroy bullet body/collider
 }
 
-void ColliderComponent::ConstrainUpright(){
-	// NewtonConstraintCreateUpVector(PhysicsManager::GetSingleton()->world, &vec3::UNIT_Y.x, body);
+void ColliderComponent::DisableRotation(){
+	body->setAngularFactor(0.f);
 }
 
 void ColliderComponent::SetTrigger(bool trigger){
@@ -131,36 +139,37 @@ void ColliderComponent::SetTrigger(bool trigger){
 	// NewtonCollisionSetAsTriggerVolume(collider, trigger);
 }
 
-void BoxColliderComponent::CreateCollider() {
-	// auto world = PhysicsManager::GetSingleton()->world;
-	// collider = NewtonCreateBox(world, size.x, size.y, size.z, 0, nullptr);
+void ColliderComponent::SetAutosleep(bool as){
+	body->setActivationState(as?WANTS_DEACTIVATION:DISABLE_DEACTIVATION);
 }
 
+void ColliderComponent::Wakeup(){
+	body->activate();
+}
+
+vec3 ColliderComponent::GetVelocity() const {
+	auto v = body->getLinearVelocity();
+	return vec3{v.x(), v.y(), v.z()};
+}
+void ColliderComponent::SetVelocity(const vec3& v){
+	body->setLinearVelocity({v.x, v.y, v.z});
+}
+
+void BoxColliderComponent::CreateCollider() {
+	auto hs = size/2.f;
+	collider = new btBoxShape{{hs.x, hs.y, hs.z}};
+}
 
 void CapsuleColliderComponent::CreateCollider() {
-	// auto world = PhysicsManager::GetSingleton()->world;
-	// quat rotation;
-	// mat4 transform;
-
-	// // This is required because for some reason Newton capsules
-	// //	lie along the x-axis
-	// rotation.FromAngleAxis(Ogre::Radian(M_PI/2.0), vec3::UNIT_Z);
-	// transform.makeTransform(vec3::ZERO, vec3(1,1,1), rotation);
-	// transform = transform.transpose();
-
-	// collider = NewtonCreateCapsule(world, radius, height, 0, transform[0]);
+	collider = new btCapsuleShape{radius, height};
 }
-
 
 void SphereColliderComponent::CreateCollider() {
-	// auto world = PhysicsManager::GetSingleton()->world;
-	// collider = NewtonCreateSphere(world, radius, radius, radius, 0, nullptr);
+	collider = new btSphereShape{radius};
 }
 
-
 void StaticMeshColliderComponent::CreateCollider() {
-	// auto world = PhysicsManager::GetSingleton()->world;
-	// collider = NewtonCreateTreeCollision(world, 0);
+	collider = new btEmptyShape{};
 
 	// // Temporary
 	// auto sm = entity->ogreEntity->getMesh()->getSubMesh(0);

@@ -125,7 +125,7 @@ void App::Init(){
 
 	auto player = entityManager->CreateEntity();
 	player->ogreSceneNode = rootNode->createChildSceneNode();
-	player->ogreSceneNode->setPosition(0,1,0);
+	player->ogreSceneNode->setPosition(0,2,0);
 
 	// TODO: This should really be an Entity::AddChild
 	// Camera should be a component of a child entity
@@ -134,7 +134,7 @@ void App::Init(){
 
 	player->AddComponent<Player>();
 	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(1.f, 1.f, true);
-	playerCollider->ConstrainUpright();
+	playerCollider->DisableRotation();
 	playerCollider->collisionGroups = 0xff;
 	physicsManager->enabledCollisionGroups = 1<<0;
 	// playerCollider->force = vec3(0, -10, 0);

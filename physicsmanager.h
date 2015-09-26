@@ -28,12 +28,16 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 	void Update();
 };
 
-struct ColliderComponent : Component {
-	using Rigidbody = btRigidBody;
-	using Collider = btCollisionShape;
+class EntityMotionState;
 
-	Rigidbody* body = nullptr;
+struct ColliderComponent : Component {
+	using RigidBody = btRigidBody;
+	using Collider = btCollisionShape;
+	using MotionState = EntityMotionState;
+
+	RigidBody* body = nullptr;
 	Collider* collider = nullptr;
+	MotionState* motionState = nullptr;
 
 	vec3 force = vec3::ZERO;
 	vec3 velocity = vec3::ZERO;
@@ -43,8 +47,14 @@ struct ColliderComponent : Component {
 	void OnInit() override;
 	void OnDestroy() override;
 
-	void ConstrainUpright();
+	void DisableRotation();
 	void SetTrigger(bool);
+	void SetAutosleep(bool);
+
+	void Wakeup();
+
+	vec3 GetVelocity() const;
+	void SetVelocity(const vec3&);
 
 	// TODO: Functions for getting and setting body properties
 	//	velocity, damping, etc...

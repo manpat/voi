@@ -15,6 +15,8 @@ void Player::OnAwake() {
 	std::cout << "New player" << std::endl;
 	collider = entity->FindComponent<ColliderComponent>();
 	if(!collider) throw "Player requires a collider component";
+
+	collider->SetAutosleep(false);
 }
 
 void Player::OnUpdate() {
@@ -43,7 +45,7 @@ void Player::OnUpdate() {
 	}
 
 	// Move with WASD, based on look direction
-	auto velocity = collider->velocity;
+	auto velocity = collider->GetVelocity();
 	velocity.x = 0.;
 	velocity.z = 0.;
 
@@ -59,7 +61,7 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
-	collider->velocity = velocity;
+	collider->SetVelocity(velocity);
 
 	if(Input::GetKeyDown('f')){
 		static s32 layer = 0;
