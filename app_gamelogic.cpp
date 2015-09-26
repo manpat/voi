@@ -135,7 +135,6 @@ void App::Init(){
 	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(1.f, 1.f, true);
 	playerCollider->DisableRotation();
 	playerCollider->collisionGroups = ~0u;
-	physicsManager->enabledCollisionGroups = 1<<0;
 
 	auto ground = entityManager->CreateEntity();
 	ground->ogreSceneNode = rootNode->createChildSceneNode();
@@ -150,7 +149,7 @@ void App::Init(){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
-	camera->cameraNode->setPosition(0, 1.2, 0);
+	camera->cameraNode->setPosition(0, 1.0, 0);
 	auto g = 0.1;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 }

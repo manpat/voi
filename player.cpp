@@ -17,6 +17,7 @@ void Player::OnAwake() {
 	if(!collider) throw "Player requires a collider component";
 
 	collider->SetAutosleep(false);
+	collider->collisionGroups = 1<<0; // Layer 1;
 }
 
 void Player::OnUpdate() {
@@ -67,6 +68,6 @@ void Player::OnUpdate() {
 		static s32 layer = 0;
 		layer = (layer+1)%portalManager->GetNumLayers();
 		portalManager->SetLayer(layer);
-		physicsManager->enabledCollisionGroups = 1<<layer;
+		collider->collisionGroups = 1<<layer;
 	}
 }

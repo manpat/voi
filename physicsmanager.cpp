@@ -71,69 +71,6 @@ void PhysicsManager::Update(){
 	world->stepSimulation(AppTime::deltaTime, 10);
 }
 
-// extern "C" s32 FilterCollision(const NewtonMaterial* mat, const NewtonBody* b1, const NewtonBody* b2, s32){
-// 	auto ud = NewtonMaterialGetMaterialPairUserData(mat);
-// 	auto physMan = static_cast<PhysicsManager*>(ud);
-
-// 	auto ud1 = NewtonBodyGetUserData(b1);
-// 	auto ud2 = NewtonBodyGetUserData(b2);
-// 	auto collider1 = static_cast<Component*>(ud1)->As<ColliderComponent>();
-// 	auto collider2 = static_cast<Component*>(ud2)->As<ColliderComponent>();
-
-// 	return (s32)((collider1->collisionGroups 
-// 		& collider2->collisionGroups & physMan->enabledCollisionGroups) > 0);
-// }
-
-// extern "C" void CollisionCallback (const NewtonJoint* const contact, f32, int){
-// 	auto ud1 = NewtonBodyGetUserData(NewtonJointGetBody0(contact));
-// 	auto ud2 = NewtonBodyGetUserData(NewtonJointGetBody1(contact));
-// 	auto collider1 = static_cast<Component*>(ud1)->As<ColliderComponent>();
-// 	auto collider2 = static_cast<Component*>(ud2)->As<ColliderComponent>();
-
-// 	std::cout << "Collide " << collider1->id << " -> " << collider2->id << std::endl;
-// }
-
-// extern "C" void BodyLeaveWorldCallback(const NewtonBody* const body, int) {
-// 	mat4 trans = mat4::getTrans(vec3{0,0,0}).transpose();
-
-// 	NewtonBodySetMatrix(body, trans[0]);
-// }
-
-// extern "C" void SetTransformCallback(const NewtonBody* body, const f32* nmat, int){
-// 	auto comp = static_cast<Component*>(NewtonBodyGetUserData(body));
-// 	auto ent = comp->entity;
-
-// 	auto mat = F32ArrayToOgreMat(nmat);
-
-// 	vec3 position, scale;
-// 	quat ori;
-
-// 	mat.decomposition(position, scale, ori);
-// 	ent->SetGlobalPosition(position);
-// 	ent->SetScale(scale);
-// 	ent->SetGlobalOrientation(ori);
-
-// 	// Update collider velocity
-// 	if(comp->IsType<ColliderComponent>()){
-// 		auto col = static_cast<ColliderComponent*>(comp);
-// 		NewtonBodyGetVelocity(col->body, &col->velocity.x);
-// 	}
-// }
-
-// extern "C" void ApplyForceCallback(const NewtonBody* body, f32 dt, int){
-// 	auto comp = static_cast<Component*>(NewtonBodyGetUserData(body));
-
-// 	if(comp->IsType<ColliderComponent>()){
-// 		auto col = static_cast<ColliderComponent*>(comp);
-// 		auto force = col->force + vec3{0, -30., 0}; // Gravity
-
-// 		NewtonBodySetVelocity(body, &col->velocity.x);
-// 		NewtonBodyAddForce(body, &force.x);
-// 		col->force = vec3::ZERO;
-// 		col->velocity = vec3::ZERO;
-// 	}
-// }
-
 void ColliderComponent::OnInit() {
 	auto world = PhysicsManager::GetSingleton()->world;
 
@@ -143,11 +80,15 @@ void ColliderComponent::OnInit() {
 	btScalar mass = 0.;
 	btVector3 inertia {0,0,0};
 	if(dynamic) {
-		mass = 1.;
+		mass = 10.;
 		collider->calculateLocalInertia(mass, inertia);
 	}
 
-	body = new RigidBody{mass, motionState, collider, inertia};
+	RigidBodyInfo bodyInfo{mass, motionState, collider, inertia};
+	// bodyInfo.m_friction = 1.0;
+	// bodyInfo.m_rollingFriction = 0.3;
+
+	body = new RigidBody{bodyInfo};
 	body->setUserPointer(this);
 
 	world->addRigidBody(body);

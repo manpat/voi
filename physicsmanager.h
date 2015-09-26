@@ -32,6 +32,7 @@ class EntityMotionState;
 
 struct ColliderComponent : Component {
 	using RigidBody = btRigidBody;
+	using RigidBodyInfo = btRigidBody::btRigidBodyConstructionInfo;
 	using Collider = btCollisionShape;
 	using MotionState = EntityMotionState;
 
