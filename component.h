@@ -29,7 +29,7 @@ struct Component {
 	bool enabled = true;
 
 	template<class C>
-	Component(C* c) : id{++componentIdCounter}, typeHash{typeid(C).hash_code()} {}
+	Component(C*) : id{++componentIdCounter}, typeHash{typeid(C).hash_code()} {}
 	virtual ~Component() {}
 
 	// OnInit is called after the component has been initialised and attached to 

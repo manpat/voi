@@ -15,7 +15,7 @@ class FmodSystemRef {
 	FMOD::System* system;
 
 public:
-	FmodSystemRef(FMOD::System* s) {}
+	FmodSystemRef(FMOD::System* s) : system{s} {}
 
 	FMOD::System* operator->() {
 		return system;

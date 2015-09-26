@@ -139,9 +139,6 @@ void App::Init(){
 	physicsManager->enabledCollisionGroups = 1<<0;
 	// playerCollider->force = vec3(0, -10, 0);
 
-	auto angDamping = vec3{1.0};
-	NewtonBodySetAngularDamping(playerCollider->body, &angDamping.x);
-
 	auto ground = entityManager->CreateEntity();
 	ground->ogreSceneNode = rootNode->createChildSceneNode();
 	ground->ogreSceneNode->setPosition(0,-0.52,0);

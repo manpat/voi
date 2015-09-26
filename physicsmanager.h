@@ -1,7 +1,7 @@
 #ifndef PHYSICSMANAGER_H
 #define PHYSICSMANAGER_H
 
-#include <Newton.h>
+#include <btBulletDynamicsCommon.h>
 #include "common.h"
 #include "singleton.h"
 #include "component.h"
@@ -9,10 +9,18 @@
 // http://newtondynamics.com/wiki/index.php5?title=API_Database
 
 struct PhysicsManager : Singleton<PhysicsManager> {
-	NewtonWorld* world;
+	using Broadphase = btDbvtBroadphase;
+	using Dispatcher = btCollisionDispatcher;
+	using Solver = btSequentialImpulseConstraintSolver;
+	using World = btDiscreteDynamicsWorld;
 
-	f32 timestep, accumulator;
-	u32 enabledCollisionGroups;
+	Broadphase* broadphase = nullptr;
+	Dispatcher* dispatcher = nullptr;
+	Solver* solver = nullptr;
+	World* world = nullptr;
+
+	f32 timestep = 1.f/60.f;
+	u32 enabledCollisionGroups = ~0u;
 
 	PhysicsManager(f32 = 60.f);
 	~PhysicsManager();
@@ -21,8 +29,11 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 };
 
 struct ColliderComponent : Component {
-	NewtonBody* body = nullptr;
-	NewtonCollision* collider = nullptr;
+	using Rigidbody = btRigidBody;
+	using Collider = btCollisionShape;
+
+	Rigidbody* body = nullptr;
+	Collider* collider = nullptr;
 
 	vec3 force = vec3::ZERO;
 	vec3 velocity = vec3::ZERO;
@@ -42,13 +53,11 @@ protected:
 	bool dynamic = false;
 
 	virtual void CreateCollider() = 0;
-	virtual void SetMassMatrix() = 0;
 };
 
 struct BoxColliderComponent : ColliderComponent {
 	BoxColliderComponent(const vec3& _size = vec3{1.f}, bool _dynamic = false) : ColliderComponent{_dynamic}, size{_size} {}
 	void CreateCollider() override;
-	void SetMassMatrix() override;
 
 	vec3 size;
 };
@@ -56,7 +65,6 @@ struct BoxColliderComponent : ColliderComponent {
 struct SphereColliderComponent : ColliderComponent {
 	SphereColliderComponent(f32 r = 1.f, bool _dynamic = false) : ColliderComponent{_dynamic}, radius{r} {}
 	void CreateCollider() override;
-	void SetMassMatrix() override;
 
 	f32 radius;
 };
@@ -65,7 +73,6 @@ struct CapsuleColliderComponent : ColliderComponent {
 	CapsuleColliderComponent(f32 _radius = 1.f, f32 _height = 2.f, bool _dynamic = false) 
 		: ColliderComponent{_dynamic}, radius{_radius}, height{_height} {}
 	void CreateCollider() override;
-	void SetMassMatrix() override;
 
 	f32 radius, height;
 };
@@ -74,7 +81,6 @@ struct CapsuleColliderComponent : ColliderComponent {
 struct StaticMeshColliderComponent : ColliderComponent {
 	StaticMeshColliderComponent() : ColliderComponent{false} {}
 	void CreateCollider() override;
-	void SetMassMatrix() override;
 };
 
 
