@@ -14,6 +14,13 @@ PhysicsManager* Singleton<PhysicsManager>::instance = nullptr;
 // extern "C" s32 FilterCollision(const NewtonMaterial* mat, const NewtonBody* b1, const NewtonBody* b2, s32);
 // extern "C" void CollisionCallback (const NewtonJoint* const contact, f32 timestep, int);
 
+btVector3 o2bt(const vec3& v){
+	return {v.x, v.y, v.z};
+}
+vec3 bt2o(const btVector3& v){
+	return {v.x(), v.y(), v.z()};
+}
+
 PhysicsManager::PhysicsManager(f32 refreshRate)
 	: timestep{1.f/refreshRate} {
 
@@ -148,16 +155,15 @@ void ColliderComponent::Wakeup(){
 }
 
 vec3 ColliderComponent::GetVelocity() const {
-	auto v = body->getLinearVelocity();
-	return vec3{v.x(), v.y(), v.z()};
+	return bt2o(body->getLinearVelocity());
 }
 void ColliderComponent::SetVelocity(const vec3& v){
-	body->setLinearVelocity({v.x, v.y, v.z});
+	body->setLinearVelocity(o2bt(v));
 }
 
 void BoxColliderComponent::CreateCollider() {
 	auto hs = size/2.f;
-	collider = new btBoxShape{{hs.x, hs.y, hs.z}};
+	collider = new btBoxShape{o2bt(hs)};
 }
 
 void CapsuleColliderComponent::CreateCollider() {
@@ -171,14 +177,21 @@ void SphereColliderComponent::CreateCollider() {
 void StaticMeshColliderComponent::CreateCollider() {
 	collider = new btEmptyShape{};
 
-	// // Temporary
-	// auto sm = entity->ogreEntity->getMesh()->getSubMesh(0);
-	// auto smVertices = GetOgreSubMeshVertices(sm);
+	// TODO: Use all submeshes
+	auto sm = entity->ogreEntity->getMesh()->getSubMesh(0);
+	auto smVertices = GetOgreSubMeshVertices(sm);
 
-	// NewtonTreeCollisionBeginBuild(collider);
-	// for(u32 i = 0; i < smVertices.size()/3; i++){
-	// 	NewtonTreeCollisionAddFace(collider, 3, &smVertices[i*3].x, sizeof(vec3), 1);
-	// }
+	auto trimesh = new btTriangleMesh();
 
-	// NewtonTreeCollisionEndBuild(collider, 1);
+	for(u32 i = 0; i < smVertices.size()/3; i++) {
+		btVector3 vs[] = {
+			o2bt(smVertices[i*3+0]),
+			o2bt(smVertices[i*3+1]),
+			o2bt(smVertices[i*3+2]),
+		};
+
+		trimesh->addTriangle(vs[0], vs[1], vs[2]);
+	}
+
+	collider = new btBvhTriangleMeshShape(trimesh, !dynamic /* Optimise for static */);
 }

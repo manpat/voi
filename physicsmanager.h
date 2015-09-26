@@ -93,5 +93,8 @@ struct StaticMeshColliderComponent : ColliderComponent {
 	void CreateCollider() override;
 };
 
+// TODO: Mesh convex hull
+// TODO: Other shapes
+
 
 #endif
