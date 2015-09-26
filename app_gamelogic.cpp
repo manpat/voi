@@ -119,13 +119,12 @@ void App::Init(){
 	entityManager->entities[1]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<1;
 	entityManager->entities[2]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<0;
 	auto ico = entityManager->entities[0]->AddComponent<SphereColliderComponent>(1.f, true);
-	ico->force = vec3{0,-100,0};
 	ico->collisionGroups = 1<<0;
 #endif
 
 	auto player = entityManager->CreateEntity();
 	player->ogreSceneNode = rootNode->createChildSceneNode();
-	player->ogreSceneNode->setPosition(0,2,0);
+	player->ogreSceneNode->setPosition(0,2,-3);
 
 	// TODO: This should really be an Entity::AddChild
 	// Camera should be a component of a child entity
@@ -135,15 +134,14 @@ void App::Init(){
 	player->AddComponent<Player>();
 	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(1.f, 1.f, true);
 	playerCollider->DisableRotation();
-	playerCollider->collisionGroups = 0xff;
+	playerCollider->collisionGroups = ~0u;
 	physicsManager->enabledCollisionGroups = 1<<0;
-	// playerCollider->force = vec3(0, -10, 0);
 
 	auto ground = entityManager->CreateEntity();
 	ground->ogreSceneNode = rootNode->createChildSceneNode();
 	ground->ogreSceneNode->setPosition(0,-0.52,0);
 	auto groundcol = ground->AddComponent<BoxColliderComponent>(vec3{1000., 1., 1000.}, false);
-	groundcol->collisionGroups = 0xff;
+	groundcol->collisionGroups = ~0u;
 
 	portalManager->SetLayer(0);
 	sceneManager->addRenderQueueListener(portalManager.get());

@@ -148,7 +148,8 @@ void Entity::SendMessage(const std::string& type){
 // SendMessage with arguments defined in entity.inl
 
 const std::string& Entity::GetName() const {
-	if(!ogreEntity) throw "Tried to get name of Entity with no Ogre::Entity";
+	static std::string errorName {"<unnamed entity>"};
+	if(!ogreEntity) return errorName;
 	return ogreEntity->getName();
 }
 const vec3& Entity::GetPosition() const {
