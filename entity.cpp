@@ -10,13 +10,15 @@
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreEntity.h>
 
+#undef SendMessage // TODO: Fix properly on Windows
+
 FramePool* Entity::messagePool = nullptr;
 
 void Entity::Init(){
 	components = {};
 	children = {};
 	parent = nullptr;
-	userdata = {};
+	//userdata = {}; // TODO: Fix properly in VS2013
 	ogreEntity = nullptr;
 	ogreSceneNode = nullptr;
 	// id set by entity manager
