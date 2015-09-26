@@ -56,7 +56,10 @@ struct Component {
 
 	template<class C>
 	const C* As(bool fatal = true) const {
-		if(!IsType<C>()) return nullptr;
+		if(!IsType<C>()) {
+			if(!fatal) return nullptr;
+			else throw std::string("Component cast error: As<") + getTypeName<C>() + ">";
+		}
 		return static_cast<const C*>(this);
 	}
 

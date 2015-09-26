@@ -39,8 +39,6 @@ struct ColliderComponent : Component {
 	Collider* collider = nullptr;
 	MotionState* motionState = nullptr;
 
-	vec3 force = vec3::ZERO;
-	vec3 velocity = vec3::ZERO;
 	u32 collisionGroups = 1<<0;
 
 	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}

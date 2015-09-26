@@ -21,6 +21,30 @@ vec3 bt2o(const btVector3& v){
 	return {v.x(), v.y(), v.z()};
 }
 
+void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo) {
+	auto proxy0 = collisionPair.m_pProxy0;
+	auto proxy1 = collisionPair.m_pProxy1;
+
+	auto ud0 = static_cast<btCollisionObject*>(proxy0->m_clientObject)->getUserPointer();
+	auto ud1 = static_cast<btCollisionObject*>(proxy1->m_clientObject)->getUserPointer();
+
+	auto comp0 = static_cast<Component*>(ud0);
+	auto comp1 = static_cast<Component*>(ud1);
+
+	auto col0 = comp0->As<ColliderComponent>(false);
+	auto col1 = comp1->As<ColliderComponent>(false);
+
+	if(!col0 || !col1) throw "One of the components in LayerNearCollisionFilterCallback isn't a collider";
+
+	auto ecg = PhysicsManager::GetSingleton()->enabledCollisionGroups;
+	auto mask = (col0->collisionGroups & col1->collisionGroups & ecg);
+
+	if(mask == 0) return;
+
+	// Continue physics stuff as usual
+	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
+}
+
 PhysicsManager::PhysicsManager(f32 refreshRate)
 	: timestep{1.f/refreshRate} {
 
@@ -31,8 +55,7 @@ PhysicsManager::PhysicsManager(f32 refreshRate)
 
 	world = new World{dispatcher, broadphase, solver, collisionConfig};
 	world->setGravity({0, -10., 0});
-
-	enabledCollisionGroups = 0xff;
+	dispatcher->setNearCallback(LayerNearCollisionFilterCallback);
 }
 
 PhysicsManager::~PhysicsManager(){
@@ -125,12 +148,9 @@ void ColliderComponent::OnInit() {
 	}
 
 	body = new RigidBody{mass, motionState, collider, inertia};
+	body->setUserPointer(this);
 
 	world->addRigidBody(body);
-
-	// NewtonBodySetUserData(body, this);
-	// NewtonBodySetTransformCallback(body, SetTransformCallback);
-	// NewtonBodySetForceAndTorqueCallback(body, ApplyForceCallback);
 }
 
 void ColliderComponent::OnDestroy() {
@@ -143,6 +163,7 @@ void ColliderComponent::DisableRotation(){
 
 void ColliderComponent::SetTrigger(bool trigger){
 	(void) trigger;
+	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Callbacks_and_Triggers
 	// NewtonCollisionSetAsTriggerVolume(collider, trigger);
 }
 
