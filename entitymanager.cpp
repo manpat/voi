@@ -43,6 +43,8 @@ void EntityManager::DestroyEntity(Entity* e){
 }
 
 Entity* EntityManager::FindEntity(const std::string& name){
+	(void)name;
+	// TODO: Implement
 	throw "Not Implemented";
 }
 

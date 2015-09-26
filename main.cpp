@@ -7,7 +7,7 @@ extern void unittest_Entity();
 #ifdef _WIN32
 	#undef main
 #endif
-s32 main(int argc, char** argv){
+s32 main(int, char**){
 	try{
 		App().Run();
 		// unittest_Entity();
