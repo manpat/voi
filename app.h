@@ -34,6 +34,7 @@ struct App : Singleton<App> {
 	typedef void (*Hook)();
 
 	enum class GameState : u8 {
+		NONE,
 		MAIN_MENU,
 		PLAYING,
 		PAUSED
@@ -60,7 +61,7 @@ struct App : Singleton<App> {
 	bool shouldQuit;
 
 private:
-	GameState gameState;
+	GameState gameState = GameState::NONE;
 
 public:
 	App();

@@ -175,18 +175,16 @@ void App::Run(){
 		}
 
 		// Call the appropriate update function depending on game state
-		// TODO: Remove this
 		switch (gameState) {
 			case GameState::MAIN_MENU:
 				Menu::Inst().Update(this, (f32)AppTime::deltaTime);
 				break;
 			case GameState::PLAYING:
+				Update();
 				break;
 			case GameState::PAUSED:
 				throw("Paused state not implemented");
 		}
-
-		Update();
 
 		ogreRoot->renderOneFrame();
 		SDL_GL_SwapWindow(sdlWindow);
