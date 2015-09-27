@@ -179,12 +179,13 @@ void App::Run(){
 			case GameState::MAIN_MENU:
 				Menu::Inst().Update(this, (f32)AppTime::deltaTime);
 				break;
-			case GameState::PLAYING:
-				Update();
-				break;
+			case GameState::PLAYING: break;
 			case GameState::PAUSED: throw "Paused state not implemented";
 			default: throw "Invalid gamestate";
 		}
+
+		// Updates systems
+		Update();
 
 		ogreRoot->renderOneFrame();
 		SDL_GL_SwapWindow(sdlWindow);
