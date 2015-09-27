@@ -182,8 +182,8 @@ void App::Run(){
 			case GameState::PLAYING:
 				Update();
 				break;
-			case GameState::PAUSED:
-				throw("Paused state not implemented");
+			case GameState::PAUSED: throw "Paused state not implemented";
+			default: throw "Invalid gamestate";
 		}
 
 		ogreRoot->renderOneFrame();
