@@ -127,7 +127,7 @@ void SceneParser::ConstructScene(App* app){
 			assert(layer < 10);
 
 			// Test if contains portal
-			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE+layer);
+			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
 			if(findin(entdef.userData, std::string("IsPortal")) == "true"){
 				auto dstlayerStr = findin(entdef.userData, std::string{"DstLayer"}, std::string{"1"});
 				auto dstlayer = std::stol(dstlayerStr);

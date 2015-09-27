@@ -8,7 +8,7 @@ namespace Ogre {
 	class ManualObject;
 }
 
-class App;
+struct App;
 
 class Menu {
 public:

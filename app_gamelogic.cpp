@@ -34,7 +34,7 @@
 void App::Init(){
 	std::cout << "App Init" << std::endl;
 	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
-	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(.1,.1,.1), 0.05, 10.0, 30.0);
+	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
 
 #if 0
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData", "FileSystem");
@@ -138,7 +138,7 @@ void App::Init(){
 
 	auto ground = entityManager->CreateEntity();
 	ground->ogreSceneNode = rootNode->createChildSceneNode();
-	ground->ogreSceneNode->setPosition(0,-0.52,0);
+	ground->ogreSceneNode->setPosition(0.0f, -0.52f, 0.0f);
 	auto groundcol = ground->AddComponent<BoxColliderComponent>(vec3{1000., 1., 1000.}, false);
 	groundcol->collisionGroups = ~0u;
 
@@ -150,7 +150,7 @@ void App::Init(){
 	camera->cameraNode->attachObject(psystem);
 
 	camera->cameraNode->setPosition(0, 1.0, 0);
-	auto g = 0.1;
+	auto g = 0.1f;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 }
 

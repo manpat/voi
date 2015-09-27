@@ -18,13 +18,13 @@ f32 AudioSynth::Generate(f64 dt) {
 	{
 		return 0.0f;
 	}
-	scheduler->Update(phase);
+	scheduler->Update((f32)phase);
 
 	f32 amp = 0.0f;
 	f32 o = 0.0;
 	scheduler->ForEachActive([&](Note& ni) {
 		auto freq = ntof(ni.note);
-		auto envamp = env.Generate(phase, ni);
+		auto envamp = env.Generate((f32)phase, ni);
 
 		amp += envamp;
 
@@ -53,7 +53,7 @@ f32 AudioSynth::Envelope::Generate(f32 phase, Note& note) {
 
 	}
 	else if (position - attack <= decay) {
-		return std::max(1.0 - (position - attack) / decay *(1.0 - sustain), 0.0);
+		return (f32)std::max(1.0 - (position - attack) / decay *(1.0 - sustain), 0.0);
 
 	}
 	else if (phase < note.endTime) {
@@ -61,7 +61,7 @@ f32 AudioSynth::Envelope::Generate(f32 phase, Note& note) {
 
 	}
 	else if (rpos < release) {
-		return std::max((1.0 - rpos / release)*sustain, 0.0);
+		return (f32)std::max((1.0 - rpos / release)*sustain, 0.0);
 	}
 
 	return 0.0;
@@ -72,19 +72,19 @@ f32 AudioSynth::Envelope::Generate(f32 phase, Note& note) {
 f32 AudioSynth::Oscillator::Generate(f64 phase, f64 frequency) {
 	switch (waveform) {
 	case waveformType::Sine:
-		return std::sin(M_PI*2.0*(frequency * detune * octave)*phase);
+		return (f32)std::sin(M_PI*2.0*(frequency * detune * octave)*phase);
 
 	case waveformType::Square:
-		return (std::fmod(phase*(frequency * detune * octave), 1.0) < pulsewidth) ? -1.0 : 1.0;
+		return (f32)((std::fmod(phase*(frequency * detune * octave), 1.0) < pulsewidth) ? -1.0 : 1.0);
 
 	case waveformType::Saw:
-		return fmod(phase*(frequency * detune * octave)*2.0, 2.0) - 1.0;
+		return (f32)(fmod(phase*(frequency * detune * octave)*2.0, 2.0) - 1.0);
 
 	case waveformType::Triangle: {
 		auto nph = fmod(phase*(frequency * detune * octave), 1.0);
-		if (nph <= 0.5) return (nph - 0.25)*4.0;
+		if (nph <= 0.5) return (f32)((nph - 0.25) * 4.0);
 
-		return (0.75 - nph)*4.0;
+		return (f32)((0.75 - nph) * 4.0);
 	}
 	default: break;
 	}
@@ -95,7 +95,7 @@ f32 AudioSynth::Oscillator::Generate(f64 phase, f64 frequency) {
 // NOTE SCHEDULER
 
 void AudioSynth::NoteScheduler::Update(f32 t) {
-	time = t * 90 / 60.0;
+	time = t * 90 / 60.0f;
 
 	auto end = notes.end();
 	auto nend = std::remove_if(notes.begin(), end, [](const Note& n) {

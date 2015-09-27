@@ -30,9 +30,9 @@ void Player::OnUpdate() {
 	auto nyaw =  -md.x * 2.0 * M_PI * AppTime::deltaTime * 7.f;
 	auto npitch = md.y * 2.0 * M_PI * AppTime::deltaTime * 7.f;
 	if(abs(cameraPitch + npitch) < M_PI/4.0f) { // Convoluted clamp
-		cameraPitch += npitch;
+		cameraPitch += (f32)npitch;
 	}
-	cameraYaw += nyaw;
+	cameraYaw += (f32)nyaw;
 
 	// Rotate camera
 	auto oriYaw = Ogre::Quaternion(Ogre::Radian(cameraYaw), vec3::UNIT_Y);

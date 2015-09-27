@@ -8,7 +8,7 @@ namespace Ogre {
 	class SceneManager;
 }
 
-class App;
+struct App;
 
 class SceneParser {
 	using UserData = std::map<std::string, std::string>;

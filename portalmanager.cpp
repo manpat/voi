@@ -176,7 +176,7 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 	portalSubmesh = portalSubEnt->getSubMesh();
 
 	// This assumes that subMeshes and subEntities match one to one
-	portalSubEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1, 0.1, 0.1)); // Skycolor
+	portalSubEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1f, 0.1f, 0.1f)); // Skycolor
 	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
 
 	// ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);

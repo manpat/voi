@@ -68,7 +68,7 @@ PhysicsManager::~PhysicsManager(){
 }
 
 void PhysicsManager::Update(){
-	world->stepSimulation(AppTime::deltaTime, 10);
+	world->stepSimulation((btScalar)AppTime::deltaTime, 10);
 }
 
 void ColliderComponent::OnInit() {

@@ -254,7 +254,7 @@ void unittest_Entity(){
 		int x;
 	};
 	struct ComponentB : Component {
-		ComponentB(int _x) : Component{this}, x(_x) {}
+		ComponentB(int _x) : Component{this}, x((float)_x) {}
 		void OnInit()    { std::cout << "B " << id << " OnInit\n"; }
 		void OnAwake()   { std::cout << "B " << id << " OnAwake\n"; }
 		void OnDestroy() { std::cout << "B " << id << " OnDestroy\n"; }

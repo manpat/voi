@@ -178,7 +178,7 @@ void App::Run(){
 		// TODO: Remove this
 		switch (gameState) {
 			case GameState::MAIN_MENU:
-				Menu::Inst().Update(this, AppTime::deltaTime);
+				Menu::Inst().Update(this, (f32)AppTime::deltaTime);
 				break;
 			case GameState::PLAYING:
 				break;

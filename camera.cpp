@@ -26,7 +26,7 @@ Camera::Camera(string name){
 		size /* width */, size /* height */);
 
 	viewport->setAutoUpdated(true);
-	auto g = 0.1;
+	auto g = 0.1f;
 	viewport->setBackgroundColour(Ogre::ColourValue(g,g,g)); // TODO: Expose
 
 	ogreCamera->setAspectRatio(
