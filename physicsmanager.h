@@ -87,8 +87,8 @@ struct CapsuleColliderComponent : ColliderComponent {
 };
 
 // This is for level meshes and stuff that doesn't move ever.
-struct StaticMeshColliderComponent : ColliderComponent {
-	StaticMeshColliderComponent() : ColliderComponent{false} {}
+struct MeshColliderComponent : ColliderComponent {
+	MeshColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
 	void CreateCollider() override;
 };
 

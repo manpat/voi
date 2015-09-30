@@ -136,9 +136,7 @@ void SphereColliderComponent::CreateCollider() {
 	collider = new btSphereShape{radius};
 }
 
-void StaticMeshColliderComponent::CreateCollider() {
-	collider = new btEmptyShape{};
-
+void MeshColliderComponent::CreateCollider() {
 	// TODO: Use all submeshes
 	auto sm = entity->ogreEntity->getMesh()->getSubMesh(0);
 	auto smVertices = GetOgreSubMeshVertices(sm);

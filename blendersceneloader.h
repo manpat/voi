@@ -7,7 +7,7 @@
 
 struct BlenderSceneLoader : SceneLoaderInterface {
 protected:
-	using UserData = std::map<std::string, std::string>;
+	using UserData = std::unordered_map<std::string, std::string>;
 
 	struct Object {
 		std::string name;

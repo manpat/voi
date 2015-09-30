@@ -103,8 +103,18 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				n.parent->AddChild(ent);
 			}
 
+			UserData& userdata = ent->userdata;
+
+			for(auto& pair: entdef.userData){
+				userdata[pair.first] = pair.second;
+			}
+
+			for(auto& pair: ndef.userData){
+				userdata[pair.first] = pair.second;
+			}
+
 			// Set layer
-			auto layerStr = findin(entdef.userData, std::string{"anom_layer"}, std::string{"0"});
+			auto layerStr = findin(userdata, std::string{"anom_layer"}, std::string{"0"});
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
@@ -113,8 +123,8 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 			// Test if contains portal
 			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
-			if(findin(entdef.userData, std::string("anom_portal")) == "1"){
-				auto dstlayerStr = findin(entdef.userData, std::string{"anom_portaldst"}, std::string{"1"});
+			if(findin(userdata, std::string("anom_portal")) == "1"){
+				auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
 				auto dstlayer = std::stol(dstlayerStr);
 				assert(dstlayer < 10);
 
@@ -122,20 +132,35 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			}
 
 			// Set up colliders
-			// if(entdef.physicsType != PhysicsType::None){
-			// 	bool dynamic = entdef.physicsType == PhysicsType::Dynamic;
-			// 	switch()
+			if(entdef.physicsType != PhysicsType::None){
+				bool dynamic = entdef.physicsType == PhysicsType::Dynamic;
+				// TODO: get size data
+				ColliderComponent* collider = nullptr;
 
-			// }
+				switch(entdef.colliderType){
+					case ColliderType::Box:
+						collider = ent->AddComponent<BoxColliderComponent>(vec3{1.0}, dynamic);
+						break;
+					case ColliderType::Sphere:
+						collider = ent->AddComponent<SphereColliderComponent>(1.f, dynamic);
+						break;
+					case ColliderType::Capsule:
+						collider = ent->AddComponent<CapsuleColliderComponent>(1.f, 1.f, dynamic);
+						break;
+					case ColliderType::Mesh:
+						collider = ent->AddComponent<MeshColliderComponent>(dynamic);
+						break;
+
+					default:
+						throw "Collider type not implemented";
+				}
+
+				collider->collisionGroups = 1u<<layer;
+			}
 
 			// Set user data
 			auto& uob = ogreent->getUserObjectBindings();
 			uob.setUserAny(Ogre::Any{ent});
-
-			for(auto& pair: ndef.userData){
-				// uob.setUserAny(pair.first, Ogre::Any(pair.second));
-				ent->userdata[pair.first] = pair.second;
-			}
 		}
 
 		for(auto& child: ndef.nodes){
@@ -154,7 +179,7 @@ auto BlenderSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 		auto rotnode = n->first_node("rotation");
 		auto scalenode = n->first_node("scale");
 		auto entnode = n->first_node("entity");
-		// auto udnode = n->first_node("user_data");
+		auto udnode = n->first_node("user_data");
 
 		if(!nameattr || !posnode || !rotnode || !scalenode) {
 			error("Malformed node");
@@ -168,7 +193,7 @@ auto BlenderSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 		nn.scale = ParseVec(scalenode);
 		nn.entity = entnode?ParseEntity(entnode):nullptr;
 		nn.nodes = ParseNodes(n);
-		// nn.userData = udnode?ParseUserData(udnode):UserData{};
+		nn.userData = udnode?ParseUserData(udnode):UserData{};
 
 		nodes.push_back(std::move(nn));
 	}
@@ -182,7 +207,7 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 	auto phystypattr = node->first_attribute("physics_type");
 	auto coltypeattr = node->first_attribute("collisionPrim");
 
-	if(!nameattr || !meshattr || !phystypattr || !coltypeattr) {
+	if(!nameattr || !meshattr || !phystypattr) {
 		error("Malformed entity");
 		return nullptr;
 	}
@@ -191,7 +216,6 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 	e->name = nameattr->value();
 	e->mesh = meshattr->value();
 	std::string phystype{phystypattr->value()};
-	std::string coltype{coltypeattr->value()};
 
 	if(phystype == "NO_COLLISION"){
 		e->physicsType = PhysicsType::None;
@@ -203,22 +227,30 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 		error("Unsupported physics type in scene file: " + phystype);
 	}
 
-	if(coltype == "box") {
-		e->colliderType = ColliderType::Box;
-	}else if(coltype == "capsule") {
-		e->colliderType = ColliderType::Capsule;
-	}else if(coltype == "sphere") {
-		e->colliderType = ColliderType::Sphere;
-	}else if(coltype == "cylinder") {
-		e->colliderType = ColliderType::Cylinder;
-	}else if(coltype == "cone") {
-		e->colliderType = ColliderType::Cone;
-	}else if(coltype == "convex_hull") {
-		e->colliderType = ColliderType::ConvexHull;
-	}else if(coltype == "triangle_mesh") {
-		e->colliderType = ColliderType::Mesh;
-	}else {
-		error("Invalid collider type in scene file: " + coltype);
+	if(e->physicsType != PhysicsType::None){
+		if(!coltypeattr) {
+			error("RigidBody missing collider type");
+		}
+
+		std::string coltype{coltypeattr->value()};
+
+		if(coltype == "box") {
+			e->colliderType = ColliderType::Box;
+		}else if(coltype == "capsule") {
+			e->colliderType = ColliderType::Capsule;
+		}else if(coltype == "sphere") {
+			e->colliderType = ColliderType::Sphere;
+		}else if(coltype == "cylinder") {
+			e->colliderType = ColliderType::Cylinder;
+		}else if(coltype == "cone") {
+			e->colliderType = ColliderType::Cone;
+		}else if(coltype == "convex_hull") {
+			e->colliderType = ColliderType::ConvexHull;
+		}else if(coltype == "triangle_mesh") {
+			e->colliderType = ColliderType::Mesh;
+		}else {
+			error("Invalid collider type in scene file: " + coltype);
+		}
 	}
 
 	return e;
@@ -263,18 +295,16 @@ quat BlenderSceneLoader::ParseQuaternion(xml_node<>* node){
 auto BlenderSceneLoader::ParseUserData(xml_node<>* node) -> UserData {
 	UserData ud;
 
-	for(auto n = node->first_node("property"); n; 
-		n = n->next_sibling("property")){
-
+	for(auto n = node; n; n = n->next_sibling("user_data")){
 		auto name = n->first_attribute("name");
-		auto data = n->first_attribute("data");
+		auto value = n->first_attribute("value");
 
-		if(!name || !data){
+		if(!name || !value){
 			error("Malformed userdata");
 			continue;
 		}
 
-		ud[name->value()] = data->value();
+		ud[name->value()] = value->value();
 	}
 
 	return ud;

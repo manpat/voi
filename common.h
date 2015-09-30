@@ -5,6 +5,7 @@
 #include <cmath>
 #include <memory>
 #include <cstdint>
+#include <unordered_map>
 #include <OGRE/OgreVector2.h>
 #include <OGRE/OgreVector3.h>
 #include <OGRE/OgreVector4.h>
@@ -14,6 +15,13 @@
 
 template<typename K, typename V>
 V findin(const std::map<K,V>& m, K k, V dv = V()){
+	auto it = m.find(k);
+	if(it == m.end()) return dv;
+
+	return it->second;
+}
+template<typename K, typename V>
+V findin(const std::unordered_map<K,V>& m, K k, V dv = V()){
 	auto it = m.find(k);
 	if(it == m.end()) return dv;
 

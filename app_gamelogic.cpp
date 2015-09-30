@@ -119,15 +119,15 @@ void App::Init(){
 	}
 	std::cout << std::endl;
 
-	// entityManager->entities[1]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<1;
-	// entityManager->entities[2]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<0;
+	// entityManager->entities[1]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<1;
+	// entityManager->entities[2]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<0;
 	// auto ico = entityManager->entities[0]->AddComponent<SphereColliderComponent>(1.f, true);
 	// ico->collisionGroups = 1<<0;
 #endif
 
 	auto player = entityManager->CreateEntity();
 	player->ogreSceneNode = rootNode->createChildSceneNode();
-	player->ogreSceneNode->setPosition(0,2,-3);
+	player->ogreSceneNode->setPosition(0,2,0);
 
 	// TODO: This should really be an Entity::AddChild
 	// Camera should be a component of a child entity
