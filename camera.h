@@ -10,16 +10,14 @@ namespace Ogre {
 	class Viewport;
 }
 
-class Camera {
-public:
+// TODO: Make a component
+struct Camera {
 	Ogre::Camera* ogreCamera = nullptr;
 	Ogre::SceneNode* cameraNode = nullptr;
 	Ogre::Viewport* viewport = nullptr;
 
-public:
 	Camera(std::string name = "MainCamera");
 	~Camera();
-
 };
 
 #endif

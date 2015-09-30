@@ -8,7 +8,7 @@
 #include "singleton.h"
 
 class Input;
-class Camera;
+struct Camera;
 class AudioManager;
 class PortalManager;
 struct EntityManager;

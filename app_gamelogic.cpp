@@ -9,10 +9,11 @@
 #include "player.h"
 #include "camera.h"
 #include "apptime.h"
-#include "sceneparser.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
 #include "physicsmanager.h"
+#include "ogitorsceneloader.h"
+#include "blendersceneloader.h"
 
 #include "entity.h"
 #include "component.h"
@@ -108,18 +109,20 @@ void App::Init(){
 	portalManager->AddPortal(door2, 1, 2);
 
 #else
-	SceneParser sceneloader;
-	sceneloader.Load("GameData/bend.scene", this);
+	OgitorSceneLoader{}.Load("GameData/bend.scene", this);
+
+	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/TestTempleScene", "FileSystem");
+	// BlenderSceneLoader{}.Load("GameData/TestTempleScene/temple.scene", this);
 
 	for(auto& e: entityManager->entities){
 		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
 	}
 	std::cout << std::endl;
 
-	entityManager->entities[1]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<1;
-	entityManager->entities[2]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<0;
-	auto ico = entityManager->entities[0]->AddComponent<SphereColliderComponent>(1.f, true);
-	ico->collisionGroups = 1<<0;
+	// entityManager->entities[1]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<1;
+	// entityManager->entities[2]->AddComponent<StaticMeshColliderComponent>()->collisionGroups = 1<<0;
+	// auto ico = entityManager->entities[0]->AddComponent<SphereColliderComponent>(1.f, true);
+	// ico->collisionGroups = 1<<0;
 #endif
 
 	auto player = entityManager->CreateEntity();
@@ -134,7 +137,7 @@ void App::Init(){
 	player->AddComponent<Player>();
 	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(1.f, 1.f, true);
 	playerCollider->DisableRotation();
-	playerCollider->collisionGroups = ~0u;
+	playerCollider->collisionGroups = 1<<0; // First layer
 
 	auto ground = entityManager->CreateEntity();
 	ground->ogreSceneNode = rootNode->createChildSceneNode();

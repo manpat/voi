@@ -6,20 +6,20 @@
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
 
+#include "ogitorsceneloader.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
-#include "sceneparser.h"
 #include "entity.h"
 #include "app.h"
 
 using namespace rapidxml;
 
 static void error(const std::string& e){
-	std::cerr << ("Error: " + e) << std::endl;
-	//throw "SceneParser error";
+	std::cerr << ("!!! Error: " + e) << std::endl;
+	//throw "OgitorSceneLoader error";
 }
 
-SceneParser::~SceneParser(){
+OgitorSceneLoader::~OgitorSceneLoader(){
 	std::queue<Node*> nodeQueue;
 	for(auto& n: nodes)
 		nodeQueue.push(&n);
@@ -38,7 +38,7 @@ SceneParser::~SceneParser(){
 	}
 }
 
-void SceneParser::Load(std::string filename, App* app) {
+void OgitorSceneLoader::Load(const std::string& filename, App* app) {
 	std::fstream file(filename);
 	if(!file) throw "File open failed";
 
@@ -66,7 +66,7 @@ void SceneParser::Load(std::string filename, App* app) {
 	for(auto& rl: resourceLocations){
 		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(rl.dir, rl.type);
 	}
-	// Ogre::ResourceGroupManager::getS3ingleton().addResourceLocation("GameData/Meshes", "FileSystem");
+	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Meshes", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -74,7 +74,7 @@ void SceneParser::Load(std::string filename, App* app) {
 	ConstructScene(app);
 }
 
-void SceneParser::ConstructScene(App* app){
+void OgitorSceneLoader::ConstructScene(App* app){
 	auto rootNode = app->rootNode;
 	auto entMgr = app->entityManager;
 
@@ -152,7 +152,7 @@ void SceneParser::ConstructScene(App* app){
 	}
 }
 
-auto SceneParser::ParseResourceLocations(xml_node<>* node) -> std::vector<ResourceLocation>{
+auto OgitorSceneLoader::ParseResourceLocations(xml_node<>* node) -> std::vector<ResourceLocation>{
 	std::vector<ResourceLocation> rls;
 
 	if(!node) {
@@ -178,7 +178,7 @@ auto SceneParser::ParseResourceLocations(xml_node<>* node) -> std::vector<Resour
 	return rls;
 }
 
-auto SceneParser::ParseNodes(xml_node<>* node) -> std::vector<Node> {
+auto OgitorSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	std::vector<Node> nodes;
 	if(!node) return nodes;
 
@@ -210,7 +210,7 @@ auto SceneParser::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	return nodes;
 }
 
-auto SceneParser::ParseEntity(xml_node<>* node) -> EntityDef* {
+auto OgitorSceneLoader::ParseEntity(xml_node<>* node) -> EntityDef* {
 	auto nameattr = node->first_attribute("name");
 	auto meshattr = node->first_attribute("meshFile");
 	auto udnode = node->first_node("userData");
@@ -242,7 +242,7 @@ auto SceneParser::ParseEntity(xml_node<>* node) -> EntityDef* {
 	return e;
 }
 
-vec3 SceneParser::ParseVec(xml_node<>* node){
+vec3 OgitorSceneLoader::ParseVec(xml_node<>* node){
 	auto xn = node->first_attribute("x");
 	auto yn = node->first_attribute("y");
 	auto zn = node->first_attribute("z");
@@ -259,7 +259,7 @@ vec3 SceneParser::ParseVec(xml_node<>* node){
 	return vec3(x,y,z);
 }
 
-quat SceneParser::ParseQuaternion(xml_node<>* node){
+quat OgitorSceneLoader::ParseQuaternion(xml_node<>* node){
 	auto xn = node->first_attribute("qx");
 	auto yn = node->first_attribute("qy");
 	auto zn = node->first_attribute("qz");
@@ -278,7 +278,7 @@ quat SceneParser::ParseQuaternion(xml_node<>* node){
 	return quat(w,x,y,z);
 }
 
-auto SceneParser::ParseUserData(xml_node<>* node) -> UserData {
+auto OgitorSceneLoader::ParseUserData(xml_node<>* node) -> UserData {
 	UserData ud;
 
 	for(auto n = node->first_node("property"); n; 

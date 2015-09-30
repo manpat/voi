@@ -2,15 +2,13 @@
 #define SCENE_PARSER_H
 
 #include "common.h"
+#include "sceneloader.h"
 #include <rapidxml.hpp>
-
-namespace Ogre {
-	class SceneManager;
-}
 
 struct App;
 
-class SceneParser {
+struct OgitorSceneLoader : SceneLoaderInterface {
+protected:
 	using UserData = std::map<std::string, std::string>;
 
 	struct ResourceLocation {
@@ -46,9 +44,9 @@ public:
 	std::vector<ResourceLocation> resourceLocations;
 	std::vector<Node> nodes;
 
-	~SceneParser();
+	~OgitorSceneLoader();
 
-	void Load(std::string filename, App*);
+	void Load(const std::string& filename, App*) override;
 
 protected:
 	void ConstructScene(App*);

@@ -21,7 +21,6 @@ struct Component {
 	// This is the owning entity
 	Entity* entity = nullptr;
 	// Unique identifier, id 0 is invalid
-	// TODO: Find somewhere to put the id counter
 	u32 id = 0;
 	// This is for fast type comparisons
 	size_t typeHash = 0; 
@@ -51,9 +50,14 @@ struct Component {
 	// OnMessage is called when SendMessage is called on the owning entity 
 	virtual void OnMessage(const std::string&, const OpaqueType&) {};
 
+	// Checks derived component type
 	template<class C>
 	bool IsType() const { return typeid(C).hash_code() == typeHash; }
 
+	// Tests whether this is the same type as another component
+	bool SameType(Component*) const;
+
+	// Upcast to derived component
 	template<class C>
 	const C* As(bool fatal = true) const {
 		if(!IsType<C>()) {
@@ -63,9 +67,15 @@ struct Component {
 		return static_cast<const C*>(this);
 	}
 
-	bool SameType(Component*) const;
-
-
+	// Upcast to derived component
+	template<class C>
+	C* As(bool fatal = true) {
+		if(!IsType<C>()) {
+			if(!fatal) return nullptr;
+			else throw std::string("Component cast error: As<") + getTypeName<C>() + ">";
+		}
+		return static_cast<C*>(this);
+	}
 };
 
 #endif
