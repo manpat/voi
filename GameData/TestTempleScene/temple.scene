@@ -1,4 +1,4 @@
-<scene exported_by="patrick" export_time="1443596649.6509461" formatVersion="1.0.1" previous_export_time="1443596525.8144464" >
+<scene exported_by="patrick" export_time="1443607371.3934832" formatVersion="1.0.1" previous_export_time="1443599854.9626067" >
   <nodes >
     <node name="Cube.003" >
       <position z="-51.991856" y="8.022818" x="4.005518" />
@@ -31,7 +31,9 @@
         <sensors />
         <actuators />
       </game>
-      <entity actor="True" lock_trans_y="False" velocity_min="0.0" physics_type="RIGID_BODY" lock_rot_x="False" inertia_tensor="0.4000000059604645" friction_y="1.0" lock_trans_z="False" mass="1.0" damping_trans="0.03999999910593033" name="Cube.001" lock_rot_z="False" collisionPrim="box" lock_rot_y="False" meshFile="Cube.001.mesh" damping_rot="0.10000000149011612" ghost="False" friction_x="1.0" velocity_max="0.0" friction_z="1.0" mass_radius="1.0" lock_trans_x="False" anisotropic_friction="False" />
+      <entity actor="True" lock_trans_y="False" velocity_min="0.0" physics_type="RIGID_BODY" lock_rot_x="False" inertia_tensor="0.4000000059604645" friction_y="1.0" lock_trans_z="False" mass="1.0" damping_trans="0.03999999910593033" name="Cube.001" lock_rot_z="False" collisionPrim="box" lock_rot_y="False" meshFile="Cube.001.mesh" damping_rot="0.10000000149011612" ghost="False" friction_x="1.0" velocity_max="0.0" friction_z="1.0" mass_radius="1.0" lock_trans_x="False" anisotropic_friction="False" >
+        <user_data value="1.0" name="Blah" type="float" />
+      </entity>
       <node name="Cube.002" >
         <position z="0.002739" y="2.978005" x="-0.005518" />
         <rotation qx="0.000000" qw="1.000000" qy="0.000000" qz="-0.000000" />
@@ -52,7 +54,7 @@
         <sensors />
         <actuators />
       </game>
-      <entity actor="False" lock_trans_y="False" velocity_min="0.0" physics_type="STATIC" lock_rot_x="False" inertia_tensor="0.4000000059604645" friction_y="1.0" lock_trans_z="False" mass="1.0" damping_trans="0.03999999910593033" name="Pyramid" lock_rot_z="False" lock_rot_y="False" meshFile="Pyramid.mesh" damping_rot="0.10000000149011612" ghost="False" friction_x="1.0" velocity_max="0.0" friction_z="1.0" mass_radius="1.0" lock_trans_x="False" anisotropic_friction="False" />
+      <entity actor="False" lock_trans_y="False" velocity_min="0.0" physics_type="STATIC" lock_rot_x="False" inertia_tensor="0.4000000059604645" friction_y="1.0" lock_trans_z="False" mass="1.0" damping_trans="0.03999999910593033" name="Pyramid" lock_rot_z="False" collisionPrim="triangle_mesh" lock_rot_y="False" meshFile="Pyramid.mesh" damping_rot="0.10000000149011612" ghost="False" friction_x="1.0" velocity_max="0.0" friction_z="1.0" mass_radius="1.0" lock_trans_x="False" anisotropic_friction="False" />
     </node>
     <node name="Foyer" >
       <position z="-0.000000" y="0.000000" x="0.000000" />

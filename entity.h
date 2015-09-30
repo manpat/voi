@@ -59,6 +59,8 @@ struct Entity {
 	void RemoveChild(Entity*);
 	// DestroyChild detaches and destroys a child entity
 	void DestroyChild(Entity*);
+	// OrphanSelf detaches self from parent 
+	void OrphanSelf();
 
 	// AddComponent<C,A...> constructs a component with type C with arguments
 	//	of types A... or void. Returns new component

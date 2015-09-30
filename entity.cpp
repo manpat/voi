@@ -62,8 +62,16 @@ void Entity::AddChild(Entity* e){
 	children.push_back(e);
 	e->parent = this;
 
-	if(ogreSceneNode)
-		ogreSceneNode->addChild(e->ogreSceneNode);
+	if(ogreSceneNode && e->ogreSceneNode){
+		auto p = e->ogreSceneNode->getParentSceneNode();
+
+		// If the child node doesn't have a parent, go for it
+		if(!p) ogreSceneNode->addChild(e->ogreSceneNode);
+		// Otherwise it's an error. Orphan first
+		else if(p != ogreSceneNode){
+			throw "Tried to add a child of one entity to another without orphaning first";
+		}
+	}
 }
 
 void Entity::RemoveChild(Entity* e){
@@ -81,7 +89,7 @@ void Entity::RemoveChild(Entity* e){
 	// Reset parent if e is actually a child
 	e->parent = nullptr;
 
-	if(ogreSceneNode)
+	if(ogreSceneNode && e->ogreSceneNode)
 		ogreSceneNode->removeChild(e->ogreSceneNode);
 }
 
@@ -97,11 +105,16 @@ void Entity::DestroyChild(Entity* e){
 
 	children.erase(it, end);
 
-	if(ogreSceneNode)
+	if(ogreSceneNode && e->ogreSceneNode)
 		ogreSceneNode->removeChild(e->ogreSceneNode);
 
 	// Destroy it
 	EntityManager::GetSingleton()->DestroyEntity(e);
+}
+
+void Entity::OrphanSelf(){
+	if(!parent) return;
+	parent->RemoveChild(this);
 }
 
 void Entity::AddComponent(Component* c){

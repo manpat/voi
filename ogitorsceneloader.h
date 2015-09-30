@@ -1,11 +1,9 @@
-#ifndef SCENE_PARSER_H
-#define SCENE_PARSER_H
+#ifndef OGITOR_SCENE_LOADER_H
+#define OGITOR_SCENE_LOADER_H
 
 #include "common.h"
 #include "sceneloader.h"
 #include <rapidxml.hpp>
-
-struct App;
 
 struct OgitorSceneLoader : SceneLoaderInterface {
 protected:
@@ -37,14 +35,12 @@ public:
 		vec3 position;
 		vec3 scale;
 
-		EntityDef* entity;
+		std::shared_ptr<EntityDef> entity;
 		std::vector<Node> nodes;
 	};
 
 	std::vector<ResourceLocation> resourceLocations;
 	std::vector<Node> nodes;
-
-	~OgitorSceneLoader();
 
 	void Load(const std::string& filename, App*) override;
 
@@ -53,7 +49,7 @@ protected:
 
 	std::vector<ResourceLocation> ParseResourceLocations(rapidxml::xml_node<>* node);
 	std::vector<Node> ParseNodes(rapidxml::xml_node<>* node);
-	EntityDef* ParseEntity(rapidxml::xml_node<>* node);
+	std::shared_ptr<EntityDef> ParseEntity(rapidxml::xml_node<>* node);
 
 	vec3 ParseVec(rapidxml::xml_node<>*);
 	quat ParseQuaternion(rapidxml::xml_node<>*);

@@ -1,3 +1,5 @@
+#include "blendersceneloader.h"
+
 #include <iostream>
 #include <fstream>
 #include <queue>
@@ -6,7 +8,7 @@
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
 
-#include "ogitorsceneloader.h"
+#include "physicsmanager.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
 #include "entity.h"
@@ -16,10 +18,10 @@ using namespace rapidxml;
 
 static void error(const std::string& e){
 	std::cerr << ("!!! Error: " + e) << std::endl;
-	//throw "OgitorSceneLoader error";
+	throw "BlenderSceneLoader error";
 }
 
-void OgitorSceneLoader::Load(const std::string& filename, App* app) {
+void BlenderSceneLoader::Load(const std::string& filename, App* app) {
 	std::fstream file(filename);
 	if(!file) throw "File open failed";
 
@@ -39,14 +41,14 @@ void OgitorSceneLoader::Load(const std::string& filename, App* app) {
 
 	// Construct tree
 	auto node = doc.first_node("scene");
-	resourceLocations = ParseResourceLocations(node->first_node("resourceLocations"));
+	if(!node) {
+		error("Scene file missing root scene node");
+		return;
+	}
+
 	nodes = ParseNodes(node->first_node("nodes"));
 	delete[] data;
 
-	// Init resource locations
-	for(auto& rl: resourceLocations){
-		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(rl.dir, rl.type);
-	}
 	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Meshes", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
@@ -55,9 +57,10 @@ void OgitorSceneLoader::Load(const std::string& filename, App* app) {
 	ConstructScene(app);
 }
 
-void OgitorSceneLoader::ConstructScene(App* app){
+void BlenderSceneLoader::ConstructScene(App* app){
 	auto rootNode = app->rootNode;
 	auto entMgr = app->entityManager;
+	// auto physMgr = app->physicsManager;
 
 	struct NodeParentPair {
 		Ogre::SceneNode* parentNode;
@@ -78,7 +81,7 @@ void OgitorSceneLoader::ConstructScene(App* app){
 	while(nodeQueue.size() > 0){
 		auto& n = nodeQueue.front();
 		nodeQueue.pop();
-		
+
 		auto& ndef = *n.ndef;
 		auto node = n.parentNode->createChildSceneNode(ndef.name, ndef.position, ndef.rotation);
 		node->setScale(ndef.scale);
@@ -89,6 +92,7 @@ void OgitorSceneLoader::ConstructScene(App* app){
 			// If entities were stored in a queue like nodes, then they could be
 			//	iterated through to find portals
 			auto& entdef = *ndef.entity;
+
 			auto ogreent = app->sceneManager->createEntity(entdef.name, entdef.mesh);
 			node->attachObject(ogreent);
 
@@ -100,7 +104,7 @@ void OgitorSceneLoader::ConstructScene(App* app){
 			}
 
 			// Set layer
-			auto layerStr = findin(entdef.userData, std::string{"Layer"}, std::string{});
+			auto layerStr = findin(entdef.userData, std::string{"anom_layer"}, std::string{"0"});
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
@@ -109,13 +113,20 @@ void OgitorSceneLoader::ConstructScene(App* app){
 
 			// Test if contains portal
 			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
-			if(findin(entdef.userData, std::string("IsPortal")) == "true"){
-				auto dstlayerStr = findin(entdef.userData, std::string{"DstLayer"}, std::string{"1"});
+			if(findin(entdef.userData, std::string("anom_portal")) == "1"){
+				auto dstlayerStr = findin(entdef.userData, std::string{"anom_portaldst"}, std::string{"1"});
 				auto dstlayer = std::stol(dstlayerStr);
 				assert(dstlayer < 10);
 
 				app->portalManager->AddPortal(ogreent, layer, dstlayer);
 			}
+
+			// Set up colliders
+			// if(entdef.physicsType != PhysicsType::None){
+			// 	bool dynamic = entdef.physicsType == PhysicsType::Dynamic;
+			// 	switch()
+
+			// }
 
 			// Set user data
 			auto& uob = ogreent->getUserObjectBindings();
@@ -133,33 +144,7 @@ void OgitorSceneLoader::ConstructScene(App* app){
 	}
 }
 
-auto OgitorSceneLoader::ParseResourceLocations(xml_node<>* node) -> std::vector<ResourceLocation>{
-	std::vector<ResourceLocation> rls;
-
-	if(!node) {
-		error("No resourceLocations node in scene file");
-		return rls;
-	}
-
-	for(auto rl = node->first_node("resourceLocation"); rl; rl = rl->next_sibling("resourceLocation")) {
-		auto type = rl->first_attribute("type");
-		auto dir = rl->first_attribute("name");
-
-		if(!type || !dir) {
-			error("Malformed resourceLocation");
-			continue;
-		}
-
-		rls.push_back(ResourceLocation{
-			std::string(type->value()),
-			std::string(dir->value()),
-		});
-	} 
-
-	return rls;
-}
-
-auto OgitorSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
+auto BlenderSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	std::vector<Node> nodes;
 	if(!node) return nodes;
 
@@ -169,7 +154,7 @@ auto OgitorSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 		auto rotnode = n->first_node("rotation");
 		auto scalenode = n->first_node("scale");
 		auto entnode = n->first_node("entity");
-		auto udnode = n->first_node("userData");
+		// auto udnode = n->first_node("user_data");
 
 		if(!nameattr || !posnode || !rotnode || !scalenode) {
 			error("Malformed node");
@@ -183,7 +168,7 @@ auto OgitorSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 		nn.scale = ParseVec(scalenode);
 		nn.entity = entnode?ParseEntity(entnode):nullptr;
 		nn.nodes = ParseNodes(n);
-		nn.userData = udnode?ParseUserData(udnode):UserData{};
+		// nn.userData = udnode?ParseUserData(udnode):UserData{};
 
 		nodes.push_back(std::move(nn));
 	}
@@ -191,39 +176,55 @@ auto OgitorSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	return nodes;
 }
 
-auto OgitorSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<EntityDef> {
+auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<EntityDef> {
 	auto nameattr = node->first_attribute("name");
 	auto meshattr = node->first_attribute("meshFile");
-	auto udnode = node->first_node("userData");
+	auto phystypattr = node->first_attribute("physics_type");
+	auto coltypeattr = node->first_attribute("collisionPrim");
 
-	if(!nameattr || !meshattr) {
+	if(!nameattr || !meshattr || !phystypattr || !coltypeattr) {
 		error("Malformed entity");
 		return nullptr;
 	}
+
 	auto e = std::make_shared<EntityDef>();
 	e->name = nameattr->value();
 	e->mesh = meshattr->value();
-	e->userData = udnode?ParseUserData(udnode):UserData{};
+	std::string phystype{phystypattr->value()};
+	std::string coltype{coltypeattr->value()};
 
-	for(auto se = node->first_node("subentity"); se; se=se->next_sibling("subentity")){
-		auto index = se->first_attribute("index");
-		auto material = se->first_attribute("materialName");
+	if(phystype == "NO_COLLISION"){
+		e->physicsType = PhysicsType::None;
+	}else if(phystype == "STATIC"){
+		e->physicsType = PhysicsType::Static;
+	}else if(phystype == "RIGID_BODY"){
+		e->physicsType = PhysicsType::Dynamic;
+	}else{
+		error("Unsupported physics type in scene file: " + phystype);
+	}
 
-		if(!index || !material){
-			error("Malformed SubEntity");
-			continue;
-		}
-
-		e->subEntities.push_back(SubEntityDef{
-			(unsigned) std::strtol(index->value(), nullptr, 10),
-			material->value()
-		});
+	if(coltype == "box") {
+		e->colliderType = ColliderType::Box;
+	}else if(coltype == "capsule") {
+		e->colliderType = ColliderType::Capsule;
+	}else if(coltype == "sphere") {
+		e->colliderType = ColliderType::Sphere;
+	}else if(coltype == "cylinder") {
+		e->colliderType = ColliderType::Cylinder;
+	}else if(coltype == "cone") {
+		e->colliderType = ColliderType::Cone;
+	}else if(coltype == "convex_hull") {
+		e->colliderType = ColliderType::ConvexHull;
+	}else if(coltype == "triangle_mesh") {
+		e->colliderType = ColliderType::Mesh;
+	}else {
+		error("Invalid collider type in scene file: " + coltype);
 	}
 
 	return e;
 }
 
-vec3 OgitorSceneLoader::ParseVec(xml_node<>* node){
+vec3 BlenderSceneLoader::ParseVec(xml_node<>* node){
 	auto xn = node->first_attribute("x");
 	auto yn = node->first_attribute("y");
 	auto zn = node->first_attribute("z");
@@ -240,7 +241,7 @@ vec3 OgitorSceneLoader::ParseVec(xml_node<>* node){
 	return vec3(x,y,z);
 }
 
-quat OgitorSceneLoader::ParseQuaternion(xml_node<>* node){
+quat BlenderSceneLoader::ParseQuaternion(xml_node<>* node){
 	auto xn = node->first_attribute("qx");
 	auto yn = node->first_attribute("qy");
 	auto zn = node->first_attribute("qz");
@@ -259,7 +260,7 @@ quat OgitorSceneLoader::ParseQuaternion(xml_node<>* node){
 	return quat(w,x,y,z);
 }
 
-auto OgitorSceneLoader::ParseUserData(xml_node<>* node) -> UserData {
+auto BlenderSceneLoader::ParseUserData(xml_node<>* node) -> UserData {
 	UserData ud;
 
 	for(auto n = node->first_node("property"); n; 

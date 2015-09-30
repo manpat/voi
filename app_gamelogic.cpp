@@ -109,10 +109,10 @@ void App::Init(){
 	portalManager->AddPortal(door2, 1, 2);
 
 #else
-	OgitorSceneLoader{}.Load("GameData/bend.scene", this);
+	// OgitorSceneLoader{}.Load("GameData/bend.scene", this);
 
-	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/TestTempleScene", "FileSystem");
-	// BlenderSceneLoader{}.Load("GameData/TestTempleScene/temple.scene", this);
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/TestTempleScene", "FileSystem");
+	BlenderSceneLoader{}.Load("GameData/TestTempleScene/temple.scene", this);
 
 	for(auto& e: entityManager->entities){
 		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
