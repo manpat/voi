@@ -26,6 +26,7 @@ protected:
 
 	struct EntityDef : Object {
 		std::string mesh;
+		vec3 bounds;
 		PhysicsType physicsType;
 		ColliderType colliderType;
 	};

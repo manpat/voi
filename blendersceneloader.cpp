@@ -134,18 +134,17 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			// Set up colliders
 			if(entdef.physicsType != PhysicsType::None){
 				bool dynamic = entdef.physicsType == PhysicsType::Dynamic;
-				// TODO: get size data
 				ColliderComponent* collider = nullptr;
 
 				switch(entdef.colliderType){
 					case ColliderType::Box:
-						collider = ent->AddComponent<BoxColliderComponent>(vec3{1.0}, dynamic);
+						collider = ent->AddComponent<BoxColliderComponent>(entdef.bounds, dynamic);
 						break;
 					case ColliderType::Sphere:
-						collider = ent->AddComponent<SphereColliderComponent>(1.f, dynamic);
+						collider = ent->AddComponent<SphereColliderComponent>(entdef.bounds.x/2.f, dynamic);
 						break;
 					case ColliderType::Capsule:
-						collider = ent->AddComponent<CapsuleColliderComponent>(1.f, 1.f, dynamic);
+						collider = ent->AddComponent<CapsuleColliderComponent>(entdef.bounds.x/2.f, entdef.bounds.y, dynamic);
 						break;
 					case ColliderType::Mesh:
 						collider = ent->AddComponent<MeshColliderComponent>(dynamic);
@@ -206,8 +205,9 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 	auto meshattr = node->first_attribute("meshFile");
 	auto phystypattr = node->first_attribute("physics_type");
 	auto coltypeattr = node->first_attribute("collisionPrim");
+	auto dimnode = node->first_node("dimensions");
 
-	if(!nameattr || !meshattr || !phystypattr) {
+	if(!nameattr || !meshattr || !phystypattr || !dimnode) {
 		error("Malformed entity");
 		return nullptr;
 	}
@@ -215,6 +215,7 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 	auto e = std::make_shared<EntityDef>();
 	e->name = nameattr->value();
 	e->mesh = meshattr->value();
+	e->bounds = ParseVec(dimnode);
 	std::string phystype{phystypattr->value()};
 
 	if(phystype == "NO_COLLISION"){
