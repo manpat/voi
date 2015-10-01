@@ -13,11 +13,14 @@ EntityManager::EntityManager(): entityIdCounter{0} {
 }
 
 EntityManager::~EntityManager(){
+	// TODO: Fix segfault here
 	delete Entity::messagePool;
 	Entity::messagePool = nullptr;
 	instance = nullptr;
 
 	for(auto e: entities){
+		if(!e) continue;
+
 		e->Destroy();
 		delete e;
 	}

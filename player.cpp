@@ -18,6 +18,9 @@ void Player::OnAwake() {
 
 	collider->SetAutosleep(false);
 	collider->collisionGroups = 1<<0; // Layer 1;
+
+	// TODO: Abstract
+	collider->body->setFriction(0);
 }
 
 void Player::OnUpdate() {
@@ -27,11 +30,12 @@ void Player::OnUpdate() {
 
 	auto md = Input::GetMouseDelta();
 
-	auto nyaw =  -md.x * 2.0 * M_PI * AppTime::deltaTime * 7.f;
-	auto npitch = md.y * 2.0 * M_PI * AppTime::deltaTime * 7.f;
-	if(abs(cameraPitch + npitch) < M_PI/4.0f) { // Convoluted clamp
-		cameraPitch += (f32)npitch;
-	}
+	// TODO: the 7.f here is sensitivity. Probably make a setting
+	auto nyaw =  -md.x * 2.0 * PI * AppTime::deltaTime * 7.f;
+	auto npitch = md.y * 2.0 * PI * AppTime::deltaTime * 7.f;
+	const f32 limit = PI/2.f;
+
+	cameraPitch = clamp(cameraPitch+npitch, -limit, limit);
 	cameraYaw += (f32)nyaw;
 
 	// Rotate camera
@@ -39,10 +43,10 @@ void Player::OnUpdate() {
 	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->_setDerivedOrientation(ori);
 
-	f32 boost = 2.f;
+	f32 boost = 6.f;
 
 	if(Input::GetKey(SDLK_LSHIFT)){
-		boost = 6.f;
+		boost *= 1.5f;
 	}
 
 	// Move with WASD, based on look direction
@@ -62,6 +66,10 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
+	if(Input::GetKeyDown(SDLK_SPACE)){
+		velocity += vec3::UNIT_Y*10.;
+	}
+
 	collider->SetVelocity(velocity);
 
 	if(Input::GetKeyDown('f')){
@@ -69,5 +77,6 @@ void Player::OnUpdate() {
 		layer = (layer+1)%portalManager->GetNumLayers();
 		portalManager->SetLayer(layer);
 		collider->collisionGroups = 1<<layer;
+		collider->Refilter();
 	}
 }

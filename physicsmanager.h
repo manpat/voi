@@ -6,7 +6,8 @@
 #include "singleton.h"
 #include "component.h"
 
-// http://newtondynamics.com/wiki/index.php5?title=API_Database
+// Ray casting
+// http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Using_RayTest
 
 struct PhysicsManager : Singleton<PhysicsManager> {
 	using Broadphase = btDbvtBroadphase;
@@ -40,6 +41,7 @@ struct ColliderComponent : Component {
 	Collider* collider = nullptr;
 	MotionState* motionState = nullptr;
 
+	// TODO: Make setter and trigger Refilter
 	u32 collisionGroups = 1<<0;
 
 	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}
@@ -51,6 +53,7 @@ struct ColliderComponent : Component {
 	void SetAutosleep(bool);
 
 	void Wakeup();
+	void Refilter();
 
 	vec3 GetVelocity() const;
 	void SetVelocity(const vec3&);

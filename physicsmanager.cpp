@@ -10,10 +10,6 @@
 template<>
 PhysicsManager* Singleton<PhysicsManager>::instance = nullptr;
 
-// extern "C" void BodyLeaveWorldCallback(const NewtonBody* const body, int threadIndex);
-// extern "C" s32 FilterCollision(const NewtonMaterial* mat, const NewtonBody* b1, const NewtonBody* b2, s32);
-// extern "C" void CollisionCallback (const NewtonJoint* const contact, f32 timestep, int);
-
 btVector3 o2bt(const vec3& v){
 	return {v.x, v.y, v.z};
 }
@@ -54,7 +50,7 @@ PhysicsManager::PhysicsManager(f32 refreshRate)
 	solver = new Solver{};
 
 	world = new World{dispatcher, broadphase, solver, collisionConfig};
-	world->setGravity({0, -10., 0});
+	world->setGravity({0, -20., 0});
 	dispatcher->setNearCallback(LayerNearCollisionFilterCallback);
 }
 
@@ -103,9 +99,16 @@ void ColliderComponent::DisableRotation(){
 }
 
 void ColliderComponent::SetTrigger(bool trigger){
-	(void) trigger;
 	// http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Callbacks_and_Triggers
-	// NewtonCollisionSetAsTriggerVolume(collider, trigger);
+	// TODO: lookup ghost objects
+	auto flags = body->getCollisionFlags();
+	if(trigger){
+		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
+	}else{
+		flags &= ~btCollisionObject::CF_NO_CONTACT_RESPONSE;
+	}
+
+	body->setCollisionFlags(flags);
 }
 
 void ColliderComponent::SetAutosleep(bool as){
@@ -114,6 +117,20 @@ void ColliderComponent::SetAutosleep(bool as){
 
 void ColliderComponent::Wakeup(){
 	body->activate();
+}
+
+void ColliderComponent::Refilter(){
+	// TODO: this
+
+	// struct Dummy : PhysicsManager::World::ContactResultCallback {
+	// 	btScalar addSingleResult(btManifoldPoint &, const btCollisionObjectWrapper*, int, int, const btCollisionObjectWrapper*, int, int){
+	// 		return 0.;
+	// 	}
+	// 	bool needsCollision (btBroadphaseProxy *proxy0) const{
+	// 		return true;
+	// 	}
+	// } dummyCB;
+	// PhysicsManager::GetSingleton()->world->contactTest(body, dummyCB);
 }
 
 vec3 ColliderComponent::GetVelocity() const {
@@ -137,20 +154,22 @@ void SphereColliderComponent::CreateCollider() {
 }
 
 void MeshColliderComponent::CreateCollider() {
-	// TODO: Use all submeshes
-	auto sm = entity->ogreEntity->getMesh()->getSubMesh(0);
-	auto smVertices = GetOgreSubMeshVertices(sm);
-
 	auto trimesh = new btTriangleMesh();
 
-	for(u32 i = 0; i < smVertices.size()/3; i++) {
-		btVector3 vs[] = {
-			o2bt(smVertices[i*3+0]),
-			o2bt(smVertices[i*3+1]),
-			o2bt(smVertices[i*3+2]),
-		};
+	// Yuck
+	for(u32 i = 0; i < entity->ogreEntity->getMesh()->getNumSubMeshes(); i++){
+		auto sm = entity->ogreEntity->getMesh()->getSubMesh(i);
+		auto smVertices = GetOgreSubMeshVertices(sm);
 
-		trimesh->addTriangle(vs[0], vs[1], vs[2]);
+		for(u32 i = 0; i < smVertices.size()/3; i++) {
+			btVector3 vs[] = {
+				o2bt(smVertices[i*3+0]),
+				o2bt(smVertices[i*3+1]),
+				o2bt(smVertices[i*3+2]),
+			};
+
+			trimesh->addTriangle(vs[0], vs[1], vs[2]);
+		}
 	}
 
 	collider = new btBvhTriangleMeshShape(trimesh, !dynamic /* Optimise for static */);

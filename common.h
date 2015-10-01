@@ -28,6 +28,11 @@ V findin(const std::unordered_map<K,V>& m, K k, V dv = V()){
 	return it->second;
 }
 
+template<class T, class L, class U>
+T clamp(T v, L l = 0, U u = 1){
+	return std::max(std::min((T)u, v), (T)l);
+}
+
 using vec2 = Ogre::Vector2;
 using vec3 = Ogre::Vector3;
 using vec4 = Ogre::Vector4;
@@ -50,6 +55,10 @@ using f64 = double;
 
 #ifndef M_PI
 #define M_PI 3.14159265359
+#endif
+
+#ifndef PI
+#define PI M_PI
 #endif
 
 #endif

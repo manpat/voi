@@ -8,6 +8,7 @@ namespace Ogre {
 	class SubMesh;
 }
 
+// TODO: Make this take scale into account
 std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh*);
 
 #endif

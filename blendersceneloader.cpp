@@ -121,20 +121,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			auto layer = std::stol(layerStr);
 			assert(layer < 10);
 
-			// Test if contains portal
-			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
-			if(findin(userdata, std::string("anom_portal")) == "1"){
-				auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
-				auto dstlayer = std::stol(dstlayerStr);
-				assert(dstlayer < 10);
-
-				app->portalManager->AddPortal(ogreent, layer, dstlayer);
-			}
-
 			// Set up colliders
+			ColliderComponent* collider = nullptr;
 			if(entdef.physicsType != PhysicsType::None){
 				bool dynamic = entdef.physicsType == PhysicsType::Dynamic;
-				ColliderComponent* collider = nullptr;
 
 				switch(entdef.colliderType){
 					case ColliderType::Box:
@@ -155,6 +145,17 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 
 				collider->collisionGroups = 1u<<layer;
+			}
+
+			// Test if contains portal
+			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
+			if(findin(userdata, std::string("anom_portal")) == "1"){
+				auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
+				auto dstlayer = std::stol(dstlayerStr);
+				assert(dstlayer < 10);
+
+				app->portalManager->AddPortal(ogreent, layer, dstlayer);
+				if(collider) collider->SetTrigger(true);
 			}
 
 			// Set user data
