@@ -18,10 +18,13 @@ class UtilityPanel(bpy.types.Panel):
 		row = layout.row()
 		row.prop(context.active_object, "anom_portal")
 
+		# row = layout.row()
+		row.prop(context.active_object, "anom_mirror")
+
 		row = layout.row()
 		row.prop(context.active_object, "anom_layer")
 
-		if(context.active_object["anom_portal"]):
+		if(context.active_object["anom_portal"] or context.active_object["anom_mirror"]):
 			row.prop(context.active_object, "anom_portaldst")
 
 
@@ -42,6 +45,9 @@ def register():
 	obj.anom_portal = BoolProperty(name="Is Portal",
 		default=False)
 
+	obj.anom_mirror = BoolProperty(name="Is Mirror",
+		default=False)
+
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
 
@@ -51,6 +57,7 @@ def unregister():
 	obj = bpy.types.Object
 	del obj.anom_layer
 	del obj.anom_portal
+	del obj.anom_mirror
 	del obj.anom_portaldst
 	bpy.utils.unregister_module(__name__)
 

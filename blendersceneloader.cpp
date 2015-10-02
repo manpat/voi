@@ -158,6 +158,11 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				if(collider) collider->SetTrigger(true);
 			}
 
+			// Test if contains mirror
+			if(findin(userdata, std::string{"anom_mirror"}) == "1") {
+				// TODO: Is mirror
+			}
+
 			// Set user data
 			auto& uob = ogreent->getUserObjectBindings();
 			uob.setUserAny(Ogre::Any{ent});
