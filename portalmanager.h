@@ -22,7 +22,7 @@ namespace Ogre {
 	class RenderQueueInvocationSequence;
 };
 
-class Camera;
+struct Camera;
 
 struct Portal {
 	s32 id;

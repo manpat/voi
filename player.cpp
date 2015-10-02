@@ -33,9 +33,9 @@ void Player::OnUpdate() {
 	// TODO: the 7.f here is sensitivity. Probably make a setting
 	auto nyaw =  -md.x * 2.0 * PI * AppTime::deltaTime * 7.f;
 	auto npitch = md.y * 2.0 * PI * AppTime::deltaTime * 7.f;
-	const f32 limit = PI/2.f;
+	const f32 limit = (f32)PI/2.f;
 
-	cameraPitch = clamp(cameraPitch+npitch, -limit, limit);
+	cameraPitch = (f32)clamp(cameraPitch+npitch, -limit, limit);
 	cameraYaw += (f32)nyaw;
 
 	// Rotate camera
