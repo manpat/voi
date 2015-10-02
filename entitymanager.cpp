@@ -14,22 +14,22 @@ EntityManager::EntityManager(): entityIdCounter{0} {
 
 EntityManager::~EntityManager(){
 	// TODO: Fix segfault here
-	delete Entity::messagePool;
-	Entity::messagePool = nullptr;
-	instance = nullptr;
-
 	for(auto e: entities){
 		if(!e) continue;
 
 		e->Destroy();
 		delete e;
 	}
+
+	delete Entity::messagePool;
+	Entity::messagePool = nullptr;
+	instance = nullptr;
 }
 
 Entity* EntityManager::CreateEntity(){
 	auto e = new Entity{};
-	e->Init();
 	e->id = ++entityIdCounter; // Smallest valid id is 1
+	e->Init();
 	entities.push_back(e);
 	return e;
 }

@@ -1,6 +1,7 @@
 #ifndef PHYSICSMANAGER_H
 #define PHYSICSMANAGER_H
 
+#include <vector>
 #include <btBulletDynamicsCommon.h>
 #include "common.h"
 #include "singleton.h"
@@ -9,16 +10,29 @@
 // Ray casting
 // http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Using_RayTest
 
+struct ColliderComponent;
+
 struct PhysicsManager : Singleton<PhysicsManager> {
 	using Broadphase = btDbvtBroadphase;
 	using Dispatcher = btCollisionDispatcher;
 	using Solver = btSequentialImpulseConstraintSolver;
 	using World = btDiscreteDynamicsWorld;
 
+	struct TriggerColliderPair {
+		ColliderComponent* trigger;
+		ColliderComponent* collider;
+		u8 stamp;
+	};
+
 	Broadphase* broadphase = nullptr;
 	Dispatcher* dispatcher = nullptr;
 	Solver* solver = nullptr;
 	World* world = nullptr;
+
+	// Stores pairs of triggers to colliding colliders and a timestamp
+	//	to test for staleness. I'm not sure I like this implementation
+	std::vector<TriggerColliderPair*> activeTriggerPairs = {};
+	u8 currentStamp = 0;
 
 	f32 timestep = 1.f/60.f;
 	u32 enabledCollisionGroups = ~0u;
@@ -27,6 +41,8 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 	~PhysicsManager();
 
 	void Update();
+
+	void ProcessTriggerCollision(ColliderComponent*, ColliderComponent*);
 };
 
 class EntityMotionState;
@@ -43,6 +59,7 @@ struct ColliderComponent : Component {
 
 	// TODO: Make setter and trigger Refilter
 	u32 collisionGroups = 1<<0;
+	bool trigger = false;
 
 	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}
 	void OnInit() override;

@@ -16,13 +16,15 @@ class UtilityPanel(bpy.types.Panel):
 		layout = self.layout
 
 		row = layout.row()
-		row.prop(context.active_object, "anom_portal")
-		row.prop(context.active_object, "anom_mirror")
+		# row.prop(context.active_object, "anom_portal")
+		# row.prop(context.active_object, "anom_mirror")
+		row.prop(context.active_object, "anom_objecttype")
 
 		row = layout.row()
 		row.prop(context.active_object, "anom_layer")
 
-		if(context.active_object["anom_portal"] or context.active_object["anom_mirror"]):
+		otyp = context.active_object["anom_objecttype"]
+		if(otyp == 'p' or otyp == 'm'):
 			row.prop(context.active_object, "anom_portaldst")
 
 
@@ -40,11 +42,16 @@ def register():
 	obj.anom_layer = IntProperty(name="Layer",
 		default=0, min=0, max=10, subtype='UNSIGNED')
 
-	obj.anom_portal = BoolProperty(name="Is Portal",
-		default=False)
+	items = [
+		('d', 'Door', 'An openable door'),
+		('i', 'Interact', 'Is interactible. Triggers event(s) on interact'),
+		('m', 'Mirror', 'Can reflect into another layer'),
+		('p', 'Portal', 'Act\'s as a portal between layers'),
+		('_', 'World', ''),
+	]
 
-	obj.anom_mirror = BoolProperty(name="Is Mirror",
-		default=False)
+	obj.anom_objecttype = EnumProperty(items=items,
+		name="Object Type", default='_')
 
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
@@ -54,9 +61,8 @@ def register():
 def unregister():
 	obj = bpy.types.Object
 	del obj.anom_layer
-	del obj.anom_portal
-	del obj.anom_mirror
 	del obj.anom_portaldst
+	del obj.anom_objecttype
 	bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":

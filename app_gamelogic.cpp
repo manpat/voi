@@ -57,6 +57,21 @@ void App::Init(){
 	player->ogreSceneNode = rootNode->createChildSceneNode();
 	player->ogreSceneNode->setPosition(0,2,0);
 
+	// Purely for testing triggers
+	struct MessageTestComponent : Component {
+		MessageTestComponent() : Component{this} {}
+		void OnAwake() {
+			// throw "Test exception";
+		}
+		void OnMessage(const std::string& msg, const OpaqueType& ot){
+			auto trigent = *ot.Get<Entity*>(true /*should always be a valid entity*/);
+
+			std::cout << "Player message: " << msg << "\ttrigger name: " << trigent->GetName() << std::endl;
+		}
+	};
+
+	player->AddComponent<MessageTestComponent>();
+
 	//////////////////////////// This is for testing camera angles ////////////////////
 #if 0
 	auto thing = sceneManager->createManualObject("upthing");
