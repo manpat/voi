@@ -17,8 +17,6 @@ class UtilityPanel(bpy.types.Panel):
 
 		row = layout.row()
 		row.prop(context.active_object, "anom_portal")
-
-		# row = layout.row()
 		row.prop(context.active_object, "anom_mirror")
 
 		row = layout.row()

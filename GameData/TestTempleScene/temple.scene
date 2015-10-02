@@ -1,4 +1,4 @@
-<scene previous_export_time="1443738189.4225616" formatVersion="1.0.1" exported_by="patrick" export_time="1443744321.9150078" >
+<scene previous_export_time="1443744321.9150078" formatVersion="1.0.1" exported_by="patrick" export_time="1443745012.5115647" >
   <nodes >
     <node name="Layer2Platform" >
       <position z="-52.057850" x="0.015204" y="3.996550" />
@@ -70,7 +70,7 @@
       <user_data name="anom_mirror" value="0" type="int" />
       <user_data name="anom_portal" value="0" type="int" />
       <entity inertia_tensor="0.4000000059604645" meshFile="Foyer.mesh" lock_trans_y="False" actor="False" friction_x="1.0" name="Foyer" anisotropic_friction="False" damping_rot="0.1589999943971634" mass_radius="1.0" velocity_max="0.0" lock_trans_z="False" friction_z="1.0" damping_trans="0.02539999969303608" mass="1.0" lock_rot_x="False" friction_y="1.0" physics_type="STATIC" collisionPrim="triangle_mesh" velocity_min="0.0" lock_trans_x="False" lock_rot_z="False" ghost="False" lock_rot_y="False" >
-        <dimensions z="16.0" x="12.0" y="9.0" />
+        <dimensions z="16.5" x="12.0" y="9.0" />
       </entity>
     </node>
   </nodes>

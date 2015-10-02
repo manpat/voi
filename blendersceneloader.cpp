@@ -149,7 +149,8 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 			// Test if contains portal
 			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
-			if(findin(userdata, std::string("anom_portal")) == "1"){
+			bool isPortal = findin(userdata, std::string("anom_portal")) == "1";
+			if(isPortal){
 				auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
 				auto dstlayer = std::stol(dstlayerStr);
 				assert(dstlayer < 10);
@@ -160,6 +161,9 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 			// Test if contains mirror
 			if(findin(userdata, std::string{"anom_mirror"}) == "1") {
+				if(isPortal) {
+					error("Entity set to be constructed as both mirror and portal. Defaulting to portal");
+				}
 				// TODO: Is mirror
 			}
 

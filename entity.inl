@@ -30,8 +30,17 @@ struct ArgumentPackImpl<1, F, T...> {
 	using type = F;
 };
 
+template<class F, class... T>
+struct CountPack {
+	enum{ count =  CountPack<T...>::count+1 };
+};
+template<class F>
+struct CountPack<F> {
+	enum{ count =  1 };
+};
+
 template<class... T>
-using ArgumentPack = typename ArgumentPackImpl<sizeof...(T), T...>::type;
+using ArgumentPack = typename ArgumentPackImpl<CountPack<T...>::count, T...>::type;
 
 template<class... A>
 void Entity::SendMessage(const std::string& type, A... args){
