@@ -147,24 +147,29 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				collider->collisionGroups = 1u<<layer;
 			}
 
-			// Test if contains portal
 			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
-			bool isPortal = findin(userdata, std::string("anom_portal")) == "1";
-			if(isPortal){
-				auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
-				auto dstlayer = std::stol(dstlayerStr);
-				assert(dstlayer < 10);
 
-				app->portalManager->AddPortal(ogreent, layer, dstlayer);
-				if(collider) collider->SetTrigger(true);
-			}
+			auto otype = std::stol(findin(userdata, std::string{"anom_objecttype"}, std::string{"0"}));
+			switch(otype){
+				case 0/*World*/: break;
+				case 1/*Portal*/:{
+					auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
+					auto dstlayer = std::stol(dstlayerStr);
+					assert(dstlayer < 10);
 
-			// Test if contains mirror
-			if(findin(userdata, std::string{"anom_mirror"}) == "1") {
-				if(isPortal) {
-					error("Entity set to be constructed as both mirror and portal. Defaulting to portal");
+					app->portalManager->AddPortal(ogreent, layer, dstlayer);
+					if(collider) collider->SetTrigger(true);
+					break;
 				}
-				// TODO: Is mirror
+
+				case 2/*Mirror*/:{
+					// TODO: Is mirror
+					break;
+				}
+				case 3/*Interactable*/: break;
+				case 4/*Door*/: break;
+
+				default: throw "Unknown object type";
 			}
 
 			// Set user data

@@ -16,15 +16,13 @@ class UtilityPanel(bpy.types.Panel):
 		layout = self.layout
 
 		row = layout.row()
-		# row.prop(context.active_object, "anom_portal")
-		# row.prop(context.active_object, "anom_mirror")
 		row.prop(context.active_object, "anom_objecttype")
 
 		row = layout.row()
 		row.prop(context.active_object, "anom_layer")
 
 		otyp = context.active_object["anom_objecttype"]
-		if(otyp == 'p' or otyp == 'm'):
+		if(otyp == 1 or otyp == 2):
 			row.prop(context.active_object, "anom_portaldst")
 
 
@@ -43,11 +41,11 @@ def register():
 		default=0, min=0, max=10, subtype='UNSIGNED')
 
 	items = [
-		('d', 'Door', 'An openable door'),
-		('i', 'Interact', 'Is interactible. Triggers event(s) on interact'),
-		('m', 'Mirror', 'Can reflect into another layer'),
-		('p', 'Portal', 'Act\'s as a portal between layers'),
-		('_', 'World', ''),
+		('d', 'Door', 'An openable door', '', 4),
+		('i', 'Interact', 'Is interactible. Triggers event(s) on interact', '', 3),
+		('m', 'Mirror', 'Can reflect into another layer', '', 2),
+		('p', 'Portal', 'Act\'s as a portal between layers', '', 1),
+		('_', 'World', '', '', 0),
 	]
 
 	obj.anom_objecttype = EnumProperty(items=items,
