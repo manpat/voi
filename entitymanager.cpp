@@ -17,7 +17,7 @@ EntityManager::~EntityManager(){
 	for(auto e: entities){
 		if(!e) continue;
 
-		e->Destroy();
+		// e->Destroy();
 		delete e;
 	}
 

@@ -1,3 +1,4 @@
+#include "portalmanager.h"
 #include "entitymanager.h"
 #include "component.h"
 #include "entity.h"
@@ -22,6 +23,7 @@ void Entity::Init(){
 	ogreEntity = nullptr;
 	ogreSceneNode = nullptr;
 	// id set by entity manager
+	layer = 0;
 
 	enabled = true;
 }
@@ -224,6 +226,38 @@ void Entity::SetScale(const vec3& n) {
 // 	ogreSceneNode->_setFullTransform(n);
 // }
 
+void Entity::SetLayer(s32 l) {
+	layer = l;
+
+	if(ogreEntity){
+		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
+	}
+
+	for(auto& c: components){
+		c->OnLayerChange();
+	}
+}
+
+void Entity::OnCollisionEnter(ColliderComponent* oc){
+	for(auto c: components){
+		c->OnCollisionEnter(oc);
+	}
+}
+void Entity::OnCollisionLeave(ColliderComponent* oc){
+	for(auto c: components){
+		c->OnCollisionLeave(oc);
+	}
+}
+void Entity::OnTriggerEnter(ColliderComponent* oc){
+	for(auto c: components){
+		c->OnTriggerEnter(oc);
+	}
+}
+void Entity::OnTriggerLeave(ColliderComponent* oc){
+	for(auto c: components){
+		c->OnTriggerLeave(oc);
+	}
+}
 
 /*
 

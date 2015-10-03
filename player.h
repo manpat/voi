@@ -14,6 +14,8 @@ struct Player : Component {
 
 	void OnAwake() override;
 	void OnUpdate() override;
+	void OnLayerChange() override;
+	void OnTriggerEnter(ColliderComponent*) override;
 };
 
 #endif

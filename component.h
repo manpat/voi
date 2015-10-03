@@ -14,6 +14,7 @@
 // Note: Cannot be pooled easily because it relies on polymorphism
 
 struct Entity;
+struct ColliderComponent;
 
 struct Component {
 	static u32 componentIdCounter;
@@ -46,6 +47,15 @@ struct Component {
 
 	// OnUpdate is called once per frame if the component is enabled
 	virtual void OnUpdate() {};
+
+	// OnLayerChange is called when the parent entity's layer changes
+	virtual void OnLayerChange() {};
+
+	// These are called for the relevant physics events
+	virtual void OnCollisionEnter(ColliderComponent*) {};
+	virtual void OnCollisionLeave(ColliderComponent*) {};
+	virtual void OnTriggerEnter(ColliderComponent*) {};
+	virtual void OnTriggerLeave(ColliderComponent*) {};
 
 	// OnMessage is called when SendMessage is called on the owning entity 
 	virtual void OnMessage(const std::string&, const OpaqueType&) {};

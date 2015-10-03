@@ -121,6 +121,8 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			auto layer = std::stol(layerStr);
 			assert(layer < 10);
 
+			ent->SetLayer(layer);
+
 			// Set up colliders
 			ColliderComponent* collider = nullptr;
 			if(entdef.physicsType != PhysicsType::None){
@@ -147,8 +149,6 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				collider->collisionGroups = 1u<<layer;
 			}
 
-			ogreent->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
-
 			auto otype = std::stol(findin(userdata, std::string{"anom_objecttype"}, std::string{"0"}));
 			switch(otype){
 				case 0/*World*/: break;
@@ -158,7 +158,13 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					assert(dstlayer < 10);
 
 					app->portalManager->AddPortal(ogreent, layer, dstlayer);
-					if(collider) collider->SetTrigger(true);
+					if(collider) {
+						// Set as trigger
+						collider->SetTrigger(true);
+
+						// Enable interactions in destination layer
+						collider->collisionGroups |= 1u<<dstlayer;
+					}
 					break;
 				}
 

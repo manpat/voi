@@ -71,46 +71,94 @@ void PhysicsManager::Update(){
 	// Find all collisions between colliders and collider triggers
 	int numManifolds = world->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
-		btPersistentManifold* contactManifold =  world->getDispatcher()->getManifoldByIndexInternal(i);
-		btCollisionObject* obA = (btCollisionObject*)contactManifold->getBody0();
-		btCollisionObject* obB = (btCollisionObject*)contactManifold->getBody1();
+		btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+		auto obA = (btCollisionObject*)contactManifold->getBody0();
+		auto obB = (btCollisionObject*)contactManifold->getBody1();
 
 		int numContacts = contactManifold->getNumContacts();
 		for (int j = 0; j < numContacts; j++) {
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() < 0.f) {
-				auto ud0 = static_cast<btCollisionObject*>(obA)->getUserPointer();
-				auto ud1 = static_cast<btCollisionObject*>(obB)->getUserPointer();
+				auto ud0 = obA->getUserPointer();
+				auto ud1 = obB->getUserPointer();
 
 				auto col0 = static_cast<Component*>(ud0)->As<ColliderComponent>(false);
 				auto col1 = static_cast<Component*>(ud1)->As<ColliderComponent>(false);
 
-				// If both objects are valid colliders and either of them are triggers
+				// If both objects are valid colliders
 				if(!col0 || !col1) continue;
-				if(!col0->trigger && !col1->trigger) continue;
 
 				// Process collision
-				ProcessTriggerCollision(col0, col1);
+				if(col0->trigger || col1->trigger) {
+					ProcessTriggerCollision(col0, col1);
+				}else{
+					ProcessCollision(col0, col1);
+				}
 			}
 		}
 	}
 
 	// Remove stale trigger collisions and notify relevant
 	//	entities
-	for(auto& tcp: activeTriggerPairs){
+	for(auto& cp: activeColliderPairs){
+		if(!cp) continue;
+		if(!cp->collider0 || !cp->collider1) continue;
+
 		// Should work fine given unsigned integer underflow
-		if((currentStamp - tcp->stamp) > 1){
-			tcp->trigger->entity->SendMessage("leave", tcp->collider->entity);
-			tcp->collider->entity->SendMessage("leave", tcp->trigger->entity);
-			delete tcp;
-			tcp = nullptr;
+		if((currentStamp - cp->stamp) > 1){
+			if(cp->collider0->trigger
+			|| cp->collider1->trigger){
+
+				cp->collider0->entity->OnTriggerLeave(cp->collider1);
+				cp->collider1->entity->OnTriggerLeave(cp->collider0);
+			}else{
+				cp->collider0->entity->OnCollisionLeave(cp->collider1);
+				cp->collider1->entity->OnCollisionLeave(cp->collider0);
+			}
+
+			// Setting these to nullptr flags them for cleanup
+			cp->collider0 = nullptr;
+			cp->collider1 = nullptr;
 		}
 	}
 
 	// Remove all deleted and null trigger collisions
-	activeTriggerPairs.erase(
-		std::remove(activeTriggerPairs.begin(), activeTriggerPairs.end(), nullptr), 
-		activeTriggerPairs.end());
+	for(auto& acp: activeColliderPairs){
+		if(!acp) continue;
+		if(!acp->collider0 || !acp->collider1){
+			delete acp;
+			acp = nullptr;
+		}
+	}
+
+	auto begin = activeColliderPairs.begin();
+	auto end = activeColliderPairs.end();
+	activeColliderPairs.erase(std::remove(begin, end, nullptr), end);
+}
+
+void PhysicsManager::ProcessCollision(ColliderComponent* col0, ColliderComponent* col1){
+	// Test if this collision is already being tracked
+	auto begin = activeColliderPairs.begin();
+	auto end = activeColliderPairs.end();
+	auto it = std::find_if(begin, end,
+		[col0, col1](const ColliderPair* cp){
+			return (cp->collider0 == col0 && cp->collider1 == col1)
+				|| (cp->collider0 == col1 && cp->collider1 == col0);
+		});
+
+	// If it already exists, update stamp and stop
+	if(it != end) {
+		(*it)->stamp = currentStamp;
+		return;
+	}
+
+	// Otherwise register new pair
+	auto acp = new ColliderPair{col0, col1, currentStamp};
+	activeColliderPairs.push_back(acp);
+
+	// Notify relevant entities
+	col0->entity->OnCollisionEnter(col1);
+	col1->entity->OnCollisionEnter(col0);
 }
 
 void PhysicsManager::ProcessTriggerCollision(ColliderComponent* col0, ColliderComponent* col1){
@@ -134,24 +182,27 @@ void PhysicsManager::ProcessTriggerCollision(ColliderComponent* col0, ColliderCo
 	if(!trigger) return;
 
 	// Test if this collision is already being tracked
-	auto it = std::find_if(activeTriggerPairs.begin(), activeTriggerPairs.end(), 
-		[trigger, col](const TriggerColliderPair* tcp){
-			return tcp->trigger == trigger && tcp->collider == col;
+	auto begin = activeColliderPairs.begin();
+	auto end = activeColliderPairs.end();
+	auto it = std::find_if(begin, end,
+		[trigger, col](const ColliderPair* cp){
+			return (cp->collider0 == trigger && cp->collider1 == col)
+				|| (cp->collider0 == col && cp->collider1 == trigger);
 		});
 
 	// If it already exists, update stamp and stop
-	if(it != activeTriggerPairs.end()) {
+	if(it != end) {
 		(*it)->stamp = currentStamp;
 		return;
 	}
 
 	// Otherwise register new pair
-	auto atp = new TriggerColliderPair{trigger, col, currentStamp};
-	activeTriggerPairs.push_back(atp);
+	auto acp = new ColliderPair{trigger, col, currentStamp};
+	activeColliderPairs.push_back(acp);
 
 	// Notify relevant entities
-	trigger->entity->SendMessage("enter", col->entity);
-	col->entity->SendMessage("enter", trigger->entity);
+	trigger->entity->OnTriggerEnter(col);
+	col->entity->OnTriggerEnter(trigger);
 }
 
 void ColliderComponent::OnInit() {

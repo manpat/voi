@@ -12,7 +12,6 @@
 #include <OGRE/OgreSceneNode.h>
 
 void Player::OnAwake() {
-	std::cout << "New player" << std::endl;
 	collider = entity->FindComponent<ColliderComponent>();
 	if(!collider) throw "Player requires a collider component";
 
@@ -73,10 +72,21 @@ void Player::OnUpdate() {
 	collider->SetVelocity(velocity);
 
 	if(Input::GetKeyDown('f')){
-		static s32 layer = 0;
-		layer = (layer+1)%portalManager->GetNumLayers();
-		portalManager->SetLayer(layer);
-		collider->collisionGroups = 1<<layer;
-		collider->Refilter();
+		entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
 	}
+}
+
+void Player::OnLayerChange(){
+	auto portalManager = App::GetSingleton()->portalManager;
+	
+	portalManager->SetLayer(entity->layer);
+	collider->collisionGroups = 1<<entity->layer;
+	collider->Refilter();
+}
+
+void Player::OnTriggerEnter(ColliderComponent* o){
+	std::cout << "Player enter" << std::endl;
+
+	auto portalManager = App::GetSingleton()->portalManager;
+	entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
 }

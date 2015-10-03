@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "common.h"
+#include "component.h"
 
 enum {
 	RENDER_QUEUE_PORTAL = Ogre::RENDER_QUEUE_3,

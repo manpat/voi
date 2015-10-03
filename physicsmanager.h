@@ -18,9 +18,9 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 	using Solver = btSequentialImpulseConstraintSolver;
 	using World = btDiscreteDynamicsWorld;
 
-	struct TriggerColliderPair {
-		ColliderComponent* trigger;
-		ColliderComponent* collider;
+	struct ColliderPair {
+		ColliderComponent* collider0;
+		ColliderComponent* collider1;
 		u8 stamp;
 	};
 
@@ -31,7 +31,7 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 
 	// Stores pairs of triggers to colliding colliders and a timestamp
 	//	to test for staleness. I'm not sure I like this implementation
-	std::vector<TriggerColliderPair*> activeTriggerPairs = {};
+	std::vector<ColliderPair*> activeColliderPairs = {};
 	u8 currentStamp = 0;
 
 	f32 timestep = 1.f/60.f;
@@ -42,6 +42,7 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 
 	void Update();
 
+	void ProcessCollision(ColliderComponent*, ColliderComponent*);
 	void ProcessTriggerCollision(ColliderComponent*, ColliderComponent*);
 };
 

@@ -24,8 +24,11 @@ namespace Ogre {
 
 struct Component;
 struct FramePool;
+struct PhysicsManager;
+struct ColliderComponent;
 
 struct Entity {
+	friend PhysicsManager;
 	static FramePool* messagePool;
 
 	std::vector<Component*> components;
@@ -39,6 +42,10 @@ struct Entity {
 	// Unique identifier, id 0 is invalid
 	//	id 0 can be used for pooling
 	u32 id;
+
+	// The layer than this entity exists in
+	//	NOTE: setting directly will do nothing
+	s32 layer;
 
 	// Whether or not this should recieve updates
 	bool enabled;
@@ -115,6 +122,14 @@ struct Entity {
 	// void SetFullTransform(const mat4&);
 
 	// TODO: Add coordinate conversion
+
+	void SetLayer(s32);
+
+protected:
+	void OnCollisionEnter(ColliderComponent*);
+	void OnCollisionLeave(ColliderComponent*);
+	void OnTriggerEnter(ColliderComponent*);
+	void OnTriggerLeave(ColliderComponent*);
 };
 
 #include "entity.inl"

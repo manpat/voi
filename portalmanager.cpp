@@ -144,6 +144,7 @@ void PortalManager::SetLayer(s32 l){
 }
 
 void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
+	assert(l0 < 10 && l1 < 10);
 	auto id = (s32)portals.size();
 	assert(id < 10);
 
