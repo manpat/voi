@@ -7,6 +7,7 @@
 
 #include <OGRE/OgreEntity.h>
 #include <algorithm>
+#include <limits>
 
 template<>
 PhysicsManager* Singleton<PhysicsManager>::instance = nullptr;
@@ -134,6 +135,48 @@ void PhysicsManager::Update(){
 	auto begin = activeColliderPairs.begin();
 	auto end = activeColliderPairs.end();
 	activeColliderPairs.erase(std::remove(begin, end, nullptr), end);
+}
+
+struct RaycastCallback : btCollisionWorld::ClosestRayResultCallback {
+	RaycastCallback(const btVector3& start, const btVector3& end, u32 _collisionMask = ~0u, s32 _layer = 0)
+		: ClosestRayResultCallback{start, end}, collisionMask{_collisionMask}, layer{_layer} {}
+
+	u32 collisionMask;
+	s32 layer;
+
+	bool needsCollision(btBroadphaseProxy* proxy0) const override {
+		auto co = (ColliderComponent::RigidBody*)proxy0->m_clientObject;
+		auto col = (ColliderComponent*)co->getUserPointer();
+
+		auto ecg = PhysicsManager::GetSingleton()->enabledCollisionGroups;
+		auto mask = (col->collisionGroups & collisionMask & ecg);
+
+		return mask && ((layer<0) || (layer == col->entity->layer));
+	}
+};
+
+auto PhysicsManager::Raycast(const vec3& start, const vec3& dir, s32 layer, u32 collisionMask) -> RaycastResult {
+	return Linecast(start, start + dir, layer, collisionMask);
+}
+
+auto PhysicsManager::Linecast(const vec3& ostart, const vec3& oend, s32 layer, u32 collisionMask) -> RaycastResult {
+	auto start = o2bt(ostart);
+	auto end = o2bt(oend);
+
+	RaycastCallback rayCallback{start, end, collisionMask, layer};
+
+	// Perform raycast
+	world->rayTest(start, end, rayCallback);
+
+	if(rayCallback.hasHit()) {
+		end = rayCallback.m_hitPointWorld;
+		auto normal = rayCallback.m_hitNormalWorld;
+		auto col = (ColliderComponent*)rayCallback.m_collisionObject->getUserPointer();
+
+		return {col, bt2o(end), bt2o(normal), rayCallback.m_closestHitFraction};
+	}
+
+	return {nullptr, vec3::ZERO, vec3::ZERO, std::numeric_limits<f32>::infinity()};
 }
 
 void PhysicsManager::ProcessCollision(ColliderComponent* col0, ColliderComponent* col1){

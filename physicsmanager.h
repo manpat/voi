@@ -23,10 +23,22 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 	using Solver = btSequentialImpulseConstraintSolver;
 	using World = btDiscreteDynamicsWorld;
 
+private: 
 	struct ColliderPair {
 		ColliderComponent* collider0;
 		ColliderComponent* collider1;
 		u8 stamp;
+	};
+
+public:
+	struct RaycastResult {
+		bool hit() const { return collider; }
+		operator bool() const { return hit(); }
+
+		ColliderComponent* collider;
+		vec3 hitPosition;
+		vec3 hitNormal;
+		f32 distance;
 	};
 
 	Broadphase* broadphase = nullptr;
@@ -47,6 +59,16 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 
 	void Update();
 
+	// Linecast returns the first ColliderComponent hit between begin and end
+	//	or nullptr if nothing. If layer is specified, rays will only hit
+	//	colliders in that layer. Layer < 0 will hit all layers.
+	RaycastResult Linecast(const vec3& begin, const vec3& end, s32 layer = -1, u32 collisionMask = ~0u);
+
+	// Raycast is the same as Linecast except it takes direction*distance 
+	//	instead of end
+	RaycastResult Raycast(const vec3& begin, const vec3& dir, s32 layer = -1, u32 collisionMask = ~0u);
+
+private:
 	void ProcessCollision(ColliderComponent*, ColliderComponent*);
 	void ProcessTriggerCollision(ColliderComponent*, ColliderComponent*);
 };

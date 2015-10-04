@@ -25,11 +25,13 @@ struct Component {
 	u32 id = 0;
 	// This is for fast type comparisons
 	size_t typeHash = 0; 
+	// This is for debugging
+	std::string typeName = "Component"; 
 	// This determines whether OnUpdate is triggered
 	bool enabled = true;
 
 	template<class C>
-	Component(C*) : id{++componentIdCounter}, typeHash{typeid(C).hash_code()} {}
+	Component(C*) : id{++componentIdCounter}, typeHash{typeid(C).hash_code()}, typeName{getTypeName<C>()} {}
 	virtual ~Component() {}
 
 	// OnInit is called after the component has been initialised and attached to 
@@ -72,7 +74,7 @@ struct Component {
 	const C* As(bool fatal = true) const {
 		if(!IsType<C>()) {
 			if(!fatal) return nullptr;
-			else throw std::string("Component cast error: As<") + getTypeName<C>() + ">";
+			else throw std::string("Component cast error: As<") + getTypeName<C>() + "> {"+ typeName +"}";
 		}
 		return static_cast<const C*>(this);
 	}
@@ -82,7 +84,7 @@ struct Component {
 	C* As(bool fatal = true) {
 		if(!IsType<C>()) {
 			if(!fatal) return nullptr;
-			else throw std::string("Component cast error: As<") + getTypeName<C>() + ">";
+			else throw std::string("Component cast error: As<") + getTypeName<C>() + "> {"+ typeName +"}";
 		}
 		return static_cast<C*>(this);
 	}

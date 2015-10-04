@@ -8,7 +8,7 @@
 #include "app.h"
 
 // TODO: Remove references to ogre stuff
-//	All ogre stuff should be handled by camera wrapper
+//	All camera stuff should be handled by camera wrapper
 #include <OGRE/OgreSceneNode.h>
 
 void Player::OnAwake() {
@@ -16,7 +16,7 @@ void Player::OnAwake() {
 	if(!collider) throw "Player requires a collider component";
 
 	collider->SetAutosleep(false);
-	collider->collisionGroups = 1<<0; // Layer 1;
+	entity->SetLayer(0);
 
 	// TODO: Abstract
 	collider->body->setFriction(0);
@@ -78,6 +78,17 @@ void Player::OnUpdate() {
 	if(Input::GetButtonDown(Input::Left)){
 		// Interact
 	}
+
+	// // This prints out what you're looking at
+	// auto rayres = PhysicsManager::GetSingleton()->Raycast(
+	// 	entity->GetPosition()+vec3::UNIT_Y*0.2f -ori.zAxis()*0.3f, 
+	// 	-ori.zAxis()*10.f,
+	// 	/*entity->layer*/-1,
+	// 	collider->collisionGroups);
+
+	// if(rayres){
+	// 	std::cout << rayres.collider->entity->GetName() << std::endl;
+	// }
 }
 
 void Player::OnLayerChange(){
