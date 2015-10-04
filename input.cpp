@@ -3,6 +3,7 @@
 #include "app.h"
 
 std::map<s32,s32> Input::keyStates;
+std::map<s32,s32> Input::mouseStates;
 vec2 Input::mouseDelta = vec2::ZERO;
 
 Input::Input(){
@@ -39,6 +40,16 @@ void Input::EventHook(const SDL_Event& e){
 			// Save state and inform of change
 			keyStates[e.key.keysym.sym] = Input::Down | Input::ChangedThisFrameFlag;
 		break;
+
+	case SDL_MOUSEBUTTONUP:
+		// Save state and inform of change
+		mouseStates[e.button.button] = Input::Up | Input::ChangedThisFrameFlag;
+		break;
+
+	case SDL_MOUSEBUTTONDOWN:
+		// Save state and inform of change
+		mouseStates[e.button.button] = Input::Down | Input::ChangedThisFrameFlag;
+		break;
 	}
 }
 
@@ -64,6 +75,9 @@ void Input::EndFrame(){
 	for(auto& kv: keyStates){
 		kv.second &= ~Input::ChangedThisFrameFlag;
 	}
+	for(auto& kv: mouseStates){
+		kv.second &= ~Input::ChangedThisFrameFlag;
+	}
 }
 
 /*
@@ -82,6 +96,20 @@ void Input::EndFrame(){
 vec2 Input::GetMouseDelta(){
 	return mouseDelta;
 }
+
+bool Input::GetButton(s32 k) {
+	// Get only the raw "up or down" state
+	return findin(mouseStates, k) & 1;
+}
+bool Input::GetButtonDown(s32 k) {
+	// Get state and return if it is down and has changed this frame
+	return findin(mouseStates, k) == (Input::ChangedThisFrameFlag|Input::Down);
+}
+bool Input::GetButtonUp(s32 k) {
+	// Get state and return if it is up and has changed this frame
+	return findin(mouseStates, k) == (Input::ChangedThisFrameFlag|Input::Up);
+}
+
 
 bool Input::GetKey(s32 k){
 	// Get only the raw "up or down" state

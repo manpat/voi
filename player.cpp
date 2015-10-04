@@ -74,6 +74,10 @@ void Player::OnUpdate() {
 	if(Input::GetKeyDown('f')){
 		entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
 	}
+
+	if(Input::GetButtonDown(Input::Left)){
+		// Interact
+	}
 }
 
 void Player::OnLayerChange(){

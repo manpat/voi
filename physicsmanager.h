@@ -10,6 +10,11 @@
 // Ray casting
 // http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Using_RayTest
 
+// TODO: Non-mesh colliders are created with their center at origin
+//	This is a problem because meshes don't have to be centered on their origin
+//	
+//	Probably have the blender plugin export an offset
+
 struct ColliderComponent;
 
 struct PhysicsManager : Singleton<PhysicsManager> {
@@ -107,7 +112,7 @@ struct CapsuleColliderComponent : ColliderComponent {
 	f32 radius, height;
 };
 
-// This is for level meshes and stuff that doesn't move ever.
+// This is mainly for level meshes
 struct MeshColliderComponent : ColliderComponent {
 	MeshColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
 	void CreateCollider() override;

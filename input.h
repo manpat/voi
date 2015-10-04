@@ -7,15 +7,23 @@
 class Input {
 public:
 	static std::map<s32, s32> keyStates;
+	static std::map<s32, s32> mouseStates;
 	static vec2 mouseDelta;
 
-	// This flag is for indicating that a key changed during a frame
-	//	Can be used for triggering things that should only happen once per 
-	//	key press.
 	enum {
 		Up = 0,
 		Down = 1,
+
+		// This flag is for indicating that a key changed during a frame
+		//	Can be used for triggering things that should only happen once per 
+		//	key press.
 		ChangedThisFrameFlag = 1<<8
+	};
+
+	enum {
+		Left = SDL_BUTTON_LEFT,
+		Middle = SDL_BUTTON_MIDDLE,
+		Right = SDL_BUTTON_RIGHT,
 	};
 
 public:
@@ -24,6 +32,16 @@ public:
 
 	// Returns mouse delta since last frame
 	static vec2 GetMouseDelta();
+
+	// Returns if a mouse button is pressed
+	static bool GetButton(s32 k);
+
+	// Returns if a mouse button was pressed this frame
+	static bool GetButtonDown(s32 k);
+
+	// Returns if a mouse button was released this frame
+	static bool GetButtonUp(s32 k);
+
 
 	// Returns if a key is pressed
 	static bool GetKey(s32 k);
