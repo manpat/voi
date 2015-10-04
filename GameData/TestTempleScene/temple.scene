@@ -1,4 +1,4 @@
-<scene previous_export_time="1443928769.2657979" exported_by="patrick" formatVersion="1.0.1" export_time="1443928962.3854704" >
+<scene previous_export_time="1443928962.3854704" exported_by="patrick" formatVersion="1.0.1" export_time="1443938331.4686007" >
   <nodes >
     <node name="Cube.005" >
       <position z="-49.979279" x="-0.001323" y="5.044720" />
@@ -72,6 +72,7 @@
       <user_data name="anom_portal" value="0" type="int" />
       <user_data name="anom_portaldst" value="1" type="int" />
       <user_data name="anom_layer" value="1" type="int" />
+      <user_data name="anom_objecttype" value="3" type="int" />
       <entity mass_radius="1.0" actor="True" physics_type="RIGID_BODY" inertia_tensor="0.4000000059604645" lock_rot_y="False" friction_x="1.0" name="Cube.003" velocity_min="0.0" ghost="False" lock_trans_x="False" velocity_max="0.0" lock_trans_z="False" mass="1.0" friction_z="1.0" lock_trans_y="False" meshFile="Cube.003.mesh" friction_y="1.0" lock_rot_z="False" anisotropic_friction="False" damping_rot="0.10000000149011612" lock_rot_x="False" damping_trans="0.03999999910593033" collisionPrim="box" >
         <dimensions z="2.0" x="2.0" y="2.0" />
       </entity>

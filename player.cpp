@@ -1,5 +1,6 @@
-#include "portalmanager.h"
 #include "physicsmanager.h"
+#include "portalmanager.h"
+#include "interactable.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -75,8 +76,29 @@ void Player::OnUpdate() {
 		entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
 	}
 
+	auto physman = PhysicsManager::GetSingleton();
+
+	// Interact
 	if(Input::GetButtonDown(Input::Left)){
-		// Interact
+		auto rayres = physman->Raycast(
+			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.5f,
+			-ori.zAxis()*3.f,
+			entity->layer);
+
+		if(rayres){
+			auto interactable = rayres.collider->entity->FindComponent<Interactable>();
+
+			std::cout
+				<< rayres.collider->entity->GetName()
+				<< "\tIs interactable? "  
+				<< std::boolalpha
+				<< (interactable != nullptr)
+				<< std::endl;
+
+			if(interactable){
+				interactable->Activate();
+			}
+		}
 	}
 
 	// // This prints out what you're looking at

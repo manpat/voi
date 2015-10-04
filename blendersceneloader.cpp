@@ -11,6 +11,7 @@
 #include "physicsmanager.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
+#include "interactable.h"
 #include "entity.h"
 #include "app.h"
 
@@ -172,7 +173,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					// TODO: Is mirror
 					break;
 				}
-				case 3/*Interactable*/: break;
+				case 3/*Interactable*/: {
+					ent->AddComponent<Interactable>();
+					break;
+				}
 				case 4/*Door*/: break;
 
 				default: throw "Unknown object type";
