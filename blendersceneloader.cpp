@@ -80,7 +80,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 	}
 
 	while(nodeQueue.size() > 0){
-		auto& n = nodeQueue.front();
+		auto n = nodeQueue.front();
 		nodeQueue.pop();
 
 		auto& ndef = *n.ndef;

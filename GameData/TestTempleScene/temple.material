@@ -14,20 +14,20 @@ material _missing_material_
     }
 }
 
-// GreyStone genrated by blender2ogre 0.6.0
+// Stone genrated by blender2ogre 0.6.0
 
-material GreyStone 
+material Stone 
 {
     receive_shadows on 
 
     technique
     {
-        pass GreyStone
+        pass Stone
         {
-            ambient 0.2738308608531952 0.2738308608531952 0.2738308608531952 1.0
-            diffuse 0.2190646919468744 0.2190646919468744 0.2190646919468744 1.0
+            ambient 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
+            diffuse 0.3975378334155355 0.39230735886554946 0.39230735886554946 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.2738308608531952 0.2738308608531952 0.2738308608531952 1.0
+            emissive 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -84,20 +84,20 @@ material Portal
         }
     }
 }
-// Stone genrated by blender2ogre 0.6.0
+// GreyStone genrated by blender2ogre 0.6.0
 
-material Stone 
+material GreyStone 
 {
     receive_shadows on 
 
     technique
     {
-        pass Stone
+        pass GreyStone
         {
-            ambient 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
-            diffuse 0.3975378334155355 0.39230735886554946 0.39230735886554946 1.0
+            ambient 0.2738308608531952 0.2738308608531952 0.2738308608531952 1.0
+            diffuse 0.2190646919468744 0.2190646919468744 0.2190646919468744 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
+            emissive 0.2738308608531952 0.2738308608531952 0.2738308608531952 1.0
 
             alpha_to_coverage off
             colour_write on
