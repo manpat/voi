@@ -119,7 +119,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
-			auto layer = std::stol(layerStr);
+			s32 layer = std::stol(layerStr);
 			assert(layer < 10);
 
 			ent->SetLayer(layer);
@@ -155,10 +155,11 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				case 0/*World*/: break;
 				case 1/*Portal*/:{
 					auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
-					auto dstlayer = std::stol(dstlayerStr);
+					s32 dstlayer = std::stol(dstlayerStr);
 					assert(dstlayer < 10);
 
-					app->portalManager->AddPortal(ogreent, layer, dstlayer);
+					// app->portalManager->AddPortal(ogreent, layer, dstlayer);
+					ent->AddComponent<Portal>(layer, dstlayer);
 					if(collider) {
 						// Set as trigger
 						collider->SetTrigger(true);

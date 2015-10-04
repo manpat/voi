@@ -8,6 +8,8 @@
 #include "portalmanager.h"
 #include "meshinfo.h"
 #include "camera.h"
+#include "entity.h"
+#include "app.h"
 
 #include <cassert>
 
@@ -21,6 +23,8 @@ PortalManager::PortalManager(Ogre::Root* root, std::shared_ptr<Camera>& c)
 	SetLayer(0);
 }
 
+// TODO: Remove all traces of portal frames
+// TODO: Holy shit, clean this mess up
 void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation, bool& /*skipThisInvocation*/) {
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
@@ -46,8 +50,9 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 
 	}else if(invocationType == "PtS"){
 		auto portalId = std::stol(invocation.substr(3));
-		auto& portal = portals[portalId];
-		s32 layer = (portal.layer[0] == (s32)currentLayer)?portal.layer[1]:portal.layer[0];
+		auto portal = portals[portalId];
+
+		s32 layer = (portal->layer[0] == (s32)currentLayer)?portal->layer[1]:portal->layer[0];
 
 		rs->_setColourBufferWriteEnabled(true, true, true, true);
 		rs->setStencilCheckEnabled(true);
@@ -56,15 +61,15 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 
 		// TODO: Make good
 		auto playerPos = camera->cameraNode->_getDerivedPosition();
-		auto side = portal.clip.getSide(playerPos);
+		auto side = portal->clip.getSide(playerPos);
 
 		if(side == Ogre::Plane::NEGATIVE_SIDE){
-			rs->addClipPlane(portal.clip);
+			rs->addClipPlane(portal->clip);
 
 		}else{
 			Ogre::Plane nplane{
-				-portal.clip.normal,
-				portal.clip.d // I don't know why this works
+				-portal->clip.normal,
+				portal->clip.d // I don't know why this works
 			};
 
 			rs->addClipPlane(nplane);
@@ -100,22 +105,22 @@ void PortalManager::SetLayer(s32 l){
 	static std::vector<PType> visiblePortals;
 	visiblePortals.clear();
 
-	for(auto& p: portals){
+	for(auto p: portals){
 		// Test if portal exists in the new layer and if so
 		//	get it's destination layer
 		s32 layer = -1;
-		if(p.layer[0] == l){
-			layer = p.layer[1];
+		if(p->layer[0] == l){
+			layer = p->layer[1];
 
-		}else if(p.layer[1] == l){
-			layer = p.layer[0];
+		}else if(p->layer[1] == l){
+			layer = p->layer[0];
 		}
 
 		// if the portal IS in the new layer
 		if(layer >= 0){
 			// Queue it's frame to be rendered
-			rqis->add(RENDER_QUEUE_PORTALFRAME+p.id, "Main");
-			visiblePortals.push_back(PType(layer, &p));
+			// rqis->add(RENDER_QUEUE_PORTALFRAME+p->portalId, "Main");
+			visiblePortals.push_back(PType(layer, p));
 		}
 	}
 
@@ -125,7 +130,7 @@ void PortalManager::SetLayer(s32 l){
 	// Draw each portal to the stencil buffer with a ref value of 
 	//	the dstlayer 
 	for(auto p: visiblePortals){
-		rqis->add(RENDER_QUEUE_PORTAL+p.second->id, "Prt"+std::to_string(p.first));
+		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt"+std::to_string(p.first));
 	}
 
 	rqis->add(RENDER_QUEUE_PARTICLES, "dummy");
@@ -136,22 +141,37 @@ void PortalManager::SetLayer(s32 l){
 	// Draw each portal scene masked by dstlayer in the stencilbuffer.
 	//	Then draw the portal frame 'behind' the portal
 	for(auto p: visiblePortals){
-		auto scenestr = "PtS"+std::to_string(p.second->id);
+		auto scenestr = "PtS"+std::to_string(p.second->portalId);
 
 		rqis->add(RENDER_QUEUE_PORTALSCENE+p.first, scenestr);
-		rqis->add(RENDER_QUEUE_PORTALFRAME+p.second->id, scenestr);
+		// rqis->add(RENDER_QUEUE_PORTALFRAME+p.second->portalId, scenestr);
 	}
 }
 
-void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
-	assert(l0 < 10 && l1 < 10);
-	auto id = (s32)portals.size();
+// void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
+void PortalManager::AddPortal(Portal* portal){
+	if(!portal) return;
+
+	auto id = portal->portalId = (s32)portals.size();
 	assert(id < 10);
+
+	portals.push_back(portal);
+
+	numLayers = std::max((u32)portal->layer[1]+1, numLayers);
+}
+
+void Portal::OnInit(){
+	auto prtMgr = App::GetSingleton()->portalManager;
+
+	assert(layer[0] < 10 && layer[1] < 10);
+	prtMgr->AddPortal(this);
 
 	// Get subentity with name Portal
 	Ogre::SubEntity* portalSubEnt = nullptr;
 	Ogre::SubMesh* portalSubmesh = nullptr;
-	auto portalMesh = ent->getMesh();
+
+	assert(entity->ogreEntity);
+	auto portalMesh = entity->ogreEntity->getMesh();
 
 	auto subMeshes = portalMesh->getSubMeshNameMap(); // std::unordered_map<string, ushort>
 	auto subMeshIt = subMeshes.find("Portal"); // Find submesh with name Portal
@@ -159,19 +179,19 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 		// Get submesh with material of name Portal
 		for(auto& sm: subMeshes){ 
 			if(portalMesh->getSubMesh(sm.second)->getMaterialName() == "Portal"){
-				portalSubEnt = ent->getSubEntity(sm.second);
+				portalSubEnt = entity->ogreEntity->getSubEntity(sm.second);
 				break;
 			}
 		}
 
 		// No portal surface found
 		if(!portalSubEnt) {
-			std::cout << "No portal surfaces found in " << ent->getName() << std::endl;
+			std::cout << "No portal surfaces found in " << entity->GetName() << std::endl;
 			return;
 		}
 	}else{
 		//
-		portalSubEnt = ent->getSubEntity(subMeshIt->second);
+		portalSubEnt = entity->ogreEntity->getSubEntity(subMeshIt->second);
 	}
 
 	portalSubmesh = portalSubEnt->getSubMesh();
@@ -181,7 +201,7 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
 
 	// ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
-	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+id);
+	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+portalId);
 
 	auto mesh = GetOgreSubMeshVertices(portalSubmesh);
 	auto forward = vec3::UNIT_Z;
@@ -197,20 +217,12 @@ void PortalManager::AddPortal(Ogre::Entity* ent, s32 l0, s32 l1){
 		}
 	}
 
-	auto portalNode = ent->getParentSceneNode();
+	auto portalNode = entity->ogreEntity->getParentSceneNode();
 	auto pos = portalNode->_getDerivedPosition() + posOffset;
 	auto ori = portalNode->_getDerivedOrientation();
 	auto normal = ori * forward;
 	normal.normalise();
 
 	auto length = pos.dotProduct(normal);
-	Ogre::Plane clip{normal, length};
-
-	portals.push_back(Portal{
-		id,
-		{std::min(l0, l1),	std::max(l0, l1)},
-		clip
-	});
-
-	numLayers = std::max((u32)std::max(l0, l1)+1, numLayers);
+	clip = Ogre::Plane{normal, length};
 }

@@ -114,7 +114,8 @@ void OgitorSceneLoader::ConstructScene(App* app){
 				auto dstlayer = std::stol(dstlayerStr);
 				assert(dstlayer < 10);
 
-				app->portalManager->AddPortal(ogreent, layer, dstlayer);
+				// TODO: Can't be fucked
+				// app->portalManager->AddPortal(ogreent, layer, dstlayer);
 			}
 
 			// Set user data

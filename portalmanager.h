@@ -25,18 +25,22 @@ namespace Ogre {
 
 struct Camera;
 
-struct Portal {
-	s32 id;
+struct Portal : Component {
+	s32 portalId;
 	s32 layer[2];
-
 	Ogre::Plane clip;
+
+	Portal(s32 l0, s32 l1) : Component{this}, 
+		layer{std::min(l0, l1), std::max(l0, l1)} {};
+
+	void OnInit() override;
 };
 
 class PortalManager : public Ogre::RenderQueueListener {
 protected:
 	Ogre::RenderQueueInvocationSequence* rqis;
 	std::shared_ptr<Camera> camera;
-	std::vector<Portal> portals;
+	std::vector<Portal*> portals;
 	u32 numLayers;
 	u32 currentLayer;
 
@@ -46,9 +50,8 @@ public:
 	void SetLayer(s32);
 	u32 GetNumLayers() const {return numLayers;}
 
-	// Note: AddPortal assumes that the portal submesh's normal lies along the Z-axis
-	//	local to the parent mesh
-	void AddPortal(Ogre::Entity*, s32 l0, s32 l1);
+	// void AddPortal(Ogre::Entity*, s32 l0, s32 l1);
+	void AddPortal(Portal*);
 
 protected:
 	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;

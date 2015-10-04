@@ -122,8 +122,11 @@ void Player::OnLayerChange(){
 }
 
 void Player::OnTriggerEnter(ColliderComponent* o){
-	std::cout << "Player enter" << std::endl;
-
-	auto portalManager = App::GetSingleton()->portalManager;
-	entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
+	if(auto portal = o->entity->FindComponent<Portal>()){		
+		if(portal->layer[0] == entity->layer){
+			entity->SetLayer(portal->layer[1]);
+		}else{
+			entity->SetLayer(portal->layer[0]);
+		}
+	}
 }
