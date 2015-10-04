@@ -93,6 +93,7 @@ struct Entity {
 	//	packet std::tuple<s32, s32, f32, char>
 	template<class... A>
 	void SendMessage(const std::string&, A... arguments);
+	void SendMessage(const std::string&);
 
 	// SendMessageRecurse broadcasts a message to attached components
 	//	and child entities

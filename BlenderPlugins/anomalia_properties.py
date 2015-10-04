@@ -25,6 +25,11 @@ class UtilityPanel(bpy.types.Panel):
 		if(otyp == 1 or otyp == 2):
 			row.prop(context.active_object, "anom_portaldst")
 
+		if(otyp == 3):
+			row = layout.row()
+			row.prop(context.active_object, "anom_targetentity")
+			row.prop(context.active_object, "anom_interactaction")
+
 
 bl_info = {
 	"name": "Anomalia Properties",
@@ -54,6 +59,9 @@ def register():
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
 
+	obj.anom_targetentity = StringProperty(name="Target Entity")
+	obj.anom_interactaction = StringProperty(name="Action")
+
 	bpy.utils.register_module(__name__)
 
 def unregister():
@@ -61,6 +69,8 @@ def unregister():
 	del obj.anom_layer
 	del obj.anom_portaldst
 	del obj.anom_objecttype
+	del obj.anom_targetentity
+	del obj.anom_interactaction
 	bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":

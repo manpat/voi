@@ -152,7 +152,6 @@ void Entity::DestroyComponent(Component* c){
 	delete c;
 }
 
-template<>
 void Entity::SendMessage(const std::string& type){
 	OpaqueType ot;
 
@@ -164,8 +163,8 @@ void Entity::SendMessage(const std::string& type){
 
 const std::string& Entity::GetName() const {
 	static std::string errorName {"<unnamed entity>"};
-	if(!ogreEntity) return errorName;
-	return ogreEntity->getName();
+	if(!ogreSceneNode) return errorName;
+	return ogreSceneNode->getName();
 }
 const vec3& Entity::GetPosition() const {
 	if(!ogreSceneNode) throw "Tried to get local position of Entity with no Ogre::SceneNode";

@@ -1,6 +1,6 @@
-<scene previous_export_time="1443928962.3854704" exported_by="patrick" formatVersion="1.0.1" export_time="1443938331.4686007" >
+<scene previous_export_time="1443939784.989724" exported_by="patrick" formatVersion="1.0.1" export_time="1443939816.3643804" >
   <nodes >
-    <node name="Cube.005" >
+    <node name="PortalFrameL1" >
       <position z="-49.979279" x="-0.001323" y="5.044720" />
       <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
@@ -9,7 +9,7 @@
         <dimensions z="1.0" x="8.0" y="8.0" />
       </entity>
     </node>
-    <node name="Cube.004" >
+    <node name="PortalFrameL0" >
       <position z="-49.979279" x="-0.001323" y="5.044720" />
       <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
@@ -17,7 +17,7 @@
         <dimensions z="1.0" x="8.0" y="8.0" />
       </entity>
     </node>
-    <node name="Plane.002" >
+    <node name="BendPortal" >
       <position z="-4.000000" x="15.500000" y="2.000000" />
       <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
@@ -27,7 +27,7 @@
         <dimensions z="0.0" x="3.0" y="4.0" />
       </entity>
     </node>
-    <node name="Plane.001" >
+    <node name="Bend2" >
       <position z="-5.000000" x="15.600000" y="0.000000" />
       <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
@@ -36,7 +36,7 @@
         <dimensions z="29.0" x="20.0" y="6.0" />
       </entity>
     </node>
-    <node name="Plane" >
+    <node name="Bend1" >
       <position z="3.000000" x="7.000000" y="0.000000" />
       <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
@@ -65,7 +65,7 @@
         <dimensions z="6.0" x="4.001317024230957" y="0.0" />
       </entity>
     </node>
-    <node name="Cube.003" >
+    <node name="Interactable" >
       <position z="-57.991856" x="0.005518" y="8.022818" />
       <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
@@ -73,14 +73,11 @@
       <user_data name="anom_portaldst" value="1" type="int" />
       <user_data name="anom_layer" value="1" type="int" />
       <user_data name="anom_objecttype" value="3" type="int" />
+      <user_data name="anom_targetentity" value="" type="str" />
+      <user_data name="anom_interactaction" value="blah" type="str" />
       <entity mass_radius="1.0" actor="True" physics_type="RIGID_BODY" inertia_tensor="0.4000000059604645" lock_rot_y="False" friction_x="1.0" name="Cube.003" velocity_min="0.0" ghost="False" lock_trans_x="False" velocity_max="0.0" lock_trans_z="False" mass="1.0" friction_z="1.0" lock_trans_y="False" meshFile="Cube.003.mesh" friction_y="1.0" lock_rot_z="False" anisotropic_friction="False" damping_rot="0.10000000149011612" lock_rot_x="False" damping_trans="0.03999999910593033" collisionPrim="box" >
         <dimensions z="2.0" x="2.0" y="2.0" />
       </entity>
-    </node>
-    <node name="Cube.001" >
-      <position z="-1.985512" x="0.000000" y="0.000000" />
-      <rotation qy="0.000000" qx="0.000000" qw="1.000000" qz="-0.000000" />
-      <scale z="1.000000" x="1.000000" y="1.000000" />
     </node>
     <node name="Cube" >
       <position z="-29.991856" x="0.005518" y="8.022818" />

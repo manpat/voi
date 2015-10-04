@@ -54,7 +54,7 @@ void App::Init(){
 	std::cout << std::endl;
 
 	auto player = entityManager->CreateEntity();
-	player->ogreSceneNode = rootNode->createChildSceneNode();
+	player->ogreSceneNode = rootNode->createChildSceneNode("Player");
 	player->ogreSceneNode->setPosition(0,2,0);
 
 	// Purely for testing triggers

@@ -36,7 +36,7 @@ struct CountPack {
 };
 template<class F>
 struct CountPack<F> {
-	enum{ count =  1 };
+	enum{ count = 1 };
 };
 
 template<class... T>
