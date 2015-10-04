@@ -174,7 +174,14 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					break;
 				}
 				case 3/*Interactable*/: {
-					ent->AddComponent<Interactable>();
+					auto targetEntStr = findin(userdata, std::string{"anom_targetentity"});
+					auto action = findin(userdata, std::string{"anom_interactaction"});
+
+					if(targetEntStr.size() > 0)
+						ent->AddComponent<Interactable>(targetEntStr, action);
+					else
+						ent->AddComponent<Interactable>(action);
+
 					break;
 				}
 				case 4/*Door*/: break;

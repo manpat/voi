@@ -3,6 +3,8 @@
 #include "entity.h"
 #include "pool.h"
 
+#include <algorithm>
+
 template<>
 EntityManager* Singleton<EntityManager>::instance = nullptr;
 
@@ -46,9 +48,12 @@ void EntityManager::DestroyEntity(Entity* e){
 }
 
 Entity* EntityManager::FindEntity(const std::string& name){
-	(void)name;
-	// TODO: Implement
-	throw "Not Implemented";
+	auto entit = std::find_if(entities.begin(), entities.end(), [&name](const Entity* e){
+		return name == e->GetName();
+	});
+
+	if(entit == entities.end()) return nullptr;
+	return *entit;
 }
 
 void EntityManager::Update(){

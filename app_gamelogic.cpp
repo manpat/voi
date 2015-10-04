@@ -60,13 +60,11 @@ void App::Init(){
 	// Purely for testing triggers
 	struct MessageTestComponent : Component {
 		MessageTestComponent() : Component{this} {}
-		void OnAwake() {
-			// throw "Test exception";
-		}
 		void OnMessage(const std::string& msg, const OpaqueType& ot){
-			auto trigent = *ot.Get<Entity*>(true /*should always be a valid entity*/);
-
-			std::cout << "Player message: " << msg << "\ttrigger name: " << trigent->GetName() << std::endl;
+			if(auto compp = ot.Get<Component*>(false)){
+				auto ent = (*compp)->entity;
+				std::cout << "Player message: " << msg << "\tent name: " << ent->GetName() << std::endl;
+			}
 		}
 	};
 
