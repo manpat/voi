@@ -11,6 +11,7 @@
 #include "physicsmanager.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
+#include "doorcomponent.h"
 #include "interactable.h"
 #include "entity.h"
 #include "app.h"
@@ -134,13 +135,13 @@ void BlenderSceneLoader::ConstructScene(App* app){
 						collider = ent->AddComponent<BoxColliderComponent>(entdef.bounds, dynamic);
 						break;
 					case ColliderType::Sphere:
-						collider = ent->AddComponent<SphereColliderComponent>(entdef.bounds.x/2.f, dynamic);
+						collider = ent->AddComponent<SphereColliderComponent>(entdef.bounds, dynamic);
 						break;
 					case ColliderType::Capsule:
-						collider = ent->AddComponent<CapsuleColliderComponent>(entdef.bounds.x/2.f, entdef.bounds.y, dynamic);
+						collider = ent->AddComponent<CapsuleColliderComponent>(entdef.bounds, dynamic);
 						break;
 					case ColliderType::Mesh:
-						collider = ent->AddComponent<MeshColliderComponent>(dynamic);
+						collider = ent->AddComponent<MeshColliderComponent>(entdef.bounds, dynamic);
 						break;
 
 					default:
@@ -185,7 +186,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 					break;
 				}
-				case 4/*Door*/: break;
+				case 4/*Door*/: {
+					ent->AddComponent<DoorComponent>();
+					break;
+				}
 
 				default: throw "Unknown object type";
 			}

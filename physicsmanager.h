@@ -75,6 +75,7 @@ private:
 
 class EntityMotionState;
 
+// TODO: Colliders can/should be split into a separate module
 struct ColliderComponent : Component {
 	using RigidBody = btRigidBody;
 	using RigidBodyInfo = btRigidBody::btRigidBodyConstructionInfo;
@@ -88,13 +89,18 @@ struct ColliderComponent : Component {
 	// TODO: Make setter and trigger Refilter
 	u32 collisionGroups = 1<<0;
 	bool trigger = false;
+	bool kinematic = false;
 
-	ColliderComponent(bool _dynamic = false) : Component{this}, dynamic{_dynamic} {}
+	vec3 dimensions = vec3::ZERO;
+
+	ColliderComponent(const vec3& _dim, bool _dynamic = false) : Component{this}, 
+		dimensions{_dim}, dynamic{_dynamic} {}
 	void OnInit() override;
 	void OnDestroy() override;
 
 	void DisableRotation();
 	void SetTrigger(bool);
+	void SetKinematic(bool);
 	void SetAutosleep(bool);
 
 	void Wakeup();
@@ -103,8 +109,8 @@ struct ColliderComponent : Component {
 	vec3 GetVelocity() const;
 	void SetVelocity(const vec3&);
 
-	// TODO: Functions for getting and setting body properties
-	//	velocity, damping, etc...
+	vec3 GetPosition() const;
+	void SetPosition(const vec3&);
 
 protected:
 	bool dynamic = false;
@@ -113,30 +119,23 @@ protected:
 };
 
 struct BoxColliderComponent : ColliderComponent {
-	BoxColliderComponent(const vec3& _size = vec3{1.f}, bool _dynamic = false) : ColliderComponent{_dynamic}, size{_size} {}
+	using ColliderComponent::ColliderComponent;
 	void CreateCollider() override;
-
-	vec3 size;
 };
 
 struct SphereColliderComponent : ColliderComponent {
-	SphereColliderComponent(f32 r = 1.f, bool _dynamic = false) : ColliderComponent{_dynamic}, radius{r} {}
+	using ColliderComponent::ColliderComponent;
 	void CreateCollider() override;
-
-	f32 radius;
 };
 
 struct CapsuleColliderComponent : ColliderComponent {
-	CapsuleColliderComponent(f32 _radius = 1.f, f32 _height = 2.f, bool _dynamic = false) 
-		: ColliderComponent{_dynamic}, radius{_radius}, height{_height} {}
+	using ColliderComponent::ColliderComponent;
 	void CreateCollider() override;
-
-	f32 radius, height;
 };
 
 // This is mainly for level meshes
 struct MeshColliderComponent : ColliderComponent {
-	MeshColliderComponent(bool _dynamic = false) : ColliderComponent{_dynamic} {}
+	using ColliderComponent::ColliderComponent;
 	void CreateCollider() override;
 };
 

@@ -1,5 +1,6 @@
 #include "entitymotionstate.h"
 #include "physicsmanager.h"
+#include "bullethelpers.h"
 #include "meshinfo.h"
 #include "apptime.h"
 #include "entity.h"
@@ -11,13 +12,6 @@
 
 template<>
 PhysicsManager* Singleton<PhysicsManager>::instance = nullptr;
-
-btVector3 o2bt(const vec3& v){
-	return {v.x, v.y, v.z};
-}
-vec3 bt2o(const btVector3& v){
-	return {v.x(), v.y(), v.z()};
-}
 
 void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo) {
 	auto proxy0 = collisionPair.m_pProxy0;
@@ -68,7 +62,7 @@ PhysicsManager::~PhysicsManager(){
 void PhysicsManager::Update(){
 	world->stepSimulation((btScalar)AppTime::deltaTime, 10);
 	currentStamp++;
-	
+
 	// Find all collisions between colliders and collider triggers
 	int numManifolds = world->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
@@ -248,6 +242,17 @@ void PhysicsManager::ProcessTriggerCollision(ColliderComponent* col0, ColliderCo
 	col->entity->OnTriggerEnter(trigger);
 }
 
+/*
+	  ,ad8888ba,              88 88 88          88
+	 d8"'    `"8b             88 88 ""          88
+	d8'                       88 88             88
+	88             ,adPPYba,  88 88 88  ,adPPYb,88  ,adPPYba, 8b,dPPYba,
+	88            a8"     "8a 88 88 88 a8"    `Y88 a8P_____88 88P'   "Y8
+	Y8,           8b       d8 88 88 88 8b       88 8PP""""""" 88
+	 Y8a.    .a8P "8a,   ,a8" 88 88 88 "8a,   ,d88 "8b,   ,aa 88
+	  `"Y8888Y"'   `"YbbdP"'  88 88 88  `"8bbdP"Y8  `"Ybbd8"' 88
+*/
+
 void ColliderComponent::OnInit() {
 	auto world = PhysicsManager::GetSingleton()->world;
 
@@ -262,9 +267,6 @@ void ColliderComponent::OnInit() {
 	}
 
 	RigidBodyInfo bodyInfo{mass, motionState, collider, inertia};
-	// bodyInfo.m_friction = 1.0;
-	// bodyInfo.m_rollingFriction = 0.3;
-
 	body = new RigidBody{bodyInfo};
 	body->setUserPointer(this);
 
@@ -290,6 +292,19 @@ void ColliderComponent::SetTrigger(bool _trigger){
 		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
 	}else{
 		flags &= ~btCollisionObject::CF_NO_CONTACT_RESPONSE;
+	}
+
+	body->setCollisionFlags(flags);
+}
+
+void ColliderComponent::SetKinematic(bool _kine){
+	kinematic = _kine;
+
+	auto flags = body->getCollisionFlags();
+	if(kinematic){
+		flags |= btCollisionObject::CF_KINEMATIC_OBJECT;
+	}else{
+		flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
 	}
 
 	body->setCollisionFlags(flags);
@@ -331,17 +346,37 @@ void ColliderComponent::SetVelocity(const vec3& v){
 	body->setLinearVelocity(o2bt(v));
 }
 
+vec3 ColliderComponent::GetPosition() const {
+	return bt2o(body->getWorldTransform().getOrigin());
+}
+void ColliderComponent::SetPosition(const vec3& p) {
+	auto world = body->getWorldTransform();
+	world.setOrigin(o2bt(p));
+	body->setWorldTransform(world);
+}
+
+
+/*
+	  ,ad8888ba,                                           88                          
+	 d8"'    `"8b                                    ,d    ""                          
+	d8'                                              88                                
+	88            8b,dPPYba,  ,adPPYba, ,adPPYYba, MM88MMM 88  ,adPPYba,  8b,dPPYba,   
+	88            88P'   "Y8 a8P_____88 ""     `Y8   88    88 a8"     "8a 88P'   `"8a  
+	Y8,           88         8PP""""""" ,adPPPPP88   88    88 8b       d8 88       88  
+	 Y8a.    .a8P 88         "8b,   ,aa 88,    ,88   88,   88 "8a,   ,a8" 88       88  
+	  `"Y8888Y"'  88          `"Ybbd8"' `"8bbdP"Y8   "Y888 88  `"YbbdP"'  88       88  
+*/
 void BoxColliderComponent::CreateCollider() {
-	auto hs = size/2.f;
+	auto hs = dimensions/2.f;
 	collider = new btBoxShape{o2bt(hs)};
 }
 
 void CapsuleColliderComponent::CreateCollider() {
-	collider = new btCapsuleShape{radius, height};
+	collider = new btCapsuleShape{dimensions.x/2.f, dimensions.y};
 }
 
 void SphereColliderComponent::CreateCollider() {
-	collider = new btSphereShape{radius};
+	collider = new btSphereShape{dimensions.x/2.f};
 }
 
 void MeshColliderComponent::CreateCollider() {

@@ -21,6 +21,9 @@
 #include "component.h"
 #include "entitymanager.h"
 
+#include "interactable.h"
+#include "doorcomponent.h"
+
 /*
 
 	88             88
@@ -56,19 +59,6 @@ void App::Init(){
 	auto player = entityManager->CreateEntity();
 	player->ogreSceneNode = rootNode->createChildSceneNode("Player");
 	player->ogreSceneNode->setPosition(0,2,0);
-
-	// Purely for testing triggers
-	struct MessageTestComponent : Component {
-		MessageTestComponent() : Component{this} {}
-		void OnMessage(const std::string& msg, const OpaqueType& ot){
-			if(auto compp = ot.Get<Component*>(false)){
-				auto ent = (*compp)->entity;
-				std::cout << "Player message: " << msg << "\tent name: " << ent->GetName() << std::endl;
-			}
-		}
-	};
-
-	player->AddComponent<MessageTestComponent>();
 
 	//////////////////////////// This is for testing camera angles ////////////////////
 #if 0
@@ -109,7 +99,7 @@ void App::Init(){
 	player->ogreSceneNode->addChild(camera->cameraNode);
 
 	player->AddComponent<Player>();
-	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(1.f, 1.f, true);
+	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(vec3{2.f, 2.f, 1.f}, true);
 	playerCollider->DisableRotation();
 	playerCollider->collisionGroups = 1<<0; // First layer
 
