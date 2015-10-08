@@ -27,6 +27,7 @@ void Player::OnUpdate() {
 	auto camera = App::GetSingleton()->camera;
 	auto portalManager = App::GetSingleton()->portalManager;
 	auto physicsManager = App::GetSingleton()->physicsManager;
+	auto input = App::GetSingleton()->input;
 
 	auto md = Input::GetMouseDelta();
 
@@ -43,9 +44,10 @@ void Player::OnUpdate() {
 	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->_setDerivedOrientation(ori);
 
-	f32 boost = 6.f;
+	f32 boost = 10.f;
+	f64 jumpHeight = 10.0;
 
-	if(Input::GetKey(SDLK_LSHIFT)){
+	if(Input::GetKey(Input::Boost)){
 		boost *= 1.5f;
 	}
 
@@ -54,20 +56,20 @@ void Player::OnUpdate() {
 	velocity.x = 0.;
 	velocity.z = 0.;
 
-	if(Input::GetKey(SDLK_w)){
+	if(Input::GetKey(Input::Forward)){
 		velocity -= oriYaw.zAxis() * boost;
-	}else if(Input::GetKey(SDLK_s)){
+	}else if(Input::GetKey(Input::Backward)){
 		velocity += oriYaw.zAxis() * boost;
 	}
 
-	if(Input::GetKey(SDLK_a)){
+	if(Input::GetKey(Input::Left)){
 		velocity -= oriYaw.xAxis() * boost;
-	}else if(Input::GetKey(SDLK_d)){
+	}else if(Input::GetKey(Input::Right)){
 		velocity += oriYaw.xAxis() * boost;
 	}
 
-	if(Input::GetKeyDown(SDLK_SPACE)){
-		velocity += vec3::UNIT_Y*10.;
+	if(Input::GetKeyDown(Input::Jump)){
+		velocity += vec3::UNIT_Y*jumpHeight;
 	}
 
 	collider->SetVelocity(velocity);
@@ -86,7 +88,7 @@ void Player::OnUpdate() {
 	auto physman = PhysicsManager::GetSingleton();
 
 	// Interact
-	if(Input::GetButtonDown(Input::Left)){
+	if(Input::GetButtonDown(Input::Interact)){
 		auto rayres = physman->Raycast(
 			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.5f,
 			-ori.zAxis()*3.f,

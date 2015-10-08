@@ -11,6 +11,16 @@ public:
 	static vec2 mouseDelta;
 
 	enum {
+		Forward = SDLK_w,
+		Backward = SDLK_s,
+		Left = SDLK_a,
+		Right = SDLK_d,
+		Boost = SDLK_LSHIFT,
+		Jump = SDLK_SPACE,
+		Interact = SDLK_e
+	};
+
+	enum {
 		Up = 0,
 		Down = 1,
 
@@ -21,9 +31,9 @@ public:
 	};
 
 	enum {
-		Left = SDL_BUTTON_LEFT,
-		Middle = SDL_BUTTON_MIDDLE,
-		Right = SDL_BUTTON_RIGHT,
+		MouseLeft = SDL_BUTTON_LEFT,
+		MouseMiddle = SDL_BUTTON_MIDDLE,
+		MouseRight = SDL_BUTTON_RIGHT,
 	};
 
 public:
