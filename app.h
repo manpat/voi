@@ -9,7 +9,6 @@
 
 class Input;
 struct Camera;
-struct ControlMap;
 class AudioManager;
 class PortalManager;
 struct EntityManager;
@@ -51,7 +50,6 @@ struct App : Singleton<App> {
 
 	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
-	std::shared_ptr<ControlMap> controlMap;
 	std::shared_ptr<AudioManager> audioManager;
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;

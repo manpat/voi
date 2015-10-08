@@ -1,7 +1,6 @@
 #include "physicsmanager.h"
 #include "portalmanager.h"
 #include "interactable.h"
-#include "controlmap.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -26,9 +25,9 @@ void Player::OnAwake() {
 
 void Player::OnUpdate() {
 	auto camera = App::GetSingleton()->camera;
-	auto controlMap = App::GetSingleton()->controlMap;
 	auto portalManager = App::GetSingleton()->portalManager;
 	auto physicsManager = App::GetSingleton()->physicsManager;
+	auto input = App::GetSingleton()->input;
 
 	auto md = Input::GetMouseDelta();
 
@@ -48,7 +47,7 @@ void Player::OnUpdate() {
 	f32 boost = 10.f;
 	f64 jumpHeight = 10.0;
 
-	if(Input::GetKey(controlMap->boost)){
+	if(Input::GetKey(Input::Boost)){
 		boost *= 1.5f;
 	}
 
@@ -57,19 +56,19 @@ void Player::OnUpdate() {
 	velocity.x = 0.;
 	velocity.z = 0.;
 
-	if(Input::GetKey(controlMap->forward)){
+	if(Input::GetKey(Input::Forward)){
 		velocity -= oriYaw.zAxis() * boost;
-	}else if(Input::GetKey(controlMap->backward)){
+	}else if(Input::GetKey(Input::Backward)){
 		velocity += oriYaw.zAxis() * boost;
 	}
 
-	if(Input::GetKey(controlMap->left)){
+	if(Input::GetKey(Input::Left)){
 		velocity -= oriYaw.xAxis() * boost;
-	}else if(Input::GetKey(controlMap->right)){
+	}else if(Input::GetKey(Input::Right)){
 		velocity += oriYaw.xAxis() * boost;
 	}
 
-	if(Input::GetKeyDown(controlMap->jump)){
+	if(Input::GetKeyDown(Input::Jump)){
 		velocity += vec3::UNIT_Y*jumpHeight;
 	}
 
@@ -82,7 +81,7 @@ void Player::OnUpdate() {
 	auto physman = PhysicsManager::GetSingleton();
 
 	// Interact
-	if(Input::GetButtonDown(controlMap->interact)){
+	if(Input::GetButtonDown(Input::Interact)){
 		auto rayres = physman->Raycast(
 			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.5f,
 			-ori.zAxis()*3.f,
