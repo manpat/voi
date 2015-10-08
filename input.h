@@ -17,7 +17,7 @@ public:
 		Right = SDLK_d,
 		Boost = SDLK_LSHIFT,
 		Jump = SDLK_SPACE,
-		Interact = SDLK_e
+		Interact = SDL_BUTTON_LEFT
 	};
 
 	enum {
