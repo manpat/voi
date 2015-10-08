@@ -18,6 +18,7 @@
 #include "common.h"
 #include "apptime.h"
 
+#include "controlmap.h"
 #include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
@@ -46,6 +47,7 @@ App::App(){
 
 	input = std::make_shared<Input>();
 	camera = std::make_shared<Camera>();
+	controlMap = std::make_shared<ControlMap>();
 	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();

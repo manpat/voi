@@ -1,6 +1,7 @@
 #include "physicsmanager.h"
 #include "portalmanager.h"
 #include "interactable.h"
+#include "controlmap.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -25,6 +26,7 @@ void Player::OnAwake() {
 
 void Player::OnUpdate() {
 	auto camera = App::GetSingleton()->camera;
+	auto controlMap = App::GetSingleton()->controlMap;
 	auto portalManager = App::GetSingleton()->portalManager;
 	auto physicsManager = App::GetSingleton()->physicsManager;
 
@@ -43,9 +45,10 @@ void Player::OnUpdate() {
 	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->_setDerivedOrientation(ori);
 
-	f32 boost = 6.f;
+	f32 boost = 10.f;
+	f64 jumpHeight = 10.0;
 
-	if(Input::GetKey(SDLK_LSHIFT)){
+	if(Input::GetKey(controlMap->boost)){
 		boost *= 1.5f;
 	}
 
@@ -54,20 +57,20 @@ void Player::OnUpdate() {
 	velocity.x = 0.;
 	velocity.z = 0.;
 
-	if(Input::GetKey(SDLK_w)){
+	if(Input::GetKey(controlMap->forward)){
 		velocity -= oriYaw.zAxis() * boost;
-	}else if(Input::GetKey(SDLK_s)){
+	}else if(Input::GetKey(controlMap->backward)){
 		velocity += oriYaw.zAxis() * boost;
 	}
 
-	if(Input::GetKey(SDLK_a)){
+	if(Input::GetKey(controlMap->left)){
 		velocity -= oriYaw.xAxis() * boost;
-	}else if(Input::GetKey(SDLK_d)){
+	}else if(Input::GetKey(controlMap->right)){
 		velocity += oriYaw.xAxis() * boost;
 	}
 
-	if(Input::GetKeyDown(SDLK_SPACE)){
-		velocity += vec3::UNIT_Y*10.;
+	if(Input::GetKeyDown(controlMap->jump)){
+		velocity += vec3::UNIT_Y*jumpHeight;
 	}
 
 	collider->SetVelocity(velocity);
@@ -79,7 +82,7 @@ void Player::OnUpdate() {
 	auto physman = PhysicsManager::GetSingleton();
 
 	// Interact
-	if(Input::GetButtonDown(Input::Left)){
+	if(Input::GetButtonDown(controlMap->interact)){
 		auto rayres = physman->Raycast(
 			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.5f,
 			-ori.zAxis()*3.f,
