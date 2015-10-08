@@ -21,9 +21,6 @@
 #include "component.h"
 #include "entitymanager.h"
 
-#include "interactable.h"
-#include "doorcomponent.h"
-
 /*
 
 	88             88
@@ -56,9 +53,9 @@ void App::Init(){
 	}
 	std::cout << std::endl;
 
-	auto player = entityManager->CreateEntity();
-	player->ogreSceneNode = rootNode->createChildSceneNode("Player");
-	player->ogreSceneNode->setPosition(0,2,0);
+	auto playerEnt = entityManager->CreateEntity();
+	playerEnt->ogreSceneNode = rootNode->createChildSceneNode("Player");
+	playerEnt->ogreSceneNode->setPosition(0,2,0);
 
 	//////////////////////////// This is for testing camera angles ////////////////////
 #if 0
@@ -81,12 +78,12 @@ void App::Init(){
 	thing->convertToMesh("upthingMesh");
 
 	auto upthingEnt = sceneManager->createEntity("upthingMesh");
-	auto upthingNode = player->ogreSceneNode->createChildSceneNode();
+	auto upthingNode = playerEnt->ogreSceneNode->createChildSceneNode();
 	upthingNode->attachObject(upthingEnt);
 	upthingNode->translate(0,4,0);
 
 	upthingEnt = sceneManager->createEntity("upthingMesh");
-	upthingNode = player->ogreSceneNode->createChildSceneNode();
+	upthingNode = playerEnt->ogreSceneNode->createChildSceneNode();
 	upthingNode->attachObject(upthingEnt);
 	upthingNode->translate(0,-3,0);
 	upthingNode->scale(1,-1,1);
@@ -96,18 +93,18 @@ void App::Init(){
 	// TODO: This should really be an Entity::AddChild
 	// Camera should be a component of a child entity
 	camera->cameraNode->getParentSceneNode()->removeChild(camera->cameraNode);
-	player->ogreSceneNode->addChild(camera->cameraNode);
+	playerEnt->ogreSceneNode->addChild(camera->cameraNode);
 
-	player->AddComponent<Player>();
-	auto playerCollider = player->AddComponent<CapsuleColliderComponent>(vec3{2.f, 2.f, 1.f}, true);
+	player = playerEnt->AddComponent<Player>();
+	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);
 	playerCollider->DisableRotation();
 	playerCollider->collisionGroups = 1<<0; // First layer
 
-	auto ground = entityManager->CreateEntity();
-	ground->ogreSceneNode = rootNode->createChildSceneNode();
-	ground->ogreSceneNode->setPosition(0.0f, -0.52f, 0.0f);
-	auto groundcol = ground->AddComponent<BoxColliderComponent>(vec3{1000., 1., 1000.}, false);
-	groundcol->collisionGroups = ~0u;
+	// auto ground = entityManager->CreateEntity();
+	// ground->ogreSceneNode = rootNode->createChildSceneNode();
+	// ground->ogreSceneNode->setPosition(0.0f, -0.52f, 0.0f);
+	// auto groundcol = ground->AddComponent<BoxColliderComponent>(vec3{1000., 1., 1000.}, false);
+	// groundcol->collisionGroups = ~0u;
 
 	portalManager->SetLayer(0);
 	sceneManager->addRenderQueueListener(portalManager.get());
@@ -116,7 +113,7 @@ void App::Init(){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
-	camera->cameraNode->setPosition(0, 1.0, 0);
+	camera->cameraNode->setPosition(0, 1.4f, 0);
 	auto g = 0.1f;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 }

@@ -372,7 +372,9 @@ void BoxColliderComponent::CreateCollider() {
 }
 
 void CapsuleColliderComponent::CreateCollider() {
-	collider = new btCapsuleShape{dimensions.x/2.f, dimensions.y};
+	auto radius = dimensions.x/2.f;
+	auto height = dimensions.y - dimensions.x; // Because the hemisphere caps aren't included
+	collider = new btCapsuleShape{radius, height};
 }
 
 void SphereColliderComponent::CreateCollider() {

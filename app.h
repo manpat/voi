@@ -29,6 +29,8 @@ namespace Ogre {
 struct SDL_Window;
 union SDL_Event;
 
+struct Player;
+
 struct App : Singleton<App> {
 	typedef void (*SDLEventHook)(const SDL_Event&);
 	typedef void (*Hook)();
@@ -54,6 +56,7 @@ struct App : Singleton<App> {
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;
 	std::shared_ptr<PhysicsManager> physicsManager;
+	Player* player;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 

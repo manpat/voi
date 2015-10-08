@@ -6,6 +6,9 @@
 struct ColliderComponent;
 struct MoverComponent;
 
+// TODO: Logic for 'and' and 'sequence' locks
+// TODO: blender panel for door configuration
+
 struct DoorComponent : Component {
 	MoverComponent* mover = nullptr;
 	ColliderComponent* collider = nullptr;

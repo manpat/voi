@@ -76,6 +76,13 @@ void Player::OnUpdate() {
 		entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
 	}
 
+	// HACK
+	if(collider->GetPosition().y < -50.f){
+		collider->SetPosition({0.f, 2.f, 0.f});
+		collider->SetVelocity({0,0,0});
+		entity->SetLayer(0);
+	}
+
 	auto physman = PhysicsManager::GetSingleton();
 
 	// Interact
