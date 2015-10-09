@@ -4,7 +4,7 @@
 
 template<class C, class... A>
 C* Entity::AddComponent(A... args) {
-	auto c = new C{args...};
+	auto c = new C(args...);
 	AddComponent(c);
 
 	return c;

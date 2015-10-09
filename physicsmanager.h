@@ -119,23 +119,23 @@ protected:
 };
 
 struct BoxColliderComponent : ColliderComponent {
-	using ColliderComponent::ColliderComponent;
+	BoxColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
 	void CreateCollider() override;
 };
 
 struct SphereColliderComponent : ColliderComponent {
-	using ColliderComponent::ColliderComponent;
+	SphereColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
 	void CreateCollider() override;
 };
 
 struct CapsuleColliderComponent : ColliderComponent {
-	using ColliderComponent::ColliderComponent;
+	CapsuleColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
 	void CreateCollider() override;
 };
 
 // This is mainly for level meshes
 struct MeshColliderComponent : ColliderComponent {
-	using ColliderComponent::ColliderComponent;
+	MeshColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
 	void CreateCollider() override;
 };
 

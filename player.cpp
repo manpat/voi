@@ -16,6 +16,8 @@ void Player::OnAwake() {
 	collider = entity->FindComponent<ColliderComponent>();
 	if(!collider) throw "Player requires a collider component";
 
+	std::cout << "Player OnAwake" << std::endl;
+
 	collider->SetAutosleep(false);
 	entity->SetLayer(0);
 
