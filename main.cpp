@@ -9,7 +9,8 @@ extern void unittest_Entity();
 #endif
 s32 main(int, char**){
 	try{
-		App().Run();
+		App app;
+		app.Run();
 		// unittest_Entity();
 
 	}catch(const Ogre::Exception& e){

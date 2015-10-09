@@ -6,18 +6,23 @@
 
 class Input {
 public:
-	static std::map<s32, s32> keyStates;
-	static std::map<s32, s32> mouseStates;
-	static vec2 mouseDelta;
+	enum MappingName {
+		Forward,
+		Backward,
+		Left,
+		Right,
+		Boost,
+		Jump,
+		Interact,
+		Count
+	};
 
-	enum {
-		Forward = SDLK_w,
-		Backward = SDLK_s,
-		Left = SDLK_a,
-		Right = SDLK_d,
-		Boost = SDLK_LSHIFT,
-		Jump = SDLK_SPACE,
-		Interact = SDL_BUTTON_LEFT
+	struct MappedCode {
+		s32 keyCode = -1;
+		s32 mouseCode = -1;
+		s32 controllerCode = -1;
+
+		MappedCode(s32 k, s32 m, s32 c) : keyCode{ k }, mouseCode{ m }, controllerCode{ c } {}
 	};
 
 	enum {
@@ -35,6 +40,11 @@ public:
 		MouseMiddle = SDL_BUTTON_MIDDLE,
 		MouseRight = SDL_BUTTON_RIGHT,
 	};
+
+	static std::map<s32, s32> keyStates;
+	static std::map<s32, s32> mouseStates;
+	static vec2 mouseDelta;
+	static MappedCode mappings[MappingName::Count];
 
 public:
 	Input();
@@ -61,6 +71,18 @@ public:
 
 	// Returns if a key was released this frame
 	static bool GetKeyUp(s32 k);
+
+	static bool GetControllerButton(s32 k);
+
+	static bool GetControllerButtonDown(s32 k);
+
+	static bool GetControllerButtonUp(s32 k);
+
+	static bool GetMapped(s32 k);
+
+	static bool GetMappedDown(s32 k);
+
+	static bool GetMappedUp(s32 k);
 
 	static void Update();
 	static void EndFrame();
