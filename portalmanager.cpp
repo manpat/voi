@@ -232,7 +232,7 @@ void Portal::OnInit(){
 	}
 
 	auto portalNode = entity->ogreEntity->getParentSceneNode();
-	auto pos = portalNode->_getDerivedPosition() /*+ posOffset*/;
+	auto pos = portalNode->_getDerivedPosition();
 	auto ori = portalNode->_getDerivedOrientation();
 	auto normal = ori * forward;
 	normal.normalise();

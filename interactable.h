@@ -20,13 +20,13 @@ struct Interactable : Component {
 	std::string action; 
 
 	Interactable(Entity* t, const std::string& a = "trigger") 
-		: Component{this}, target{t}, targetName{}, action{a} {}
+		: Component(this), target(t), targetName(), action(a) {}
 
 	Interactable(const std::string& tn, const std::string& a) 
-		: Component{this}, target{nullptr}, targetName{tn}, action{a} {}
+		: Component(this), target(nullptr), targetName(tn), action(a) {}
 		
 	Interactable(const std::string& a = "interact") 
-		: Component{this}, target{nullptr}, targetName{}, action{a} {}
+		: Component(this), target(nullptr), targetName(), action(a) {}
 
 	void Activate();
 

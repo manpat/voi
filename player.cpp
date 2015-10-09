@@ -44,7 +44,7 @@ void Player::OnUpdate() {
 	camera->cameraNode->_setDerivedOrientation(ori);
 
 	f32 boost = 10.f;
-	f64 jumpHeight = 10.0;
+	f32 jumpHeight = 10.0;
 
 	if(Input::GetKey(Input::Boost)){
 		boost *= 1.5f;

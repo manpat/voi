@@ -59,9 +59,11 @@ Entity* EntityManager::FindEntity(const std::string& name){
 void EntityManager::Update(){
 	Entity::messagePool->Update();
 
-	while(!newComponents.empty()){
+	while (!newComponents.empty()) {
 		auto c = newComponents.front();
-		if(c) c->OnAwake();
+		if(c) {
+			c->OnAwake();
+		}
 		newComponents.pop();
 	}
 

@@ -32,7 +32,7 @@ private:
 
 public:
 	struct RaycastResult {
-		bool hit() const { return collider; }
+		bool hit() const { return collider != nullptr; }
 		operator bool() const { return hit(); }
 
 		ColliderComponent* collider;
@@ -48,7 +48,7 @@ public:
 
 	// Stores pairs of triggers to colliding colliders and a timestamp
 	//	to test for staleness. I'm not sure I like this implementation
-	std::vector<ColliderPair*> activeColliderPairs = {};
+	std::vector<ColliderPair*> activeColliderPairs;
 	u8 currentStamp = 0;
 
 	f32 timestep = 1.f/60.f;
