@@ -17,7 +17,7 @@ void MoverComponent::OnUpdate(){
 		npos = fromPosition + positionDiff;
 	}else{
 		npos = fromPosition + positionDiff * a;
-		a += AppTime::scaledDeltaTime / animationLength;
+		a += (f32)AppTime::scaledDeltaTime / animationLength;
 	}
 
 	if(collider && !collider->kinematic){

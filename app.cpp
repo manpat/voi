@@ -53,7 +53,7 @@ App::App(){
 	window->setActive(true);
 	window->setAutoUpdated(false);
 
-	SetGameState(GameState::MAIN_MENU);
+	SetGameState(GameState::PLAYING);
 
 	ogreRoot->clearEventTimes();
 	inFocus = true;

@@ -30,8 +30,12 @@ struct Portal : Component {
 	s32 layer[2];
 	Ogre::Plane clip;
 
-	Portal(s32 l0, s32 l1) : Component{this}, 
-		layer{std::min(l0, l1), std::max(l0, l1)} {};
+	//Portal(s32 l0, s32 l1) : Component{this}, 
+	//	layer{std::min(l0, l1), std::max(l0, l1)} {};
+	Portal(s32 l0, s32 l1) : Component{this} {
+		layer[0] = std::min(l0, l1);
+		layer[1] = std::max(l0, l1);
+	}
 
 	void OnInit() override;
 };

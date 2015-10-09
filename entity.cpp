@@ -128,7 +128,7 @@ void Entity::AddComponent(Component* c){
 	c->enabled = true;
 	c->OnInit();
 
-	EntityManager::GetSingleton()->newComponents.push_back(c);
+	EntityManager::GetSingleton()->newComponents.push(c);
 }
 
 void Entity::RemoveComponent(Component* c){
