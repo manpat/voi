@@ -267,7 +267,7 @@ void App::SetGameState(GameState gs) {
 		Init();
 	} else if (gameState == GameState::PLAYING) {
 		// Changing away from playing
-		//Terminate();
+		Terminate();
 	}
 
 	// Finally set the actual game state

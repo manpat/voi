@@ -63,6 +63,7 @@ void Menu::Init(App* app) {
 }
 
 void Menu::Terminate(App* app) {
+	//BlenderSceneLoader{}.Unload(app);
 	app->rootNode->removeChild(m_node);
 	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 }

@@ -146,5 +146,6 @@ void App::Update(){
 }
 
 void App::Terminate() {
+	BlenderSceneLoader{}.Unload(this);
 	//Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 }
