@@ -45,8 +45,8 @@ void App::Init(){
 	// auto ico = entityManager->entities[0]->AddComponent<SphereColliderComponent>(1.f, true);
 	// ico->collisionGroups = 1<<0;
 
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/TestTempleScene", "FileSystem");
-	BlenderSceneLoader{}.Load("GameData/TestTempleScene/temple.scene", this);
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/TestTemple", "FileSystem");
+	BlenderSceneLoader{}.Load("GameData/Scenes/TestTemple/temple.scene", this);
 
 	for(auto& e: entityManager->entities){
 		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
