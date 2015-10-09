@@ -136,15 +136,21 @@ bool Input::GetKeyUp(s32 k){
 }
 
 bool Input::GetControllerButton(s32 k) {
-	return false;
+	// Get rid of the "unused parameter" warning
+	(void) k;
+	throw "Not implemented";
 }
 
 bool Input::GetControllerButtonDown(s32 k) {
-	return false;
+	// Get rid of the "unused parameter" warning
+	(void) k;
+	throw "Not implemented";
 }
 
 bool Input::GetControllerButtonUp(s32 k) {
-	return false;
+	// Get rid of the "unused parameter" warning
+	(void) k;
+	throw "Not implemented";
 }
 
 bool Input::GetMapped(s32 k) {

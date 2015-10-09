@@ -17,7 +17,7 @@ struct Component;
 
 struct EntityManager : Singleton<EntityManager> {
 	std::vector<Entity*> entities;
-	std::vector<Component*> newComponents;
+	std::queue<Component*> newComponents;
 	u32 entityIdCounter;
 
 	EntityManager();

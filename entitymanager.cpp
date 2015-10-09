@@ -59,13 +59,15 @@ Entity* EntityManager::FindEntity(const std::string& name){
 void EntityManager::Update(){
 	Entity::messagePool->Update();
 
-	newComponents.erase(std::remove(newComponents.begin(), newComponents.end(), nullptr), newComponents.end());
-	for(auto c: newComponents){
-		c->OnAwake();
+	while(!newComponents.empty()){
+		auto c = newComponents.front();
+		if(c) c->OnAwake();
+		newComponents.pop();
 	}
-	newComponents.clear();
 
-	for(auto e: entities){
+	for(auto it = entities.begin(); it != entities.end(); ++it){
+		auto e = *it;
+
 		// Don't bother checking active because it's guaranteed that
 		//	all entities will be.
 		// Pooling not implemented

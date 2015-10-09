@@ -4,6 +4,7 @@
 #include "component.h"
 
 struct ColliderComponent;
+struct Portal;
 
 struct Player : Component {
 	ColliderComponent* collider;
@@ -16,6 +17,11 @@ struct Player : Component {
 	void OnUpdate() override;
 	void OnLayerChange() override;
 	void OnTriggerEnter(ColliderComponent*) override;
+	void OnTriggerLeave(ColliderComponent*) override;
+
+protected:
+	void EnterPortal(Portal*);
+	void LeavePortal(Portal*);
 };
 
 #endif

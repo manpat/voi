@@ -29,7 +29,8 @@ void Entity::Init(){
 }
 
 void Entity::Destroy(){
-	for(auto c: components){
+	for(auto it = components.begin(); it != components.end(); ++it){
+		auto c = *it;
 		c->OnDestroy();
 		delete c;
 	}
@@ -38,8 +39,8 @@ void Entity::Destroy(){
 
 	// This will recurse and destroy all leaf nodes first
 	//	Note that circular references will kill this
-	for(auto e: children){
-		EntityManager::GetSingleton()->DestroyEntity(e);
+	for(auto e = children.begin(); e != children.end(); ++e){
+		EntityManager::GetSingleton()->DestroyEntity(*e);
 	}
 
 	if(ogreSceneNode){
@@ -52,8 +53,8 @@ void Entity::Destroy(){
 }
 
 void Entity::Update(){
-	for(auto c: components){
-		c->OnUpdate();
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnUpdate();
 	}
 }
 
@@ -128,7 +129,7 @@ void Entity::AddComponent(Component* c){
 	c->enabled = true;
 	c->OnInit();
 
-	EntityManager::GetSingleton()->newComponents.push_back(c);
+	EntityManager::GetSingleton()->newComponents.push(c);
 }
 
 void Entity::RemoveComponent(Component* c){
@@ -155,8 +156,8 @@ void Entity::DestroyComponent(Component* c){
 void Entity::SendMessage(const std::string& type){
 	OpaqueType ot;
 
-	for(auto c: components){
-		c->OnMessage(type, ot);
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnMessage(type, ot);
 	}
 }
 // SendMessage with arguments defined in entity.inl
@@ -232,29 +233,29 @@ void Entity::SetLayer(s32 l) {
 		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
 	}
 
-	for(auto& c: components){
-		c->OnLayerChange();
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnLayerChange();
 	}
 }
 
 void Entity::OnCollisionEnter(ColliderComponent* oc){
-	for(auto c: components){
-		c->OnCollisionEnter(oc);
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnCollisionEnter(oc);
 	}
 }
 void Entity::OnCollisionLeave(ColliderComponent* oc){
-	for(auto c: components){
-		c->OnCollisionLeave(oc);
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnCollisionLeave(oc);
 	}
 }
 void Entity::OnTriggerEnter(ColliderComponent* oc){
-	for(auto c: components){
-		c->OnTriggerEnter(oc);
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnTriggerEnter(oc);
 	}
 }
 void Entity::OnTriggerLeave(ColliderComponent* oc){
-	for(auto c: components){
-		c->OnTriggerLeave(oc);
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnTriggerLeave(oc);
 	}
 }
 

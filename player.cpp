@@ -16,8 +16,6 @@ void Player::OnAwake() {
 	collider = entity->FindComponent<ColliderComponent>();
 	if(!collider) throw "Player requires a collider component";
 
-	std::cout << "Player OnAwake" << std::endl;
-
 	collider->SetAutosleep(false);
 	entity->SetLayer(0);
 
@@ -132,11 +130,26 @@ void Player::OnLayerChange(){
 }
 
 void Player::OnTriggerEnter(ColliderComponent* o){
-	if(auto portal = o->entity->FindComponent<Portal>()){		
-		if(portal->layer[0] == entity->layer){
-			entity->SetLayer(portal->layer[1]);
-		}else{
-			entity->SetLayer(portal->layer[0]);
-		}
+	if(auto portal = o->entity->FindComponent<Portal>()){
+		EnterPortal(portal);
 	}
+}
+void Player::OnTriggerLeave(ColliderComponent* o){
+	if(auto portal = o->entity->FindComponent<Portal>()){
+		LeavePortal(portal);
+	}
+}
+
+void Player::EnterPortal(Portal* portal){
+	if(!portal) return;
+
+	if(portal->layer[0] == entity->layer){
+		entity->SetLayer(portal->layer[1]);
+	}else{
+		entity->SetLayer(portal->layer[0]);
+	}
+}
+
+void Player::LeavePortal(Portal* portal){
+	if(!portal) return;
 }
