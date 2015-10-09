@@ -36,7 +36,10 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 		auto portal = portals[portalId];
 		s32 layer = (portal->layer[0] == (s32)currentLayer)?portal->layer[1]:portal->layer[0];
 
-		// std::cout << "Portal " << portal->entity->GetName() << "\tlayer " << layer << std::endl; 
+		if(!portal->shouldDraw) {
+			skipThisInvocation = true;
+			return;
+		}
 
 		rs->setStencilCheckEnabled(true);
 		rs->_setColourBufferWriteEnabled(false, false, false, false);
@@ -58,10 +61,10 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 		auto portalId = std::stol(invocation.substr(3));
 		auto portal = portals[portalId];
 
-		// if(!portal->shouldDraw) {
-		// 	skipThisInvocation = true;
-		// 	return;
-		// }
+		if(!portal->shouldDraw) {
+			skipThisInvocation = true;
+			return;
+		}
 
 		s32 layer = (portal->layer[0] == (s32)currentLayer)?portal->layer[1]:portal->layer[0];
 		// auto layer = queueId - RENDER_QUEUE_PORTALSCENE;

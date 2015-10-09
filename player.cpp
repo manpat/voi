@@ -148,8 +148,11 @@ void Player::EnterPortal(Portal* portal){
 	}else{
 		entity->SetLayer(portal->layer[0]);
 	}
+	portal->shouldDraw = false;
 }
 
 void Player::LeavePortal(Portal* portal){
 	if(!portal) return;
+
+	portal->shouldDraw = true;
 }
