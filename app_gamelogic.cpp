@@ -137,14 +137,14 @@ void App::Update(){
 	physicsManager->Update();
 	audioManager->Update();
 
-	// Close window on ESC
+	// Return to menu on ESC
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
-		shouldQuit = true;
+		SetGameState(App::GameState::MAIN_MENU);
 	}
 
 	input->EndFrame();
 }
 
 void App::Terminate() {
-
+	ResetScene();
 }

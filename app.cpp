@@ -260,8 +260,7 @@ void App::SetGameState(GameState gs) {
 		Menu::Inst().Init(this);
 	} else if (gameState == GameState::MAIN_MENU) {
 		// Changing away from main menu
-		//Menu::Inst().Terminate(this);
-		ResetScene();
+		Menu::Inst().Terminate(this);
 	}
 
 	// Changing to playing
@@ -269,8 +268,7 @@ void App::SetGameState(GameState gs) {
 		Init();
 	} else if (gameState == GameState::PLAYING) {
 		// Changing away from playing
-		//Terminate();
-		ResetScene();
+		Terminate();
 	}
 
 	// Finally set the actual game state
@@ -314,9 +312,7 @@ void App::ResetScene() {
 	//app->sceneManager->clearScene();
 
 	// Destroy all existing entities
-	while (!entityManager->entities.empty()) {
-		entityManager->DestroyEntity(entityManager->entities.front());
-	}
+	entityManager->DestroyAllEntities();
 
 	// Destroy particle systems and particle templates
 	sceneManager->destroyAllParticleSystems();
