@@ -83,4 +83,6 @@ void EntityManager::DestroyAllEntities(){
 		e->Destroy();
 		delete e;
 	}
+
+	entities.clear();
 }
