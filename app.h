@@ -71,6 +71,7 @@ public:
 	~App();
 
 	void Run();
+	void ResetScene();
 
 	// Hooks
 	void RegisterSDLHook(SDLEventHook);

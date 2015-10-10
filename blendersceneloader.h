@@ -44,7 +44,6 @@ public:
 	std::vector<Node> nodes;
 
 	void Load(const std::string& path, App*) override;
-	void Unload(App*) override;
 
 protected:
 	void ConstructScene(App*);

@@ -10,6 +10,7 @@
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreParticleSystemManager.h> // TEMP
 
 #include "app.h"
 #include "menu.h"
@@ -259,7 +260,8 @@ void App::SetGameState(GameState gs) {
 		Menu::Inst().Init(this);
 	} else if (gameState == GameState::MAIN_MENU) {
 		// Changing away from main menu
-		Menu::Inst().Terminate(this);
+		//Menu::Inst().Terminate(this);
+		ResetScene();
 	}
 
 	// Changing to playing
@@ -267,7 +269,8 @@ void App::SetGameState(GameState gs) {
 		Init();
 	} else if (gameState == GameState::PLAYING) {
 		// Changing away from playing
-		Terminate();
+		//Terminate();
+		ResetScene();
 	}
 
 	// Finally set the actual game state
@@ -302,4 +305,30 @@ s32 App::GetWindowHeight() const {
 
 bool App::IsInFocus() const {
 	return inFocus;
+}
+
+void App::ResetScene() {
+	auto defaultResGrp = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+
+	// Clear scene completely
+	//app->sceneManager->clearScene();
+
+	// Destroy all existing entities
+	while (!entityManager->entities.empty()) {
+		entityManager->DestroyEntity(entityManager->entities.front());
+	}
+
+	// Destroy particle systems and particle templates
+	sceneManager->destroyAllParticleSystems();
+	Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
+
+	// Clear default resouce group resources
+	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(defaultResGrp);
+
+	// Remove default resouce group resource locations
+	Ogre::ResourceGroupManager::LocationList locList = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(defaultResGrp);
+
+	for (auto l = locList.begin(); l != locList.end(); l++) {
+		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation((*l)->archive->getName(), defaultResGrp);
+	}
 }

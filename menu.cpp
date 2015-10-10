@@ -11,6 +11,8 @@
 #include "camera.h"
 #include "blendersceneloader.h"
 
+//#define NEW_MENU
+
 Menu& Menu::Inst() {
 	static Menu inst = Menu{};
 	return inst;
@@ -19,9 +21,16 @@ Menu& Menu::Inst() {
 void Menu::Init(App* app) {
 	std::cout << "Menu Init" << std::endl;
 
-	/*Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Menu", "FileSystem");
-	BlenderSceneLoader{}.Load("GameData/Scenes/Menu/menu.scene", app);*/
+#ifdef NEW_MENU
+	Ogre::ColourValue sky(1, 1, 1);
+	app->sceneManager->setFog(Ogre::FOG_LINEAR, sky, NULL, 15.0f, 30.0f);
 
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Menu", "FileSystem");
+	BlenderSceneLoader{}.Load("GameData/Scenes/Menu/menu.scene", app);
+
+	app->camera->cameraNode->setPosition(0, 1.0, 12.0);
+	app->camera->viewport->setBackgroundColour(sky);
+#else
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -58,14 +67,13 @@ void Menu::Init(App* app) {
 
 	app->camera->cameraNode->setPosition(0, 0, 3.0);
 	app->camera->viewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0));
+#endif
 
 	m_delta = 0.f;
 }
 
 void Menu::Terminate(App* app) {
-	//BlenderSceneLoader{}.Unload(app);
-	app->rootNode->removeChild(m_node);
-	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
 }
 
 void Menu::Update(App* app, f32 dt) {
