@@ -9,6 +9,7 @@
 #include "app.h"
 #include "input.h"
 #include "camera.h"
+#include "blendersceneloader.h"
 
 Menu& Menu::Inst() {
 	static Menu inst = Menu{};
@@ -16,6 +17,11 @@ Menu& Menu::Inst() {
 }
 
 void Menu::Init(App* app) {
+	std::cout << "Menu Init" << std::endl;
+
+	/*Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Menu", "FileSystem");
+	BlenderSceneLoader{}.Load("GameData/Scenes/Menu/menu.scene", app);*/
+
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -57,6 +63,7 @@ void Menu::Init(App* app) {
 }
 
 void Menu::Terminate(App* app) {
+	//BlenderSceneLoader{}.Unload(app);
 	app->rootNode->removeChild(m_node);
 	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 }

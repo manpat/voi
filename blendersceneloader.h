@@ -44,9 +44,11 @@ public:
 	std::vector<Node> nodes;
 
 	void Load(const std::string& path, App*) override;
+	void Unload(App*) override;
 
 protected:
 	void ConstructScene(App*);
+	void DestroyScene(App*);
 
 	std::vector<Node> ParseNodes(rapidxml::xml_node<>* node);
 	std::shared_ptr<EntityDef> ParseEntity(rapidxml::xml_node<>* node);

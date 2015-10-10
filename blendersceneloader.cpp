@@ -211,6 +211,14 @@ void BlenderSceneLoader::ConstructScene(App* app){
 	}
 }
 
+void BlenderSceneLoader::Unload(App* app) {
+	//TODO
+}
+
+void BlenderSceneLoader::DestroyScene(App* app) {
+	//TODO
+}
+
 auto BlenderSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	std::vector<Node> nodes;
 	if(!node) return nodes;
