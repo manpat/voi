@@ -55,10 +55,9 @@ void Menu::Update(App* app, f32 dt) {
 
 	m_delta += dt * 0.25f;
 
-	// TODO: Use input mapping interface
-	if (Input::GetKeyDown(SDLK_RETURN)) {
+	if (Input::GetMapped(Input::Select)) {
 		app->SetGameState(App::GameState::PLAYING);
-	} else if (Input::GetKeyDown(SDLK_ESCAPE)) {
+	} else if (Input::GetMapped(Input::Cancel)) {
 		app->shouldQuit = true;
 	}
 }

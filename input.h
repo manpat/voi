@@ -7,6 +7,8 @@
 class Input {
 public:
 	enum MappingName {
+		Select,
+		Cancel,
 		Forward,
 		Backward,
 		Left,

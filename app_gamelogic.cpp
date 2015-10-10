@@ -140,7 +140,7 @@ void App::Update(){
 	audioManager->Update();
 
 	// Return to menu on ESC
-	if(Input::GetKeyDown(SDLK_ESCAPE)){
+	if (Input::GetMapped(Input::Cancel)) {
 		std::cout << "------ Going to menu " << std::endl;
 		SetGameState(App::GameState::MAIN_MENU);
 	}

@@ -6,13 +6,15 @@ std::map<s32,s32> Input::keyStates;
 std::map<s32,s32> Input::mouseStates;
 vec2 Input::mouseDelta = vec2::ZERO;
 Input::MappedCode Input::mappings[MappingName::Count] = {
-	{SDLK_w, -1, -1},             // Forward
-	{SDLK_s, -1, -1},             // Backward
-	{SDLK_a, -1, -1},             // Left
-	{SDLK_d, -1, -1},             // Right
-	{SDLK_LSHIFT, -1, -1},        // Boost
-	{SDLK_SPACE, -1, -1},         // Jump
-	{SDLK_e, SDL_BUTTON_LEFT, -1} // Interact
+	{SDLK_RETURN, -1, -1},			// Select
+	{SDLK_ESCAPE, -1, -1},			// Cancel
+	{SDLK_w, -1, -1},				// Forward
+	{SDLK_s, -1, -1},				// Backward
+	{SDLK_a, -1, -1},				// Left
+	{SDLK_d, -1, -1},				// Right
+	{SDLK_LSHIFT, -1, -1},			// Boost
+	{SDLK_SPACE, -1, -1},			// Jump
+	{SDLK_e, SDL_BUTTON_LEFT, -1}	// Interact
 };
 
 Input::Input(){
