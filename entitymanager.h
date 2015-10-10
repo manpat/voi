@@ -29,6 +29,8 @@ struct EntityManager : Singleton<EntityManager> {
 
 	// Update updates all active entites
 	void Update();
+
+	void DestroyAllEntities();
 };
 
 #endif

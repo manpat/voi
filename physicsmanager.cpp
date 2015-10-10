@@ -274,7 +274,12 @@ void ColliderComponent::OnInit() {
 }
 
 void ColliderComponent::OnDestroy() {
-	// TODO: Destroy bullet body/collider
+	auto world = PhysicsManager::GetSingleton()->world;
+
+	world->removeRigidBody(body);
+	delete motionState;
+	delete body;
+	delete collider;
 }
 
 void ColliderComponent::DisableRotation(){

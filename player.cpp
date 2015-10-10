@@ -43,10 +43,10 @@ void Player::OnUpdate() {
 	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->_setDerivedOrientation(ori);
 
-	f32 boost = 10.f;
+	f32 boost = 8.f;
 	f32 jumpImpulse = 10.f;
 
-	if(Input::GetKey(Input::Boost)){
+	if(Input::GetMapped(Input::Boost)){
 		boost *= 1.5f;
 	}
 

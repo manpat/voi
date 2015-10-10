@@ -32,7 +32,9 @@ void PortalManager::renderQueueStarted(u8 queueId, const std::string& invocation
 	if(invocationType == "Prt"){
 		// auto layer = std::stol(invocation.substr(3));
 		// auto layer = queueId - RENDER_QUEUE_PORTAL;
-		auto portalId = std::stol(invocation.substr(3));
+		// auto portalId = std::stol(invocation.substr(3));
+		
+		auto portalId = queueId - RENDER_QUEUE_PORTAL;
 		auto portal = portals[portalId];
 		s32 layer = (portal->layer[0] == (s32)currentLayer)?portal->layer[1]:portal->layer[0];
 
@@ -145,8 +147,7 @@ void PortalManager::SetLayer(s32 l){
 	// Draw each portal to the stencil buffer with a ref value of 
 	//	the dstlayer 
 	for(auto p: visiblePortals){
-		// rqis->add(RENDER_QUEUE_PORTAL+p.first, "Prt"+std::to_string(p.second->portalId));
-		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt"+std::to_string(p.second->portalId));
+		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt"/*+std::to_string(p.first)*/);
 	}
 
 	rqis->add(RENDER_QUEUE_PARTICLES, "dummy");

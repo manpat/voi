@@ -15,13 +15,7 @@ EntityManager::EntityManager(): entityIdCounter{0} {
 }
 
 EntityManager::~EntityManager(){
-	// TODO: Fix segfault here
-	for(auto e: entities){
-		if(!e) continue;
-
-		// e->Destroy();
-		delete e;
-	}
+	DestroyAllEntities();
 
 	delete Entity::messagePool;
 	Entity::messagePool = nullptr;
@@ -76,5 +70,15 @@ void EntityManager::Update(){
 		if(e->enabled /*&& e->id != 0*/){
 			e->Update();
 		}
+	}
+}
+
+void EntityManager::DestroyAllEntities(){
+	for(auto it = entities.begin(); it != entities.end(); ++it){
+		auto e = *it;
+		if(!e) continue;
+
+		e->Destroy();
+		delete e;
 	}
 }
