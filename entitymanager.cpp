@@ -84,8 +84,10 @@ void EntityManager::DestroyAllEntities(){
 		if(!e) continue;
 
 		// Don't try to destroy children
+		std::cout << "Destroying " << e->GetName() << std::endl;
 		e->Destroy();
 		delete e;
+		e = nullptr;
 	}
 
 	entities.clear();
@@ -95,6 +97,4 @@ void EntityManager::DestroyAllEntities(){
 
 	entityIdCounter = 0;
 	Component::componentIdCounter = 0;
-
-	App::GetSingleton()->sceneManager->destroyAllMovableObjects();
 }

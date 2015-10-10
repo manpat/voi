@@ -43,18 +43,20 @@ struct Portal : Component {
 class PortalManager : public Ogre::RenderQueueListener {
 protected:
 	Ogre::RenderQueueInvocationSequence* rqis;
-	std::shared_ptr<Camera> camera;
+	Camera* camera;
 	std::vector<Portal*> portals;
 	u32 numLayers;
 	u32 currentLayer;
 
 public:
-	PortalManager(Ogre::Root*, std::shared_ptr<Camera>&);
+	PortalManager();
+	~PortalManager();
 
 	void SetLayer(s32);
 	u32 GetNumLayers() const {return numLayers;}
 
 	void AddPortal(Portal*);
+	void SetCamera(Camera*);
 
 protected:
 	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;

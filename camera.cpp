@@ -5,15 +5,23 @@
 #include <OGRE/OgreCamera.h>
 
 #include "camera.h"
+#include "entity.h"
 #include "app.h"
 
 using std::string;
 
-Camera::Camera(string name){
+Camera::Camera(string n) : Component{this}, name{n} {}
+
+void Camera::OnInit(){
 	auto app = App::GetSingleton();
+	auto scenenode = entity->ogreSceneNode;
+
+	if(!scenenode) {
+		scenenode = app->rootNode;
+	}
 
 	ogreCamera = app->sceneManager->createCamera(name);
-	cameraNode = app->rootNode->createChildSceneNode(name);
+	cameraNode = scenenode->createChildSceneNode(name);
 	cameraNode->attachObject(ogreCamera);
 	cameraNode->translate(0, 0, 0);
 
@@ -37,6 +45,9 @@ Camera::Camera(string name){
 	ogreCamera->setFarClipDistance(1000.f); // TODO: Expose
 }
 
-Camera::~Camera(){
-
+void Camera::OnDestroy(){
+	cameraNode->getParentSceneNode()->removeChild(cameraNode);
+	App::GetSingleton()->sceneManager->destroyCamera(ogreCamera);
+	App::GetSingleton()->window->removeViewport(viewport->getZOrder());
+	
 }

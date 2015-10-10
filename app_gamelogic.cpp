@@ -36,8 +36,8 @@
 */
 void App::Init(){
 	std::cout << "App Init" << std::endl;
-	portalManager = std::make_shared<PortalManager>(ogreRoot.get(), camera);
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
+	portalManager = std::make_shared<PortalManager>();
 
 	// OgitorSceneLoader{}.Load("GameData/bend.scene", this);
 	// entityManager->entities[1]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<1;
@@ -56,6 +56,9 @@ void App::Init(){
 	auto playerEnt = entityManager->CreateEntity();
 	playerEnt->ogreSceneNode = rootNode->createChildSceneNode("Player");
 	playerEnt->ogreSceneNode->setPosition(0,2,0);
+
+	camera = playerEnt->AddComponent<Camera>("MainCamera");
+	portalManager->SetCamera(camera);
 
 	//////////////////////////// This is for testing camera angles ////////////////////
 #if 0
@@ -107,7 +110,6 @@ void App::Init(){
 	// groundcol->collisionGroups = ~0u;
 
 	portalManager->SetLayer(0);
-	sceneManager->addRenderQueueListener(portalManager.get());
 
 	auto psystem = sceneManager->createParticleSystem("Dust", "Environment/Dust");
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
@@ -139,6 +141,7 @@ void App::Update(){
 
 	// Return to menu on ESC
 	if(Input::GetKeyDown(SDLK_ESCAPE)){
+		std::cout << "------ Going to menu " << std::endl;
 		SetGameState(App::GameState::MAIN_MENU);
 	}
 
@@ -147,4 +150,5 @@ void App::Update(){
 
 void App::Terminate() {
 	ResetScene();
+	portalManager.reset();
 }

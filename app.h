@@ -50,13 +50,13 @@ struct App : Singleton<App> {
 	Ogre::RenderWindow* window;
 	Ogre::SceneNode* rootNode;
 
-	std::shared_ptr<Camera> camera;
 	std::shared_ptr<Input> input;
 	std::shared_ptr<AudioManager> audioManager;
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;
 	std::shared_ptr<PhysicsManager> physicsManager;
 	Player* player;
+	Camera* camera;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 

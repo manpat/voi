@@ -13,14 +13,18 @@
 
 #include <cassert>
 
-PortalManager::PortalManager(Ogre::Root* root, std::shared_ptr<Camera>& c)
-	: camera(c) {
-
-	rqis = root->createRenderQueueInvocationSequence("Lol");
-	camera->viewport->setRenderQueueInvocationSequenceName("Lol");
+PortalManager::PortalManager() {
+	rqis = App::GetSingleton()->ogreRoot->createRenderQueueInvocationSequence("PortalInvocationSequence");
+	App::GetSingleton()->sceneManager->addRenderQueueListener(this);
 
 	numLayers = 1;
 	SetLayer(0);
+}
+
+PortalManager::~PortalManager(){
+	App::GetSingleton()->ogreRoot->destroyRenderQueueInvocationSequence("PortalInvocationSequence");
+	App::GetSingleton()->sceneManager->removeRenderQueueListener(this);
+	rqis = nullptr;
 }
 
 // TODO: Remove all traces of portal frames
@@ -176,6 +180,11 @@ void PortalManager::AddPortal(Portal* portal){
 	// portal->shouldDraw = false;
 	portal->shouldDraw = true;
 	numLayers = std::max((u32)portal->layer[1]+1, numLayers);
+}
+
+void PortalManager::SetCamera(Camera* c){
+	camera = c;
+	camera->viewport->setRenderQueueInvocationSequenceName("PortalInvocationSequence");
 }
 
 void Portal::OnInit(){

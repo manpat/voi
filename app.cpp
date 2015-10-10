@@ -46,7 +46,6 @@ App::App(){
 	InitOgre();
 
 	input = std::make_shared<Input>();
-	camera = std::make_shared<Camera>();
 	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();
@@ -255,20 +254,22 @@ void App::SetGameState(GameState gs) {
 		return;
 	}
 
-	// Changing to main menu
-	if (gs == GameState::MAIN_MENU) {
-		Menu::Inst().Init(this);
-	} else if (gameState == GameState::MAIN_MENU) {
+	if(gameState == GameState::MAIN_MENU) {
 		// Changing away from main menu
 		Menu::Inst().Terminate(this);
-	}
 
-	// Changing to playing
-	if (gs == GameState::PLAYING) {
-		Init();
-	} else if (gameState == GameState::PLAYING) {
+	} else if(gameState == GameState::PLAYING) {
 		// Changing away from playing
 		Terminate();
+	}
+
+	if(gs == GameState::MAIN_MENU) {
+		// Changing to main menu
+		Menu::Inst().Init(this);
+
+	} else if(gs == GameState::PLAYING) {
+		// Changing to playing
+		Init();
 	}
 
 	// Finally set the actual game state
@@ -308,11 +309,11 @@ bool App::IsInFocus() const {
 void App::ResetScene() {
 	auto defaultResGrp = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
 
-	// Clear scene completely
-	//app->sceneManager->clearScene();
-
 	// Destroy all existing entities
 	entityManager->DestroyAllEntities();
+
+	// Clear scene completely
+	sceneManager->clearScene();
 
 	// Destroy particle systems and particle templates
 	sceneManager->destroyAllParticleSystems();

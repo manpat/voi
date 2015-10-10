@@ -9,6 +9,8 @@
 #include "app.h"
 #include "input.h"
 #include "camera.h"
+#include "entity.h"
+#include "entitymanager.h"
 #include "blendersceneloader.h"
 
 #define NEW_MENU
@@ -27,6 +29,9 @@ void Menu::Init(App* app) {
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Menu", "FileSystem");
 	BlenderSceneLoader{}.Load("GameData/Scenes/Menu/menu.scene", app);
+
+	auto cameraEnt = app->entityManager->CreateEntity();
+	app->camera = cameraEnt->AddComponent<Camera>();
 
 	app->camera->cameraNode->setPosition(0, 1.0, 12.0);
 	app->camera->viewport->setBackgroundColour(sky);
@@ -73,7 +78,7 @@ void Menu::Init(App* app) {
 }
 
 void Menu::Terminate(App* app) {
-	(void) app;
+	app->ResetScene();
 }
 
 void Menu::Update(App* app, f32 dt) {
@@ -92,8 +97,7 @@ void Menu::Update(App* app, f32 dt) {
 	m_delta += dt * 0.25f;
 
 	// TODO: Use input mapping interface
-	if (Input::GetKey(SDLK_RETURN)) {
-		//App::GetSingleton()->gameState = App::GameState::PLAYING;
+	if (Input::GetKeyDown(SDLK_RETURN)) {
 		app->SetGameState(App::GameState::PLAYING);
 	} else if (Input::GetKeyDown(SDLK_ESCAPE)) {
 		app->shouldQuit = true;
