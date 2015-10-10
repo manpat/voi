@@ -39,7 +39,8 @@ void EntityManager::DestroyEntity(Entity* e){
 	auto end = entities.end();
 	entities.erase(std::remove(entities.begin(), end, e), end);
 
-	e->Destroy();
+	// Destroy self and all children
+	e->DestroyRecurse();
 	delete e;
 }
 
@@ -80,9 +81,16 @@ void EntityManager::DestroyAllEntities(){
 		auto e = *it;
 		if(!e) continue;
 
+		// Don't try to destroy children
 		e->Destroy();
 		delete e;
 	}
 
 	entities.clear();
+	// For some reason, std::queue doesn't have a clear
+	//	This is equivalent
+	newComponents = std::queue<Component*>{};
+
+	entityIdCounter = 0;
+	Component::componentIdCounter = 0;
 }

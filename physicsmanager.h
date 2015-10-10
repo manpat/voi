@@ -18,6 +18,8 @@
 struct ColliderComponent;
 
 struct PhysicsManager : Singleton<PhysicsManager> {
+	friend ColliderComponent;
+
 	using Broadphase = btDbvtBroadphase;
 	using Dispatcher = btCollisionDispatcher;
 	using Solver = btSequentialImpulseConstraintSolver;
@@ -71,6 +73,8 @@ public:
 private:
 	void ProcessCollision(ColliderComponent*, ColliderComponent*);
 	void ProcessTriggerCollision(ColliderComponent*, ColliderComponent*);
+
+	void NotifyColliderRemoval(ColliderComponent*);
 };
 
 class EntityMotionState;
