@@ -2,8 +2,10 @@
 #include "component.h"
 #include "entity.h"
 #include "pool.h"
+#include "app.h"
 
 #include <algorithm>
+#include <OGRE/OgreSceneManager.h>
 
 template<>
 EntityManager* Singleton<EntityManager>::instance = nullptr;
@@ -93,4 +95,6 @@ void EntityManager::DestroyAllEntities(){
 
 	entityIdCounter = 0;
 	Component::componentIdCounter = 0;
+
+	App::GetSingleton()->sceneManager->destroyAllMovableObjects();
 }
