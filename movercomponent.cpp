@@ -3,10 +3,6 @@
 #include "apptime.h"
 #include "entity.h"
 
-void MoverComponent::OnAwake() {
-	collider = entity->FindComponent<ColliderComponent>();
-}
-
 void MoverComponent::OnUpdate(){
 	if(!moving) return;
 
@@ -20,8 +16,8 @@ void MoverComponent::OnUpdate(){
 		a += (f32)AppTime::scaledDeltaTime / animationLength;
 	}
 
-	if(collider && !collider->kinematic){
-		collider->SetPosition(npos);
+	if(entity->collider && !entity->collider->kinematic){
+		entity->collider->SetPosition(npos);
 	}else{
 		entity->SetPosition(npos);
 	}

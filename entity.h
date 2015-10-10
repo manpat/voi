@@ -31,11 +31,25 @@ struct Entity {
 	friend PhysicsManager;
 	static FramePool* messagePool;
 
+	// Vector of components, owned by this entity
 	std::vector<Component*> components;
+
+	// Vector of children entities, owned by entity manager
 	std::vector<Entity*> children;
+
+	// Parent entity, null if root entity
 	Entity* parent;
+
+	// Collider pointer for caching purposes, since most entities 
+	//	will have one. It assumes each entity will only ever have 
+	//	one collider
+	ColliderComponent* collider;
+
+	// Stores all the extra userdata stored in the scene file
 	std::unordered_map<std::string, std::string> userdata; // TODO: Make better
 
+	// Both of these are optional but required if the entity is to have
+	//	a transform, name or collider
 	Ogre::Entity* ogreEntity;
 	Ogre::SceneNode* ogreSceneNode;
 

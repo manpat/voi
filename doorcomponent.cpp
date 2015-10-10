@@ -5,14 +5,13 @@
 
 void DoorComponent::OnAwake() {
 	mover = entity->AddComponent<MoverComponent>();
-	collider = entity->FindComponent<ColliderComponent>();
-	if(!collider) throw "DoorComponent requires collider";
+	if(!entity->collider) throw "DoorComponent requires collider";
 
-	collider->SetKinematic(true);
-	collider->SetAutosleep(false);
+	entity->collider->SetKinematic(true);
+	entity->collider->SetAutosleep(false);
 
-	closedPosition = collider->GetPosition();
-	openPosition = closedPosition + vec3::UNIT_Y*collider->dimensions.y;
+	closedPosition = entity->collider->GetPosition();
+	openPosition = closedPosition + vec3::UNIT_Y*entity->collider->dimensions.y;
 	isOpen = false;
 }
 

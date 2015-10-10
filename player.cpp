@@ -13,14 +13,13 @@
 #include <OGRE/OgreSceneNode.h>
 
 void Player::OnAwake() {
-	collider = entity->FindComponent<ColliderComponent>();
-	if(!collider) throw "Player requires a collider component";
+	if(!entity->collider) throw "Player requires a collider component";
 
-	collider->SetAutosleep(false);
+	entity->collider->SetAutosleep(false);
 	entity->SetLayer(0);
 
 	// TODO: Abstract
-	collider->body->setFriction(0);
+	entity->collider->body->setFriction(0);
 }
 
 void Player::OnUpdate() {
@@ -43,15 +42,17 @@ void Player::OnUpdate() {
 	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
 	camera->cameraNode->_setDerivedOrientation(ori);
 
+	// TODO: Move elsewhere
 	f32 boost = 8.f;
 	f32 jumpImpulse = 10.f;
+	f32 interactDistance = 4.f;
 
 	if(Input::GetMapped(Input::Boost)){
 		boost *= 1.5f;
 	}
 
 	// Move with WASD, based on look direction
-	auto velocity = collider->GetVelocity();
+	auto velocity = entity->collider->GetVelocity();
 	velocity.x = 0.;
 	velocity.z = 0.;
 
@@ -71,16 +72,16 @@ void Player::OnUpdate() {
 		velocity += vec3::UNIT_Y*jumpImpulse;
 	}
 
-	collider->SetVelocity(velocity);
+	entity->collider->SetVelocity(velocity);
 
 	if(Input::GetKeyDown('f')){
 		entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
 	}
 
 	// HACK
-	if(collider->GetPosition().y < -50.f){
-		collider->SetPosition({0.f, 2.f, 0.f});
-		collider->SetVelocity({0,0,0});
+	if(entity->collider->GetPosition().y < -50.f){
+		entity->collider->SetPosition({0.f, 2.f, 0.f});
+		entity->collider->SetVelocity({0,0,0});
 		entity->SetLayer(0);
 	}
 
@@ -89,8 +90,8 @@ void Player::OnUpdate() {
 	// Interact
 	if(Input::GetMappedDown(Input::Interact)){
 		auto rayres = physman->Raycast(
-			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.5f,
-			-ori.zAxis()*3.f,
+			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.45f,
+			-ori.zAxis()*interactDistance,
 			entity->layer);
 
 		if(rayres){
@@ -125,8 +126,8 @@ void Player::OnLayerChange(){
 	auto portalManager = App::GetSingleton()->portalManager;
 	
 	portalManager->SetLayer(entity->layer);
-	collider->collisionGroups = 1<<entity->layer;
-	collider->Refilter();
+	entity->collider->collisionGroups = 1<<entity->layer;
+	entity->collider->Refilter();
 }
 
 void Player::OnTriggerEnter(ColliderComponent* o){

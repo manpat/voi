@@ -3,11 +3,9 @@
 
 #include "component.h"
 
-struct ColliderComponent;
 struct Portal;
 
 struct Player : Component {
-	ColliderComponent* collider;
 	f32 cameraYaw = 0.f;
 	f32 cameraPitch = 0.f;
 

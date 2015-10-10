@@ -1,3 +1,4 @@
+#include "physicsmanager.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
 #include "component.h"
@@ -124,6 +125,10 @@ void Entity::AddComponent(Component* c){
 	if(!c) return;
 	if(c->entity) throw "Tried to add a component already attached to another entity";
 
+	if(c->IsType<ColliderComponent>()){
+		collider = static_cast<ColliderComponent*>(c);
+	}
+
 	components.push_back(c);
 	c->entity = this;
 	c->enabled = true;
@@ -139,6 +144,10 @@ void Entity::RemoveComponent(Component* c){
 	auto it = std::remove(components.begin(), end, c);
 
 	if(it == end) return;
+
+	if(collider == c){
+		collider = nullptr;
+	}
 
 	components.erase(it, end);
 	c->OnRemove();

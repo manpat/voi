@@ -11,7 +11,6 @@ struct MoverComponent;
 
 struct DoorComponent : Component {
 	MoverComponent* mover = nullptr;
-	ColliderComponent* collider = nullptr;
 
 	vec3 closedPosition = vec3::ZERO;
 	vec3 openPosition = vec3::ZERO;
