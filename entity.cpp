@@ -30,11 +30,14 @@ void Entity::Init(){
 }
 
 void Entity::Destroy(){
-	for(auto it = components.begin(); it != components.end(); ++it){
-		auto c = *it;
-		c->OnDestroy();
-		delete c;
+	while (!components.empty()) {
+		components.front()->OnDestroy();
 	}
+	//for(auto it = components.begin(); it != components.end(); ++it){
+	//	auto c = *it;
+	//	c->OnDestroy();
+	//	delete c;
+	//}
 
 	// TODO: TEST
 
