@@ -133,6 +133,16 @@ struct CapsuleColliderComponent : ColliderComponent {
 	void CreateCollider() override;
 };
 
+struct ConeColliderComponent : ColliderComponent {
+	ConeColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
+	void CreateCollider() override;
+};
+
+struct CylinderColliderComponent : ColliderComponent {
+	CylinderColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
+	void CreateCollider() override;
+};
+
 // This is mainly for level meshes
 struct MeshColliderComponent : ColliderComponent {
 	MeshColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}

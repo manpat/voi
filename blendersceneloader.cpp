@@ -140,6 +140,12 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					case ColliderType::Capsule:
 						collider = ent->AddComponent<CapsuleColliderComponent>(entdef.bounds, dynamic);
 						break;
+					case ColliderType::Cone:
+						collider = ent->AddComponent<ConeColliderComponent>(entdef.bounds, dynamic);
+						break;
+					case ColliderType::Cylinder:
+						collider = ent->AddComponent<CylinderColliderComponent>(entdef.bounds, dynamic);
+						break;
 					case ColliderType::Mesh:
 						collider = ent->AddComponent<MeshColliderComponent>(entdef.bounds, dynamic);
 						break;

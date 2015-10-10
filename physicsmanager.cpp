@@ -377,6 +377,18 @@ void CapsuleColliderComponent::CreateCollider() {
 	collider = new btCapsuleShape{radius, height};
 }
 
+void ConeColliderComponent::CreateCollider() {
+	auto radius = dimensions.x/2.f;
+	auto height = dimensions.y;
+	collider = new btConeShape{radius, height};
+}
+
+void CylinderColliderComponent::CreateCollider() {
+	auto radius = dimensions.x/2.f;
+	auto height = dimensions.y;
+	collider = new btConeShape{radius, height};
+}
+
 void SphereColliderComponent::CreateCollider() {
 	collider = new btSphereShape{dimensions.x/2.f};
 }

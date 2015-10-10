@@ -44,7 +44,7 @@ void Player::OnUpdate() {
 	camera->cameraNode->_setDerivedOrientation(ori);
 
 	f32 boost = 10.f;
-	f32 jumpHeight = 10.0;
+	f32 jumpImpulse = 10.f;
 
 	if(Input::GetKey(Input::Boost)){
 		boost *= 1.5f;
@@ -68,7 +68,7 @@ void Player::OnUpdate() {
 	}
 
 	if(Input::GetMappedDown(Input::Jump)){
-		velocity += vec3::UNIT_Y*jumpHeight;
+		velocity += vec3::UNIT_Y*jumpImpulse;
 	}
 
 	collider->SetVelocity(velocity);
