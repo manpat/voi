@@ -66,6 +66,21 @@ void PhysicsManager::Update(){
 	world->stepSimulation((btScalar)AppTime::deltaTime, 10);
 	currentStamp++;
 
+	// Remove all deleted and null trigger collisions
+	// This happens before processing because collisions
+	//	can be nullified by NotifyColliderRemoval
+	for(auto& acp: activeColliderPairs){
+		if(!acp) continue;
+		if(!acp->collider0 || !acp->collider1){
+			delete acp;
+			acp = nullptr;
+		}
+	}
+
+	auto begin = activeColliderPairs.begin();
+	auto end = activeColliderPairs.end();
+	activeColliderPairs.erase(std::remove(begin, end, nullptr), end);
+
 	// Find all collisions between colliders and collider triggers
 	int numManifolds = world->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
@@ -106,7 +121,6 @@ void PhysicsManager::Update(){
 		if((currentStamp - cp->stamp) > 1){
 			if(cp->collider0->trigger
 			|| cp->collider1->trigger){
-
 				cp->collider0->entity->OnTriggerLeave(cp->collider1);
 				cp->collider1->entity->OnTriggerLeave(cp->collider0);
 			}else{
@@ -119,19 +133,6 @@ void PhysicsManager::Update(){
 			cp->collider1 = nullptr;
 		}
 	}
-
-	// Remove all deleted and null trigger collisions
-	for(auto& acp: activeColliderPairs){
-		if(!acp) continue;
-		if(!acp->collider0 || !acp->collider1){
-			delete acp;
-			acp = nullptr;
-		}
-	}
-
-	auto begin = activeColliderPairs.begin();
-	auto end = activeColliderPairs.end();
-	activeColliderPairs.erase(std::remove(begin, end, nullptr), end);
 }
 
 struct RaycastCallback : btCollisionWorld::ClosestRayResultCallback {
@@ -245,6 +246,33 @@ void PhysicsManager::ProcessTriggerCollision(ColliderComponent* col0, ColliderCo
 	col->entity->OnTriggerEnter(trigger);
 }
 
+void PhysicsManager::NotifyColliderRemoval(ColliderComponent* c){
+	if(!c) return;
+
+	for(auto& cp: activeColliderPairs){
+		if(!cp) continue;
+		if(!cp->collider0 || !cp->collider1) continue;
+		if(cp->collider0 != c && cp->collider1 != c) continue;
+
+		// Should work fine given unsigned integer underflow
+		if(cp->collider0->entity
+		&& cp->collider1->entity) {
+			if(cp->collider0->trigger
+			|| cp->collider1->trigger){
+				cp->collider0->entity->OnTriggerLeave(cp->collider1);
+				cp->collider1->entity->OnTriggerLeave(cp->collider0);
+			}else{
+				cp->collider0->entity->OnCollisionLeave(cp->collider1);
+				cp->collider1->entity->OnCollisionLeave(cp->collider0);
+			}
+		}
+
+		// Setting these to nullptr flags them for cleanup
+		cp->collider0 = nullptr;
+		cp->collider1 = nullptr;
+	}
+}
+
 /*
 	  ,ad8888ba,              88 88 88          88
 	 d8"'    `"8b             88 88 ""          88
@@ -277,12 +305,14 @@ void ColliderComponent::OnInit() {
 }
 
 void ColliderComponent::OnDestroy() {
-	auto world = PhysicsManager::GetSingleton()->world;
+	auto physman = PhysicsManager::GetSingleton();
 
-	world->removeRigidBody(body);
+	physman->world->removeRigidBody(body);
 	delete motionState;
 	delete body;
 	delete collider;
+
+	physman->NotifyColliderRemoval(this);
 }
 
 void ColliderComponent::DisableRotation(){

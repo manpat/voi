@@ -68,8 +68,11 @@ struct Entity {
 	// 	To help with pooling
 	void Init();
 
-	// Destroy cleans up components and children
+	// Destroy cleans up components
 	void Destroy();
+
+	// Destroy cleans up components and children
+	void DestroyRecurse();
 
 	// Update updates all attached and active components
 	void Update();

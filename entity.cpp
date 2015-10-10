@@ -30,14 +30,38 @@ void Entity::Init(){
 }
 
 void Entity::Destroy(){
-	while (!components.empty()) {
-		components.front()->OnDestroy();
+	std::cout << "Destroying entity " << id << std::endl;
+
+	for(auto it = components.begin(); it != components.end(); ++it){
+		auto c = *it;
+		c->OnDestroy();
+		delete c;
 	}
-	//for(auto it = components.begin(); it != components.end(); ++it){
-	//	auto c = *it;
-	//	c->OnDestroy();
-	//	delete c;
-	//}
+	components.clear();
+	children.clear();
+
+	if(ogreSceneNode){
+		// ogreSceneNode->removeAndDestroyAllChildren();
+
+		// Don't destroy children because they should be 
+		//	managed by other entities
+		ogreSceneNode->removeAllChildren();
+		App::GetSingleton()->sceneManager->destroySceneNode(ogreSceneNode);
+	}
+
+	if(ogreEntity)
+		App::GetSingleton()->sceneManager->destroyEntity(ogreEntity);
+}
+
+void Entity::DestroyRecurse(){
+	std::cout << "Recursively destroying entity " << id << std::endl;
+
+	for(auto it = components.begin(); it != components.end(); ++it){
+		auto c = *it;
+		c->OnDestroy();
+		delete c;
+	}
+	components.clear();
 
 	// TODO: TEST
 
@@ -46,9 +70,14 @@ void Entity::Destroy(){
 	for(auto e = children.begin(); e != children.end(); ++e){
 		EntityManager::GetSingleton()->DestroyEntity(*e);
 	}
+	children.clear();
 
 	if(ogreSceneNode){
-		ogreSceneNode->removeAndDestroyAllChildren();
+		// ogreSceneNode->removeAndDestroyAllChildren();
+
+		// Don't destroy children because they should be
+		//	managed by other entities
+		ogreSceneNode->removeAllChildren();
 		App::GetSingleton()->sceneManager->destroySceneNode(ogreSceneNode);
 	}
 
