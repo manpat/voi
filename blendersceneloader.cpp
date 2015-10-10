@@ -149,6 +149,9 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					case ColliderType::Mesh:
 						collider = ent->AddComponent<MeshColliderComponent>(entdef.bounds, dynamic);
 						break;
+					case ColliderType::ConvexHull:
+						collider = ent->AddComponent<ConvexHullColliderComponent>(entdef.bounds, dynamic);
+						break;
 
 					default:
 						throw "Collider type not implemented";

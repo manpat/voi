@@ -149,8 +149,10 @@ struct MeshColliderComponent : ColliderComponent {
 	void CreateCollider() override;
 };
 
-// TODO: Mesh convex hull
-// TODO: Other shapes
+struct ConvexHullColliderComponent : ColliderComponent {
+	ConvexHullColliderComponent(const vec3& dm, bool dn = false) : ColliderComponent(dm, dn) {}
+	void CreateCollider() override;
+};
 
 
 #endif

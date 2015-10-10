@@ -7,6 +7,36 @@ std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh* sm){
 	auto vertexData = sm->useSharedVertices? 
 		mesh->sharedVertexData : sm->vertexData;
 
+	auto posElem = vertexData->vertexDeclaration
+		->findElementBySemantic(Ogre::VES_POSITION);
+
+	auto vbuf = vertexData->vertexBufferBinding
+		->getBuffer(posElem->getSource());
+
+	u8* vertex = static_cast<u8*>(
+		vbuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
+	
+	auto vertexCount = vertexData->vertexCount;
+
+	std::vector<vec3> vertices;
+	vertices.resize(vertexCount);
+
+	f32* vecPtr = nullptr;
+	for(u32 i = 0; i < vertexCount; ++i, vertex += vbuf->getVertexSize()){
+		posElem->baseVertexPointerToElement(vertex, &vecPtr);
+		vertices[i] = vec3(vecPtr[0], vecPtr[1], vecPtr[2]);
+	}
+
+	vbuf->unlock();
+
+	return vertices;
+}
+
+std::vector<vec3> GetOgreSubMeshVerticesFlat(Ogre::SubMesh* sm){
+	auto mesh = sm->parent;
+	auto vertexData = sm->useSharedVertices? 
+		mesh->sharedVertexData : sm->vertexData;
+
 	auto indexData = sm->indexData;
 	auto ibuf = indexData->indexBuffer;
 
@@ -25,7 +55,7 @@ std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh* sm){
 		vbuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
 	
 	std::vector<vec3> vertices;
-	vertices.reserve(vertexData->vertexCount);
+	vertices.reserve(indexData->indexCount);
 
 	f32* vecPtr = nullptr;
 	auto idxStart = indexData->indexStart;

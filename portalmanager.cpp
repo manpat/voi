@@ -221,12 +221,14 @@ void Portal::OnInit(){
 	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+portalId);
 
 	auto mesh = GetOgreSubMeshVertices(portalSubmesh);
+
 	auto forward = vec3::UNIT_Z;
 	auto posOffset = vec3::ZERO;
 	for(u32 i = 0; i < mesh.size()-2; i++){
 		posOffset = mesh[i];
-		auto p1 = mesh[i+1] - mesh[i];
-		auto p2 = mesh[i+2] - mesh[i];
+		auto p1 = mesh[i+1] - posOffset;
+		auto p2 = mesh[i+2] - posOffset;
+
 		auto cross = p1.crossProduct(p2);
 		if(cross.length() > 0.9){
 			forward = cross.normalisedCopy();

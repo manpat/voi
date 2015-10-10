@@ -399,7 +399,7 @@ void MeshColliderComponent::CreateCollider() {
 	// Yuck
 	for(u32 i = 0; i < entity->ogreEntity->getMesh()->getNumSubMeshes(); i++){
 		auto sm = entity->ogreEntity->getMesh()->getSubMesh(i);
-		auto smVertices = GetOgreSubMeshVertices(sm);
+		auto smVertices = GetOgreSubMeshVerticesFlat(sm);
 
 		for(u32 i = 0; i < smVertices.size()/3; i++) {
 			btVector3 vs[] = {
@@ -413,4 +413,20 @@ void MeshColliderComponent::CreateCollider() {
 	}
 
 	collider = new btBvhTriangleMeshShape(trimesh, !dynamic /* Optimise for static */);
+}
+
+void ConvexHullColliderComponent::CreateCollider() {
+	auto hull = new btConvexHullShape();
+
+	// Yuck
+	for(u32 i = 0; i < entity->ogreEntity->getMesh()->getNumSubMeshes(); i++){
+		auto sm = entity->ogreEntity->getMesh()->getSubMesh(i);
+		auto smVertices = GetOgreSubMeshVertices(sm);
+
+		for(u32 j = 0; j < smVertices.size(); j++) {
+			hull->addPoint(o2bt(smVertices[j]));
+		}
+	}
+
+	collider = hull;
 }

@@ -83,6 +83,7 @@ void Menu::Update(App* app, f32 dt) {
 
 	m_delta += dt * 0.25f;
 
+	// TODO: Use input mapping interface
 	if (Input::GetKey(SDLK_RETURN)) {
 		//App::GetSingleton()->gameState = App::GameState::PLAYING;
 		app->SetGameState(App::GameState::PLAYING);
