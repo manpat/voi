@@ -26,7 +26,10 @@ void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisi
 	auto col0 = comp0->As<ColliderComponent>(false);
 	auto col1 = comp1->As<ColliderComponent>(false);
 
-	if(!col0 || !col1) return;// "One of the components in LayerNearCollisionFilterCallback isn't a collider";
+	if(!col0 || !col1) {
+		std::cout << "One of the components in LayerNearCollisionFilterCallback isn't a collider" << std::endl;
+		return;
+	}
 
 	auto ecg = PhysicsManager::GetSingleton()->enabledCollisionGroups;
 	auto mask = (col0->collisionGroups & col1->collisionGroups & ecg);

@@ -5,13 +5,13 @@
 std::map<s32,s32> Input::keyStates;
 std::map<s32,s32> Input::mouseStates;
 vec2 Input::mouseDelta = vec2::ZERO;
-Input::MappedCode Input::mappings[Input::MappingName::Count] = {
-	{SDLK_w, -1, -1}, // Forward
-	{SDLK_s, -1, -1}, // Backward
-	{SDLK_a, -1, -1}, // Left
-	{SDLK_d, -1, -1}, // Right
-	{SDLK_LSHIFT, -1, -1}, // Boost
-	{SDLK_SPACE, -1, -1}, // Jump
+Input::MappedCode Input::mappings[MappingName::Count] = {
+	{SDLK_w, -1, -1},             // Forward
+	{SDLK_s, -1, -1},             // Backward
+	{SDLK_a, -1, -1},             // Left
+	{SDLK_d, -1, -1},             // Right
+	{SDLK_LSHIFT, -1, -1},        // Boost
+	{SDLK_SPACE, -1, -1},         // Jump
 	{SDLK_e, SDL_BUTTON_LEFT, -1} // Interact
 };
 
@@ -65,6 +65,9 @@ void Input::EventHook(const SDL_Event& e){
 void Input::Update(){
 	// Get mouse delta from center, convert to range (-1, 1), 
 	//	move mouse back to center
+
+	// The reason that this isn't being handled with SDLs event queue
+	//	is the mouse warping
 
 	s32 mx, my;
 	SDL_GetMouseState(&mx, &my);

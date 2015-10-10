@@ -11,7 +11,7 @@
 #include "camera.h"
 #include "blendersceneloader.h"
 
-//#define NEW_MENU
+// #define NEW_MENU
 
 Menu& Menu::Inst() {
 	static Menu inst = Menu{};
@@ -23,7 +23,7 @@ void Menu::Init(App* app) {
 
 #ifdef NEW_MENU
 	Ogre::ColourValue sky(1, 1, 1);
-	app->sceneManager->setFog(Ogre::FOG_LINEAR, sky, NULL, 15.0f, 30.0f);
+	app->sceneManager->setFog(Ogre::FOG_LINEAR, sky, nullptr, 15.0f, 30.0f);
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Menu", "FileSystem");
 	BlenderSceneLoader{}.Load("GameData/Scenes/Menu/menu.scene", app);
@@ -73,7 +73,7 @@ void Menu::Init(App* app) {
 }
 
 void Menu::Terminate(App* app) {
-
+	(void) app;
 }
 
 void Menu::Update(App* app, f32 dt) {

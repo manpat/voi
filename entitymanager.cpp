@@ -17,6 +17,8 @@ EntityManager::EntityManager(): entityIdCounter{0} {
 EntityManager::~EntityManager(){
 	DestroyAllEntities();
 
+	// We don't need checks here because deleting a nullptr
+	//	is a nop
 	delete Entity::messagePool;
 	Entity::messagePool = nullptr;
 	instance = nullptr;
