@@ -13,8 +13,6 @@
 #include "entitymanager.h"
 #include "blendersceneloader.h"
 
-#define NEW_MENU
-
 Menu& Menu::Inst() {
 	static Menu inst = Menu{};
 	return inst;
@@ -23,7 +21,6 @@ Menu& Menu::Inst() {
 void Menu::Init(App* app) {
 	std::cout << "Menu Init" << std::endl;
 
-#ifdef NEW_MENU
 	Ogre::ColourValue sky(1, 1, 1);
 	app->sceneManager->setFog(Ogre::FOG_LINEAR, sky, 0, 15.0f, 30.0f);
 
@@ -35,44 +32,6 @@ void Menu::Init(App* app) {
 
 	app->camera->cameraNode->setPosition(0, 1.0, 12.0);
 	app->camera->viewport->setBackgroundColour(sky);
-#else
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData", "FileSystem");
-	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
-	if (m_quad == nullptr) {
-		m_quad = app->sceneManager->createManualObject("MenuQuad");
-		m_quad->begin("MenuMat", Ogre::RenderOperation::OT_TRIANGLE_FAN);
-
-		m_quad->position(-1.5, -1.0, 0.0);
-		m_quad->textureCoord(0, 1);
-
-		m_quad->position(1.5, -1.0, 0.0);
-		m_quad->textureCoord(1, 1);
-
-		m_quad->position(1.5, 1.0, 0.0);
-		m_quad->textureCoord(1, 0);
-
-		m_quad->position(-1.5, 1.0, 0.0);
-		m_quad->textureCoord(0, 0);
-
-		m_quad->index(0);
-		m_quad->index(1);
-		m_quad->index(2);
-		m_quad->index(3);
-
-		m_quad->end();
-	}
-
-	if (m_node == nullptr) {
-		m_node = app->rootNode->createChildSceneNode();
-		m_node->attachObject(m_quad);
-	} else {
-		app->rootNode->addChild(m_node);
-	}
-
-	app->camera->cameraNode->setPosition(0, 0, 3.0);
-	app->camera->viewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0));
-#endif
 
 	m_delta = 0.f;
 }

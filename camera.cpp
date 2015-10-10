@@ -10,7 +10,7 @@
 
 using std::string;
 
-Camera::Camera(string n) : Component{this}, name{n} {}
+Camera::Camera(string n) : Component(this), name(n) {}
 
 void Camera::OnInit(){
 	auto app = App::GetSingleton();
