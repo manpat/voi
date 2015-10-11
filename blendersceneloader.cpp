@@ -10,6 +10,7 @@
 
 #include "physicsmanager.h"
 #include "portalmanager.h"
+#include "mirrormanager.h"
 #include "entitymanager.h"
 #include "doorcomponent.h"
 #include "interactable.h"
@@ -181,7 +182,20 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 
 				case 2/*Mirror*/:{
-					// TODO: Is mirror
+					auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
+					s32 dstlayer = std::stol(dstlayerStr);
+					assert(dstlayer < 10);
+
+					ent->AddComponent<Mirror>(layer, dstlayer);
+
+					//if (collider) {
+					//	// Set as trigger
+					//	collider->SetTrigger(true);
+					//
+					//	// Enable interactions in destination layer
+					//	collider->collisionGroups |= 1u<<dstlayer;
+					//}
+
 					break;
 				}
 				case 3/*Interactable*/: {

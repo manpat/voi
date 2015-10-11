@@ -6,7 +6,10 @@
 #include "component.h"
 
 struct Mirror : Component {
+	s32 layer[2];
 	// TODO
+
+	Mirror(s32 l0, s32 l1);
 
 	void OnInit() override;
 	void OnDestroy() override;

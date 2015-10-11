@@ -48,6 +48,9 @@ void App::Init(){
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/TestTemple", "FileSystem");
 	BlenderSceneLoader{}.Load("GameData/Scenes/TestTemple/temple.scene", this);
 
+	//Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Mirror1", "FileSystem");
+	//BlenderSceneLoader{}.Load("GameData/Scenes/Mirror1/mirror1.scene", this);
+
 	for(auto& e: entityManager->entities){
 		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
 	}

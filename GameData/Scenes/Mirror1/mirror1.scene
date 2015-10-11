@@ -1,0 +1,45 @@
+<scene exported_by="Tim" previous_export_time="1444523538.516298" formatVersion="1.0.1" export_time="1444524763.908724" >
+  <nodes >
+    <node name="Cube.001" >
+      <position x="0.000000" z="-0.000000" y="-4.080000" />
+      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
+      <scale x="20.400000" z="20.400000" y="2.040000" />
+      <user_data name="anom_layer" type="int" value="0" />
+      <user_data name="anom_objecttype" type="int" value="2" />
+      <user_data name="anom_portaldst" type="int" value="1" />
+      <entity mass_radius="1.0" lock_rot_x="False" velocity_max="0.0" friction_y="1.0" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" friction_x="1.0" lock_rot_z="False" physics_type="STATIC" actor="False" lock_trans_z="False" meshFile="Cube.000.mesh" anisotropic_friction="False" ghost="False" inertia_tensor="0.4000000059604645" velocity_min="0.0" collisionPrim="triangle_mesh" name="Cube.000" mass="1.0" lock_trans_x="False" lock_rot_y="False" friction_z="1.0" lock_trans_y="False" >
+        <dimensions x="33.04800033569336" z="33.04800033569336" y="0.0" />
+      </entity>
+    </node>
+    <node name="Cube.002" >
+      <position x="0.000000" z="-0.000000" y="-2.040000" />
+      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
+      <scale x="20.400000" z="20.400000" y="2.040000" />
+      <user_data name="anom_objecttype" type="int" value="0" />
+      <user_data name="anom_layer" type="int" value="1" />
+      <entity mass_radius="1.0" lock_rot_x="False" velocity_max="0.0" friction_y="1.0" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" friction_x="1.0" lock_rot_z="False" physics_type="STATIC" actor="False" lock_trans_z="False" meshFile="Cube.003.mesh" anisotropic_friction="False" ghost="False" inertia_tensor="0.4000000059604645" velocity_min="0.0" collisionPrim="triangle_mesh" name="Cube.003" mass="1.0" lock_trans_x="False" lock_rot_y="False" friction_z="1.0" lock_trans_y="False" >
+        <dimensions x="9.944998741149902" z="8.26200008392334" y="9.791999816894531" />
+      </entity>
+    </node>
+    <node name="Cube" >
+      <position x="0.000000" z="-0.000000" y="-2.040000" />
+      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
+      <scale x="20.400000" z="20.400000" y="2.040000" />
+      <user_data name="anom_layer" type="int" value="0" />
+      <user_data name="anom_objecttype" type="int" value="0" />
+      <entity mass_radius="1.0" lock_rot_x="False" velocity_max="0.0" friction_y="1.0" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" friction_x="1.0" lock_rot_z="False" physics_type="STATIC" actor="False" lock_trans_z="False" meshFile="Cube.001.mesh" anisotropic_friction="False" ghost="False" inertia_tensor="0.4000000059604645" velocity_min="0.0" collisionPrim="triangle_mesh" name="Cube.001" mass="1.0" lock_trans_x="False" lock_rot_y="False" friction_z="1.0" lock_trans_y="False" >
+        <dimensions x="40.79999923706055" z="44.880001068115234" y="29.579999923706055" />
+      </entity>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="C:\Users\Timothy\Desktop\SAE QANTM\T7\CIU330\Week 1\Anomalia\bullet\GameData\Scenes\Mirror1\mirror1.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourDiffuse g="0.05087608844041824" b="0.05087608844041824" r="0.05087608844041824" />
+    <colourBackground g="0.05087608844041824" b="0.05087608844041824" r="0.05087608844041824" />
+    <colourAmbient g="0.0" b="0.0" r="0.0" />
+  </environment>
+</scene>
