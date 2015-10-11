@@ -178,7 +178,7 @@ void PortalManager::AddPortal(Portal* portal){
 	if(!portal) return;
 
 	auto id = portal->portalId = (s32)portals.size();
-	assert(id < 10);
+	assert(id < 30);
 
 	portals.push_back(portal);
 
