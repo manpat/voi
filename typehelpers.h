@@ -3,6 +3,7 @@
 
 #include <string>
 #include <typeinfo>
+#include "common.h"
 
 #ifdef __GNUC__
 // This is for fancy type demangling in GCC

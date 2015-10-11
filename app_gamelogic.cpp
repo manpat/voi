@@ -13,6 +13,7 @@
 #include "apptime.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
+#include "synthcomponent.h"
 #include "physicsmanager.h"
 #include "ogitorsceneloader.h"
 #include "blendersceneloader.h"
@@ -48,8 +49,8 @@ void App::Init(){
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/TestTemple", "FileSystem");
 	BlenderSceneLoader{}.Load("GameData/Scenes/TestTemple/temple.scene", this);
 
-	//Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Mirror1", "FileSystem");
-	//BlenderSceneLoader{}.Load("GameData/Scenes/Mirror1/mirror1.scene", this);
+	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Mirror1", "FileSystem");
+	// BlenderSceneLoader{}.Load("GameData/Scenes/Mirror1/mirror1.scene", this);
 
 	for(auto& e: entityManager->entities){
 		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
@@ -62,54 +63,15 @@ void App::Init(){
 	camera = playerEnt->AddComponent<Camera>("MainCamera");
 	portalManager->SetCamera(camera);
 
-	//////////////////////////// This is for testing camera angles ////////////////////
-#if 0
-	auto thing = sceneManager->createManualObject("upthing");
-	f32 s = 1.0;
-	thing->begin("BaseWhiteNoLighting" /* Material name*/, Ogre::RenderOperation::OT_TRIANGLE_LIST);
-		thing->position(-s, 0,-s);
-		thing->colour(Ogre::ColourValue::White);
-		thing->position( s, 0, s);
-		thing->colour(Ogre::ColourValue::White);
-		thing->position(-s, 0, s);
-		thing->colour(Ogre::ColourValue::White);
-		thing->position( s, 0,-s);
-		thing->colour(Ogre::ColourValue::White);
-
-		thing->triangle(0, 1, 2);
-		thing->triangle(2, 3, 1);
-	thing->end();
-
-	thing->convertToMesh("upthingMesh");
-
-	auto upthingEnt = sceneManager->createEntity("upthingMesh");
-	auto upthingNode = playerEnt->ogreSceneNode->createChildSceneNode();
-	upthingNode->attachObject(upthingEnt);
-	upthingNode->translate(0,4,0);
-
-	upthingEnt = sceneManager->createEntity("upthingMesh");
-	upthingNode = playerEnt->ogreSceneNode->createChildSceneNode();
-	upthingNode->attachObject(upthingEnt);
-	upthingNode->translate(0,-3,0);
-	upthingNode->scale(1,-1,1);
-#endif
-	///////////////////////////////////////////////////////////////////////////////////
-
-	// TODO: This should really be an Entity::AddChild
-	// Camera should be a component of a child entity
-	camera->cameraNode->getParentSceneNode()->removeChild(camera->cameraNode);
-	playerEnt->ogreSceneNode->addChild(camera->cameraNode);
+	playerEnt->AddComponent<AudioListenerComponent>();
+	entityManager->FindEntity("Door")->AddComponent<SynthComponent>(0);
+	entityManager->FindEntity("TrophyRoom")->AddComponent<SynthComponent>(1);
+	entityManager->FindEntity("4WayFrame")->AddComponent<SynthComponent>(2);
 
 	player = playerEnt->AddComponent<Player>();
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);
 	playerCollider->DisableRotation();
 	playerCollider->collisionGroups = 1<<0; // First layer
-
-	// auto ground = entityManager->CreateEntity();
-	// ground->ogreSceneNode = rootNode->createChildSceneNode();
-	// ground->ogreSceneNode->setPosition(0.0f, -0.52f, 0.0f);
-	// auto groundcol = ground->AddComponent<BoxColliderComponent>(vec3{1000., 1., 1000.}, false);
-	// groundcol->collisionGroups = ~0u;
 
 	portalManager->SetLayer(0);
 
@@ -142,9 +104,8 @@ void App::Update(){
 	audioManager->Update();
 
 	// Return to menu on ESC
-	if (Input::GetMapped(Input::Cancel)) {
-		std::cout << "------ Going to menu " << std::endl;
-		SetGameState(App::GameState::MAIN_MENU);
+	if (Input::GetMappedDown(Input::Cancel)) {
+		SetGameState(GameState::MAIN_MENU);
 	}
 
 	input->EndFrame();

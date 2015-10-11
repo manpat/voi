@@ -55,9 +55,9 @@ void Menu::Update(App* app, f32 dt) {
 
 	m_delta += dt * 0.25f;
 
-	if (Input::GetMapped(Input::Select)) {
+	if (Input::GetMappedDown(Input::Select)) {
 		app->SetGameState(App::GameState::PLAYING);
-	} else if (Input::GetMapped(Input::Cancel)) {
+	} else if (Input::GetMappedDown(Input::Cancel)) {
 		app->shouldQuit = true;
 	}
 }
