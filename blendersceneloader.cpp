@@ -9,6 +9,7 @@
 #include <OGRE/OgreEntity.h>
 
 #include "physicsmanager.h"
+#include "soundcomponent.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
 #include "entitymanager.h"
@@ -169,7 +170,6 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					s32 dstlayer = std::stol(dstlayerStr);
 					assert(dstlayer < 10);
 
-					// app->portalManager->AddPortal(ogreent, layer, dstlayer);
 					ent->AddComponent<Portal>(layer, dstlayer);
 					if(collider) {
 						// Set as trigger
@@ -229,11 +229,25 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			// Set user data
 			auto& uob = ogreent->getUserObjectBindings();
 			uob.setUserAny(Ogre::Any{ent});
+
+		}else{
+			// Create entity with sound component if soundpath found
+			auto soundpath = findin(ndef.userData, std::string{"anom_soundpath"});
+			if(soundpath.size() > 0){
+				ent = entMgr->CreateEntity();
+				ent->ogreSceneNode = node;
+				if(n.parent){
+					n.parent->AddChild(ent);
+				}
+
+				ent->userdata = ndef.userData;
+				ent->AddComponent<SoundComponent>(soundpath);
+			}
 		}
 
 		for(auto& child: ndef.nodes){
 			nodeQueue.push({node, ent, &child});
-		}
+		}		
 	}
 }
 

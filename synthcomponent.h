@@ -26,6 +26,4 @@ private:
 	static FMOD_RESULT F_CALLBACK GeneratorFunction(FMOD_DSP_STATE*, f32*, f32*, u32, s32, s32*);
 };
 
-
-
-#endif//AUDIOSYNTH_H
+#endif

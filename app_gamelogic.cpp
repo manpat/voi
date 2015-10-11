@@ -13,6 +13,7 @@
 #include "apptime.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
+#include "soundcomponent.h"
 #include "synthcomponent.h"
 #include "physicsmanager.h"
 #include "ogitorsceneloader.h"

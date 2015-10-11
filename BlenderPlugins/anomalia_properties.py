@@ -34,7 +34,22 @@ class ObjectPanel(bpy.types.Panel):
 			row = layout.row()
 			row.prop(context.active_object, "anom_newarea")
 
+class SpeakerPanel(bpy.types.Panel):
+	bl_label = "Anomalia Speaker Properties"
+	bl_idname = "SPEAKER_PT_anomalia"
 
+	bl_space_type = "PROPERTIES"
+	bl_region_type = "WINDOW"
+	bl_context = "object"
+
+	@classmethod
+	def poll(cls, context):
+		return (context.object is not None) and (context.object.type == 'SPEAKER')
+
+	def draw(self, context):
+		layout = self.layout
+		row = layout.row()
+		row.prop(context.active_object, "anom_soundpath")
 
 bl_info = {
 	"name": "Anomalia Properties",
@@ -88,6 +103,8 @@ def register():
 
 	obj.anom_newarea = StringProperty(name="New Area Path")
 
+	obj.anom_soundpath = StringProperty(name="Sound Path")
+
 	bpy.app.handlers.scene_update_post.append(poll_object_layer)
 	bpy.utils.register_module(__name__)
 
@@ -95,6 +112,7 @@ def unregister():
 	obj = bpy.types.Object
 	del obj.anom_layer
 	del obj.anom_newarea
+	del obj.anom_soundpath
 	del obj.anom_portaldst
 	del obj.anom_objecttype
 	del obj.anom_targetentity
