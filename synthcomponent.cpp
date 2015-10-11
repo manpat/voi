@@ -101,15 +101,15 @@ f32 SynthComponent::Generate(f64 dt) {
 
 	switch(mode){
 	case 0:
-		o += (f32)(Wave::tri(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.0);
-		o += (f32)Wave::tri(elapsed * A * 3./2.);
-		o += (f32)(Wave::saw(elapsed * A / 2.0) * 0.333);
-		o += (f32)(Wave::saw(elapsed * (A+0.1) / 2.0) * 0.333);
+		o += Wave::tri(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.f;
+		o += Wave::tri(elapsed * A * 3./2.);
+		o += Wave::saw(elapsed * A / 2.0) * 0.333f;
+		o += Wave::saw(elapsed * (A+0.1) / 2.0) * 0.333f;
 		break;
 
 	case 1:
 		if(bar2 > 0.9){
-			o += (f32)(Wave::tri(elapsed * A * 2.0) * 3.0 * (bar2 - 0.9)/0.1);
+			o += Wave::tri(elapsed * A * 2.0) * 3.0f * ((f32)bar2 - 0.9f)/0.1f;
 		}else{
 			o += Wave::sqr(elapsed * A * 5.0/4.0, 0.3);
 		}
