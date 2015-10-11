@@ -24,8 +24,8 @@ void Menu::Init(App* app) {
 	Ogre::ColourValue sky(0.484375, 0.73046875, 1);
 	app->sceneManager->setFog(Ogre::FOG_LINEAR, sky, 0, 15.0f, 30.0f);
 
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/Menu", "FileSystem");
-	BlenderSceneLoader{}.Load("GameData/Scenes/Menu/menu.scene", app);
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
+	BlenderSceneLoader{}.Load("GameData/Scenes/menu/menu.scene", app);
 
 	auto cameraEnt = app->entityManager->CreateEntity();
 	app->camera = cameraEnt->AddComponent<Camera>();

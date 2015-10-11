@@ -128,11 +128,11 @@ f32 SynthComponent::Generate(f64 dt) {
 
 	case 4:
 		switch(((s32)(elapsed*4.))%5){
-		case 0: o += Wave::Sin(elapsed * ntof(128))*2.0; break;
-		case 1: o += Wave::Sin(elapsed * ntof(132))*2.0; break;
-		case 2: o += Wave::Sin(elapsed * ntof(135))*2.0; break;
-		case 3: o += Wave::Sin(elapsed * ntof(137))*2.0; break;
-		case 4: o += Wave::Triangle(elapsed * ntof(139))*2.0; break;
+		case 0: o += Wave::Sin(elapsed * ntof(128))*2.0f; break;
+		case 1: o += Wave::Sin(elapsed * ntof(132))*2.0f; break;
+		case 2: o += Wave::Sin(elapsed * ntof(135))*2.0f; break;
+		case 3: o += Wave::Sin(elapsed * ntof(137))*2.0f; break;
+		case 4: o += Wave::Triangle(elapsed * ntof(139))*2.0f; break;
 		}
 
 		break;

@@ -9,8 +9,8 @@
 
 class Input;
 struct Camera;
-class AudioManager;
 class PortalManager;
+struct AudioManager;
 struct EntityManager;
 struct PhysicsManager;
 
