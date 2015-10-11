@@ -67,6 +67,12 @@ void App::Init(){
 	entityManager->FindEntity("Door")->AddComponent<SynthComponent>(0);
 	entityManager->FindEntity("TrophyRoom")->AddComponent<SynthComponent>(1);
 	entityManager->FindEntity("4WayFrame")->AddComponent<SynthComponent>(2);
+	
+	entityManager->FindEntity("Cube")->AddComponent<SynthComponent>(3);
+	entityManager->FindEntity("Cube.002")->AddComponent<SynthComponent>(4);
+	// HACK
+	entityManager->FindEntity("Cube.002")->OrphanSelf();
+	rootNode->addChild(entityManager->FindEntity("Cube.002")->ogreSceneNode);
 
 	player = playerEnt->AddComponent<Player>();
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);
