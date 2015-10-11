@@ -29,7 +29,7 @@ void SynthComponent::OnInit() {
 	if(mode >= 3){
 		cfmod(channel->set3DMinMaxDistance(0.4f, 10000.0f));
 	}else{
-		cfmod(channel->set3DMinMaxDistance(3.0f, 10000.0f));
+		cfmod(channel->set3DMinMaxDistance(2.0f, 10000.0f));
 	}
 
 	auto newReverb = [&]() -> FMOD::DSP* {
@@ -128,20 +128,20 @@ f32 SynthComponent::Generate(f64 dt) {
 
 	case 3:
 		switch(((s32)(elapsed*7.))%5){
-		case 0: o += Wave::sin(elapsed * ntof(140));break;
-		case 1: o += Wave::sin(elapsed * ntof(144));break;
-		case 2: o += Wave::sin(elapsed * ntof(147));break;
-		case 3: o += Wave::sin(elapsed * ntof(149));break;
-		case 4: o += Wave::sin(elapsed * ntof(152));break;
+		case 0: o += Wave::sin(elapsed * ntof(140)); break;
+		case 1: o += Wave::sin(elapsed * ntof(144)); break;
+		case 2: o += Wave::sin(elapsed * ntof(147)); break;
+		case 3: o += Wave::sin(elapsed * ntof(149)); break;
+		case 4: o += Wave::sin(elapsed * ntof(152)); break;
 		}
 
 	case 4:
-		switch(((s32)(elapsed*3.))%5){
-		case 0: o += Wave::sin(elapsed * ntof(128));break;
-		case 1: o += Wave::sin(elapsed * ntof(132));break;
-		case 2: o += Wave::sin(elapsed * ntof(135));break;
-		case 3: o += Wave::sin(elapsed * ntof(137));break;
-		case 4: o += Wave::sin(elapsed * ntof(139));break;
+		switch(((s32)(elapsed*4.))%5){
+		case 0: o += Wave::sin(elapsed * ntof(128))*2.0; break;
+		case 1: o += Wave::sin(elapsed * ntof(132))*2.0; break;
+		case 2: o += Wave::sin(elapsed * ntof(135))*2.0; break;
+		case 3: o += Wave::sin(elapsed * ntof(137))*2.0; break;
+		case 4: o += Wave::sin(elapsed * ntof(139))*2.0; break;
 		}
 
 		break;
