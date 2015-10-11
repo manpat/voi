@@ -27,9 +27,9 @@ void SynthComponent::OnInit() {
 	// TODO: Figure out values properly
 	// e.g. test if entity has collider and use dimensions
 	if(mode >= 3){
-		cfmod(channel->set3DMinMaxDistance(0.4, 10000.0));
+		cfmod(channel->set3DMinMaxDistance(0.4f, 10000.0f));
 	}else{
-		cfmod(channel->set3DMinMaxDistance(3.0, 10000.0));
+		cfmod(channel->set3DMinMaxDistance(3.0f, 10000.0f));
 	}
 
 	auto newReverb = [&]() -> FMOD::DSP* {
@@ -69,11 +69,11 @@ void SynthComponent::OnDestroy() {
 // ------ TEMPORARY ------
 namespace Wave {
 	f32 sin(f64 phase){
-		return std::sin(2.0*M_PI*phase);
+		return (f32)std::sin(2.0*M_PI*phase);
 	}
 
 	f32 saw(f64 phase){
-		return fmod(phase, 2.0)-1.0;
+		return (f32)(fmod(phase, 2.0)-1.0);
 	}
 
 	f32 sqr(f64 phase, f64 width = 0.5){
@@ -85,9 +85,9 @@ namespace Wave {
 
 	f32 tri(f64 phase){
 		auto nph = fmod(phase, 1.0);
-		if(nph <= 0.5) return (nph-0.25)*4.0;
+		if(nph <= 0.5) return (f32)((nph-0.25)*4.0);
 
-		return (0.75-nph)*4.0;
+		return (f32)((0.75-nph)*4.0);
 	}
 }
 // ------ TEMPORARY ------
@@ -101,15 +101,15 @@ f32 SynthComponent::Generate(f64 dt) {
 
 	switch(mode){
 	case 0:
-		o += Wave::tri(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.0;
-		o += Wave::tri(elapsed * A * 3./2.);
-		o += Wave::saw(elapsed * A / 2.0) * 0.333;
-		o += Wave::saw(elapsed * (A+0.1) / 2.0) * 0.333;
+		o += (f32)(Wave::tri(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.0);
+		o += (f32)Wave::tri(elapsed * A * 3./2.);
+		o += (f32)(Wave::saw(elapsed * A / 2.0) * 0.333);
+		o += (f32)(Wave::saw(elapsed * (A+0.1) / 2.0) * 0.333);
 		break;
 
 	case 1:
 		if(bar2 > 0.9){
-			o += Wave::tri(elapsed * A * 2.0) * 3.0 * (bar2 - 0.9)/0.1;
+			o += (f32)(Wave::tri(elapsed * A * 2.0) * 3.0 * (bar2 - 0.9)/0.1);
 		}else{
 			o += Wave::sqr(elapsed * A * 5.0/4.0, 0.3);
 		}
