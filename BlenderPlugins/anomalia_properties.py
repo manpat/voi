@@ -30,6 +30,10 @@ class UtilityPanel(bpy.types.Panel):
 			row.prop(context.active_object, "anom_targetentity")
 			row.prop(context.active_object, "anom_interactaction")
 
+		if(otyp == 5):
+			row = layout.row()
+			row.prop(context.active_object, "anom_newarea")
+
 
 bl_info = {
 	"name": "Anomalia Properties",
@@ -46,6 +50,7 @@ def register():
 		default=0, min=0, max=10, subtype='UNSIGNED')
 
 	items = [
+		('l', 'Level Trigger', 'A trigger that loads a new area when entered', '', 5),
 		('d', 'Door', 'An openable door', '', 4),
 		('i', 'Interact', 'Is interactible. Triggers event(s) on interact', '', 3),
 		('m', 'Mirror', 'Can reflect into another layer', '', 2),
@@ -62,11 +67,14 @@ def register():
 	obj.anom_targetentity = StringProperty(name="Target Entity")
 	obj.anom_interactaction = StringProperty(name="Action")
 
+	obj.anom_newarea = StringProperty(name="New Area Path")
+
 	bpy.utils.register_module(__name__)
 
 def unregister():
 	obj = bpy.types.Object
 	del obj.anom_layer
+	del obj.anom_newarea
 	del obj.anom_portaldst
 	del obj.anom_objecttype
 	del obj.anom_targetentity
