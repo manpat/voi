@@ -4,7 +4,7 @@ import sys
 import bpy
 from bpy.props import *
 
-class UtilityPanel(bpy.types.Panel):
+class ObjectPanel(bpy.types.Panel):
 	bl_label = "Anomalia Properties"
 	bl_idname = "OBJECT_PT_anomalia"
 
@@ -35,6 +35,7 @@ class UtilityPanel(bpy.types.Panel):
 			row.prop(context.active_object, "anom_newarea")
 
 
+
 bl_info = {
 	"name": "Anomalia Properties",
 	"author": "Patrick Monaghan",
@@ -44,10 +45,28 @@ bl_info = {
 	"blender": (2, 6, 9),
 }
 
+# For synchronising with blenders layers
+def layer_update(self, context):
+	layer = self["anom_layer"]
+	self.layers[layer] = True
+
+	for l in range(20):
+		self.layers[l] = (layer == l)
+
+# For synchronising with blenders layers
+def poll_object_layer(scene):
+	obj = bpy.context.active_object
+	if obj.type == 'MESH':
+		for i, v in enumerate(obj.layers):
+			if v and i != obj.anom_layer:
+				obj.anom_layer = i
+				break
+
 def register():
 	obj = bpy.types.Object
 	obj.anom_layer = IntProperty(name="Layer",
-		default=0, min=0, max=10, subtype='UNSIGNED')
+		default=0, min=0, max=10, subtype='UNSIGNED',
+		update=layer_update)
 
 	items = [
 		('l', 'Level Trigger', 'A trigger that loads a new area when entered', '', 5),
@@ -69,6 +88,7 @@ def register():
 
 	obj.anom_newarea = StringProperty(name="New Area Path")
 
+	bpy.app.handlers.scene_update_post.append(poll_object_layer)
 	bpy.utils.register_module(__name__)
 
 def unregister():
@@ -79,6 +99,7 @@ def unregister():
 	del obj.anom_objecttype
 	del obj.anom_targetentity
 	del obj.anom_interactaction
+	bpy.app.handlers.scene_update_post.clear()
 	bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
