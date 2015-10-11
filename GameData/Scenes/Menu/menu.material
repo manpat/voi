@@ -14,20 +14,90 @@ material _missing_material_
     }
 }
 
-// Material genrated by blender2ogre 0.6.0
+// Shapes genrated by blender2ogre 0.6.0
 
-material Material 
+material Shapes 
 {
     receive_shadows on 
 
     technique
     {
-        pass Material
+        pass Shapes
         {
-            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
-            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
+            ambient 0.9911022186279297 0.6938718557357788 0.036889463663101196 1.0
+            diffuse 0.7928817867172029 0.5550974928602201 0.029511571370237633 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.0 0.0 0.0 1.0
+            emissive 0.9911022186279297 0.6938718557357788 0.036889463663101196 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Text genrated by blender2ogre 0.6.0
+
+material Text 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Text
+        {
+            ambient 0.9911022186279297 0.057805441319942474 0.01850022003054619 1.0
+            diffuse 0.7928817867172029 0.04624435374504854 0.01480017624497676 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.9911022186279297 0.057805441319942474 0.01850022003054619 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Floor genrated by blender2ogre 0.6.0
+
+material Floor 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Floor
+        {
+            ambient 1.0 0.5775806307792664 0.17788845300674438 1.0
+            diffuse 0.800000011920929 0.46206451150871075 0.14231076452599112 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 1.0 0.5775806307792664 0.17788845300674438 1.0
 
             alpha_to_coverage off
             colour_write on

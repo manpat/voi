@@ -59,7 +59,6 @@ void App::Init(){
 	auto playerEnt = entityManager->CreateEntity();
 	playerEnt->ogreSceneNode = rootNode->createChildSceneNode("Player");
 	playerEnt->ogreSceneNode->setPosition(0,2,0);
-
 	camera = playerEnt->AddComponent<Camera>("MainCamera");
 	portalManager->SetCamera(camera);
 
