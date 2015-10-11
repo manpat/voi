@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "audiomanager.h"
+#include "audiogenerator.h"
 #include "synthcomponent.h"
 
 f64 ntof(u8 n) {
@@ -66,83 +67,72 @@ void SynthComponent::OnDestroy() {
 	dsp->release();
 }
 
-// ------ TEMPORARY ------
-namespace Wave {
-	f32 sin(f64 phase){
-		return (f32)std::sin(2.0*M_PI*phase);
-	}
-
-	f32 saw(f64 phase){
-		return (f32)(fmod(phase, 2.0)-1.0);
-	}
-
-	f32 sqr(f64 phase, f64 width = 0.5){
-		auto nph = fmod(phase, 1.0);
-		if(nph < width) return -1.0;
-
-		return 1.0;
-	}
-
-	f32 tri(f64 phase){
-		auto nph = fmod(phase, 1.0);
-		if(nph <= 0.5) return (f32)((nph-0.25)*4.0);
-
-		return (f32)((0.75-nph)*4.0);
-	}
-}
-// ------ TEMPORARY ------
-
 f32 SynthComponent::Generate(f64 dt) {
 	f32 o = 0.f;
-	auto bar2 = std::fmod(elapsed/2.0, 1.0);
-	auto bar8 = std::fmod(elapsed/8.0, 1.0);
+	auto speed = 0.8;
+	auto bar2 = std::fmod(elapsed/2.0*speed, 1.0);
+	auto bar8 = std::fmod(elapsed/8.0*speed, 1.0);
 
 	auto A = ntof(128);
 
 	switch(mode){
 	case 0:
-		o += Wave::tri(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.f;
-		o += Wave::tri(elapsed * A * 3./2.);
-		o += Wave::saw(elapsed * A / 2.0) * 0.333f;
-		o += Wave::saw(elapsed * (A+0.1) / 2.0) * 0.333f;
+		o += Wave::Triangle(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.f;
+		if(bar8 > 0.5){
+			o += Wave::Triangle(elapsed * A * 3./2.);
+		}else{
+			o += Wave::Triangle(elapsed * A * 3./4.);
+		}
+
+		o += Wave::Saw(elapsed * A / 2.0) * 0.2f;
+		o += Wave::Saw(elapsed * (A+0.1) / 2.0) * 0.2f;
+		o += Wave::Noise() * 0.3f;
 		break;
 
 	case 1:
-		if(bar2 > 0.9){
-			o += Wave::tri(elapsed * A * 2.0) * 3.0f * ((f32)bar2 - 0.9f)/0.1f;
+		if(bar2 < 0.1){
+			o += Wave::Square(elapsed * A * 2.0, Wave::Noise() * 0.3 + 0.7) * 3.0f * (f32)bar2/0.1f;
 		}else{
-			o += Wave::sqr(elapsed * A * 5.0/4.0, 0.3);
+			o += Wave::Triangle(elapsed * A * 5.0/4.0);
 		}
-		o += Wave::tri(elapsed * A / 2.0);
+		
+		o += Wave::Saw(elapsed * A / 2.0);
+		if(bar8 > 0.5){
+			o += Wave::Triangle(elapsed * A / 3.0);
+		}else{
+			o += Wave::Triangle(elapsed * A * 3.0 / 4.0);
+		}
 		break;
 
 	case 2:
 		if(bar8 < 0.5){
-			o += Wave::tri(elapsed * ntof(128));
-			o += Wave::sin(elapsed * ntof(128+4));
+			o += Wave::Triangle(elapsed * ntof(128));
+			o += Wave::Sin(elapsed * ntof(128+4));
 		}else{
-			o += Wave::tri(elapsed * ntof(128+4));
-			o += Wave::sin(elapsed * ntof(128+9));
+			o += Wave::Triangle(elapsed * ntof(128+4));
+			o += Wave::Sin(elapsed * ntof(128+9));
 		}
+		o += Wave::Noise() * 0.35f * Wave::Sin(Wave::Sin(elapsed*0.05f)*0.5+0.5);
+
 		break;
 
 	case 3:
 		switch(((s32)(elapsed*6.))%6){
-		case 0: o += Wave::sin(elapsed * ntof(140)); break;
-		case 1: o += Wave::sin(elapsed * ntof(144)); break;
-		case 2: o += Wave::sin(elapsed * ntof(147)); break;
-		case 3: o += Wave::sin(elapsed * ntof(149)); break;
-		case 4: o += Wave::sin(elapsed * ntof(152)); break;
-		case 5: o += Wave::sin(elapsed * ntof(154)); break;
+		case 0: o += Wave::Sin(elapsed * ntof(140)); break;
+		case 1: o += Wave::Sin(elapsed * ntof(144)); break;
+		case 2: o += Wave::Saw(elapsed * ntof(147)); break;
+		case 3: o += Wave::Sin(elapsed * ntof(149)); break;
+		case 4: o += Wave::Sin(elapsed * ntof(152)); break;
+		case 5: o += Wave::Saw(elapsed * ntof(154)); break;
 		}
 
 	case 4:
 		switch(((s32)(elapsed*4.))%5){
-		case 0: o += Wave::sin(elapsed * ntof(128))*2.0; break;
-		case 1: o += Wave::sin(elapsed * ntof(132))*2.0; break;
-		case 2: o += Wave::sin(elapsed * ntof(135))*2.0; break;
-		case 3: o += Wave::sin(elapsed * ntof(137))*2.0; break;
-		case 4: o += Wave::sin(elapsed * ntof(139))*2.0; break;
+		case 0: o += Wave::Sin(elapsed * ntof(128))*2.0; break;
+		case 1: o += Wave::Sin(elapsed * ntof(132))*2.0; break;
+		case 2: o += Wave::Sin(elapsed * ntof(135))*2.0; break;
+		case 3: o += Wave::Sin(elapsed * ntof(137))*2.0; break;
+		case 4: o += Wave::Triangle(elapsed * ntof(139))*2.0; break;
 		}
 
 		break;
