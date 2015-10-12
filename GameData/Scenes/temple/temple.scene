@@ -1,4 +1,4 @@
-<scene formatVersion="1.0.1" export_time="1444656111.947303" previous_export_time="1444654783.2873085" exported_by="patrick" >
+<scene formatVersion="1.0.1" export_time="1444659537.7924345" previous_export_time="1444659484.8703547" exported_by="patrick" >
   <nodes >
     <node name="Waterfall.001" >
       <position z="-64.000000" x="18.000000" y="8.000000" />
@@ -15,6 +15,7 @@
       <scale z="1.000000" x="1.263600" y="1.000000" />
       <user_data name="anom_soundpath" value="GameData/Sound/waterfall_normalised.ogg" type="str" />
       <user_data name="anom_soundsize" value="1.0" type="float" />
+      <user_data name="anom_soundtype" value="1" type="int" />
     </node>
     <node name="Waterfall.Speaker.002" >
       <position z="-58.057846" x="17.705606" y="2.996550" />
@@ -30,6 +31,7 @@
       <scale z="1.000000" x="1.263600" y="1.000000" />
       <user_data name="anom_soundpath" value="GameData/Sound/waterfall_normalised.ogg" type="str" />
       <user_data name="anom_soundsize" value="1.0" type="float" />
+      <user_data name="anom_soundtype" value="1" type="int" />
     </node>
     <node name="Waterfall.Speaker" >
       <position z="-70.057846" x="-17.675200" y="2.996550" />
@@ -37,6 +39,7 @@
       <scale z="1.000000" x="1.263600" y="1.000000" />
       <user_data name="anom_soundpath" value="GameData/Sound/waterfall_normalised.ogg" type="str" />
       <user_data name="anom_soundsize" value="1.0" type="float" />
+      <user_data name="anom_soundtype" value="1" type="int" />
     </node>
     <node name="Waterfall" >
       <position z="-64.000000" x="-18.000000" y="8.000000" />

@@ -66,9 +66,7 @@ void SynthComponent::OnDestroy() {
 }
 
 f32 SynthComponent::Generate(f64 dt) {
-	f32 o = 0.f;
-
-	o = generator->Generate(elapsed);
+	auto o = generator->Generate(elapsed);
 
 	elapsed += dt;
 	return o;
