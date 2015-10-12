@@ -13,6 +13,7 @@
 #include "apptime.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
+#include "audiogenerator.h"
 #include "soundcomponent.h"
 #include "synthcomponent.h"
 #include "physicsmanager.h"
@@ -36,10 +37,19 @@
 
 
 */
+
+#include "testaudiogenerators.h"
+
 void App::Init(){
 	std::cout << "App Init" << std::endl;
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
 	portalManager = std::make_shared<PortalManager>();
+
+	audioManager->RegisterAudioGeneratorType<DoorAudioGenerator>("door");
+	audioManager->RegisterAudioGeneratorType<TrophyAudioGenerator>("trophy");
+	audioManager->RegisterAudioGeneratorType<FourWayAudioGenerator>("4way");
+	audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
+	audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
 
 	// OgitorSceneLoader{}.Load("GameData/bend.scene", this);
 	// entityManager->entities[1]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<1;
@@ -65,12 +75,12 @@ void App::Init(){
 	portalManager->SetCamera(camera);
 
 	playerEnt->AddComponent<AudioListenerComponent>();
-	entityManager->FindEntity("Door")->AddComponent<SynthComponent>(0);
-	entityManager->FindEntity("TrophyRoom")->AddComponent<SynthComponent>(1);
-	entityManager->FindEntity("4WayFrame")->AddComponent<SynthComponent>(2);
+	entityManager->FindEntity("Door")->AddComponent<SynthComponent>("door", 2.0);
+	entityManager->FindEntity("TrophyRoom")->AddComponent<SynthComponent>("trophy", 2.0);
+	entityManager->FindEntity("4WayFrame")->AddComponent<SynthComponent>("4way", 2.0);
 
-	entityManager->FindEntity("Cube")->AddComponent<SynthComponent>(3);
-	entityManager->FindEntity("Cube.002")->AddComponent<SynthComponent>(4);
+	entityManager->FindEntity("Cube")->AddComponent<SynthComponent>("higharp", 0.4);
+	entityManager->FindEntity("Cube.002")->AddComponent<SynthComponent>("lowarp", 0.4);
 
 	player = playerEnt->AddComponent<Player>();
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);

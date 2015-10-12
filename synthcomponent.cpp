@@ -3,14 +3,12 @@
 #include "audiogenerator.h"
 #include "synthcomponent.h"
 
-f64 ntof(u8 n) {
-	return 220.0 * std::pow(2.0, ((s32)n - 128) / 12.0);
-}
-
-SynthComponent::SynthComponent(u32 _m) : Component(this), mode(_m) {}
+SynthComponent::SynthComponent(const std::string& sn, f32 s) : Component(this), synthName(sn), size(s) {}
 
 void SynthComponent::OnInit() {
 	auto audioMan = AudioManager::GetSingleton();
+
+	generator = audioMan->CreateAudioGenerator(synthName);
 
 	FMOD_DSP_DESCRIPTION desc;
 	memset(&desc, 0, sizeof(desc));
@@ -23,15 +21,9 @@ void SynthComponent::OnInit() {
 	cfmod(audioMan->system->createDSP(&desc, &dsp));
 	cfmod(dsp->setChannelFormat(FMOD_CHANNELMASK_MONO, 1, FMOD_SPEAKERMODE_MONO));
 
-	cfmod(audioMan->system->playDSP(dsp, audioMan->mastergroup, false, &channel));
+	cfmod(audioMan->system->playDSP(dsp, audioMan->mastergroup, true /*start paused*/, &channel));
 	cfmod(channel->setMode(FMOD_3D));
-	// TODO: Figure out values properly
-	// e.g. test if entity has collider and use dimensions
-	if(mode >= 3){
-		cfmod(channel->set3DMinMaxDistance(0.4f, 10000.0f));
-	}else{
-		cfmod(channel->set3DMinMaxDistance(2.0f, 10000.0f));
-	}
+	cfmod(channel->set3DMinMaxDistance(size, 10000.0f));
 
 	auto newReverb = [&]() -> FMOD::DSP* {
 		FMOD::DSP* rvb;
@@ -55,6 +47,12 @@ void SynthComponent::OnInit() {
 	newReverb();
 }
 
+void SynthComponent::OnAwake(){
+	// Unpausing in OnAwake rather than in OnInit means that the entity 
+	//	has a chance to move to where it should be
+	cfmod(channel->setPaused(false));
+}
+
 void SynthComponent::OnUpdate() {
 	auto pos = o2fm(entity->GetGlobalPosition());
 	auto vel = o2fm(vec3::ZERO);
@@ -69,76 +67,8 @@ void SynthComponent::OnDestroy() {
 
 f32 SynthComponent::Generate(f64 dt) {
 	f32 o = 0.f;
-	auto speed = 0.8;
-	auto bar2 = std::fmod(elapsed/2.0*speed, 1.0);
-	auto bar8 = std::fmod(elapsed/8.0*speed, 1.0);
 
-	auto A = ntof(128);
-
-	switch(mode){
-	case 0:
-		o += Wave::Triangle(elapsed * A * (bar2>0.1? 5.0/4.0 : 2.0)) * 2.f;
-		if(bar8 > 0.5){
-			o += Wave::Triangle(elapsed * A * 3./2.);
-		}else{
-			o += Wave::Triangle(elapsed * A * 3./4.);
-		}
-
-		o += Wave::Saw(elapsed * A / 2.0) * 0.2f;
-		o += Wave::Saw(elapsed * (A+0.1) / 2.0) * 0.2f;
-		o += Wave::Noise() * 0.3f;
-		break;
-
-	case 1:
-		if(bar2 < 0.1){
-			o += Wave::Square(elapsed * A * 2.0, Wave::Noise() * 0.3 + 0.7) * 3.0f * (f32)bar2/0.1f;
-		}else{
-			o += Wave::Triangle(elapsed * A * 5.0/4.0);
-		}
-		
-		o += Wave::Saw(elapsed * A / 2.0);
-		if(bar8 > 0.5){
-			o += Wave::Triangle(elapsed * A / 3.0);
-		}else{
-			o += Wave::Triangle(elapsed * A * 3.0 / 4.0);
-		}
-		break;
-
-	case 2:
-		if(bar8 < 0.5){
-			o += Wave::Triangle(elapsed * ntof(128));
-			o += Wave::Sin(elapsed * ntof(128+4));
-		}else{
-			o += Wave::Triangle(elapsed * ntof(128+4));
-			o += Wave::Sin(elapsed * ntof(128+9));
-		}
-		o += Wave::Noise() * 0.35f * Wave::Sin(Wave::Sin(elapsed*0.05f)*0.5+0.5);
-
-		break;
-
-	case 3:
-		switch(((s32)(elapsed*6.))%6){
-		case 0: o += Wave::Sin(elapsed * ntof(140)); break;
-		case 1: o += Wave::Sin(elapsed * ntof(144)); break;
-		case 2: o += Wave::Saw(elapsed * ntof(147)); break;
-		case 3: o += Wave::Sin(elapsed * ntof(149)); break;
-		case 4: o += Wave::Sin(elapsed * ntof(152)); break;
-		case 5: o += Wave::Saw(elapsed * ntof(154)); break;
-		}
-
-	case 4:
-		switch(((s32)(elapsed*4.))%5){
-		case 0: o += Wave::Sin(elapsed * ntof(128))*2.0f; break;
-		case 1: o += Wave::Sin(elapsed * ntof(132))*2.0f; break;
-		case 2: o += Wave::Sin(elapsed * ntof(135))*2.0f; break;
-		case 3: o += Wave::Sin(elapsed * ntof(137))*2.0f; break;
-		case 4: o += Wave::Triangle(elapsed * ntof(139))*2.0f; break;
-		}
-
-		break;
-
-	default: break;
-	}
+	o = generator->Generate(elapsed);
 
 	elapsed += dt;
 	return o;

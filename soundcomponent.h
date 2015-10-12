@@ -11,9 +11,11 @@ struct SoundComponent : Component {
 	FMOD::Sound* sound = nullptr;
 
 	std::string fileName;
+	f32 size;
 
-	SoundComponent(const std::string&);
+	SoundComponent(const std::string&, f32 = 1.0f);
 	void OnInit() override;
+	void OnAwake() override;
 	void OnUpdate() override;
 	void OnDestroy() override;
 };

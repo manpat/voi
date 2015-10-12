@@ -6,17 +6,21 @@
 #include "component.h"
 #include "common.h"
 
+struct AudioGenerator;
+
 struct SynthComponent : Component {
 	FMOD::Channel* channel = nullptr;
 	FMOD::DSP* dsp = nullptr;
+	std::shared_ptr<AudioGenerator> generator;
 
 	f64 elapsed = 0.0;
 
-	// This is most definitely temporary
-	u32 mode = 0;
+	std::string synthName;
+	f32 size;
 
-	SynthComponent(u32 = 0);
+	SynthComponent(const std::string&, f32 = 1.0f);
 	void OnInit() override;
+	void OnAwake() override;
 	void OnUpdate() override;
 	void OnDestroy() override;
 

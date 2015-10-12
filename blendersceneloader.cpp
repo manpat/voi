@@ -10,6 +10,7 @@
 
 #include "physicsmanager.h"
 #include "soundcomponent.h"
+#include "synthcomponent.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
 #include "entitymanager.h"
@@ -97,7 +98,9 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			//	iterated through to find portals
 			auto& entdef = *ndef.entity;
 
-			auto ogreent = app->sceneManager->createEntity(entdef.name, entdef.mesh);
+			// Don't bother with entdef.name, because nothing uses it anyway
+			// Entity::GetName uses the scenenode's name
+			auto ogreent = app->sceneManager->createEntity(/*entdef.name, */entdef.mesh);
 			node->attachObject(ogreent);
 
 			ent = entMgr->CreateEntity();
@@ -231,17 +234,35 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			uob.setUserAny(Ogre::Any{ent});
 
 		}else{
-			// Create entity with sound component if soundpath found
-			auto soundpath = findin(ndef.userData, std::string{"anom_soundpath"});
-			if(soundpath.size() > 0){
+			// Create entity with sound component if soundtype found
+			s32 soundtype = std::stol(findin(ndef.userData, std::string{"anom_soundtype"}, std::string{"0"}));
+				
+			if(soundtype > 0){
 				ent = entMgr->CreateEntity();
 				ent->ogreSceneNode = node;
+				ent->userdata = ndef.userData;
 				if(n.parent){
 					n.parent->AddChild(ent);
 				}
 
-				ent->userdata = ndef.userData;
-				ent->AddComponent<SoundComponent>(soundpath);
+				auto soundsizeStr = findin(ndef.userData, std::string{"anom_soundsize"}, std::string{"1.0"});
+				f32 soundsize = std::stof(soundsizeStr);
+				
+				switch(soundtype){
+					case 1: {
+						auto soundpath = findin(ndef.userData, std::string{"anom_soundpath"});
+						ent->AddComponent<SoundComponent>(soundpath, soundsize);
+						break;
+					}
+
+					case 2: {
+						auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
+						ent->AddComponent<SynthComponent>(synthname, soundsize);
+						break;
+					}
+
+					default: throw "Invalid sound type for entity " + ent->GetName();
+				}
 			}
 		}
 

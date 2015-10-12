@@ -35,3 +35,7 @@ namespace Wave {
 		return distribution(generator);
 	}
 }
+
+f64 ntof(u8 n) {
+	return 220.0 * std::pow(2.0, ((s32)n - 128) / 12.0);
+}

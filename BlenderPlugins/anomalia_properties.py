@@ -34,6 +34,9 @@ class ObjectPanel(bpy.types.Panel):
 			row = layout.row()
 			row.prop(context.active_object, "anom_newarea")
 
+		if(len(context.selected_objects) > 1):
+			layout.row().operator("anomalia.consistentiser")
+
 class SpeakerPanel(bpy.types.Panel):
 	bl_label = "Anomalia Speaker Properties"
 	bl_idname = "SPEAKER_PT_anomalia"
@@ -48,8 +51,56 @@ class SpeakerPanel(bpy.types.Panel):
 
 	def draw(self, context):
 		layout = self.layout
-		row = layout.row()
-		row.prop(context.active_object, "anom_soundpath")
+		ob = context.active_object
+
+		layout.row().prop(ob, "anom_soundtype")
+
+		if(ob["anom_soundtype"] == 1):
+			layout.row().prop(ob, "anom_soundpath")
+		elif(ob["anom_soundtype"] == 2):
+			layout.row().prop(ob, "anom_soundsynth")
+
+		layout.row().prop(ob, "anom_soundsize")
+
+		if(len(context.selected_objects) > 1):
+			layout.row().operator("anomalia.speaker_consistentiser")
+
+
+class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
+	bl_idname = "anomalia.consistentiser"
+	bl_label = "Make Consistent"
+	bl_description = "Copies attributes from last selected object to all other selected objects"
+
+	def execute(self, context):
+		ao = context.active_object
+		for ob in context.selected_objects:
+			if(ob == ao or ob.type != 'MESH'):
+				continue
+
+			ob.anom_layer = ao.anom_layer
+			ob.anom_newarea = ao.anom_newarea
+			ob.anom_portaldst = ao.anom_portaldst
+			ob.anom_objecttype = ao.anom_objecttype
+			ob.anom_targetentity = ao.anom_targetentity
+			ob.anom_interactaction = ao.anom_interactaction
+
+		return {'FINISHED'}
+
+class OBJECT_OT_speakerconsistentiser(bpy.types.Operator):
+	bl_idname = "anomalia.speaker_consistentiser"
+	bl_label = "Make Consistent"
+	bl_description = "Copies speaker attributes from last selected speaker to all other selected speakers"
+
+	def execute(self, context):
+		ao = context.active_object
+		for ob in context.selected_objects:
+			if(ob == ao or ob.type != 'SPEAKER'):
+				continue
+
+			ob.anom_soundpath = ao.anom_soundpath
+			ob.anom_soundsize = ao.anom_soundsize
+
+		return {'FINISHED'}
 
 bl_info = {
 	"name": "Anomalia Properties",
@@ -83,7 +134,7 @@ def register():
 		default=0, min=0, max=10, subtype='UNSIGNED',
 		update=layer_update)
 
-	items = [
+	obtypes = [
 		('l', 'Level Trigger', 'A trigger that loads a new area when entered', '', 5),
 		('d', 'Door', 'An openable door', '', 4),
 		('i', 'Interact', 'Is interactible. Triggers event(s) on interact', '', 3),
@@ -92,7 +143,7 @@ def register():
 		('_', 'World', '', '', 0),
 	]
 
-	obj.anom_objecttype = EnumProperty(items=items,
+	obj.anom_objecttype = EnumProperty(items=obtypes,
 		name="Object Type", default='_')
 
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
@@ -103,7 +154,16 @@ def register():
 
 	obj.anom_newarea = StringProperty(name="New Area Path")
 
+	sptypes = [
+		('_', 'None', 'Not a sound', 0),
+		('f', 'File', 'A sound loaded from a file', 1),
+		('s', 'Synthesizer', 'A synthesized sound', 2),
+	]
+
+	obj.anom_soundtype = EnumProperty(items=sptypes, name="Speaker Type", default='_')
 	obj.anom_soundpath = StringProperty(name="Sound Path")
+	obj.anom_soundsynth = StringProperty(name="Synth Name")
+	obj.anom_soundsize = FloatProperty(name="Sound Size", default=1.0, min=0.1, max=100.0)
 
 	bpy.app.handlers.scene_update_post.append(poll_object_layer)
 	bpy.utils.register_module(__name__)
@@ -112,11 +172,15 @@ def unregister():
 	obj = bpy.types.Object
 	del obj.anom_layer
 	del obj.anom_newarea
-	del obj.anom_soundpath
 	del obj.anom_portaldst
 	del obj.anom_objecttype
 	del obj.anom_targetentity
 	del obj.anom_interactaction
+
+	del obj.anom_soundtype
+	del obj.anom_soundpath
+	del obj.anom_soundsize
+	del obj.anom_soundsynth
 	bpy.app.handlers.scene_update_post.clear()
 	bpy.utils.unregister_module(__name__)
 

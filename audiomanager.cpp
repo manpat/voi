@@ -48,6 +48,14 @@ void AudioManager::Update() {
 	cfmod(system->update());
 }
 
+std::shared_ptr<AudioGenerator> AudioManager::CreateAudioGenerator(const std::string& name){
+	auto agf = findin(audioGeneratorTemplates, name);
+	if(!agf) throw "Tried to create AudioGenerator of non-existent type: " + name;
+
+	return agf->Create();
+}
+
+
 AudioListenerComponent::AudioListenerComponent() : Component(this) {}
 
 // TODO: Fuck this off when camera gets better
