@@ -1,4 +1,4 @@
-<scene formatVersion="1.0.1" export_time="1444659804.9084108" previous_export_time="1444659756.4065726" exported_by="patrick" >
+<scene formatVersion="1.0.1" export_time="1444659920.4872687" previous_export_time="1444659804.9084108" exported_by="patrick" >
   <nodes >
     <node name="Cube.001" >
       <position z="12.500000" x="-22.500000" y="2.000000" />
@@ -13,7 +13,7 @@
         <rotation qy="0.000000" qw="1.000000" qx="0.000000" qz="-0.000000" />
         <scale z="1.000000" x="1.000000" y="1.000000" />
         <user_data name="anom_soundtype" value="2" type="int" />
-        <user_data name="anom_soundsynth" value="lowarp" type="str" />
+        <user_data name="anom_soundsynth" value="noise" type="str" />
       </node>
     </node>
     <node name="Waterfall.001" >

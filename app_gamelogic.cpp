@@ -50,6 +50,7 @@ void App::Init(){
 	audioManager->RegisterAudioGeneratorType<FourWayAudioGenerator>("4way");
 	audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 	audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
+	audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
 
 	// OgitorSceneLoader{}.Load("GameData/bend.scene", this);
 	// entityManager->entities[1]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<1;
