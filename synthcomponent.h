@@ -11,6 +11,7 @@ struct AudioGenerator;
 struct SynthComponent : Component {
 	FMOD::Channel* channel = nullptr;
 	FMOD::DSP* dsp = nullptr;
+	FMOD::DSP* reverb = nullptr;
 	std::shared_ptr<AudioGenerator> generator;
 
 	f64 elapsed = 0.0;
@@ -25,6 +26,9 @@ struct SynthComponent : Component {
 	void OnDestroy() override;
 
 	f32 Generate(f64);
+
+	void SetReverbTime(f32);
+	void SetReverbMix(f32);
 
 private:
 	static FMOD_RESULT F_CALLBACK GeneratorFunction(FMOD_DSP_STATE*, f32*, f32*, u32, s32, s32*);

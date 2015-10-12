@@ -257,7 +257,14 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 					case 2: {
 						auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
-						ent->AddComponent<SynthComponent>(synthname, soundsize);
+						auto synthreverb = std::stof(findin(
+							ndef.userData, std::string{"anom_soundsynthreverb"}, std::string{"10000.0"}));
+						auto synthmix = std::stof(findin(
+							ndef.userData, std::string{"anom_soundsynthmix"}, std::string{"100.0"}));
+
+						auto synth = ent->AddComponent<SynthComponent>(synthname, soundsize);
+						synth->SetReverbTime(synthreverb);
+						synth->SetReverbMix(synthmix);
 						break;
 					}
 

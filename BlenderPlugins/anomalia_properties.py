@@ -59,6 +59,8 @@ class SpeakerPanel(bpy.types.Panel):
 			layout.row().prop(ob, "anom_soundpath")
 		elif(ob["anom_soundtype"] == 2):
 			layout.row().prop(ob, "anom_soundsynth")
+			layout.row().prop(ob, "anom_soundreverb")
+			layout.row().prop(ob, "anom_soundmix")
 
 		layout.row().prop(ob, "anom_soundsize")
 
@@ -97,8 +99,11 @@ class OBJECT_OT_speakerconsistentiser(bpy.types.Operator):
 			if(ob == ao or ob.type != 'SPEAKER'):
 				continue
 
+			ob.anom_soundmix = ao.anom_soundmix
+			ob.anom_soundtype = ao.anom_soundtype
 			ob.anom_soundpath = ao.anom_soundpath
 			ob.anom_soundsize = ao.anom_soundsize
+			ob.anom_soundreverb = ao.anom_soundreverb
 
 		return {'FINISHED'}
 
@@ -164,6 +169,8 @@ def register():
 	obj.anom_soundpath = StringProperty(name="Sound Path")
 	obj.anom_soundsynth = StringProperty(name="Synth Name")
 	obj.anom_soundsize = FloatProperty(name="Sound Size", default=1.0, min=0.1, max=100.0)
+	obj.anom_soundreverb = FloatProperty(name="Reverb Time", default=10000.0, min=10.0, max=20000.0)
+	obj.anom_soundmix = FloatProperty(name="Reverb Mix", default=100.0, min=0.0, max=100.0)
 
 	bpy.app.handlers.scene_update_post.append(poll_object_layer)
 	bpy.utils.register_module(__name__)
@@ -177,10 +184,12 @@ def unregister():
 	del obj.anom_targetentity
 	del obj.anom_interactaction
 
+	del obj.anom_soundmix
 	del obj.anom_soundtype
 	del obj.anom_soundpath
 	del obj.anom_soundsize
 	del obj.anom_soundsynth
+	del obj.anom_soundreverb
 	bpy.app.handlers.scene_update_post.clear()
 	bpy.utils.unregister_module(__name__)
 

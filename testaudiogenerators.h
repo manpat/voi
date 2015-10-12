@@ -94,8 +94,8 @@ struct LowArpeggiatorAudioGenerator : AudioGenerator {
 };
 
 struct NoiseAudioGenerator : AudioGenerator {
-	f32 Generate(f64 elapsed) override {
-		return floor(Wave::Noise()*20.f)/20.f;
+	f32 Generate(f64) override {
+		return floor(Wave::Noise()*2.f)/2.f;
 	}
 };
 

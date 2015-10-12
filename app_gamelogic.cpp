@@ -76,12 +76,12 @@ void App::Init(){
 	portalManager->SetCamera(camera);
 
 	playerEnt->AddComponent<AudioListenerComponent>();
-	entityManager->FindEntity("Door")->AddComponent<SynthComponent>("door", 2.0);
+	entityManager->FindEntity("Door")->AddComponent<SynthComponent>("door", 2.0) ->SetReverbTime(20000.0);
 	entityManager->FindEntity("TrophyRoom")->AddComponent<SynthComponent>("trophy", 2.0);
 	entityManager->FindEntity("4WayFrame")->AddComponent<SynthComponent>("4way", 2.0);
 
-	entityManager->FindEntity("Cube")->AddComponent<SynthComponent>("higharp", 0.4);
-	entityManager->FindEntity("Cube.002")->AddComponent<SynthComponent>("lowarp", 0.4);
+	entityManager->FindEntity("Cube")->AddComponent<SynthComponent>("higharp", 0.4) 	->SetReverbTime(2000.0);
+	entityManager->FindEntity("Cube.002")->AddComponent<SynthComponent>("lowarp", 0.4) 	->SetReverbTime(2000.0);
 
 	player = playerEnt->AddComponent<Player>();
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);

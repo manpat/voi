@@ -32,7 +32,7 @@ void SynthComponent::OnInit() {
 
 		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_DRYLEVEL, -60.0);
 
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, 80.0);
+		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, 100.0);
 		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, 10000.);
 		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_LATEDELAY, 10.);
 
@@ -44,7 +44,7 @@ void SynthComponent::OnInit() {
 		return rvb;
 	};
 
-	newReverb();
+	reverb = newReverb();
 }
 
 void SynthComponent::OnAwake(){
@@ -70,6 +70,14 @@ f32 SynthComponent::Generate(f64 dt) {
 
 	elapsed += dt;
 	return o;
+}
+
+void SynthComponent::SetReverbTime(f32 ms){
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, ms);
+}
+
+void SynthComponent::SetReverbMix(f32 mx){
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, mx);
 }
 
 FMOD_RESULT F_CALLBACK 
