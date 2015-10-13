@@ -55,12 +55,12 @@ void DoorComponent::OnMessage(const std::string& msg, const OpaqueType&){
 }
 
 void DoorComponent::UpdateState() {
-	// If all required switch states are set 
+	// If all required switch states are set
 	if((switchStates&requiredMask) == requiredMask){
 		// Do the things
-		if(!isOpen) mover->MoveTo(openPosition, 2.f);		
+		if(!isOpen) mover->MoveTo(openPosition, 2.f);
 		isOpen = true;
-		
+
 	}else{
 		if(isOpen) mover->MoveTo(closedPosition, 2.f);
 		isOpen = false;

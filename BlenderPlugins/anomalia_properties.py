@@ -142,6 +142,7 @@ def poll_object_layer(scene):
 
 def register():
 	obtypes = [
+		('t', 'Trigger', 'A trigger that does nothing yet', '', 6),
 		('l', 'Level Trigger', 'A trigger that loads a new area when entered', '', 5),
 		('d', 'Door', 'An openable door', '', 4),
 		('i', 'Interact', 'Is interactible. Triggers event(s) on interact', '', 3),

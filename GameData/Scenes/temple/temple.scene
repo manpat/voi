@@ -1,5 +1,16 @@
-<scene export_time="1444744267.332085" exported_by="patrick" previous_export_time="1444744101.3539927" formatVersion="1.0.1" >
+<scene export_time="1444746052.5435276" exported_by="patrick" previous_export_time="1444745789.791479" formatVersion="1.0.1" >
   <nodes >
+    <node name="Temp1Temp2" >
+      <position y="2.500000" z="3.500000" x="-83.500000" />
+      <rotation qz="-0.000000" qx="0.000000" qw="1.000000" qy="0.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <user_data name="anom_layer" type="int" value="1" />
+      <user_data name="anom_objecttype" type="int" value="5" />
+      <user_data name="anom_newarea" type="str" value="GameData/Scenes/temple2/temple2.scene" />
+      <entity actor="False" lock_rot_y="False" friction_y="1.0" velocity_max="0.0" mass_radius="1.0" friction_x="1.0" inertia_tensor="0.4000000059604645" friction_z="1.0" damping_rot="0.10000000149011612" meshFile="Plane.022.mesh" lock_trans_y="False" anisotropic_friction="False" name="Plane.022" mass="1.0" physics_type="STATIC" collisionPrim="box" damping_trans="0.03999999910593033" lock_trans_z="False" lock_trans_x="False" lock_rot_z="False" lock_rot_x="False" velocity_min="0.0" ghost="False" >
+        <dimensions y="5.0" z="5.0" x="5.0" />
+      </entity>
+    </node>
     <node name="Speaker.010" >
       <position y="2.000000" z="3.500000" x="-22.500000" />
       <rotation qz="-0.000000" qx="0.000000" qw="1.000000" qy="0.000000" />
@@ -270,7 +281,7 @@
       <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data name="anom_layer" type="int" value="1" />
       <entity actor="False" lock_rot_y="False" friction_y="1.0" velocity_max="0.0" mass_radius="1.0" friction_x="1.0" inertia_tensor="0.4000000059604645" friction_z="1.0" damping_rot="0.10000000149011612" meshFile="Plane.010.mesh" lock_trans_y="False" anisotropic_friction="False" name="Plane.010" mass="1.0" physics_type="STATIC" collisionPrim="triangle_mesh" damping_trans="0.03999999910593033" lock_trans_z="False" lock_trans_x="False" lock_rot_z="False" lock_rot_x="False" velocity_min="0.0" ghost="False" >
-        <dimensions y="10.0" z="13.0" x="28.0" />
+        <dimensions y="10.0" z="32.0" x="67.0" />
       </entity>
     </node>
     <node name="4WayPortal.001" >
@@ -333,7 +344,7 @@
       <user_data name="anom_objecttype" type="int" value="4" />
       <user_data name="anom_layer" type="int" value="1" />
       <user_data name="anom_doorcount" type="int" value="2" />
-      <user_data name="anom_doorordered" type="int" value="1" />
+      <user_data name="anom_doorordered" type="int" value="0" />
       <entity actor="True" lock_rot_y="False" friction_y="1.0" velocity_max="0.0" mass_radius="1.0" friction_x="1.0" inertia_tensor="0.4000000059604645" friction_z="1.0" damping_rot="0.10000000149011612" meshFile="Cube.mesh" lock_trans_y="False" anisotropic_friction="False" name="Cube" mass="1.0" physics_type="STATIC" collisionPrim="box" damping_trans="0.03999999910593033" lock_trans_z="False" lock_trans_x="False" lock_rot_z="False" lock_rot_x="False" velocity_min="0.0" ghost="False" >
         <dimensions y="6.099999904632568" z="0.7999999523162842" x="4.0" />
       </entity>

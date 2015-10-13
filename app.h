@@ -13,6 +13,7 @@ class PortalManager;
 struct AudioManager;
 struct EntityManager;
 struct PhysicsManager;
+struct AreaTriggerManager;
 
 enum {
 	WIDTH = 800,
@@ -55,6 +56,7 @@ struct App : Singleton<App> {
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;
 	std::shared_ptr<PhysicsManager> physicsManager;
+	std::shared_ptr<AreaTriggerManager> areaTriggerManager;
 	Player* player;
 	Camera* camera;
 
@@ -72,6 +74,7 @@ public:
 
 	void Run();
 	void ResetScene();
+	void Load(const std::string&);
 
 	// Hooks
 	void RegisterSDLHook(SDLEventHook);
