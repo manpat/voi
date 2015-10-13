@@ -26,10 +26,22 @@ EntityManager::~EntityManager(){
 	instance = nullptr;
 }
 
-Entity* EntityManager::CreateEntity(){
+Entity* EntityManager::CreateEntity(Ogre::SceneNode* sn){
 	auto e = new Entity{};
-	e->id = ++entityIdCounter; // Smallest valid id is 1
 	e->Init();
+	e->id = ++entityIdCounter; // Smallest valid id is 1
+	e->ogreSceneNode = sn;
+	entities.push_back(e);
+	return e;
+}
+
+Entity* EntityManager::CreateEntity(const std::string& name, const vec3& pos, const quat& rot){
+	auto app = App::GetSingleton();
+
+	auto e = new Entity{};
+	e->Init();
+	e->id = ++entityIdCounter; // Smallest valid id is 1
+	e->ogreSceneNode = app->rootNode->createChildSceneNode(name, pos, rot);
 	entities.push_back(e);
 	return e;
 }
@@ -74,6 +86,19 @@ void EntityManager::Update(){
 		// Pooling not implemented
 		if(e->enabled /*&& e->id != 0*/){
 			e->Update();
+		}
+	}
+}
+
+void EntityManager::LateUpdate(){
+	for(auto it = entities.begin(); it != entities.end(); ++it){
+		auto e = *it;
+
+		// Don't bother checking active because it's guaranteed that
+		//	all entities will be.
+		// Pooling not implemented
+		if(e->enabled /*&& e->id != 0*/){
+			e->LateUpdate();
 		}
 	}
 }

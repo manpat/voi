@@ -77,6 +77,9 @@ struct Entity {
 	// Update updates all attached and active components
 	void Update();
 
+	// LateUpdate late updates all attached and active components
+	void LateUpdate();
+
 	// AddChild attaches a child entity
 	void AddChild(Entity*);
 	// RemoveChild detaches a child entity but does not destroy it

@@ -4,22 +4,19 @@
 #include "component.h"
 
 struct Portal;
+struct PortalTrigger;
 
 struct Player : Component {
 	f32 cameraYaw = 0.f;
 	f32 cameraPitch = 0.f;
+	PortalTrigger* portalTrigger;
 
 	Player() : Component{this} {}
 
+	void OnInit() override;
 	void OnAwake() override;
 	void OnUpdate() override;
 	void OnLayerChange() override;
-	void OnTriggerEnter(ColliderComponent*) override;
-	void OnTriggerLeave(ColliderComponent*) override;
-
-protected:
-	void EnterPortal(Portal*);
-	void LeavePortal(Portal*);
 };
 
 #endif

@@ -92,9 +92,8 @@ void OgitorSceneLoader::ConstructScene(App* app){
 			auto ogreent = app->sceneManager->createEntity(entdef.name, entdef.mesh);
 			node->attachObject(ogreent);
 
-			ent = entMgr->CreateEntity();
+			ent = entMgr->CreateEntity(node);
 			ent->ogreEntity = ogreent;
-			ent->ogreSceneNode = node;
 			if(n.parent){
 				n.parent->AddChild(ent);
 			}

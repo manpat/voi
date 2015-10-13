@@ -6,6 +6,7 @@
 #include <OGRE/OgreCamera.h>
 #include <OGRE/OgreRoot.h>
 #include "portalmanager.h"
+#include "physicsmanager.h"
 #include "meshinfo.h"
 #include "camera.h"
 #include "entity.h"
@@ -230,7 +231,8 @@ void Portal::OnInit(){
 
 	// This assumes that subMeshes and subEntities match one to one
 	portalSubEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1f, 0.1f, 0.1f)); // Skycolor
-	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Back and front face
+	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Draw back and front face
+	portalSubEnt->getMaterial()->setDepthBias(10.f, 0.f);
 
 	// ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
 	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+portalId);

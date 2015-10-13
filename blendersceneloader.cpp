@@ -103,9 +103,8 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			auto ogreent = app->sceneManager->createEntity(/*entdef.name, */entdef.mesh);
 			node->attachObject(ogreent);
 
-			ent = entMgr->CreateEntity();
+			ent = entMgr->CreateEntity(node);
 			ent->ogreEntity = ogreent;
-			ent->ogreSceneNode = node;
 			if(n.parent){
 				n.parent->AddChild(ent);
 			}
@@ -239,8 +238,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 		s32 soundtype = std::stol(findin(ndef.userData, std::string{"anom_soundtype"}, std::string{"0"}));
 		if(soundtype > 0){
 			if(!ent){
-				ent = entMgr->CreateEntity();
-				ent->ogreSceneNode = node;
+				ent = entMgr->CreateEntity(node);
 				ent->userdata = ndef.userData;
 				if(n.parent){
 					n.parent->AddChild(ent);

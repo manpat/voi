@@ -74,9 +74,7 @@ void App::Init(){
 	}
 	std::cout << std::endl;
 
-	auto playerEnt = entityManager->CreateEntity();
-	playerEnt->ogreSceneNode = rootNode->createChildSceneNode("Player");
-	playerEnt->ogreSceneNode->setPosition(0,2,0);
+	auto playerEnt = entityManager->CreateEntity("Player", vec3{0,2,0});
 	camera = playerEnt->AddComponent<Camera>("MainCamera");
 	portalManager->SetCamera(camera);
 
@@ -85,9 +83,7 @@ void App::Init(){
 	player = playerEnt->AddComponent<Player>();
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);
 	playerCollider->DisableRotation();
-	playerCollider->collisionGroups = 1<<0; // First layer
-
-	portalManager->SetLayer(0);
+	playerEnt->SetLayer(0);
 
 	auto psystem = sceneManager->createParticleSystem("Dust", "Environment/Dust");
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
@@ -116,6 +112,7 @@ void App::Update(){
 	entityManager->Update();
 	physicsManager->Update();
 	audioManager->Update();
+	entityManager->LateUpdate();
 
 	// Return to menu on ESC
 	if (Input::GetMappedDown(Input::Cancel)) {

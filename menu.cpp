@@ -27,7 +27,7 @@ void Menu::Init(App* app) {
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
 	BlenderSceneLoader{}.Load("GameData/Scenes/menu/menu.scene", app);
 
-	auto cameraEnt = app->entityManager->CreateEntity();
+	auto cameraEnt = app->entityManager->CreateEntity("Camera");
 	app->camera = cameraEnt->AddComponent<Camera>();
 
 	app->camera->cameraNode->setPosition(0, 1.0, 12.0);

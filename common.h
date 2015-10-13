@@ -6,32 +6,13 @@
 #include <memory>
 #include <cstdint>
 #include <unordered_map>
+#include <OGRE/OgrePlane.h>
 #include <OGRE/OgreVector2.h>
 #include <OGRE/OgreVector3.h>
 #include <OGRE/OgreVector4.h>
 #include <OGRE/OgreMatrix3.h>
 #include <OGRE/OgreMatrix4.h>
 #include <OGRE/OgreQuaternion.h>
-
-template<typename K, typename V>
-V findin(const std::map<K,V>& m, K k, V dv = V()){
-	auto it = m.find(k);
-	if(it == m.end()) return dv;
-
-	return it->second;
-}
-template<typename K, typename V>
-V findin(const std::unordered_map<K,V>& m, K k, V dv = V()){
-	auto it = m.find(k);
-	if(it == m.end()) return dv;
-
-	return it->second;
-}
-
-template<class T, class L, class U>
-T clamp(T v, L l = 0, U u = 1){
-	return std::max(std::min((T)u, v), (T)l);
-}
 
 using vec2 = Ogre::Vector2;
 using vec3 = Ogre::Vector3;
@@ -60,5 +41,25 @@ using f64 = double;
 #ifndef PI
 #define PI M_PI
 #endif
+
+template<typename K, typename V>
+V findin(const std::map<K,V>& m, K k, V dv = V()){
+	auto it = m.find(k);
+	if(it == m.end()) return dv;
+
+	return it->second;
+}
+template<typename K, typename V>
+V findin(const std::unordered_map<K,V>& m, K k, V dv = V()){
+	auto it = m.find(k);
+	if(it == m.end()) return dv;
+
+	return it->second;
+}
+
+template<class T, class L, class U>
+T clamp(T v, L l = 0, U u = 1){
+	return std::max(std::min((T)u, v), (T)l);
+}
 
 #endif

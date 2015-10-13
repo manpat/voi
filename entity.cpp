@@ -91,6 +91,12 @@ void Entity::Update(){
 	}
 }
 
+void Entity::LateUpdate(){
+	for(auto c = components.begin(); c != components.end(); ++c){
+		(*c)->OnLateUpdate();
+	}
+}
+
 void Entity::AddChild(Entity* e){
 	if(!e) return;
 	if(e->parent) throw "Tried to child an entity that already has a parent";
@@ -101,12 +107,16 @@ void Entity::AddChild(Entity* e){
 	if(ogreSceneNode && e->ogreSceneNode){
 		auto p = e->ogreSceneNode->getParentSceneNode();
 
-		// If the child node doesn't have a parent, go for it
-		if(!p) ogreSceneNode->addChild(e->ogreSceneNode);
-		// Otherwise it's an error. Orphan first
-		else if(p != ogreSceneNode){
-			throw "Tried to add a child of one entity to another without orphaning first";
+		// Already parented
+		if(p == ogreSceneNode) return;
+
+		// parent not null, and is not this so orphan
+		if(p && p != ogreSceneNode){
+			// Remove previous parent
+			p->removeChild(e->ogreSceneNode);
 		}
+
+		ogreSceneNode->addChild(e->ogreSceneNode);
 	}
 }
 
@@ -161,11 +171,11 @@ void Entity::AddComponent(Component* c){
 		collider = static_cast<ColliderComponent*>(c);
 	}
 
-	components.push_back(c);
 	c->entity = this;
 	c->enabled = true;
 	c->OnInit();
 
+	components.push_back(c);
 	EntityManager::GetSingleton()->newComponents.push(c);
 }
 
@@ -274,7 +284,12 @@ void Entity::SetLayer(s32 l) {
 		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
 	}
 
-	// TODO: set collision group here
+	if(collider){
+		// Last 5 bits reserved for layer stuff
+		auto cg = collider->collisionGroups & ~((1<<6) - 1);
+		collider->collisionGroups = cg | 1<<layer;
+		collider->Refilter();
+	}
 
 	for(auto c = components.begin(); c != components.end(); ++c){
 		(*c)->OnLayerChange();
@@ -370,7 +385,7 @@ void unittest_Entity(){
 	};
 
 	EntityManager emgr {};
-	auto e = emgr.CreateEntity();
+	auto e = emgr.CreateEntity("blah");
 	auto c1 = e->AddComponent<ComponentA>(5);
 	auto c2 = e->AddComponent<ComponentA>(6);
 	auto c3 = e->AddComponent<ComponentB>(7);

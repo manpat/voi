@@ -213,8 +213,6 @@ void PhysicsManager::ProcessTriggerCollision(ColliderComponent* col0, ColliderCo
 	}
 
 	if(col1->trigger){
-		// Don't process two triggers
-		if(trigger) return;
 		trigger = col1;
 		col = col0;
 	}

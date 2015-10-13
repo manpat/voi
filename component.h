@@ -50,6 +50,10 @@ struct Component {
 	// OnUpdate is called once per frame if the component is enabled
 	virtual void OnUpdate() {};
 
+	// OnLateUpdate is called once per frame if the component is enabled, and after
+	//	audio and physics managers have updated
+	virtual void OnLateUpdate() {};
+
 	// OnLayerChange is called when the parent entity's layer changes
 	virtual void OnLayerChange() {};
 

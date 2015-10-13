@@ -2,7 +2,6 @@
 #define PORTALMANAGER_H
 
 #include <OGRE/OgreRenderQueueListener.h>
-#include <OGRE/OgrePlane.h>
 #include <string>
 #include <vector>
 

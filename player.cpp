@@ -1,5 +1,6 @@
 #include "physicsmanager.h"
 #include "portalmanager.h"
+#include "entitymanager.h"
 #include "interactable.h"
 #include "apptime.h"
 #include "player.h"
@@ -11,15 +12,49 @@
 // TODO: Remove references to ogre stuff
 //	All camera stuff should be handled by camera wrapper
 #include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreCamera.h>
+
+struct PortalTrigger : Component {
+	PortalTrigger() : Component(this) {}
+
+	void OnTriggerEnter(ColliderComponent* o) override {
+		if(auto portal = o->entity->FindComponent<Portal>()){
+			auto targetLayer = (portal->layer[0] == originalLayer) ? portal->layer[1] : portal->layer[0];
+
+			entity->parent->SetLayer(targetLayer);
+			portal->shouldDraw = false;
+		}
+	}
+	void OnTriggerLeave(ColliderComponent* o) override {
+		if(auto p2 = o->entity->FindComponent<Portal>()){
+			p2->shouldDraw = true;
+		}
+	}
+
+	void OnLayerChange() override {
+		auto portalManager = App::GetSingleton()->portalManager;
+		portalManager->SetLayer(entity->layer);
+	}
+};
+
+void Player::OnInit() {
+	auto portalTriggerEnt = EntityManager::GetSingleton()->CreateEntity("PortalTrigger", entity->GetPosition());
+	portalTrigger = portalTriggerEnt->AddComponent<PortalTrigger>();
+
+	auto portalTriggerCol = portalTriggerEnt->AddComponent<SphereColliderComponent>(vec3{0.5f}, true);
+	portalTriggerCol->SetTrigger(true);
+	portalTriggerCol->SetKinematic(true);
+	portalTriggerCol->SetAutosleep(false);
+
+	entity->AddChild(portalTriggerEnt);
+}
 
 void Player::OnAwake() {
 	if(!entity->collider) throw "Player requires a collider component";
 
-	entity->collider->SetAutosleep(false);
-	entity->SetLayer(0);
-
-	// TODO: Abstract
+	// TODO: Abstract setFriction
 	entity->collider->body->setFriction(0);
+	entity->collider->SetAutosleep(false);
 }
 
 void Player::OnUpdate() {
@@ -123,37 +158,5 @@ void Player::OnUpdate() {
 }
 
 void Player::OnLayerChange(){
-	auto portalManager = App::GetSingleton()->portalManager;
-	
-	portalManager->SetLayer(entity->layer);
-	entity->collider->collisionGroups = 1<<entity->layer;
-	entity->collider->Refilter();
-}
-
-void Player::OnTriggerEnter(ColliderComponent* o){
-	if(auto portal = o->entity->FindComponent<Portal>()){
-		EnterPortal(portal);
-	}
-}
-void Player::OnTriggerLeave(ColliderComponent* o){
-	if(auto portal = o->entity->FindComponent<Portal>()){
-		LeavePortal(portal);
-	}
-}
-
-void Player::EnterPortal(Portal* portal){
-	if(!portal) return;
-
-	if(portal->layer[0] == entity->layer){
-		entity->SetLayer(portal->layer[1]);
-	}else{
-		entity->SetLayer(portal->layer[0]);
-	}
-	portal->shouldDraw = false;
-}
-
-void Player::LeavePortal(Portal* portal){
-	if(!portal) return;
-
-	portal->shouldDraw = true;
+	portalTrigger->entity->SetLayer(entity->layer);
 }
