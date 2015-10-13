@@ -31,5 +31,6 @@ void SoundComponent::OnUpdate() {
 }
 
 void SoundComponent::OnDestroy() {
+	channel->stop();
 	sound->release();
 }

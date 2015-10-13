@@ -126,7 +126,8 @@ void App::InitOgre(){
 	// I'm pretty sure none of the createRenderWindow parameters actually do anything
 	window = ogreRoot->createRenderWindow("", 0, 0, false /*fullscreen*/, &windowParams);
 
-	sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "SceneManager");
+	// sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "SceneManager");
+	sceneManager = ogreRoot->createSceneManager(Ogre::ST_INTERIOR, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();
 }
 

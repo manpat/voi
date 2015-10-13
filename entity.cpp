@@ -274,6 +274,8 @@ void Entity::SetLayer(s32 l) {
 		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
 	}
 
+	// TODO: set collision group here
+
 	for(auto c = components.begin(); c != components.end(); ++c){
 		(*c)->OnLayerChange();
 	}

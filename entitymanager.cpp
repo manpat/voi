@@ -91,8 +91,9 @@ void EntityManager::DestroyAllEntities(){
 	}
 
 	entities.clear();
-	// For some reason, std::queue doesn't have a clear
-	//	This is equivalent
+	// For some reason, std::queue doesn't have a clear, this is equivalent
+	// This avoids the case where the scene is destroyed before newComponents
+	//	are processed, leading to OnAwake being called on null components
 	newComponents = std::queue<Component*>{};
 
 	entityIdCounter = 0;

@@ -62,7 +62,9 @@ void SynthComponent::OnUpdate() {
 }
 
 void SynthComponent::OnDestroy() {
+	channel->stop();
 	dsp->release();
+	reverb->release();
 }
 
 f32 SynthComponent::Generate(f64 dt) {
