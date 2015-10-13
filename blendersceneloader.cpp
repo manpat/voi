@@ -212,7 +212,9 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					break;
 				}
 				case 4/*Door*/: {
-					ent->AddComponent<DoorComponent>();
+					auto lockCount = std::stol(findin(userdata, std::string{"anom_doorcount"}, std::string{"1"}));
+					auto doorOrdered = findin(userdata, std::string{"anom_doorordered"}) == "1";
+					ent->AddComponent<DoorComponent>(lockCount, doorOrdered);
 					break;
 				}
 

@@ -6,9 +6,10 @@
 void Interactable::Activate(){
 	if(target){
 		target->SendMessage(action, (Component*)this);
-	}else{
-		entity->SendMessage(action, (Component*)this);
 	}
+
+	// Send message to self regardless
+	entity->SendMessage(action, (Component*)this);
 }
 
 void Interactable::OnAwake(){

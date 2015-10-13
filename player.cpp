@@ -19,7 +19,7 @@ struct PortalTrigger : Component {
 
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if(auto portal = o->entity->FindComponent<Portal>()){
-			auto targetLayer = (portal->layer[0] == originalLayer) ? portal->layer[1] : portal->layer[0];
+			auto targetLayer = (portal->layer[0] == entity->layer) ? portal->layer[1] : portal->layer[0];
 
 			entity->parent->SetLayer(targetLayer);
 			portal->shouldDraw = false;

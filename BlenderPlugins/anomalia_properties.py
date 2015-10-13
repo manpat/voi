@@ -22,15 +22,20 @@ class ObjectPanel(bpy.types.Panel):
 		row.prop(context.active_object, "anom_layer")
 
 		otyp = context.active_object["anom_objecttype"]
+
 		if(otyp == 1 or otyp == 2):
 			row.prop(context.active_object, "anom_portaldst")
 
-		if(otyp == 3):
+		elif(otyp == 3):
 			row = layout.row()
 			row.prop(context.active_object, "anom_targetentity")
 			row.prop(context.active_object, "anom_interactaction")
 
-		if(otyp == 5):
+		elif(otyp == 4):
+			layout.row().prop(context.active_object, "anom_doorcount")
+			layout.row().prop(context.active_object, "anom_doorordered")
+
+		elif(otyp == 5):
 			row = layout.row()
 			row.prop(context.active_object, "anom_newarea")
 
@@ -85,6 +90,8 @@ class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
 			ob.anom_objecttype = ao.anom_objecttype
 			ob.anom_targetentity = ao.anom_targetentity
 			ob.anom_interactaction = ao.anom_interactaction
+			ob.anom_doorordered = ao.anom_doorordered
+			ob.anom_doorcount = ao.anom_doorcount
 
 		return {'FINISHED'}
 
@@ -134,11 +141,6 @@ def poll_object_layer(scene):
 				break
 
 def register():
-	obj = bpy.types.Object
-	obj.anom_layer = IntProperty(name="Layer",
-		default=0, min=0, max=10, subtype='UNSIGNED',
-		update=layer_update)
-
 	obtypes = [
 		('l', 'Level Trigger', 'A trigger that loads a new area when entered', '', 5),
 		('d', 'Door', 'An openable door', '', 4),
@@ -148,16 +150,30 @@ def register():
 		('_', 'World', '', '', 0),
 	]
 
+	obj = bpy.types.Object
+
+	# General
+	obj.anom_layer = IntProperty(name="Layer",
+		default=0, min=0, max=10, subtype='UNSIGNED',
+		update=layer_update)
+
 	obj.anom_objecttype = EnumProperty(items=obtypes,
 		name="Object Type", default='_')
 
+	# Portal / Mirror
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
 
+	# Interact
 	obj.anom_targetentity = StringProperty(name="Target Entity")
 	obj.anom_interactaction = StringProperty(name="Action")
 
+	# Area boundary
 	obj.anom_newarea = StringProperty(name="New Area Path")
+
+	# Door
+	obj.anom_doorordered = BoolProperty(name="Ordered Sequence")
+	obj.anom_doorcount = IntProperty(name="Lock Count", min=1, max=30, default=1)
 
 	sptypes = [
 		('_', 'None', 'Not a sound', 0),
@@ -180,7 +196,9 @@ def unregister():
 	del obj.anom_layer
 	del obj.anom_newarea
 	del obj.anom_portaldst
+	del obj.anom_doorcount
 	del obj.anom_objecttype
+	del obj.anom_doorordered
 	del obj.anom_targetentity
 	del obj.anom_interactaction
 
