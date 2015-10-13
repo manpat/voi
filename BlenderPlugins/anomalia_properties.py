@@ -47,7 +47,7 @@ class SpeakerPanel(bpy.types.Panel):
 
 	@classmethod
 	def poll(cls, context):
-		return (context.object is not None) and (context.object.type == 'SPEAKER')
+		return context.object is not None
 
 	def draw(self, context):
 		layout = self.layout

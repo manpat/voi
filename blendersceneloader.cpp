@@ -220,8 +220,8 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				case 5/*Level Trigger*/:{
 					auto dstlevel = findin(userdata, std::string{"anom_newarea"});
 					if(dstlevel.size() == 0) throw "Invalid 'newarea' for level trigger";
-					
-					
+
+
 					// TODO: this
 					break;
 				}
@@ -233,49 +233,56 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			auto& uob = ogreent->getUserObjectBindings();
 			uob.setUserAny(Ogre::Any{ent});
 
-		}else{
-			// Create entity with sound component if soundtype found
-			s32 soundtype = std::stol(findin(ndef.userData, std::string{"anom_soundtype"}, std::string{"0"}));
-				
-			if(soundtype > 0){
+		}
+
+		// Create entity with sound/synth component if soundtype found
+		s32 soundtype = std::stol(findin(ndef.userData, std::string{"anom_soundtype"}, std::string{"0"}));
+		if(soundtype > 0){
+			if(!ent){
 				ent = entMgr->CreateEntity();
 				ent->ogreSceneNode = node;
 				ent->userdata = ndef.userData;
 				if(n.parent){
 					n.parent->AddChild(ent);
 				}
+			}
 
-				auto soundsizeStr = findin(ndef.userData, std::string{"anom_soundsize"}, std::string{"1.0"});
-				f32 soundsize = std::stof(soundsizeStr);
-				
-				switch(soundtype){
-					case 1: {
-						auto soundpath = findin(ndef.userData, std::string{"anom_soundpath"});
-						ent->AddComponent<SoundComponent>(soundpath, soundsize);
-						break;
-					}
+			auto soundsizeStr = findin(ndef.userData, std::string{"anom_soundsize"}, std::string{"1.0"});
+			f32 soundsize = std::stof(soundsizeStr);
 
-					case 2: {
-						auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
-						auto synthreverb = std::stof(findin(
-							ndef.userData, std::string{"anom_soundsynthreverb"}, std::string{"10000.0"}));
-						auto synthmix = std::stof(findin(
-							ndef.userData, std::string{"anom_soundsynthmix"}, std::string{"100.0"}));
-
-						auto synth = ent->AddComponent<SynthComponent>(synthname, soundsize);
-						synth->SetReverbTime(synthreverb);
-						synth->SetReverbMix(synthmix);
-						break;
-					}
-
-					default: throw "Invalid sound type for entity " + ent->GetName();
+			switch(soundtype){
+				case 1: {
+					auto soundpath = findin(ndef.userData, std::string{"anom_soundpath"});
+					ent->AddComponent<SoundComponent>(soundpath, soundsize);
+					break;
 				}
+
+				case 2: {
+					auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
+					auto reverbStr = findin(ndef.userData,
+						std::string{"anom_soundsynthreverb"},
+						std::string{"10000.0"});
+
+					auto mixStr = findin(ndef.userData,
+						std::string{"anom_soundsynthmix"},
+						std::string{"100.0"});
+
+					auto synthreverb = std::stof(reverbStr);
+					auto synthmix = std::stof(mixStr);
+
+					auto synth = ent->AddComponent<SynthComponent>(synthname, soundsize);
+					synth->SetReverbTime(synthreverb);
+					synth->SetReverbMix(synthmix);
+					break;
+				}
+
+				default: throw "Invalid sound type for entity " + ent->GetName();
 			}
 		}
 
 		for(auto& child: ndef.nodes){
 			nodeQueue.push({node, ent, &child});
-		}		
+		}
 	}
 }
 
