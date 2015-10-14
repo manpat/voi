@@ -57,6 +57,7 @@ void App::Init(){
 	}
 
 	Load("temple");
+	// Load("switchpuzzles");
 	// Load("mirror1");
 }
 
