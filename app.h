@@ -32,6 +32,11 @@ union SDL_Event;
 
 struct Player;
 
+struct SceneFileInfo {
+	std::string name;
+	std::string path;
+};
+
 struct App : Singleton<App> {
 	typedef void (*SDLEventHook)(const SDL_Event&);
 	typedef void (*Hook)();
@@ -61,6 +66,7 @@ struct App : Singleton<App> {
 	Camera* camera;
 
 	std::vector<SDLEventHook> sdlEventHooks;
+	std::vector<SceneFileInfo> scenes;
 
 	bool inFocus;
 	bool shouldQuit;

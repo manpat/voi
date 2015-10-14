@@ -14,20 +14,20 @@ material _missing_material_
     }
 }
 
-// Invisible genrated by blender2ogre 0.6.0
+// Material genrated by blender2ogre 0.6.0
 
-material Invisible 
+material Material 
 {
     receive_shadows on 
 
     technique
     {
-        pass Invisible
+        pass Material
         {
-            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
-            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
+            ambient 0.4575309753417969 0.4575309753417969 0.4575309753417969 1.0
+            diffuse 0.36602478572763175 0.36602478572763175 0.36602478572763175 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.0 0.0 0.0 1.0
+            emissive 0.4575309753417969 0.4575309753417969 0.4575309753417969 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -49,20 +49,20 @@ material Invisible
         }
     }
 }
-// Material genrated by blender2ogre 0.6.0
+// Invisible genrated by blender2ogre 0.6.0
 
-material Material 
+material Invisible 
 {
     receive_shadows on 
 
     technique
     {
-        pass Material
+        pass Invisible
         {
-            ambient 0.4575309753417969 0.4575309753417969 0.4575309753417969 1.0
-            diffuse 0.36602478572763175 0.36602478572763175 0.36602478572763175 1.0
+            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.4575309753417969 0.4575309753417969 0.4575309753417969 1.0
+            emissive 0.0 0.0 0.0 1.0
 
             alpha_to_coverage off
             colour_write on

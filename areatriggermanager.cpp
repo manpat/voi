@@ -1,5 +1,6 @@
 #include "areatriggercomponent.h"
 #include "areatriggermanager.h"
+#include "physicsmanager.h"
 #include "entitymanager.h"
 #include "entity.h"
 #include "player.h"
@@ -31,10 +32,10 @@ void AreaTriggerManager::Update() {
 		auto spawnNode = entMgr->FindEntity(toNode);
 		if(!spawnNode) std::cout << "Couldn't find entity in new level " + toNode;
 		else {
-			spawnPos = spawnNode->GetPosition() + posOffset;
+			spawnPos = spawnNode->GetGlobalPosition() + posOffset;
 		}
 
-		app->player->entity->SetPosition(spawnPos);
+		app->player->entity->collider->SetPosition(spawnPos);
 
 		toLevel = "";
 	}

@@ -24,6 +24,8 @@
 #include "physicsmanager.h"
 #include "areatriggermanager.h"
 
+#include <OGRE/OgreFileSystem.h>
+
 template<> App* Singleton<App>::instance = nullptr;
 
 App::App(){
@@ -61,6 +63,17 @@ App::App(){
 	ogreRoot->clearEventTimes();
 	inFocus = true;
 	shouldQuit = false;
+
+	Ogre::FileSystemArchiveFactory fsfactory;
+	auto fs = fsfactory.createInstance("GameData/Scenes", true);
+	auto fsls = fs->findFileInfo("*.scene");
+
+	std::cout << "Scenes found: \n";
+	for(auto& d: *fsls){
+		std::cout << "\t" << d.basename.substr(0, d.basename.find_first_of('.')) << "\n";
+		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
+	}
+	std::cout << std::endl;
 }
 
 App::~App(){

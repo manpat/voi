@@ -30,8 +30,6 @@ void Entity::Init(){
 }
 
 void Entity::Destroy(){
-	std::cout << "Destroying entity " << id << std::endl;
-
 	for(auto it = components.begin(); it != components.end(); ++it){
 		auto c = *it;
 		c->OnDestroy();
@@ -54,8 +52,6 @@ void Entity::Destroy(){
 }
 
 void Entity::DestroyRecurse(){
-	std::cout << "Recursively destroying entity " << id << std::endl;
-
 	for(auto it = components.begin(); it != components.end(); ++it){
 		auto c = *it;
 		c->OnDestroy();

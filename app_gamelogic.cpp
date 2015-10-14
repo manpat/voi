@@ -56,17 +56,8 @@ void App::Init(){
 		audioGeneratorsRegistered = true;
 	}
 
-	// OgitorSceneLoader{}.Load("GameData/bend.scene", this);
-	// entityManager->entities[1]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<1;
-	// entityManager->entities[2]->AddComponent<MeshColliderComponent>()->collisionGroups = 1<<0;
-	// auto ico = entityManager->entities[0]->AddComponent<SphereColliderComponent>(1.f, true);
-	// ico->collisionGroups = 1<<0;
-
-	Load("GameData/Scenes/temple/temple.scene");
-
-	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/mirror1", "FileSystem");
-	// BlenderSceneLoader{}.Load("GameData/Scenes/mirror1/mirror1.scene", this);
-
+	Load("temple");
+	// Load("mirror1");
 }
 
 /*
@@ -120,21 +111,24 @@ void App::Terminate() {
 void App::Load(const std::string& nLevel){
 	Terminate();
 
-	auto slash = nLevel.find_last_of("/\\");
-	auto path = nLevel.substr(0, slash);
+	auto lvl = nLevel + ".scene";
+	SceneFileInfo* sceneInfo = nullptr; 
+	for(auto& si: scenes) {
+		if(si.name == lvl){
+			sceneInfo = &si;
+			break;
+		}
+	}
+
+	if(!sceneInfo){
+		throw "Scene " + nLevel + " not found";
+	}
 
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
 	portalManager = std::make_shared<PortalManager>();
 
-	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/temple", "FileSystem");
-	std::cout << path << std::endl;
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(path, "FileSystem");
-	BlenderSceneLoader{}.Load(nLevel, this);
-
-	for(auto& e: entityManager->entities){
-		std::cout << "Entity " << e->id << "\tname: " << e->GetName() << "\n";
-	}
-	std::cout << std::endl;
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
+	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
 
 	auto playerEnt = entityManager->CreateEntity("Player", vec3{0,2,0});
 	camera = playerEnt->AddComponent<Camera>("MainCamera");
