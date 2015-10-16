@@ -1,12 +1,7 @@
-#include <OGRE/OgreRenderQueueInvocation.h>
-#include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
-#include <OGRE/OgreCamera.h>
-#include <OGRE/OgreRoot.h>
-
-// TODO: Remove unused OGRE headers once layer rendering manager is complete
+#include <OGRE/OgreSceneNode.h>
 
 #include "layerrenderingmanager.h"
 #include "physicsmanager.h"

@@ -18,6 +18,9 @@ Mirror::Mirror(s32 l0, s32 l1) : Component(this) {
 	PRINT("new mirror with id:" << id << ", layer: " << layer[0] << ", dest. layer: " << layer[1]);
 }
 
+template<>
+MirrorManager* Singleton<MirrorManager>::instance = nullptr;
+
 MirrorManager::MirrorManager() {
 	App::GetSingleton()->sceneManager->addRenderQueueListener(this);
 

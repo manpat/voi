@@ -3,8 +3,8 @@
 
 #include <OGRE/OgreRenderQueueListener.h>
 
-//#include "common.h"
 #include "component.h"
+#include "singleton.h"
 
 namespace Ogre {
 	class Camera;
@@ -17,7 +17,7 @@ struct Mirror : Component {
 	Ogre::Camera* ogreCamera;
 };
 
-class MirrorManager : public Ogre::RenderQueueListener {
+class MirrorManager : public Singleton<MirrorManager>, Ogre::RenderQueueListener {
 public:
 	MirrorManager();
 	~MirrorManager();
