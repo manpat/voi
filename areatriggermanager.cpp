@@ -1,4 +1,4 @@
-#include <OGRE\OgreSceneNode.h>
+#include <OGRE/OgreSceneNode.h>
 
 #include "areatriggercomponent.h"
 #include "areatriggermanager.h"
