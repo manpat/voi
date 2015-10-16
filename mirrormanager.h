@@ -25,9 +25,6 @@ public:
 	void AddMirror(Mirror*);
 
 protected:
-	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;
-	void renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) override;
-
 	std::vector<Mirror*> mirrors;
 
 private:

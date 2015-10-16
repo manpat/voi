@@ -22,23 +22,11 @@ template<>
 MirrorManager* Singleton<MirrorManager>::instance = nullptr;
 
 MirrorManager::MirrorManager() {
-	App::GetSingleton()->sceneManager->addRenderQueueListener(this);
-
 	PRINT("manager was employed!");
 }
 
 MirrorManager::~MirrorManager() {
-	App::GetSingleton()->sceneManager->removeRenderQueueListener(this);
-
 	PRINT("manager was fired!");
-}
-
-void MirrorManager::renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) {
-
-}
-
-void MirrorManager::renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) {
-
 }
 
 void MirrorManager::AddMirror(Mirror* mirror) {
