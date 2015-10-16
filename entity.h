@@ -142,6 +142,17 @@ struct Entity {
 
 	// void SetFullTransform(const mat4&);
 
+	// Move by this value
+	void Translate(const vec3&);
+	// Move from from point a to b, by progress
+	void Lerp(const vec3& a, const vec3& b, float progress);
+	// Rotate by this value
+	void Rotate(const quat&, bool worldSpace = true);
+	// Rotate from point a to b, by progress
+	void Slerp(const quat& a, const quat& b, float progress);
+	// Rotate to look at this position
+	void LookAt(const vec3& pos, bool worldSpace = true);
+
 	// TODO: Add coordinate conversion
 
 	void SetLayer(s32);
