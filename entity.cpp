@@ -273,6 +273,28 @@ void Entity::SetScale(const vec3& n) {
 // 	ogreSceneNode->_setFullTransform(n);
 // }
 
+void Entity::Translate(const vec3& diff) {
+	if (!ogreSceneNode) throw "Tried to translate Entity with no Ogre::SceneNode";
+	ogreSceneNode->translate(diff);
+}
+void Entity::Lerp(const vec3& from, const vec3& to, float percent) {
+	if (!ogreSceneNode) throw "Tried to lerp Entity with no Ogre::SceneNode";
+	auto dist = (to - from) * percent;
+	ogreSceneNode->translate(dist);
+}
+void Entity::Rotate(const quat& rot, bool worldSpace) {
+	if (!ogreSceneNode) throw "Tried to rotate Entity with no Ogre::SceneNode";
+	ogreSceneNode->rotate(rot, worldSpace ? Ogre::Node::TS_WORLD : Ogre::Node::TS_LOCAL);
+}
+void Entity::Slerp(const quat& from, const quat& to, float t) {
+	if (!ogreSceneNode) throw "Tried to slerp Entity with no Ogre::SceneNode";
+	ogreSceneNode->rotate(quat::Slerp(t, from, to, true));
+}
+void Entity::LookAt(const vec3& pos, bool worldSpace) {
+	if (!ogreSceneNode) throw "Tried to \"look at\" using an Entity with no Ogre::SceneNode";
+	ogreSceneNode->lookAt(pos, worldSpace ? Ogre::Node::TS_WORLD : Ogre::Node::TS_LOCAL);
+}
+
 void Entity::SetLayer(s32 l) {
 	layer = l;
 

@@ -22,6 +22,15 @@ struct Camera : Component {
 
 	void OnInit() override;
 	void OnDestroy() override;
+
+	void SetNearClipDistance(float dist);
+	void SetFarClipDistance(float dist);
+
+	// Set the camera's background colour
+	void SetBackgroundColour(Ogre::ColourValue colour);
+
+	// Set the camera's background colour
+	void SetBackgroundColour(float r, float g, float b, float a);
 };
 
 #endif

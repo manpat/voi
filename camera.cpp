@@ -34,20 +34,34 @@ void Camera::OnInit(){
 		size /* width */, size /* height */);
 
 	viewport->setAutoUpdated(true);
-	auto g = 0.1f;
-	viewport->setBackgroundColour(Ogre::ColourValue(g,g,g)); // TODO: Expose
+	SetBackgroundColour(0.1f, 0.1f, 0.1f, 1.0f);
 
 	ogreCamera->setAspectRatio(
 		static_cast<f32>(viewport->getActualWidth())
 		/ static_cast<f32>(viewport->getActualHeight()));
 
-	ogreCamera->setNearClipDistance(0.1f); // TODO: Expose
-	ogreCamera->setFarClipDistance(1000.f); // TODO: Expose
+	SetNearClipDistance(0.1f);
+	SetFarClipDistance(1000.0f);
 }
 
 void Camera::OnDestroy(){
 	cameraNode->getParentSceneNode()->removeChild(cameraNode);
 	App::GetSingleton()->sceneManager->destroyCamera(ogreCamera);
 	App::GetSingleton()->window->removeViewport(viewport->getZOrder());
-	
+}
+
+void Camera::SetNearClipDistance(float dist) {
+	ogreCamera->setNearClipDistance(dist);
+}
+
+void Camera::SetFarClipDistance(float dist) {
+	ogreCamera->setFarClipDistance(dist);
+}
+
+void Camera::SetBackgroundColour(Ogre::ColourValue colour) {
+	viewport->setBackgroundColour(colour);
+}
+
+void Camera::SetBackgroundColour(float r, float g, float b, float a = 1.0f) {
+	viewport->setBackgroundColour(Ogre::ColourValue(r, g, b, a));
 }

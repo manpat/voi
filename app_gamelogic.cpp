@@ -131,8 +131,10 @@ void App::Load(const std::string& nLevel){
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
 	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
 
-	auto playerEnt = entityManager->CreateEntity("Player", vec3{0,2,0});
-	camera = playerEnt->AddComponent<Camera>("MainCamera");
+	auto playerEnt = entityManager->CreateEntity("Player", vec3{ 0,2,0 });
+	auto cameraEnt = entityManager->CreateEntity("Camera", vec3{ 0,0,0 });
+	playerEnt->AddChild(cameraEnt);
+	camera = cameraEnt->AddComponent<Camera>("MainCamera");
 	portalManager->SetCamera(camera);
 
 	playerEnt->AddComponent<AudioListenerComponent>();

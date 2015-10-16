@@ -69,6 +69,8 @@ dlldata.c
 *_p.c
 *_i.h
 *.ilk
+*.iobj
+*.ipdb
 *.meta
 *.obj
 *.pch
