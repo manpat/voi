@@ -1,3 +1,4 @@
+#include "layerrenderingmanager.h"
 #include "physicsmanager.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
@@ -32,8 +33,8 @@ struct PortalTrigger : Component {
 	}
 
 	void OnLayerChange() override {
-		auto portalManager = App::GetSingleton()->portalManager;
-		portalManager->SetLayer(entity->layer);
+		auto layerRenderingManager = App::GetSingleton()->layerRenderingManager;
+		layerRenderingManager->SetupRenderQueueInvocationSequence(entity->layer);
 	}
 };
 
@@ -58,9 +59,9 @@ void Player::OnAwake() {
 }
 
 void Player::OnUpdate() {
-	auto camera = App::GetSingleton()->camera;
-	auto portalManager = App::GetSingleton()->portalManager;
+	auto layerRenderingManager = App::GetSingleton()->layerRenderingManager;
 	auto physicsManager = App::GetSingleton()->physicsManager;
+	auto camera = App::GetSingleton()->camera;
 
 	auto md = Input::GetMouseDelta();
 
@@ -110,7 +111,7 @@ void Player::OnUpdate() {
 	entity->collider->SetVelocity(velocity);
 
 	if(Input::GetKeyDown('f')){
-		entity->SetLayer((entity->layer+1)%portalManager->GetNumLayers());
+		entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
 	}
 
 	// HACK

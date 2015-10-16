@@ -9,15 +9,17 @@
 
 class Input;
 struct Camera;
-class PortalManager;
+class MirrorManager;
+struct PortalManager;
 struct AudioManager;
 struct EntityManager;
 struct PhysicsManager;
 struct AreaTriggerManager;
+struct LayerRenderingManager;
 
 enum {
-	WIDTH = 800,
-	HEIGHT = 600
+	WIDTH = 1600,
+	HEIGHT = 1200
 };
 
 namespace Ogre {
@@ -58,10 +60,13 @@ struct App : Singleton<App> {
 
 	std::shared_ptr<Input> input;
 	std::shared_ptr<AudioManager> audioManager;
+	std::shared_ptr<MirrorManager> mirrorManager;
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;
 	std::shared_ptr<PhysicsManager> physicsManager;
 	std::shared_ptr<AreaTriggerManager> areaTriggerManager;
+	std::shared_ptr<LayerRenderingManager> layerRenderingManager;
+
 	Player* player;
 	Camera* camera;
 

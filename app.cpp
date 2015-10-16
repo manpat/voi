@@ -10,7 +10,6 @@
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreRenderWindow.h>
-#include <OGRE/OgreParticleSystemManager.h> // TEMP
 
 #include "app.h"
 #include "menu.h"
@@ -320,28 +319,4 @@ s32 App::GetWindowHeight() const {
 
 bool App::IsInFocus() const {
 	return inFocus;
-}
-
-void App::ResetScene() {
-	auto defaultResGrp = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
-
-	// Destroy all existing entities
-	entityManager->DestroyAllEntities();
-
-	// Clear scene completely
-	sceneManager->clearScene();
-
-	// Destroy particle systems and particle templates
-	sceneManager->destroyAllParticleSystems();
-	Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
-
-	// Clear default resouce group resources
-	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(defaultResGrp);
-
-	// Remove default resouce group resource locations
-	Ogre::ResourceGroupManager::LocationList locList = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(defaultResGrp);
-
-	for (auto l = locList.begin(); l != locList.end(); l++) {
-		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation((*l)->archive->getName(), defaultResGrp);
-	}
 }

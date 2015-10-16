@@ -1,24 +1,17 @@
 #ifndef PORTALMANAGER_H
 #define PORTALMANAGER_H
 
-#include <OGRE/OgreRenderQueueListener.h>
 #include <string>
 #include <vector>
 
 #include "common.h"
+#include "singleton.h"
 #include "component.h"
-
-enum {
-	RENDER_QUEUE_PORTAL = Ogre::RENDER_QUEUE_2,
-	RENDER_QUEUE_PORTALSCENE = Ogre::RENDER_QUEUE_MAIN,
-	RENDER_QUEUE_PARTICLES = Ogre::RENDER_QUEUE_9,
-};
 
 namespace Ogre {
 	class Root;
 	class Viewport;
 	class SubEntity;
-	class RenderQueueInvocationSequence;
 };
 
 struct Camera;
@@ -34,27 +27,13 @@ struct Portal : Component {
 	void OnInit() override;
 };
 
-class PortalManager : public Ogre::RenderQueueListener {
-protected:
-	Ogre::RenderQueueInvocationSequence* rqis;
-	Camera* camera;
+struct PortalManager : Singleton<PortalManager> {
 	std::vector<Portal*> portals;
-	u32 numLayers;
-	u32 currentLayer;
 
-public:
 	PortalManager();
 	~PortalManager();
 
-	void SetLayer(s32);
-	u32 GetNumLayers() const {return numLayers;}
-
 	void AddPortal(Portal*);
-	void SetCamera(Camera*);
-
-protected:
-	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;
-	void renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) override;
 };
 
 #endif

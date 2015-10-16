@@ -8,6 +8,7 @@
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
 
+#include "layerrenderingmanager.h"
 #include "areatriggercomponent.h"
 #include "physicsmanager.h"
 #include "soundcomponent.h"

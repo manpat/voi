@@ -1,5 +1,5 @@
+#include "layerrenderingmanager.h"
 #include "physicsmanager.h"
-#include "portalmanager.h"
 #include "entitymanager.h"
 #include "component.h"
 #include "entity.h"
@@ -277,7 +277,7 @@ void Entity::SetLayer(s32 l) {
 	layer = l;
 
 	if(ogreEntity){
-		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_PORTALSCENE + (u8)layer);
+		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_LAYER + (u8)layer);
 	}
 
 	if(collider){

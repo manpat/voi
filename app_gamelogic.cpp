@@ -1,10 +1,10 @@
+#include <OGRE/OgreParticleSystemManager.h>
 #include <OGRE/OgreParticleSystem.h>
 #include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreManualObject.h>
 #include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
-
-#include <OGRE/OgreManualObject.h>
 
 #include "app.h"
 #include "input.h"
@@ -13,6 +13,7 @@
 #include "apptime.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
+#include "mirrormanager.h"
 #include "audiogenerator.h"
 #include "soundcomponent.h"
 #include "synthcomponent.h"
@@ -20,6 +21,7 @@
 #include "ogitorsceneloader.h"
 #include "blendersceneloader.h"
 #include "areatriggermanager.h"
+#include "layerrenderingmanager.h"
 
 #include "entity.h"
 #include "component.h"
@@ -57,8 +59,8 @@ void App::Init(){
 	}
 
 	Load("temple");
-	// Load("switchpuzzles");
-	// Load("mirror1");
+	//Load("switchpuzzles");
+	//Load("mirror1");
 }
 
 /*
@@ -91,9 +93,34 @@ void App::Update(){
 	input->EndFrame();
 }
 
+void App::ResetScene() {
+	auto defaultResGrp = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+
+	// Destroy all existing entities
+	entityManager->DestroyAllEntities();
+
+	// Clear scene completely
+	sceneManager->clearScene();
+
+	// Destroy particle systems and particle templates
+	sceneManager->destroyAllParticleSystems();
+	Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
+
+	// Clear default resouce group resources
+	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(defaultResGrp);
+
+	// Remove default resouce group resource locations
+	Ogre::ResourceGroupManager::LocationList locList = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(defaultResGrp);
+
+	for (auto l = locList.begin(); l != locList.end(); l++) {
+		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation((*l)->archive->getName(), defaultResGrp);
+	}
+}
+
 void App::Terminate() {
 	ResetScene();
 	portalManager.reset();
+	mirrorManager.reset();
 }
 
 /*
@@ -126,14 +153,16 @@ void App::Load(const std::string& nLevel){
 	}
 
 	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
+	layerRenderingManager = std::make_shared<LayerRenderingManager>();
 	portalManager = std::make_shared<PortalManager>();
+	mirrorManager = std::make_shared<MirrorManager>();
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
 	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
 
 	auto playerEnt = entityManager->CreateEntity("Player", vec3{0,2,0});
 	camera = playerEnt->AddComponent<Camera>("MainCamera");
-	portalManager->SetCamera(camera);
+	layerRenderingManager->SetCamera(camera);
 
 	playerEnt->AddComponent<AudioListenerComponent>();
 
@@ -149,4 +178,6 @@ void App::Load(const std::string& nLevel){
 	camera->cameraNode->setPosition(0, 1.4f, 0);
 	auto g = 0.1f;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
+
+	layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 }
