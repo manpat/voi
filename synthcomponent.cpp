@@ -96,7 +96,7 @@ SynthComponent::GeneratorFunction(FMOD_DSP_STATE* state, f32*, f32* outbuffer, u
 	auto synth = static_cast<SynthComponent*>(ud);
 
 	for (u32 i = 0; i < length; ++i) {
-		outbuffer[i] = synth->Generate(inc);
+		outbuffer[i] = 0;//synth->Generate(inc);
 	}
 
 	bool silent = false;

@@ -18,8 +18,8 @@ struct AreaTriggerManager;
 struct LayerRenderingManager;
 
 enum {
-	WIDTH = 1280,
-	HEIGHT = 720
+	WIDTH = 800,
+	HEIGHT = 600
 };
 
 namespace Ogre {
