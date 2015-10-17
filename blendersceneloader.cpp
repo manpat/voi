@@ -191,7 +191,6 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					assert(dstlayer < 10);
 
 					ent->AddComponent<Mirror>(layer, dstlayer);
-
 					//if (collider) {
 					//	// Set as trigger
 					//	collider->SetTrigger(true);

@@ -9,8 +9,8 @@
 
 class Input;
 struct Camera;
-class MirrorManager;
 struct PortalManager;
+struct MirrorManager;
 struct AudioManager;
 struct EntityManager;
 struct PhysicsManager;
@@ -18,8 +18,8 @@ struct AreaTriggerManager;
 struct LayerRenderingManager;
 
 enum {
-	WIDTH = 800,
-	HEIGHT = 600
+	WIDTH = 1024,
+	HEIGHT = 768
 };
 
 namespace Ogre {
