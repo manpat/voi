@@ -56,27 +56,7 @@ void Portal::OnInit(){
 	assert(entity->ogreEntity);
 	auto portalMesh = entity->ogreEntity->getMesh();
 
-	auto subMeshes = portalMesh->getSubMeshNameMap(); // std::unordered_map<string, ushort>
-	auto subMeshIt = subMeshes.find("Portal"); // Find submesh with name Portal
-	if(subMeshIt == subMeshes.end()) { // If failed
-		// Get submesh with material of name Portal
-		for(auto& sm: subMeshes){ 
-			if(portalMesh->getSubMesh(sm.second)->getMaterialName() == "Portal"){
-				portalSubEnt = entity->ogreEntity->getSubEntity(sm.second);
-				break;
-			}
-		}
-
-		// No portal surface found
-		if(!portalSubEnt) {
-			std::cout << "No portal surfaces found in " << entity->GetName() << std::endl;
-			return;
-		}
-	}else{
-		//
-		portalSubEnt = entity->ogreEntity->getSubEntity(subMeshIt->second);
-	}
-
+	portalSubEnt = entity->ogreEntity->getSubEntity(0);
 	portalSubmesh = portalSubEnt->getSubMesh();
 
 	// This assumes that subMeshes and subEntities match one to one
@@ -84,7 +64,6 @@ void Portal::OnInit(){
 	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Draw back and front face
 	portalSubEnt->getMaterial()->setDepthBias(10.f, 0.f);
 
-	// ent->setRenderQueueGroup(RENDER_QUEUE_PORTALFRAME+id);
 	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+portalId);
 
 	auto mesh = GetOgreSubMeshVertices(portalSubmesh);

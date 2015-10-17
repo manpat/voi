@@ -19,7 +19,7 @@ struct LayerRenderingManager;
 
 enum {
 	WIDTH = 1024,
-	HEIGHT = 576
+	HEIGHT = 768
 };
 
 namespace Ogre {
