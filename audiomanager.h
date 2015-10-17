@@ -19,6 +19,7 @@ struct AudioManager : Singleton<AudioManager> {
 	FMOD::System* system;
 	FMOD::ChannelGroup* mastergroup;
 	FMOD::DSP* lowPass;
+	FMOD::DSP* reverb;
 
 	std::map<std::string, std::shared_ptr<AudioGeneratorFactoryBase>> audioGeneratorTemplates;
 
@@ -27,6 +28,8 @@ struct AudioManager : Singleton<AudioManager> {
 
 	void Update();
 	void SetLowpass(f32);
+	void SetReverbTime(f32);
+	void SetReverbMix(f32);
 	
 	std::shared_ptr<AudioGenerator> CreateAudioGenerator(const std::string&);
 
