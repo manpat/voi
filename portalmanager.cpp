@@ -22,11 +22,11 @@ template<>
 PortalManager* Singleton<PortalManager>::instance = nullptr;
 
 PortalManager::PortalManager() {
-
+	// TODO: Remove if unused
 }
 
 PortalManager::~PortalManager(){
-
+	// TODO: Remove if unused
 }
 
 void PortalManager::AddPortal(Portal* portal){

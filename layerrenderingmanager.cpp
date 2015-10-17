@@ -4,6 +4,7 @@
 
 #include "layerrenderingmanager.h"
 #include "portalmanager.h"
+#include "mirrormanager.h"
 #include "camera.h"
 #include "app.h"
 
@@ -58,8 +59,19 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		}
 	}
 
-	// Prepare for portal drawing by clearing the stencil buffer
-	rqis->add(1, "PrepPrt");
+	// List of visible mirrors
+	std::vector<Mirror*> visibleMirrors;
+
+	// Collect list of visible mirrors
+	for (auto m: MirrorManager::GetSingleton()->mirrors) {
+		// If mirror is in this layer, add to list of visible mirrors.
+		if (m->layer[0] == l) {
+			visibleMirrors.push_back(m);
+		}
+	}
+
+	// Prepare for portal/mirror drawing by clearing the stencil buffer
+	rqis->add(1, "Prep");
 
 	// Draw each portal to the stencil buffer with a ref value of 
 	//	the dstlayer 
@@ -67,10 +79,15 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt"/*+std::to_string(p.first)*/);
 	}
 
+	// Add visible mirrors to render sequence for drawing to stencil buffer
+	for (auto m: visibleMirrors) {
+		rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "Mir");
+	}
+
 	rqis->add(RENDER_QUEUE_PARTICLES, "dummy");
 
-	// Prepare for portal scene drawing by clearing the depth buffer
-	rqis->add(1, "PrepPrtScn");
+	// Prepare for portal/mirror scene drawing by clearing the depth buffer
+	rqis->add(1, "PrepScn");
 
 	// Draw each portal scene masked by dstlayer in the stencilbuffer.
 	//	Then draw the portal frame 'behind' the portal
@@ -79,6 +96,11 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 
 		rqis->add(RENDER_QUEUE_LAYER+p.first, scenestr);
 		// rqis->add(RENDER_QUEUE_PORTALFRAME+p.second->portalId, scenestr);
+	}
+
+	// Add visible mirrors to render sequence for drawing of reflected scene
+	for (auto m: visibleMirrors) {
+		rqis->add(RENDER_QUEUE_LAYER + l, "MiS");
 	}
 }
 
@@ -150,19 +172,34 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			rs->addClipPlane(nplane);
 		}
 	}
+
+	if (invocationType == "Mir") {
+		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
+		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
+	
+		if (!mirror->isVisible) {
+			skipThisInvocation = true;
+			return;
+		}
+
+		std::cout << "@@@ Drawing mirror" << std::endl;
+	} else if (invocationType == "MiS") {
+		std::cout << "@@@ Drawing mirror scene" << std::endl;
+	}
 }
 
-void LayerRenderingManager::renderQueueEnded(u8 /*queueId*/, const std::string& invocation, bool& /*repeatThisInvocation*/) {
+void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) {
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
+
 	rs->setStencilCheckEnabled(false);
 	rs->setStencilBufferParams();
 
-	if(invocation == "PrepPrt"){
-		// Prepare portal drawing
+	if(invocation == "Prep"){
+		// Prepare portal/mirror drawing by clearing the stencil buffer
 		rs->clearFrameBuffer(Ogre::FBT_STENCIL, Ogre::ColourValue::Black, 1.0, 0xFF);
-	}else if(invocation == "PrepPrtScn"){
-		// Prepare portal scene drawing
+	}else if(invocation == "PrepScn"){
+		// Prepare portal/mirror scene drawing by clearing the depth buffer
 		rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
 	}else if(invocationType == "PtS"){
 		rs->resetClipPlanes();

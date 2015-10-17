@@ -60,7 +60,7 @@ void App::Init(){
 
 	Load("temple");
 	//Load("switchpuzzles");
-	//Load("mirror1");
+	//Load("mirrortest");
 }
 
 /*
@@ -121,6 +121,7 @@ void App::Terminate() {
 	ResetScene();
 	portalManager.reset();
 	mirrorManager.reset();
+	layerRenderingManager.reset();
 }
 
 /*
