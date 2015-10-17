@@ -1,11 +1,13 @@
 #include <OGRE/OgreRenderQueueInvocation.h>
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreEntity.h>
 
 #include "layerrenderingmanager.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
 #include "camera.h"
+#include "entity.h"
 #include "app.h"
 
 #include <cassert>
@@ -171,20 +173,40 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 
 			rs->addClipPlane(nplane);
 		}
-	}
-
-	if (invocationType == "Mir") {
-		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
-		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
+	} else if (invocationType == "Mir") {
+		currentMirrorId = queueId - RENDER_QUEUE_MIRRORED;
+		auto mirror = MirrorManager::GetSingleton()->mirrors[currentMirrorId];
 	
 		if (!mirror->isVisible) {
 			skipThisInvocation = true;
 			return;
 		}
 
-		std::cout << "@@@ Drawing mirror" << std::endl;
+		rs->setStencilCheckEnabled(true);
+		rs->setStencilBufferParams(
+			Ogre::CMPF_ALWAYS_PASS, // func
+			1 + currentMirrorId, // refValue
+			0xFF, // compareMask
+			0xFF, // writeMask
+			Ogre::SOP_KEEP, // stencilFailOp
+			Ogre::SOP_KEEP, // depthFailOp
+			Ogre::SOP_REPLACE, // passOp
+			false); // twoSidedOperation
 	} else if (invocationType == "MiS") {
-		std::cout << "@@@ Drawing mirror scene" << std::endl;
+		rs->setStencilCheckEnabled(true);
+		rs->setStencilBufferParams(
+			Ogre::CMPF_EQUAL, // func
+			1 + currentMirrorId, // refValue
+			0xFF, // compareMask
+			0x00, // writeMask
+			Ogre::SOP_KEEP, // stencilFailOp
+			Ogre::SOP_KEEP, // depthFailOp
+			Ogre::SOP_KEEP, // passOp
+			false); // twoSidedOperation
+
+		auto viewMat = camera->ogreCamera->getViewMatrix();
+		rs->_setViewMatrix(viewMat * MirrorManager::GetSingleton()->mirrors[currentMirrorId]->reflectionMat);
+		rs->setInvertVertexWinding(true);
 	}
 }
 

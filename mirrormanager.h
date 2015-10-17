@@ -16,11 +16,15 @@ struct Mirror : Component {
 	void OnInit() override;
 	void OnUpdate() override;
 
+	void CalculateReflectionMatrix();
+	void SetColor(Ogre::ColourValue color);
+	Ogre::SubMesh* GetSubMesh();
+
 	s32 mirrorId;
 	s32 layer[2]; // Layers that should be reflected (layer of mirror, normally hidden layer)
 	bool isVisible = true;
-	u8 maxBounces = 2; // Maximum number of times a mirror should reflect per frame (recursivley ie. two opposing mirrors)
-	u8 bounceCount = 0;
+
+	mat4 reflectionMat = mat4::IDENTITY;
 };
 
 struct MirrorManager : public Singleton<MirrorManager>, Ogre::RenderQueueListener {

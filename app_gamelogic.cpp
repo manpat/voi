@@ -58,9 +58,9 @@ void App::Init(){
 		audioGeneratorsRegistered = true;
 	}
 
-	Load("temple");
+	//Load("temple");
 	//Load("switchpuzzles");
-	//Load("mirrortest");
+	Load("mirrortest");
 }
 
 /*
