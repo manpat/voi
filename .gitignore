@@ -15,8 +15,9 @@ lib/
 # Ignore xml versions of ogre meshes, they aren't used for anything
 *.mesh.xml
 
-# Ignore blender backups
+# Ignore blender backups/logs
 *.blend?
+Working/_ogre_debug.txt
 
 # Source dir as working dir
 *.dll

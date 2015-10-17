@@ -14,28 +14,27 @@
 #include <algorithm>
 #include <cassert>
 
+// TODO: Clipping issues
+// TODO: Multiple mirror support
+// TODO: Test with portals
+// TODO: Color lerping
+
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
 //#define ERROR(msg) std::err << "MirrorMan EXCEPTION: " << msg << std::endl;
 
-Mirror::Mirror(s32 l0, s32 l1) : Component(this) {
-	layer[0] = l0;
-	layer[1] = l1;
-
-	PRINT("new mirror with id:" << id << ", layer: " << layer[0] << ", dest. layer: " << layer[1]);
+Mirror::Mirror(s32 l) : Component(this) {
+	layer = l;
+	PRINT("new mirror with id:" << id << ", layer: " << layer);
 }
 
 void Mirror::OnInit() {
 	auto mirrorMan = App::GetSingleton()->mirrorManager;
 
-	//assert(layer[0] < 10 && layer[1] < 10);
+	assert(layer < 10);
 	mirrorMan->AddMirror(this);
 
 	entity->ogreEntity->setRenderQueueGroup(RENDER_QUEUE_MIRRORED + mirrorId);
 	CalculateReflectionMatrix();
-}
-
-void Mirror::OnUpdate() {
-	// TODO: Remove if unused
 }
 
 void Mirror::SetColor(Ogre::ColourValue color) {
@@ -50,6 +49,7 @@ void Mirror::CalculateReflectionMatrix() {
 	auto mesh = GetOgreSubMeshVertices(GetSubMesh());
 
 	if (mesh.size() >= 3) {
+		// Calculate normal from mesh vertices
 		auto p1 = mesh[1] - mesh[0];
 		auto p2 = mesh[2] - mesh[0];
 
@@ -58,6 +58,7 @@ void Mirror::CalculateReflectionMatrix() {
 
 		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
 
+		// p is a point on the plane and n is the normal or unit vector perpecdicular to the plane
 		auto n = mirrorNode->_getDerivedOrientation() * normal;
 		auto p = mirrorNode->_getDerivedPosition();
 		auto pn = p.dotProduct(n);
@@ -77,14 +78,6 @@ void Mirror::CalculateReflectionMatrix() {
 template<>
 MirrorManager* Singleton<MirrorManager>::instance = nullptr;
 
-MirrorManager::MirrorManager() {
-	// TODO: Remove if unused
-}
-
-MirrorManager::~MirrorManager() {
-	// TODO: Remove if unused
-}
-
 void MirrorManager::AddMirror(Mirror* mirror) {
 	if (mirror != nullptr) {
 		mirror->mirrorId = (s32)mirrors.size();
@@ -93,6 +86,6 @@ void MirrorManager::AddMirror(Mirror* mirror) {
 		mirrors.push_back(mirror);
 
 		auto& numLayers = App::GetSingleton()->layerRenderingManager->numLayers;
-		numLayers = std::max((u32)std::max(mirror->layer[0], mirror->layer[1]) + 1, numLayers);
+		numLayers = std::max((u32)mirror->layer + 1, numLayers);
 	}
 }

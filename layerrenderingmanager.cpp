@@ -67,7 +67,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	// Collect list of visible mirrors
 	for (auto m: MirrorManager::GetSingleton()->mirrors) {
 		// If mirror is in this layer, add to list of visible mirrors.
-		if (m->layer[0] == l) {
+		if (m->layer == l) {
 			visibleMirrors.push_back(m);
 		}
 	}
@@ -223,7 +223,7 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 	}else if(invocation == "PrepScn"){
 		// Prepare portal/mirror scene drawing by clearing the depth buffer
 		rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
-	}else if(invocationType == "PtS"){
+	}else if(invocationType == "PtS" || invocationType == "MiS"){
 		rs->resetClipPlanes();
 	}
 }

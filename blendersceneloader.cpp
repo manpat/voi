@@ -186,11 +186,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 
 				case 2/*Mirror*/:{
-					auto dstlayerStr = findin(userdata, std::string{"anom_portaldst"}, std::string{"1"});
-					s32 dstlayer = std::stol(dstlayerStr);
-					assert(dstlayer < 10);
-
-					ent->AddComponent<Mirror>(layer, dstlayer);
+					ent->AddComponent<Mirror>(layer);
 					//if (collider) {
 					//	// Set as trigger
 					//	collider->SetTrigger(true);

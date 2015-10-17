@@ -21,7 +21,8 @@ Menu& Menu::Inst() {
 void Menu::Init(App* app) {
 	std::cout << "Menu Init" << std::endl;
 
-	Ogre::ColourValue sky(0.484375, 0.73046875, 1);
+	//Ogre::ColourValue sky(0.484375, 0.73046875, 1);
+	Ogre::ColourValue sky(0.25, 0, 0.25);
 	app->sceneManager->setFog(Ogre::FOG_LINEAR, sky, 0, 15.0f, 30.0f);
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
