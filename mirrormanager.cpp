@@ -59,9 +59,11 @@ void Mirror::CalculateReflectionMatrix() {
 		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
 
 		// p is a point on the plane and n is the normal or unit vector perpecdicular to the plane
-		auto n = mirrorNode->_getDerivedOrientation() * normal;
-		auto p = mirrorNode->_getDerivedPosition();
+		auto n = entity->ogreEntity->getParentSceneNode()->_getDerivedOrientation() * normal;
+		auto p = mirrorNode->_getDerivedPosition() + mesh[0];
 		auto pn = p.dotProduct(n);
+
+		PRINT("p0: " << mesh[0] << ", p: " << p);
 
 		// Translate and rotate to origin
 		// Scale by -1 along the XZ axes (Y up)

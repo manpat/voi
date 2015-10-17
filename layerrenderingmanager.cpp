@@ -193,6 +193,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_REPLACE, // passOp
 			false); // twoSidedOperation
 	} else if (invocationType == "MiS") {
+		rs->setInvertVertexWinding(true);
+		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
@@ -206,7 +208,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 
 		auto viewMat = camera->ogreCamera->getViewMatrix();
 		rs->_setViewMatrix(viewMat * MirrorManager::GetSingleton()->mirrors[currentMirrorId]->reflectionMat);
-		rs->setInvertVertexWinding(true);
+
+
 	}
 }
 
@@ -225,5 +228,6 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 		rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
 	}else if(invocationType == "PtS" || invocationType == "MiS"){
 		rs->resetClipPlanes();
+		rs->setInvertVertexWinding(false);
 	}
 }
