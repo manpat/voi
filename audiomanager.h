@@ -18,6 +18,7 @@ FMOD_VECTOR o2fm(const vec3&);
 struct AudioManager : Singleton<AudioManager> {
 	FMOD::System* system;
 	FMOD::ChannelGroup* mastergroup;
+	FMOD::DSP* lowPass;
 
 	std::map<std::string, std::shared_ptr<AudioGeneratorFactoryBase>> audioGeneratorTemplates;
 
@@ -25,6 +26,7 @@ struct AudioManager : Singleton<AudioManager> {
 	~AudioManager();
 
 	void Update();
+	void SetLowpass(f32);
 	
 	std::shared_ptr<AudioGenerator> CreateAudioGenerator(const std::string&);
 

@@ -8,6 +8,7 @@ struct AreaTriggerComponent : Component {
 
 	AreaTriggerComponent(const std::string& lvl) : Component(this), toLevel(lvl) {}
 
+	void OnUpdate() override;
 	void OnTriggerEnter(ColliderComponent*) override;
 };
 

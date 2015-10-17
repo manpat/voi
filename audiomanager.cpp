@@ -38,6 +38,11 @@ AudioManager::AudioManager() {
 	cfmod(compressor->setParameterFloat(FMOD_DSP_COMPRESSOR_ATTACK, 0.5));
 	cfmod(compressor->setBypass(false));
 	cfmod(mastergroup->addDSP(0, compressor));
+
+	cfmod(system->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &lowPass));
+	cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, 22000.0));
+	cfmod(lowPass->setBypass(false));
+	cfmod(mastergroup->addDSP(1, lowPass));
 }
 
 AudioManager::~AudioManager() {
@@ -46,6 +51,10 @@ AudioManager::~AudioManager() {
 
 void AudioManager::Update() {
 	cfmod(system->update());
+}
+
+void AudioManager::SetLowpass(f32 v){
+	cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, v));
 }
 
 std::shared_ptr<AudioGenerator> AudioManager::CreateAudioGenerator(const std::string& name){

@@ -84,7 +84,6 @@ void SynthComponent::SetReverbMix(f32 mx){
 
 FMOD_RESULT F_CALLBACK 
 SynthComponent::GeneratorFunction(FMOD_DSP_STATE* state, f32*, f32* outbuffer, u32 length, s32, s32*){
-	
 	s32 samplerate = 0;
 	cfmod(state->callbacks->getsamplerate(state, &samplerate));
 	f64 inc = 1.0 / samplerate;
@@ -96,7 +95,7 @@ SynthComponent::GeneratorFunction(FMOD_DSP_STATE* state, f32*, f32* outbuffer, u
 	auto synth = static_cast<SynthComponent*>(ud);
 
 	for (u32 i = 0; i < length; ++i) {
-		outbuffer[i] = 0;//synth->Generate(inc);
+		outbuffer[i] = synth->Generate(inc);
 	}
 
 	bool silent = false;
