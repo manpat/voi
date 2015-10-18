@@ -3,14 +3,12 @@
 #include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
-#include <OGRE/OgreCamera.h>
 
 #include "layerrenderingmanager.h"
 #include "mirrormanager.h"
 #include "component.h"
 #include "meshinfo.h"
 #include "entity.h"
-#include "camera.h"
 #include "app.h"
 
 #include <algorithm>
@@ -25,7 +23,7 @@
 
 Mirror::Mirror(s32 l) : Component(this) {
 	layer = l;
-	PRINT("new mirror with id:" << id << ", layer: " << layer);
+	PRINT("instantiated mirror with id:" << id << ", layer: " << layer);
 }
 
 void Mirror::OnInit() {
@@ -71,11 +69,14 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 		// p is a point on the plane
 		auto p = vec3::ZERO;
 
+		// Determine that point from the average of all points for later on when aligning to orientation
 		for (u32 v = 0; v < mesh.size(); ++v) {
 			p += mesh[v];
 		}
 
 		p /= (f32)mesh.size();
+
+		// Offset p by the node position
 		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
 		p += mirrorNode->_getDerivedPosition();
 
@@ -93,7 +94,8 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 			0,						0,						0,						1
 		);
 
-		clipPlane = Ogre::Plane(n, pn); // pv is length
+		// pn is length
+		clipPlane = Ogre::Plane(n, pn);
 	}
 }
 
