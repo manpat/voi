@@ -15,8 +15,8 @@
 #include <cassert>
 
 // TODO: Fix culling
-// TODO: Test with portals
-// TODO: Convert colour lerping to HSV color space
+// TODO: Fix multiple mirrors in scenes with portals
+// TODO: Lerp colors in HSV color space
 
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
 //#define ERROR(msg) std::err << "MirrorMan EXCEPTION: " << msg << std::endl;
