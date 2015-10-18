@@ -31,7 +31,6 @@ struct LayerRenderingManager : Ogre::RenderQueueListener {
 
 	Ogre::RenderQueueInvocationSequence* rqis;
 	Camera* camera;
-	s32 currentMirrorId;
 	u32 numLayers = 0;
 	u32 currentLayer;
 };

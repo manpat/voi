@@ -103,7 +103,8 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 
 	// Add visible mirrors to render sequence for drawing of reflected scene
 	for (auto m: visibleMirrors) {
-		rqis->add(RENDER_QUEUE_LAYER + l, "MiS");
+		auto scenestr = "MiS" + std::to_string(m->mirrorId);
+		rqis->add(RENDER_QUEUE_LAYER + l, scenestr);
 	}
 }
 
@@ -175,8 +176,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			rs->addClipPlane(nplane);
 		}
 	} else if (invocationType == "Mir") {
-		currentMirrorId = queueId - RENDER_QUEUE_MIRRORED;
-		auto mirror = MirrorManager::GetSingleton()->mirrors[currentMirrorId];
+		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
+		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
 	
 		if (!mirror->isVisible) {
 			skipThisInvocation = true;
@@ -186,7 +187,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // func
-			1 + currentMirrorId, // refValue
+			1 + mirrorId, // refValue
 			0xFF, // compareMask
 			0xFF, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
@@ -194,12 +195,13 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_REPLACE, // passOp
 			false); // twoSidedOperation
 	} else if (invocationType == "MiS") {
-		auto mirror = MirrorManager::GetSingleton()->mirrors[currentMirrorId];
+		auto mirrorId = std::stol(invocation.substr(3));
+		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
 
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
-			1 + currentMirrorId, // refValue
+			1 + mirrorId, // refValue
 			0xFF, // compareMask
 			0x00, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
@@ -207,14 +209,15 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // passOp
 			false); // twoSidedOperation
 
-		// TODO: replace with frustum transformation
-		auto viewMat = camera->ogreCamera->getViewMatrix();
-		rs->_setViewMatrix(viewMat * mirror->reflectionMat);
+		//mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
+		//camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
+		camera->ogreCamera->setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
 
+		// Set render system view matrix to match camera view matrix as per update in render queue ended
+		rs->_setViewMatrix(camera->ogreCamera->getViewMatrix());
 		rs->setInvertVertexWinding(true);
 		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
 		rs->addClipPlane(mirror->clipPlane);
-		//camera->ogreCamera->setCullingFrustum(&mirror->camera);
 		//camera->ogreCamera->enableReflection(mirror->clipPlane);
 		//camera->ogreCamera->enableCustomNearClipPlane(mirror->clipPlane);
 	}
@@ -233,11 +236,14 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 	}else if(invocation == "PrepScn"){
 		// Prepare portal/mirror scene drawing by clearing the depth buffer
 		rs->clearFrameBuffer(Ogre::FBT_DEPTH, Ogre::ColourValue::Black, 1.0, 0xFF);
-	}else if(invocationType == "PtS" || invocationType == "MiS"){
+	}else if(invocationType == "PtS"){
+		// Post drawing of portal scene
 		rs->resetClipPlanes();
-		rs->setInvertVertexWinding(false);
+	} else if (invocationType == "MiS") {
+		// Post drawing of mirror scene
+		camera->ogreCamera->setCustomViewMatrix(false);
 		//camera->ogreCamera->setCullingFrustum(0);
-		//camera->ogreCamera->disableReflection();
-		//camera->ogreCamera->disableCustomNearClipPlane();
+		rs->setInvertVertexWinding(false);
+		rs->resetClipPlanes();
 	}
 }
