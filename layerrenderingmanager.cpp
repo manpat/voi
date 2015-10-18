@@ -39,8 +39,11 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	rqis->clear();
 	rqis->add(RENDER_QUEUE_LAYER+l, "Main");
 
-	using PType = std::pair<s32, Portal*>;
-	static std::vector<PType> visiblePortals;
+	struct VisiblePortalInfo {
+		Portal* portal;
+		s32 targetLayer;
+	};
+	static std::vector<VisiblePortalInfo> visiblePortals;
 	visiblePortals.clear();
 
 	for(auto p: PortalManager::GetSingleton()->portals){
@@ -56,7 +59,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 
 		// if the portal IS in the new layer
 		if(layer >= 0){
-			visiblePortals.push_back(PType(layer, p));
+			visiblePortals.push_back(VisiblePortalInfo{p, layer});
 		}
 	}
 
@@ -77,7 +80,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	// Draw each portal to the stencil buffer with a ref value of 
 	//	the dstlayer 
 	for(auto p: visiblePortals){
-		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt");
+		rqis->add(RENDER_QUEUE_PORTAL+p.portal->portalId, "Prt");
 	}
 
 	// Add visible mirrors to render sequence for drawing to stencil buffer
@@ -93,9 +96,9 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	// Draw each portal scene masked by dstlayer in the stencilbuffer.
 	//	Then draw the portal frame 'behind' the portal
 	for(auto p: visiblePortals){
-		auto scenestr = "PtS"+std::to_string(p.second->portalId);
+		auto scenestr = "PtS"+std::to_string(p.portal->portalId);
 
-		rqis->add(RENDER_QUEUE_LAYER+p.first, scenestr);
+		rqis->add(RENDER_QUEUE_LAYER+p.targetLayer, scenestr);
 	}
 
 	// Add visible mirrors to render sequence for drawing of reflected scene
@@ -128,7 +131,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->_setColourBufferWriteEnabled(false, false, false, false);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // compare
-			1u+layer, // refvalue
+			1u + layer, // refvalue
 			0xFFFFFFFF, // compare mask
 			0xFFFFFFFF, // write mask
 			Ogre::SOP_KEEP, // stencil fail
@@ -154,8 +157,12 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 
 		rs->_setColourBufferWriteEnabled(true, true, true, true);
 		rs->setStencilCheckEnabled(true);
-		rs->setStencilBufferParams(Ogre::CMPF_EQUAL, 1u+layer, 0xFFFFFFFF, 0,
-			Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, false);
+		rs->setStencilBufferParams(
+			Ogre::CMPF_EQUAL, // Func
+			1u + layer, // ref
+			0xFFFFFFFF, 0, // Compare/Write mask
+			Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, // stencil/depth fail, pass
+			false);
 
 		// TODO: Make good
 		auto playerPos = camera->cameraNode->_getDerivedPosition();
@@ -184,7 +191,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // func
-			10 + mirrorId, // refValue
+			11u + mirrorId, // refValue
 			0xFF, // compareMask
 			0xFF, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
@@ -198,7 +205,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
-			10 + mirrorId, // refValue
+			11u + mirrorId, // refValue
 			0xFF, // compareMask
 			0, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
