@@ -71,7 +71,7 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 		// p is a point on the plane
 		auto p = vec3::ZERO;
 
-		for (auto v = 0; v < mesh.size(); ++v) {
+		for (u32 v = 0; v < mesh.size(); ++v) {
 			p += mesh[v];
 		}
 

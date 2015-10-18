@@ -58,7 +58,7 @@ void App::Init(){
 		audioGeneratorsRegistered = true;
 	}
 
-	//Load("temple");
+	// Load("temple");
 	//Load("switchpuzzles");
 	//Load("mirror1");
 	//Load("mirrortest"); // single mirror
