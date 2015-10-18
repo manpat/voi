@@ -98,7 +98,6 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		auto scenestr = "PtS"+std::to_string(p.second->portalId);
 
 		rqis->add(RENDER_QUEUE_LAYER+p.first, scenestr);
-		// rqis->add(RENDER_QUEUE_PORTALFRAME+p.second->portalId, scenestr);
 	}
 
 	// Add visible mirrors to render sequence for drawing of reflected scene
