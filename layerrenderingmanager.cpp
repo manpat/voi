@@ -56,8 +56,6 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 
 		// if the portal IS in the new layer
 		if(layer >= 0){
-			// Queue it's frame to be rendered
-			// rqis->add(RENDER_QUEUE_PORTALFRAME+p->portalId, "Main");
 			visiblePortals.push_back(PType(layer, p));
 		}
 	}
@@ -79,7 +77,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	// Draw each portal to the stencil buffer with a ref value of 
 	//	the dstlayer 
 	for(auto p: visiblePortals){
-		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt"/*+std::to_string(p.first)*/);
+		rqis->add(RENDER_QUEUE_PORTAL+p.second->portalId, "Prt");
 	}
 
 	// Add visible mirrors to render sequence for drawing to stencil buffer
@@ -130,10 +128,11 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->_setColourBufferWriteEnabled(false, false, false, false);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // compare
-			1<<layer, // refvalue
+			1u+layer, // refvalue
 			0xFFFFFFFF, // compare mask
 			0xFFFFFFFF, // write mask
-			Ogre::SOP_REPLACE, Ogre::SOP_KEEP, // stencil fail, depth fail
+			Ogre::SOP_KEEP, // stencil fail
+			Ogre::SOP_KEEP, // depth fail
 			Ogre::SOP_REPLACE, // stencil pass + depth pass
 			false); // two-sided operation? no
 
@@ -151,12 +150,11 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			return;
 		}
 
-		s32 layer = (portal->layer[0] == (s32)currentLayer)?portal->layer[1]:portal->layer[0];
-		// auto layer = queueId - RENDER_QUEUE_LAYER;
+		auto layer = queueId - RENDER_QUEUE_LAYER;
 
 		rs->_setColourBufferWriteEnabled(true, true, true, true);
 		rs->setStencilCheckEnabled(true);
-		rs->setStencilBufferParams(Ogre::CMPF_EQUAL, 1<<layer, 0xFFFFFFFF, 0xFFFFFFFF,
+		rs->setStencilBufferParams(Ogre::CMPF_EQUAL, 1u+layer, 0xFFFFFFFF, 0,
 			Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, false);
 
 		// TODO: Make good
