@@ -11,7 +11,8 @@ struct Mirror : Component {
 
 	void OnInit() override;
 	void CalculateReflectionMatrixAndClipPlane();
-	void SetColor(Ogre::ColourValue);
+	void SetColor(const Ogre::ColourValue&);
+	void LerpColor(const Ogre::ColourValue&, const Ogre::ColourValue&, f32);
 	Ogre::SubMesh* GetSubMesh();
 
 	s32 mirrorId;
@@ -19,6 +20,7 @@ struct Mirror : Component {
 	bool isVisible = true;
 	mat4 reflectionMat = mat4::IDENTITY;
 	Ogre::Plane clipPlane;
+	Ogre::Frustum cullFrustum;
 };
 
 struct MirrorManager : public Singleton<MirrorManager>, Ogre::RenderQueueListener {

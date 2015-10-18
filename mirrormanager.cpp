@@ -17,7 +17,6 @@
 #include <cassert>
 
 // TODO: Clipping issues (partial)
-// TODO: Multiple mirror support
 // TODO: Test with portals
 // TODO: Color lerping
 
@@ -39,8 +38,20 @@ void Mirror::OnInit() {
 	CalculateReflectionMatrixAndClipPlane();
 }
 
-void Mirror::SetColor(Ogre::ColourValue color) {
+void Mirror::SetColor(const Ogre::ColourValue& color) {
 	entity->ogreEntity->getSubEntity(0)->getMaterial()->setSelfIllumination(color);
+}
+
+// Linearly interpolate between two colours
+void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rhs, f32 delta) {
+	// TODO: Convert to HSV color space
+	f32 r = lhs.r + delta * (rhs.r - lhs.r);
+	f32 g = lhs.g + delta * (rhs.g - lhs.g);
+	f32 b = lhs.b + delta * (rhs.b - lhs.b);
+	f32 a = lhs.a + delta * (rhs.a - lhs.a);
+
+	Ogre::ColourValue rgba(r, g, b, a);
+	SetColor(rgba);
 }
 
 Ogre::SubMesh* Mirror::GetSubMesh() {
@@ -57,12 +68,20 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 
 		auto normal = p1.crossProduct(p2);
 		normal.normalise();
+		
+		// p is a point on the plane
+		auto p = vec3::ZERO;
 
+		for (u32 v = 0; v < mesh.size(); ++v) {
+			p += mesh[v];
+		}
+
+		p /= vec3(mesh.size());
 		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
+		p += mirrorNode->_getDerivedPosition();
 
-		// p is a point on the plane and n is the normal or unit vector perpecdicular to the plane
+		// n is the normal or unit vector perpecdicular to the plane
 		auto n = entity->ogreEntity->getParentSceneNode()->_getDerivedOrientation() * normal;
-		auto p = mirrorNode->_getDerivedPosition() + mesh[0];
 		auto pn = p.dotProduct(n);
 
 		// Translate and rotate to origin
@@ -76,16 +95,6 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 		);
 
 		clipPlane = Ogre::Plane(n, pn); // pv is length
-
-		//App::GetSingleton()->camera->ogreCamera->synchroniseBaseSettingsWith(&camera);
-		//cullingFrustum = new Ogre::Frustum();
-		//cullingFrustum->setProjectionType(Ogre::PT_PERSPECTIVE);
-		//cullingFrustum->setFOVy(camera->getFOVy());
-		//cullingFrustum->setAspectRatio(camera->getAspectRatio());
-		//cullingFrustum->setNearClipDistance(camera->getNearClipDistance());
-		//cullingFrustum->setFarClipDistance(camera->getFarClipDistance());
-		//cullingFrustum->resetFrustumExtents();
-		//cullingFrustum->enableReflection(clipPlane);
 	}
 }
 
