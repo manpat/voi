@@ -16,9 +16,9 @@
 #include <algorithm>
 #include <cassert>
 
-// TODO: Clipping issues (partial)
+// TODO: Fix culling
 // TODO: Test with portals
-// TODO: Color lerping
+// TODO: Convert colour lerping to HSV color space
 
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
 //#define ERROR(msg) std::err << "MirrorMan EXCEPTION: " << msg << std::endl;
@@ -44,7 +44,6 @@ void Mirror::SetColor(const Ogre::ColourValue& color) {
 
 // Linearly interpolate between two colours
 void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rhs, f32 delta) {
-	// TODO: Convert to HSV color space
 	f32 r = lhs.r + delta * (rhs.r - lhs.r);
 	f32 g = lhs.g + delta * (rhs.g - lhs.g);
 	f32 b = lhs.b + delta * (rhs.b - lhs.b);
@@ -76,7 +75,7 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 			p += mesh[v];
 		}
 
-		p /= vec3(mesh.size());
+		p /= (f32)mesh.size();
 		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
 		p += mirrorNode->_getDerivedPosition();
 
