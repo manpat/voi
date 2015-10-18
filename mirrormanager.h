@@ -6,15 +6,11 @@
 #include "component.h"
 #include "singleton.h"
 
-namespace Ogre {
-	class Camera;
-}
-
 struct Mirror : Component {
 	Mirror(s32);
 
 	void OnInit() override;
-	void CalculateReflectionMatrix();
+	void CalculateReflectionMatrixAndClipPlane();
 	void SetColor(Ogre::ColourValue);
 	Ogre::SubMesh* GetSubMesh();
 
@@ -22,6 +18,7 @@ struct Mirror : Component {
 	s32 layer;
 	bool isVisible = true;
 	mat4 reflectionMat = mat4::IDENTITY;
+	Ogre::Plane clipPlane;
 };
 
 struct MirrorManager : public Singleton<MirrorManager>, Ogre::RenderQueueListener {

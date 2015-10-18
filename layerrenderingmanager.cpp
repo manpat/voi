@@ -1,7 +1,8 @@
 #include <OGRE/OgreRenderQueueInvocation.h>
-#include <OGRE/OgreRoot.h>
 #include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreFrustum.h>
 #include <OGRE/OgreEntity.h>
+#include <OGRE/OgreRoot.h>
 
 #include "layerrenderingmanager.h"
 #include "portalmanager.h"
@@ -193,8 +194,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_REPLACE, // passOp
 			false); // twoSidedOperation
 	} else if (invocationType == "MiS") {
-		rs->setInvertVertexWinding(true);
-		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
+		auto mirror = MirrorManager::GetSingleton()->mirrors[currentMirrorId];
+
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
@@ -206,10 +207,16 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // passOp
 			false); // twoSidedOperation
 
+		// TODO: replace with frustum transformation
 		auto viewMat = camera->ogreCamera->getViewMatrix();
-		rs->_setViewMatrix(viewMat * MirrorManager::GetSingleton()->mirrors[currentMirrorId]->reflectionMat);
+		rs->_setViewMatrix(viewMat * mirror->reflectionMat);
 
-
+		rs->setInvertVertexWinding(true);
+		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
+		rs->addClipPlane(mirror->clipPlane);
+		//camera->ogreCamera->setCullingFrustum(&mirror->camera);
+		//camera->ogreCamera->enableReflection(mirror->clipPlane);
+		//camera->ogreCamera->enableCustomNearClipPlane(mirror->clipPlane);
 	}
 }
 
@@ -229,5 +236,8 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 	}else if(invocationType == "PtS" || invocationType == "MiS"){
 		rs->resetClipPlanes();
 		rs->setInvertVertexWinding(false);
+		//camera->ogreCamera->setCullingFrustum(0);
+		//camera->ogreCamera->disableReflection();
+		//camera->ogreCamera->disableCustomNearClipPlane();
 	}
 }

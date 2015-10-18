@@ -1,20 +1,22 @@
-#include <OGRE/OgreEntity.h>
-#include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreSubMesh.h>
+#include <OGRE/OgreEntity.h>
+#include <OGRE/OgreCamera.h>
 
 #include "layerrenderingmanager.h"
 #include "mirrormanager.h"
 #include "component.h"
-#include "entity.h"
-#include "app.h"
 #include "meshinfo.h"
+#include "entity.h"
+#include "camera.h"
+#include "app.h"
 
 #include <algorithm>
 #include <cassert>
 
-// TODO: Clipping issues
+// TODO: Clipping issues (partial)
 // TODO: Multiple mirror support
 // TODO: Test with portals
 // TODO: Color lerping
@@ -34,7 +36,7 @@ void Mirror::OnInit() {
 	mirrorMan->AddMirror(this);
 
 	entity->ogreEntity->setRenderQueueGroup(RENDER_QUEUE_MIRRORED + mirrorId);
-	CalculateReflectionMatrix();
+	CalculateReflectionMatrixAndClipPlane();
 }
 
 void Mirror::SetColor(Ogre::ColourValue color) {
@@ -45,7 +47,7 @@ Ogre::SubMesh* Mirror::GetSubMesh() {
 	return *entity->ogreEntity->getMesh()->getSubMeshIterator().begin();
 }
 
-void Mirror::CalculateReflectionMatrix() {
+void Mirror::CalculateReflectionMatrixAndClipPlane() {
 	auto mesh = GetOgreSubMeshVertices(GetSubMesh());
 
 	if (mesh.size() >= 3) {
@@ -63,8 +65,6 @@ void Mirror::CalculateReflectionMatrix() {
 		auto p = mirrorNode->_getDerivedPosition() + mesh[0];
 		auto pn = p.dotProduct(n);
 
-		PRINT("p0: " << mesh[0] << ", p: " << p);
-
 		// Translate and rotate to origin
 		// Scale by -1 along the XZ axes (Y up)
 		// Translate and rotate back
@@ -74,6 +74,18 @@ void Mirror::CalculateReflectionMatrix() {
 			-2 * n.x * n.z,			-2 * n.y * n.z,			1 - 2 * (n.z * n.z),	2 * pn * n.z,
 			0,						0,						0,						1
 		);
+
+		clipPlane = Ogre::Plane(n, pn); // pv is length
+
+		//App::GetSingleton()->camera->ogreCamera->synchroniseBaseSettingsWith(&camera);
+		//cullingFrustum = new Ogre::Frustum();
+		//cullingFrustum->setProjectionType(Ogre::PT_PERSPECTIVE);
+		//cullingFrustum->setFOVy(camera->getFOVy());
+		//cullingFrustum->setAspectRatio(camera->getAspectRatio());
+		//cullingFrustum->setNearClipDistance(camera->getNearClipDistance());
+		//cullingFrustum->setFarClipDistance(camera->getFarClipDistance());
+		//cullingFrustum->resetFrustumExtents();
+		//cullingFrustum->enableReflection(clipPlane);
 	}
 }
 
