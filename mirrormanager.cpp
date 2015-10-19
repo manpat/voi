@@ -15,7 +15,6 @@
 #include <cassert>
 
 // TODO: Fix culling
-// TODO: Fix multiple mirrors in scenes with portals
 // TODO: Lerp colors in HSV color space
 
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
@@ -105,7 +104,7 @@ MirrorManager* Singleton<MirrorManager>::instance = nullptr;
 void MirrorManager::AddMirror(Mirror* mirror) {
 	if (mirror != nullptr) {
 		mirror->mirrorId = (s32)mirrors.size();
-		assert(mirror->mirrorId < 30);
+		assert(mirror->mirrorId < 16);
 
 		mirrors.push_back(mirror);
 
