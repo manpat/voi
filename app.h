@@ -78,6 +78,7 @@ struct App : Singleton<App> {
 
 private:
 	GameState gameState = GameState::NONE;
+	std::string customLevelName;
 
 public:
 	App();
