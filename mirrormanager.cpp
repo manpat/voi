@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <cassert>
 
+// TODO: Do bitmasks
+// TODO: Fix Z fighting
 // TODO: Fix culling
 // TODO: Lerp colors in HSV color space
 
@@ -86,12 +88,12 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
 		p += mirrorNode->_getDerivedPosition();
 
-		// n is the normal or unit vector perpecdicular to the plane
+		// n is the normal or unit vector perpendicular to the plane
 		auto n = entity->ogreEntity->getParentSceneNode()->_getDerivedOrientation() * normal;
 		auto pn = p.dotProduct(n);
 
 		// Translate and rotate to origin
-		// Scale by -1 along the XZ axes (Y up)
+		// Scale by -1 along the Y axis (up)
 		// Translate and rotate back
 		reflectionMat = mat4(
 			1 - 2 * (n.x * n.x),	-2 * n.x * n.y,			-2 * n.x * n.z,			2 * pn * n.x,

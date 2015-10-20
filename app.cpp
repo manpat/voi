@@ -28,6 +28,9 @@
 template<> App* Singleton<App>::instance = nullptr;
 
 App::App(){
+	std::cout << "Load custom level? Leave blank for default.\nName: ";
+	std::getline(std::cin, customLevelName);
+
 	SDL_Init(SDL_INIT_VIDEO);
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); 
@@ -56,9 +59,6 @@ App::App(){
 	window->setActive(true);
 	window->setAutoUpdated(false);
 
-	// SetGameState(GameState::PLAYING);
-	SetGameState(GameState::MAIN_MENU);
-
 	ogreRoot->clearEventTimes();
 	inFocus = true;
 	shouldQuit = false;
@@ -73,6 +73,9 @@ App::App(){
 		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
 	}
 	std::cout << std::endl;
+
+	//SetGameState(GameState::PLAYING);
+	SetGameState(!customLevelName.empty() ? GameState::PLAYING : GameState::MAIN_MENU);
 }
 
 App::~App(){

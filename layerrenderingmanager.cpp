@@ -131,9 +131,9 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->_setColourBufferWriteEnabled(false, false, false, false);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // compare
-			1u + layer, // refvalue
-			0x0F, // compare mask
-			0x0F, // write mask
+			(1u + layer) & ~(1u << 7), // refvalue
+			0xFF, // compare mask
+			0xFF, // write mask
 			Ogre::SOP_KEEP, // stencil fail
 			Ogre::SOP_KEEP, // depth fail
 			Ogre::SOP_REPLACE, // stencil pass + depth pass
@@ -159,8 +159,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // Func
-			1u + layer, // ref
-			0x0F, 0, // Compare/Write mask
+			(1u + layer) & ~(1u << 7), // ref
+			0xFF, 0, // Compare/Write mask
 			Ogre::SOP_KEEP, Ogre::SOP_KEEP, Ogre::SOP_KEEP, // stencil/depth fail, pass
 			false);
 
@@ -198,7 +198,6 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // depthFailOp
 			Ogre::SOP_REPLACE, // passOp
 			false); // twoSidedOperation
-
 	} else if(invocationType == "MiS") {
 		auto mirrorId = std::stol(invocation.substr(3));
 		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
@@ -214,19 +213,17 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // passOp
 			false); // twoSidedOperation
 
-		//mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
-		//camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
-		camera->ogreCamera->setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
+		mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
+		camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
+		//camera->ogreCamera->setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
 
 		// Set render system view matrix to match camera view matrix as per update in render queue ended
 		rs->_setViewMatrix(camera->ogreCamera->getViewMatrix());
 		rs->setInvertVertexWinding(true);
 		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
-
 		rs->addClipPlane(mirror->clipPlane);
 		//camera->ogreCamera->enableReflection(mirror->clipPlane);
 		//camera->ogreCamera->enableCustomNearClipPlane(mirror->clipPlane);
-
 	} else if(invocationType == "MiF") {
 		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
 		// auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
@@ -264,10 +261,12 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 	}else if(invocationType == "PtS"){
 		// Post drawing of portal scene
 		rs->resetClipPlanes();
+	} else if (invocationType == "Mir") {
+		rs->_setCullingMode(Ogre::CULL_CLOCKWISE);
 	} else if (invocationType == "MiS") {
 		// Post drawing of mirror scene
-		camera->ogreCamera->setCustomViewMatrix(false);
-		//camera->ogreCamera->setCullingFrustum(0);
+		//camera->ogreCamera->setCustomViewMatrix(false);
+		camera->ogreCamera->setCullingFrustum(0);
 		rs->setInvertVertexWinding(false);
 		rs->resetClipPlanes();
 	}
