@@ -153,7 +153,6 @@ void Player::OnLayerChange(){
 	portalTrigger->entity->SetLayer(entity->layer);
 }
 
-
 void Player::Respawn() {
 	auto cp = App::GetSingleton()->currentCheckpoint;
 	if(cp){

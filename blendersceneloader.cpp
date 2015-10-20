@@ -18,6 +18,7 @@
 #include "entitymanager.h"
 #include "doorcomponent.h"
 #include "interactable.h"
+#include "checkpoint.h"
 #include "entity.h"
 #include "app.h"
 
@@ -222,6 +223,12 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				case 7/*Level Entry*/:{
 					if(collider) collider->SetTrigger(true);
 					ent->SetVisible(false);
+				} break;
+
+				case 8/*Checkpoint*/:{
+					collider->SetTrigger(true);
+					ent->SetVisible(false);
+					ent->AddComponent<Checkpoint>();
 				} break;
 
 				default: throw "Unknown object type";
