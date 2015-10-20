@@ -108,7 +108,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		rqis->add(RENDER_QUEUE_HIDDEN + l, scenestr);
 
 		// Fade the color
-		//rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "MiF");
+		rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "MiF");
 	}
 }
 
@@ -213,9 +213,9 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // passOp
 			false); // twoSidedOperation
 
-		//mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
-		//camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
-		camera->ogreCamera->setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
+		mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
+		camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
+		//camera->ogreCamera->setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
 
 		// Set render system view matrix to match camera view matrix as per update in render queue ended
 		rs->_setViewMatrix(camera->ogreCamera->getViewMatrix());
@@ -265,8 +265,8 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 		rs->_setCullingMode(Ogre::CULL_CLOCKWISE);
 	} else if (invocationType == "MiS") {
 		// Post drawing of mirror scene
-		camera->ogreCamera->setCustomViewMatrix(false);
-		//camera->ogreCamera->setCullingFrustum(0);
+		//camera->ogreCamera->setCustomViewMatrix(false);
+		camera->ogreCamera->setCullingFrustum(0);
 		rs->setInvertVertexWinding(false);
 		rs->resetClipPlanes();
 	}
