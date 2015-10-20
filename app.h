@@ -51,8 +51,8 @@ struct App : Singleton<App> {
 		PAUSED
 	};
 
-	SDL_Window* sdlWindow;
-	void* sdlGLContext;
+	SDL_Window* sdlWindow = nullptr;
+	void* sdlGLContext = nullptr;
 
 	std::unique_ptr<Ogre::Root> ogreRoot;
 	Ogre::SceneManager* sceneManager;
@@ -68,9 +68,9 @@ struct App : Singleton<App> {
 	std::shared_ptr<AreaTriggerManager> areaTriggerManager;
 	std::shared_ptr<LayerRenderingManager> layerRenderingManager;
 
-	Checkpoint* currentCheckpoint;
-	Player* player;
-	Camera* camera;
+	Checkpoint* currentCheckpoint = nullptr;
+	Player* player = nullptr;
+	Camera* camera = nullptr;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;

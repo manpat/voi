@@ -93,49 +93,18 @@ void App::Update(){
 	input->EndFrame();
 }
 
-void App::ResetScene() {
-	auto defaultResGrp = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
-
-	// Destroy all existing entities
-	entityManager->DestroyAllEntities();
-
-	// Clear scene completely
-	sceneManager->clearScene();
-
-	// Destroy particle systems and particle templates
-	sceneManager->destroyAllParticleSystems();
-	Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
-
-	// Clear default resouce group resources
-	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(defaultResGrp);
-
-	// Remove default resouce group resource locations
-	Ogre::ResourceGroupManager::LocationList locList = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(defaultResGrp);
-
-	for (auto l = locList.begin(); l != locList.end(); l++) {
-		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation((*l)->archive->getName(), defaultResGrp);
-	}
-}
-
-void App::Terminate() {
-	ResetScene();
-	portalManager.reset();
-	mirrorManager.reset();
-	layerRenderingManager.reset();
-}
-
 /*
-	                                               
-	88                                         88  
-	88                                         88  
-	88                                         88  
-	88          ,adPPYba,  ,adPPYYba,  ,adPPYb,88  
-	88         a8"     "8a ""     `Y8 a8"    `Y88  
-	88         8b       d8 ,adPPPPP88 8b       88  
-	88         "8a,   ,a8" 88,    ,88 "8a,   ,d88  
-	88888888888 `"YbbdP"'  `"8bbdP"Y8  `"8bbdP"Y8  
-	                                               
-	                                               
+
+	88                                         88
+	88                                         88
+	88                                         88
+	88          ,adPPYba,  ,adPPYYba,  ,adPPYb,88
+	88         a8"     "8a ""     `Y8 a8"    `Y88
+	88         8b       d8 ,adPPPPP88 8b       88
+	88         "8a,   ,a8" 88,    ,88 "8a,   ,d88
+	88888888888 `"YbbdP"'  `"8bbdP"Y8  `"8bbdP"Y8
+
+
 */
 void App::Load(const std::string& nLevel){
 	using ck = std::chrono::high_resolution_clock;
@@ -144,7 +113,7 @@ void App::Load(const std::string& nLevel){
 	Terminate();
 
 	auto lvl = nLevel + ".scene";
-	SceneFileInfo* sceneInfo = nullptr; 
+	SceneFileInfo* sceneInfo = nullptr;
 	for(auto& si: scenes) {
 		if(si.name == lvl){
 			sceneInfo = &si;
@@ -189,4 +158,48 @@ void App::Load(const std::string& nLevel){
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();
 	std::cout << "Scene load for " << nLevel << " took " << diff << "s" << std::endl;
+}
+
+/*
+
+	88888888ba
+	88      "8b                                  ,d
+	88      ,8P                                  88
+	88aaaaaa8P' ,adPPYba, ,adPPYba,  ,adPPYba, MM88MMM
+	88""""88'  a8P_____88 I8[    "" a8P_____88   88
+	88    `8b  8PP"""""""  `"Y8ba,  8PP"""""""   88
+	88     `8b "8b,   ,aa aa    ]8I "8b,   ,aa   88,
+	88      `8b `"Ybbd8"' `"YbbdP"'  `"Ybbd8"'   "Y888
+
+
+*/
+void App::ResetScene() {
+	auto defaultResGrp = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+
+	// Destroy all existing entities
+	entityManager->DestroyAllEntities();
+
+	// Clear scene completely
+	sceneManager->clearScene();
+
+	// Destroy particle systems and particle templates
+	sceneManager->destroyAllParticleSystems();
+	Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
+
+	// Clear default resouce group resources
+	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(defaultResGrp);
+
+	// Remove default resouce group resource locations
+	Ogre::ResourceGroupManager::LocationList locList = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList(defaultResGrp);
+
+	for (auto l = locList.begin(); l != locList.end(); l++) {
+		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation((*l)->archive->getName(), defaultResGrp);
+	}
+}
+
+void App::Terminate() {
+	ResetScene();
+	portalManager.reset();
+	mirrorManager.reset();
+	layerRenderingManager.reset();
 }

@@ -30,8 +30,8 @@ class ObjectPanel(bpy.types.Panel):
 		if(otyp == 1):
 			row.prop(context.active_object, "anom_portaldst")
 
-		# Interactible
-		elif(otyp == 3):
+		# Interactible / Generic Trigger
+		elif(otyp == 3 or otyp == 5):
 			row = layout.row()
 			row.prop(context.active_object, "anom_targetentity")
 			row.prop(context.active_object, "anom_interactaction")
@@ -40,9 +40,6 @@ class ObjectPanel(bpy.types.Panel):
 		elif(otyp == 4):
 			layout.row().prop(context.active_object, "anom_doorcount")
 			layout.row().prop(context.active_object, "anom_doorordered")
-
-		# Generic Trigger
-		# elif(otyp == 5):
 
 		# Halflife Point
 		elif(otyp == 6):
@@ -180,7 +177,7 @@ def register():
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
 
-	# Interact
+	# Interact / Trigger
 	obj.anom_targetentity = StringProperty(name="Target Entity")
 	obj.anom_interactaction = StringProperty(name="Action")
 

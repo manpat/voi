@@ -13,6 +13,7 @@
 #include "physicsmanager.h"
 #include "soundcomponent.h"
 #include "synthcomponent.h"
+#include "generictrigger.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
 #include "entitymanager.h"
@@ -209,6 +210,14 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				case 5/*Generic Trigger*/:{
 					collider->SetTrigger(true);
 					ent->SetVisible(false);
+
+					auto targetEntStr = findin(userdata, std::string{"anom_targetentity"});
+					auto action = findin(userdata, std::string{"anom_interactaction"});
+
+					if(targetEntStr.size() > 0)
+						ent->AddComponent<GenericTrigger>(targetEntStr, action);
+					else
+						ent->AddComponent<GenericTrigger>(action);
 				} break;
 
 				case 6/*Halflife Point*/:{

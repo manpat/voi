@@ -49,8 +49,9 @@ public:
 	World* world = nullptr;
 
 	// Stores pairs of triggers to colliding colliders and a timestamp
-	//	to test for staleness. I'm not sure I like this implementation
+	//	to test for staleness
 	std::vector<ColliderPair*> activeColliderPairs;
+	bool needsRefilter = false;
 	u8 currentStamp = 0;
 
 	f32 timestep = 1.f/60.f;
@@ -60,6 +61,7 @@ public:
 	~PhysicsManager();
 
 	void Update();
+	void Refilter();
 
 	// Linecast returns the first ColliderComponent hit between begin and end
 	//	or nullptr if nothing. If layer is specified, rays will only hit
@@ -75,6 +77,7 @@ private:
 	void ProcessTriggerCollision(ColliderComponent*, ColliderComponent*);
 
 	void NotifyColliderRemoval(ColliderComponent*);
+	void ActuallyRefilter();
 };
 
 class EntityMotionState;

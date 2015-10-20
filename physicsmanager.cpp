@@ -63,6 +63,11 @@ PhysicsManager::~PhysicsManager(){
 }
 
 void PhysicsManager::Update(){
+	if(needsRefilter){
+		ActuallyRefilter();
+		needsRefilter = false;
+	}
+
 	world->stepSimulation((btScalar)AppTime::deltaTime, 10);
 	currentStamp++;
 
@@ -271,6 +276,31 @@ void PhysicsManager::NotifyColliderRemoval(ColliderComponent* c){
 	}
 }
 
+void PhysicsManager::Refilter() {
+	needsRefilter = true;
+}
+
+void PhysicsManager::ActuallyRefilter() {
+	// Clean the broadphase of AABB data
+	btOverlappingPairCache* pairs = broadphase->getOverlappingPairCache();
+	s32 numPairs = pairs->getNumOverlappingPairs();
+	btBroadphasePairArray pairArray = pairs->getOverlappingPairArray();
+
+	for(s32 i = 0; i < numPairs; i++) {
+		btBroadphasePair& currPair = pairArray.at(i);
+		pairs->removeOverlappingPair(currPair.m_pProxy0, currPair.m_pProxy1, dispatcher);
+	}
+
+	// Clean the dispatcher(narrowphase) of shape data
+	s32 numManifolds = world->getDispatcher()->getNumManifolds();
+	for(s32 i = 0; i < numManifolds; i++) {
+		dispatcher->releaseManifold(dispatcher->getManifoldByIndexInternal(i));
+	}
+
+	broadphase->resetPool(dispatcher);
+	solver->reset();
+}
+
 /*
 	  ,ad8888ba,              88 88 88          88
 	 d8"'    `"8b             88 88 ""          88
@@ -359,24 +389,7 @@ void ColliderComponent::Wakeup(){
 }
 
 void ColliderComponent::Refilter(){
-	// TODO: this
-
-	// struct Dummy : PhysicsManager::World::ContactResultCallback {
-	// 	RigidBody* body;
-	// 	Dummy(RigidBody* b) : body{b} {}
-
-	// 	btScalar addSingleResult(btManifoldPoint&, const btCollisionObjectWrapper*, int, int, const btCollisionObjectWrapper*, int, int){
-	// 		return 0.;
-	// 	}
-	// 	bool needsCollision (btBroadphaseProxy *proxy) const{
-	// 		if(!btCollisionWorld::ContactResultCallback::needsCollision(proxy))
-	// 			return false;
-
-	// 		return body->checkCollideWithOverride(static_cast<btCollisionObject*>(proxy->m_clientObject));
-	// 	}
-	// } dummyCB{body};
-
-	// PhysicsManager::GetSingleton()->world->contactTest(body, dummyCB);
+	PhysicsManager::GetSingleton()->Refilter();
 }
 
 vec3 ColliderComponent::GetVelocity() const {
