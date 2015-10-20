@@ -105,6 +105,9 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	for (auto m: visibleMirrors) {
 		auto scenestr = "MiS" + std::to_string(m->mirrorId);
 		rqis->add(RENDER_QUEUE_LAYER + l, scenestr);
+
+		// Fade the color
+		rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "MiF");
 	}
 }
 
@@ -175,7 +178,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 
 			rs->addClipPlane(nplane);
 		}
-	} else if (invocationType == "Mir") {
+	} else if(invocationType == "Mir") {
 		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
 		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
 	
@@ -194,7 +197,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // depthFailOp
 			Ogre::SOP_REPLACE, // passOp
 			false); // twoSidedOperation
-	} else if (invocationType == "MiS") {
+
+	} else if(invocationType == "MiS") {
 		auto mirrorId = std::stol(invocation.substr(3));
 		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
 
@@ -220,6 +224,21 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->addClipPlane(mirror->clipPlane);
 		//camera->ogreCamera->enableReflection(mirror->clipPlane);
 		//camera->ogreCamera->enableCustomNearClipPlane(mirror->clipPlane);
+
+	} else if(invocationType == "MiF") {
+		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
+		// auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
+
+		rs->setStencilCheckEnabled(true);
+		rs->setStencilBufferParams(
+			Ogre::CMPF_EQUAL, // func
+			(1u + mirrorId) | (1u << 7), // refValue
+			0xFF, // compareMask
+			0, // writeMask
+			Ogre::SOP_KEEP, // stencilFailOp
+			Ogre::SOP_KEEP, // depthFailOp
+			Ogre::SOP_KEEP, // passOp
+			false); // twoSidedOperation
 	}
 }
 

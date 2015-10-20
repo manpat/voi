@@ -211,7 +211,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 				case 6/*Halflife Point*/:{
 					auto dstlevel = findin(userdata, std::string{"anom_newarea"});
-					if(dstlevel.size() == 0) throw "Invalid 'newarea' for level trigger";
+					if(dstlevel.size() == 0) throw "Invalid 'newarea' for level trigger " + ent->GetName();
 
 					ent->AddComponent<AreaTriggerComponent>(dstlevel);
 					collider->SetTrigger(true);

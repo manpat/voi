@@ -64,7 +64,7 @@ void App::Init(){
 	//Load("switchpuzzles");
 	//Load("mirror1");
 	//Load("mirrortest"); // single mirror
-	//Load("mirrortest2"); // multiple mirrors
+	// Load("mirrortest2"); // multiple mirrors
 }
 
 /*

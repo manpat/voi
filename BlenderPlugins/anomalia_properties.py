@@ -180,7 +180,7 @@ def register():
 	obj.anom_interactaction = StringProperty(name="Action")
 
 	# Area boundary
-	obj.anom_newarea = StringProperty(name="New Area Path")
+	obj.anom_newarea = StringProperty(name="Level Name")
 
 	# Door
 	obj.anom_doorordered = BoolProperty(name="Ordered Sequence")

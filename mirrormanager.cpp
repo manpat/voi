@@ -33,10 +33,12 @@ void Mirror::OnInit() {
 
 	entity->ogreEntity->setRenderQueueGroup(RENDER_QUEUE_MIRRORED + mirrorId);
 	CalculateReflectionMatrixAndClipPlane();
+	// SetColor(Ogre::ColourValue{1.f, 0.f, 1.f, 0.2f});
 }
 
 void Mirror::SetColor(const Ogre::ColourValue& color) {
 	entity->ogreEntity->getSubEntity(0)->getMaterial()->setSelfIllumination(color);
+	// entity->ogreEntity->getSubEntity(0)->getMaterial()->set(color);
 }
 
 // Linearly interpolate between two colours
