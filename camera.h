@@ -30,7 +30,7 @@ struct Camera : Component {
 	void SetBackgroundColour(Ogre::ColourValue colour);
 
 	// Set the camera's background colour
-	void SetBackgroundColour(float r, float g, float b, float a);
+	void SetBackgroundColour(float r, float g, float b, float a = 1.0f);
 };
 
 #endif

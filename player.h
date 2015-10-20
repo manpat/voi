@@ -17,6 +17,8 @@ struct Player : Component {
 	void OnAwake() override;
 	void OnUpdate() override;
 	void OnLayerChange() override;
+	
+	void Respawn(vec3 pos, s32 layer);
 };
 
 #endif

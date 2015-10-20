@@ -230,6 +230,30 @@ const quat& Entity::GetGlobalOrientation() const {
 	if(!ogreSceneNode) throw "Tried to get orientation of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->_getDerivedOrientation();
 }
+const vec3& Entity::GetXAxis() const {
+	if (!ogreSceneNode) throw "Tried to get X axis of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->getOrientation().xAxis();
+}
+const vec3& Entity::GetYAxis() const {
+	if (!ogreSceneNode) throw "Tried to get Y axis of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->getOrientation().xAxis();
+}
+const vec3& Entity::GetZAxis() const {
+	if (!ogreSceneNode) throw "Tried to get Z axis of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->getOrientation().xAxis();
+}
+const vec3& Entity::GetGlobalXAxis() const {
+	if (!ogreSceneNode) throw "Tried to get X axis of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getDerivedOrientation().xAxis();
+}
+const vec3& Entity::GetGlobalYAxis() const {
+	if (!ogreSceneNode) throw "Tried to get Y axis of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getDerivedOrientation().xAxis();
+}
+const vec3& Entity::GetGlobalZAxis() const {
+	if (!ogreSceneNode) throw "Tried to get Z axis of Entity with no Ogre::SceneNode";
+	return ogreSceneNode->_getDerivedOrientation().xAxis();
+}
 const vec3& Entity::GetScale() const {
 	if(!ogreSceneNode) throw "Tried to get scale of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->getScale();

@@ -350,6 +350,10 @@ void ColliderComponent::SetAutosleep(bool as){
 	body->setActivationState(as?WANTS_DEACTIVATION:DISABLE_DEACTIVATION);
 }
 
+void ColliderComponent::SetFriction(f32 val) {
+	body->setFriction(val);
+}
+
 void ColliderComponent::Wakeup(){
 	body->activate();
 }

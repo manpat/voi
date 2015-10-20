@@ -10,11 +10,6 @@
 #include "input.h"
 #include "app.h"
 
-// TODO: Remove references to ogre stuff
-//	All camera stuff should be handled by camera wrapper
-#include <OGRE/OgreSceneNode.h>
-#include <OGRE/OgreCamera.h>
-
 struct PortalTrigger : Component {
 	PortalTrigger() : Component(this) {}
 
@@ -53,15 +48,15 @@ void Player::OnInit() {
 void Player::OnAwake() {
 	if(!entity->collider) throw "Player requires a collider component";
 
-	// TODO: Abstract setFriction
-	entity->collider->body->setFriction(0);
+	entity->collider->SetFriction(0);
 	entity->collider->SetAutosleep(false);
 }
 
 void Player::OnUpdate() {
 	auto layerRenderingManager = App::GetSingleton()->layerRenderingManager;
-	auto physicsManager = App::GetSingleton()->physicsManager;
+	auto physicsManager = PhysicsManager::GetSingleton();
 	auto camera = App::GetSingleton()->camera;
+	auto cameraEnt = camera->entity;
 
 	auto md = Input::GetMouseDelta();
 
@@ -70,13 +65,13 @@ void Player::OnUpdate() {
 	auto npitch = md.y * 2.0 * PI * AppTime::deltaTime * 7.f;
 	const f32 limit = (f32)PI/2.f;
 
-	cameraPitch = (f32)clamp(cameraPitch+npitch, -limit, limit);
-	cameraYaw += (f32)nyaw;
+	cameraPitch = (f32)clamp(cameraPitch + npitch, -limit, limit);
+	cameraYaw = cameraYaw + (f32)nyaw;
 
-	// Rotate camera
-	auto oriYaw = Ogre::Quaternion(Ogre::Radian(cameraYaw), vec3::UNIT_Y);
-	auto ori = Ogre::Quaternion(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
-	camera->cameraNode->_setDerivedOrientation(ori);
+	auto oriYaw = quat(Ogre::Radian(cameraYaw), vec3::UNIT_Y);
+	auto ori = quat(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
+
+	cameraEnt->SetGlobalOrientation(ori);
 
 	// TODO: Move elsewhere
 	f32 boost = 8.f;
@@ -114,19 +109,14 @@ void Player::OnUpdate() {
 		entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
 	}
 
-	// HACK
 	if(entity->collider->GetPosition().y < -50.f){
-		entity->collider->SetPosition({0.f, 2.f, 0.f});
-		entity->collider->SetVelocity({0,0,0});
-		entity->SetLayer(0);
+		Respawn(vec3(0, 2, 0), 0);
 	}
-
-	auto physman = PhysicsManager::GetSingleton();
 
 	// Interact
 	if(Input::GetMappedDown(Input::Interact)){
-		auto rayres = physman->Raycast(
-			camera->cameraNode->_getDerivedPosition()-ori.zAxis()*0.45f,
+		auto rayres = physicsManager->Raycast(
+			cameraEnt->GetGlobalPosition()-ori.zAxis()*0.45f,
 			-ori.zAxis()*interactDistance,
 			entity->layer);
 
@@ -160,4 +150,11 @@ void Player::OnUpdate() {
 
 void Player::OnLayerChange(){
 	portalTrigger->entity->SetLayer(entity->layer);
+}
+
+void Player::Respawn(vec3 pos, s32 layer) {
+	entity->collider->SetPosition(pos);
+	entity->collider->SetVelocity({ 0,0,0 });
+	entity->SetGlobalOrientation(quat::IDENTITY);
+	entity->SetLayer(layer);
 }

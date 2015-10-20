@@ -106,6 +106,7 @@ struct ColliderComponent : Component {
 	void SetTrigger(bool);
 	void SetKinematic(bool);
 	void SetAutosleep(bool);
+	void SetFriction(f32);
 
 	void Wakeup();
 	void Refilter();

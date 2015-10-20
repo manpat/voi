@@ -34,7 +34,7 @@ void Camera::OnInit(){
 		size /* width */, size /* height */);
 
 	viewport->setAutoUpdated(true);
-	SetBackgroundColour(0.1f, 0.1f, 0.1f, 1.0f);
+	SetBackgroundColour(0.1f, 0.1f, 0.1f);
 
 	ogreCamera->setAspectRatio(
 		static_cast<f32>(viewport->getActualWidth())
@@ -62,6 +62,6 @@ void Camera::SetBackgroundColour(Ogre::ColourValue colour) {
 	viewport->setBackgroundColour(colour);
 }
 
-void Camera::SetBackgroundColour(float r, float g, float b, float a = 1.0f) {
+void Camera::SetBackgroundColour(float r, float g, float b, float a) {
 	viewport->setBackgroundColour(Ogre::ColourValue(r, g, b, a));
 }
