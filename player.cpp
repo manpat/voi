@@ -3,6 +3,7 @@
 #include "portalmanager.h"
 #include "entitymanager.h"
 #include "interactable.h"
+#include "checkpoint.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -110,7 +111,7 @@ void Player::OnUpdate() {
 	}
 
 	if(entity->collider->GetPosition().y < -50.f){
-		Respawn(vec3(0, 2, 0), 0);
+		Respawn();
 	}
 
 	// Interact
@@ -152,6 +153,16 @@ void Player::OnLayerChange(){
 	portalTrigger->entity->SetLayer(entity->layer);
 }
 
+
+void Player::Respawn() {
+	auto cp = App::GetSingleton()->currentCheckpoint;
+	if(cp){
+		Respawn(cp->entity->collider->GetPosition(), cp->entity->layer);
+	}else{
+		Respawn({0,2,0}, 0);
+	}
+}
+	
 void Player::Respawn(vec3 pos, s32 layer) {
 	entity->collider->SetPosition(pos);
 	entity->collider->SetVelocity({ 0,0,0 });

@@ -9,9 +9,10 @@
 
 class Input;
 struct Camera;
+struct Checkpoint;
+struct AudioManager;
 struct PortalManager;
 struct MirrorManager;
-struct AudioManager;
 struct EntityManager;
 struct PhysicsManager;
 struct AreaTriggerManager;
@@ -67,6 +68,7 @@ struct App : Singleton<App> {
 	std::shared_ptr<AreaTriggerManager> areaTriggerManager;
 	std::shared_ptr<LayerRenderingManager> layerRenderingManager;
 
+	Checkpoint* currentCheckpoint;
 	Player* player;
 	Camera* camera;
 

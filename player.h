@@ -18,6 +18,7 @@ struct Player : Component {
 	void OnUpdate() override;
 	void OnLayerChange() override;
 	
+	void Respawn();
 	void Respawn(vec3 pos, s32 layer);
 	void SetToOrientation(const quat&);
 };
