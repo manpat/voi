@@ -27,6 +27,8 @@
 #include "component.h"
 #include "entitymanager.h"
 
+#include <chrono>
+
 /*
 
 	88             88
@@ -140,6 +142,9 @@ void App::Terminate() {
 	                                               
 */
 void App::Load(const std::string& nLevel){
+	using ck = std::chrono::high_resolution_clock;
+	auto lbegin = ck::now();
+
 	Terminate();
 
 	auto lvl = nLevel + ".scene";
@@ -184,4 +189,8 @@ void App::Load(const std::string& nLevel){
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 
 	layerRenderingManager->SetupRenderQueueInvocationSequence(0);
+
+	auto lend = ck::now();
+	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();
+	std::cout << "Scene load for " << nLevel << " took " << diff << "s" << std::endl;
 }

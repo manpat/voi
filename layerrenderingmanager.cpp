@@ -80,7 +80,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	// Draw each portal to the stencil buffer with a ref value of 
 	//	the dstlayer 
 	for(auto p: visiblePortals){
-		rqis->add(RENDER_QUEUE_PORTAL+p.portal->portalId, "Prt");
+		rqis->add(RENDER_QUEUE_PORTAL + p.portal->portalId, "Prt");
 	}
 
 	// Add visible mirrors to render sequence for drawing to stencil buffer
@@ -98,7 +98,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	for(auto p: visiblePortals){
 		auto scenestr = "PtS"+std::to_string(p.portal->portalId);
 
-		rqis->add(RENDER_QUEUE_LAYER+p.targetLayer, scenestr);
+		rqis->add(RENDER_QUEUE_LAYER + p.targetLayer, scenestr);
 	}
 
 	// Add visible mirrors to render sequence for drawing of reflected scene
@@ -114,10 +114,6 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 
 	if(invocationType == "Prt"){
-		// auto layer = std::stol(invocation.substr(3));
-		// auto layer = queueId - RENDER_QUEUE_PORTAL;
-		// auto portalId = std::stol(invocation.substr(3));
-		
 		auto portalId = queueId - RENDER_QUEUE_PORTAL;
 		auto portal = PortalManager::GetSingleton()->portals[portalId];
 		s32 layer = (portal->layer[0] == (s32)currentLayer)?portal->layer[1]:portal->layer[0];

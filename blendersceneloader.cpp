@@ -182,21 +182,12 @@ void BlenderSceneLoader::ConstructScene(App* app){
 						// Enable interactions in destination layer
 						collider->collisionGroups |= 1u<<dstlayer;
 					}
-					break;
-				}
+				} break;
 
 				case 2/*Mirror*/:{
 					ent->AddComponent<Mirror>(layer);
-					//if (collider) {
-					//	// Set as trigger
-					//	collider->SetTrigger(true);
-					//
-					//	// Enable interactions in destination layer
-					//	collider->collisionGroups |= 1u<<dstlayer;
-					//}
+				} break;
 
-					break;
-				}
 				case 3/*Interactable*/: {
 					auto targetEntStr = findin(userdata, std::string{"anom_targetentity"});
 					auto action = findin(userdata, std::string{"anom_interactaction"});
@@ -205,31 +196,32 @@ void BlenderSceneLoader::ConstructScene(App* app){
 						ent->AddComponent<Interactable>(targetEntStr, action);
 					else
 						ent->AddComponent<Interactable>(action);
+				} break;
 
-					break;
-				}
 				case 4/*Door*/: {
 					auto lockCount = std::stol(findin(userdata, std::string{"anom_doorcount"}, std::string{"1"}));
 					auto doorOrdered = findin(userdata, std::string{"anom_doorordered"}) == "1";
 					ent->AddComponent<DoorComponent>(lockCount, doorOrdered);
-					break;
-				}
+				} break;
 
-				case 5/*Level Trigger*/:{
+				case 5/*Generic Trigger*/:{
+					collider->SetTrigger(true);
+					ent->SetVisible(false);
+				} break;
+
+				case 6/*Halflife Point*/:{
 					auto dstlevel = findin(userdata, std::string{"anom_newarea"});
 					if(dstlevel.size() == 0) throw "Invalid 'newarea' for level trigger";
 
 					ent->AddComponent<AreaTriggerComponent>(dstlevel);
-					ent->collider->SetTrigger(true);
+					collider->SetTrigger(true);
 					ent->ogreEntity->setVisible(false);
-					break;
-				}
+				} break;
 
-				case 6/*Generic Trigger*/:{
-					ent->collider->SetTrigger(true);
-					ent->ogreEntity->setVisible(false);
-					break;
-				}
+				case 7/*Level Entry*/:{
+					if(collider) collider->SetTrigger(true);
+					ent->SetVisible(false);
+				} break;
 
 				default: throw "Unknown object type";
 			}
@@ -237,7 +229,6 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			// Set user data
 			auto& uob = ogreent->getUserObjectBindings();
 			uob.setUserAny(Ogre::Any{ent});
-
 		}
 
 		// Create entity with sound/synth component if soundtype found
@@ -251,8 +242,9 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 			}
 
+			f32 soundsize = 1.0;
 			auto soundsizeStr = findin(ndef.userData, std::string{"anom_soundsize"}, std::string{"1.0"});
-			f32 soundsize = std::stof(soundsizeStr);
+			if(soundsizeStr.size() > 0) soundsize = std::stof(soundsizeStr);
 
 			switch(soundtype){
 				case 1: {
@@ -262,17 +254,18 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 
 				case 2: {
+					f32 synthreverb = 10000.f;
+					f32 synthmix = 100.f;
+
 					auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
 					auto reverbStr = findin(ndef.userData,
-						std::string{"anom_soundsynthreverb"},
-						std::string{"10000.0"});
+						std::string{"anom_soundsynthreverb"});
 
 					auto mixStr = findin(ndef.userData,
-						std::string{"anom_soundsynthmix"},
-						std::string{"100.0"});
+						std::string{"anom_soundsynthmix"});
 
-					auto synthreverb = std::stof(reverbStr);
-					auto synthmix = std::stof(mixStr);
+					if(reverbStr.size() > 0) synthreverb = std::stof(reverbStr);
+					if(mixStr.size() > 0) synthmix = std::stof(mixStr);
 
 					auto synth = ent->AddComponent<SynthComponent>(synthname, soundsize);
 					synth->SetReverbTime(synthreverb);

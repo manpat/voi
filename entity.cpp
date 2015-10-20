@@ -338,6 +338,11 @@ void Entity::SetLayer(s32 l) {
 	}
 }
 
+void Entity::SetVisible(bool v){
+	if(!ogreEntity) throw "Tried to set visibility of entity with no Ogre::Entity";
+	ogreEntity->setVisible(v);
+}
+
 void Entity::OnCollisionEnter(ColliderComponent* oc){
 	for(auto c = components.begin(); c != components.end(); ++c){
 		(*c)->OnCollisionEnter(oc);

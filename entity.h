@@ -137,17 +137,12 @@ struct Entity {
 
 	const mat4& GetFullTransform() const;
 
-	// Names seem to be immutable
-	// void SetName(const std::string&);
 	void SetPosition(const vec3&);
 	void SetGlobalPosition(const vec3&);
 	void SetOrientation(const quat&);
 	void SetGlobalOrientation(const quat&);
 	void SetScale(const vec3&);
-	// void SetGlobalScale(const vec3&);
-
-	// void SetFullTransform(const mat4&);
-
+	
 	// Move by this value
 	void Translate(const vec3&);
 	// Move from from point a to b, by progress
@@ -162,6 +157,7 @@ struct Entity {
 	// TODO: Add coordinate conversion
 
 	void SetLayer(s32);
+	void SetVisible(bool);
 
 protected:
 	void OnCollisionEnter(ColliderComponent*);

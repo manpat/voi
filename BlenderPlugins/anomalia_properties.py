@@ -21,23 +21,29 @@ class ObjectPanel(bpy.types.Panel):
 		row = layout.row()
 		row.prop(context.active_object, "anom_layer")
 
-		otyp = context.active_object["anom_objecttype"]
+		otyp = context.active_object.get("anom_objecttype", 0)
 
-		if(otyp == 1 or otyp == 2):
+		# Portal
+		if(otyp == 1):
 			row.prop(context.active_object, "anom_portaldst")
 
+		# Interactible
 		elif(otyp == 3):
 			row = layout.row()
 			row.prop(context.active_object, "anom_targetentity")
 			row.prop(context.active_object, "anom_interactaction")
 
+		# Door
 		elif(otyp == 4):
 			layout.row().prop(context.active_object, "anom_doorcount")
 			layout.row().prop(context.active_object, "anom_doorordered")
 
-		elif(otyp == 5):
-			row = layout.row()
-			row.prop(context.active_object, "anom_newarea")
+		# Generic Trigger
+		# elif(otyp == 5):
+
+		# Halflife Point
+		elif(otyp == 6):
+			layout.row().prop(context.active_object, "anom_newarea")
 
 		if(len(context.selected_objects) > 1):
 			layout.row().operator("anomalia.consistentiser")
@@ -60,9 +66,11 @@ class SpeakerPanel(bpy.types.Panel):
 
 		layout.row().prop(ob, "anom_soundtype")
 
-		if(ob["anom_soundtype"] == 1):
+		styp = ob.get("anom_soundtype", 0)
+
+		if(styp == 1):
 			layout.row().prop(ob, "anom_soundpath")
-		elif(ob["anom_soundtype"] == 2):
+		elif(styp == 2):
 			layout.row().prop(ob, "anom_soundsynth")
 			layout.row().prop(ob, "anom_soundreverb")
 			layout.row().prop(ob, "anom_soundmix")
@@ -142,12 +150,14 @@ def poll_object_layer(scene):
 
 def register():
 	obtypes = [
-		('t', 'Trigger', 'A trigger that does nothing yet', '', 6),
-		('l', 'Level Trigger', 'A trigger that loads a new area when entered', '', 5),
+		('c', 'Checkpoint', 'A respawn point', '', 8),
+		('e', 'Level Entry', 'Target area of a Halflife Point', '', 7),
+		('l', 'Halflife Point', 'A trigger that loads a new area when entered', '', 6),
+		('t', 'Trigger', 'A generic trigger', '', 5),
 		('d', 'Door', 'An openable door', '', 4),
 		('i', 'Interact', 'Is interactible. Triggers event(s) on interact', '', 3),
 		('m', 'Mirror', 'Can reflect into another layer', '', 2),
-		('p', 'Portal', 'Act\'s as a portal between layers', '', 1),
+		('p', 'Portal', "Act's as a portal between layers", '', 1),
 		('_', 'World', '', '', 0),
 	]
 
