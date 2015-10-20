@@ -319,11 +319,11 @@ void Entity::LookAt(const vec3& pos, bool worldSpace) {
 	ogreSceneNode->lookAt(pos, worldSpace ? Ogre::Node::TS_WORLD : Ogre::Node::TS_LOCAL);
 }
 
-void Entity::SetLayer(s32 l) {
+void Entity::SetLayer(s32 l, bool hidden) {
 	layer = l;
 
 	if(ogreEntity){
-		ogreEntity->setRenderQueueGroup(RENDER_QUEUE_LAYER + (u8)layer);
+		ogreEntity->setRenderQueueGroup((hidden?RENDER_QUEUE_HIDDEN:RENDER_QUEUE_LAYER) + (u8)layer);
 	}
 
 	if(collider){

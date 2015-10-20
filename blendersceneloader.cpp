@@ -123,13 +123,14 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 			// Set layer
 			auto layerStr = findin(userdata, std::string{"anom_layer"}, std::string{"0"});
+			auto hiddenStr = findin(userdata, std::string{"anom_hidden"}, std::string{"0"});
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
 			s32 layer = std::stol(layerStr);
 			assert(layer < 10);
 
-			ent->SetLayer(layer);
+			ent->SetLayer(layer, hiddenStr == "1");
 
 			// Set up colliders
 			ColliderComponent* collider = nullptr;

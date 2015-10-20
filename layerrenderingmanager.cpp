@@ -105,6 +105,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	for (auto m: visibleMirrors) {
 		auto scenestr = "MiS" + std::to_string(m->mirrorId);
 		rqis->add(RENDER_QUEUE_LAYER + l, scenestr);
+		rqis->add(RENDER_QUEUE_HIDDEN + l, scenestr);
 
 		// Fade the color
 		rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "MiF");
@@ -191,8 +192,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // func
 			(1u + mirrorId) | (1u << 7), // refValue
-			0xF0, // compareMask
-			0xF0, // writeMask
+			0xFF, // compareMask
+			0xFF, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
 			Ogre::SOP_KEEP, // depthFailOp
 			Ogre::SOP_REPLACE, // passOp
@@ -206,7 +207,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
 			(1u + mirrorId) | (1u << 7), // refValue
-			0xF0, // compareMask
+			0xFF, // compareMask
 			0, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
 			Ogre::SOP_KEEP, // depthFailOp
@@ -221,6 +222,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->_setViewMatrix(camera->ogreCamera->getViewMatrix());
 		rs->setInvertVertexWinding(true);
 		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
+
 		rs->addClipPlane(mirror->clipPlane);
 		//camera->ogreCamera->enableReflection(mirror->clipPlane);
 		//camera->ogreCamera->enableCustomNearClipPlane(mirror->clipPlane);
@@ -230,6 +232,8 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		// auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
 
 		rs->setStencilCheckEnabled(true);
+		rs->_setDepthBufferCheckEnabled(false);
+		rs->_setDepthBufferWriteEnabled(false);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
 			(1u + mirrorId) | (1u << 7), // refValue
@@ -246,6 +250,8 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 
+	rs->_setDepthBufferCheckEnabled(true);
+	rs->_setDepthBufferWriteEnabled(true);
 	rs->setStencilCheckEnabled(false);
 	rs->setStencilBufferParams();
 

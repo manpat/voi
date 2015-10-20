@@ -23,6 +23,9 @@ class ObjectPanel(bpy.types.Panel):
 
 		otyp = context.active_object.get("anom_objecttype", 0)
 
+		if(otyp in [0,3,4]):
+			row.prop(context.active_object, "anom_hidden")
+
 		# Portal
 		if(otyp == 1):
 			row.prop(context.active_object, "anom_portaldst")
@@ -171,6 +174,8 @@ def register():
 	obj.anom_objecttype = EnumProperty(items=obtypes,
 		name="Object Type", default='_')
 
+	obj.anom_hidden = BoolProperty(name="Object Hidden", default=False)
+
 	# Portal / Mirror
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
@@ -205,6 +210,7 @@ def register():
 def unregister():
 	obj = bpy.types.Object
 	del obj.anom_layer
+	del obj.anom_hidden
 	del obj.anom_newarea
 	del obj.anom_portaldst
 	del obj.anom_doorcount

@@ -156,7 +156,7 @@ struct Entity {
 
 	// TODO: Add coordinate conversion
 
-	void SetLayer(s32);
+	void SetLayer(s32, bool=false);
 	void SetVisible(bool);
 
 protected:
