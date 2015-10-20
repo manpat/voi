@@ -66,7 +66,7 @@ void Player::OnUpdate() {
 	const f32 limit = (f32)PI/2.f;
 
 	cameraPitch = (f32)clamp(cameraPitch + npitch, -limit, limit);
-	cameraYaw = cameraYaw + (f32)nyaw;
+	cameraYaw += (f32)nyaw;
 
 	auto oriYaw = quat(Ogre::Radian(cameraYaw), vec3::UNIT_Y);
 	auto ori = quat(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
@@ -155,6 +155,10 @@ void Player::OnLayerChange(){
 void Player::Respawn(vec3 pos, s32 layer) {
 	entity->collider->SetPosition(pos);
 	entity->collider->SetVelocity({ 0,0,0 });
-	entity->SetGlobalOrientation(quat::IDENTITY);
 	entity->SetLayer(layer);
+}
+
+void Player::SetToOrientation(const quat& orientation) {
+	cameraPitch = orientation.getPitch().valueRadians();
+	cameraYaw = orientation.getYaw().valueRadians();
 }
