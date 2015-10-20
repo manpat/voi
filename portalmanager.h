@@ -12,7 +12,7 @@ namespace Ogre {
 	class Root;
 	class Viewport;
 	class SubEntity;
-};
+}
 
 struct Camera;
 

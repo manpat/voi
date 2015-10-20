@@ -27,7 +27,7 @@ namespace Ogre {
 	class SceneNode;
 	class SceneManager;
 	class RenderWindow;
-};
+}
 
 struct SDL_Window;
 union SDL_Event;

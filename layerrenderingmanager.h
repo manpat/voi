@@ -14,7 +14,7 @@ enum {
 
 namespace Ogre {
 	class RenderQueueInvocationSequence;
-};
+}
 
 struct Camera;
 
