@@ -240,7 +240,7 @@ vec3 Entity::GetUp() const {
 }
 vec3 Entity::GetForward() const {
 	if (!ogreSceneNode) throw "Tried to get Z axis of Entity with no Ogre::SceneNode";
-	return ogreSceneNode->getOrientation().zAxis();
+	return -ogreSceneNode->getOrientation().zAxis();
 }
 vec3 Entity::GetGlobalRight() const {
 	if (!ogreSceneNode) throw "Tried to get X axis of Entity with no Ogre::SceneNode";
@@ -252,7 +252,7 @@ vec3 Entity::GetGlobalUp() const {
 }
 vec3 Entity::GetGlobalForward() const {
 	if (!ogreSceneNode) throw "Tried to get Z axis of Entity with no Ogre::SceneNode";
-	return ogreSceneNode->_getDerivedOrientation().zAxis();
+	return -ogreSceneNode->_getDerivedOrientation().zAxis();
 }
 const vec3& Entity::GetScale() const {
 	if(!ogreSceneNode) throw "Tried to get scale of Entity with no Ogre::SceneNode";
