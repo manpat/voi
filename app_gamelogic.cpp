@@ -164,7 +164,7 @@ void App::Load(const std::string& nLevel){
 	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
 
 	auto playerEnt = entityManager->CreateEntity("Player", vec3{ 0,2,0 });
-	auto cameraEnt = entityManager->CreateEntity("Camera", vec3{ 0,0,0 });
+	auto cameraEnt = entityManager->CreateEntity("Camera", vec3{ 0,1.4,0 });
 	playerEnt->AddChild(cameraEnt);
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");
 	layerRenderingManager->SetCamera(camera);
@@ -180,8 +180,6 @@ void App::Load(const std::string& nLevel){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
-	// TODO: Fuck this off -manpat
-	camera->cameraNode->setPosition(0, 1.4f, 0);
 	auto g = 0.1f;
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 

@@ -104,7 +104,7 @@ MirrorManager* Singleton<MirrorManager>::instance = nullptr;
 void MirrorManager::AddMirror(Mirror* mirror) {
 	if (mirror != nullptr) {
 		mirror->mirrorId = (s32)mirrors.size();
-		assert(mirror->mirrorId < 16);
+		assert(mirror->mirrorId < 30);
 
 		mirrors.push_back(mirror);
 

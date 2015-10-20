@@ -126,12 +126,12 @@ struct Entity {
 	const vec3& GetGlobalPosition() const;
 	const quat& GetOrientation() const;
 	const quat& GetGlobalOrientation() const;
-	const vec3& GetXAxis() const;
-	const vec3& GetYAxis() const;
-	const vec3& GetZAxis() const;
-	const vec3& GetGlobalXAxis() const;
-	const vec3& GetGlobalYAxis() const;
-	const vec3& GetGlobalZAxis() const;
+	vec3 GetXAxis() const;
+	vec3 GetYAxis() const;
+	vec3 GetZAxis() const;
+	vec3 GetGlobalXAxis() const;
+	vec3 GetGlobalYAxis() const;
+	vec3 GetGlobalZAxis() const;
 	const vec3& GetScale() const;
 	const vec3& GetGlobalScale() const;
 

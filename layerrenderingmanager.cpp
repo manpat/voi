@@ -191,7 +191,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_ALWAYS_PASS, // func
-			(1u + mirrorId) << 4, // refValue
+			(1u + mirrorId) | (1u << 7), // refValue
 			0xF0, // compareMask
 			0xF0, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp
@@ -205,7 +205,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 		rs->setStencilCheckEnabled(true);
 		rs->setStencilBufferParams(
 			Ogre::CMPF_EQUAL, // func
-			(1u + mirrorId) << 4, // refValue
+			(1u + mirrorId) | (1u << 7), // refValue
 			0xF0, // compareMask
 			0, // writeMask
 			Ogre::SOP_KEEP, // stencilFailOp

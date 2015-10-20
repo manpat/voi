@@ -116,7 +116,7 @@ void Player::OnUpdate() {
 	// Interact
 	if(Input::GetMappedDown(Input::Interact)){
 		auto rayres = physicsManager->Raycast(
-			cameraEnt->GetGlobalPosition()-ori.zAxis()*0.45f,
+			cameraEnt->GetGlobalPosition()-ori.zAxis()*0.25f,
 			-ori.zAxis()*interactDistance,
 			entity->layer);
 
