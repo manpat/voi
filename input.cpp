@@ -4,24 +4,48 @@
 
 std::map<s32,s32> Input::keyStates;
 std::map<s32,s32> Input::mouseStates;
+std::map<s32, s32> Input::controllerStates;
 vec2 Input::mouseDelta = vec2::ZERO;
 Input::MappedCode Input::mappings[MappingName::Count] = {
-	{SDLK_RETURN, -1, -1},			// Select
-	{SDLK_ESCAPE, -1, -1},			// Cancel
-	{SDLK_w, -1, -1},				// Forward
-	{SDLK_s, -1, -1},				// Backward
-	{SDLK_a, -1, -1},				// Left
-	{SDLK_d, -1, -1},				// Right
-	{SDLK_LSHIFT, -1, -1},			// Boost
-	{SDLK_SPACE, -1, -1},			// Jump
-	{SDLK_e, SDL_BUTTON_LEFT, -1}	// Interact
+	// Keyboard, Mouse, Controller
+	{SDLK_RETURN, -1, Input::JoyButtonA},			// Select
+	{SDLK_ESCAPE, -1, Input::JoyButtonB},			// Cancel
+	{SDLK_w, -1, -1},								// Forward
+	{SDLK_s, -1, -1},								// Backward
+	{SDLK_a, -1, -1},								// Left
+	{SDLK_d, -1, -1},								// Right
+	{SDLK_LSHIFT, -1, Input::JoyButtonRB},			// Boost
+	{SDLK_SPACE, -1, Input::JoyButtonA},			// Jump
+	{SDLK_e, SDL_BUTTON_LEFT, Input::JoyButtonX}	// Interact
 };
+SDL_Joystick* Input::controller;
+s32 Input::controllerIndex = -1;
+f32 Input::LXAxis = 0.0f;
+f32 Input::LYAxis = 0.0f;
+f32 Input::RXAxis = 0.0f;
+f32 Input::RYAxis = 0.0f;
 
 Input::Input(){
 	App::GetSingleton()->RegisterSDLHook(&EventHook);
+	SDL_Init(SDL_INIT_JOYSTICK);
+
+	std::cout << ("Joysticks found: " + std::to_string(SDL_NumJoysticks()) + "\n");
+
+	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+		controller = SDL_JoystickOpen(i);
+		if (controller) {
+			controllerIndex = i;
+			break;
+		}
+	}
+	std::cout << (controller) ? "Joystick " + std::to_string(controllerIndex) + " connected\n" : "Joystick unable to connect\n";
 }
 
 Input::~Input(){
+	if (controller) {
+		SDL_JoystickClose(controller);
+	}
+
 	App::GetSingleton()->RemoveSDLHook(&EventHook);
 }
 
@@ -60,6 +84,35 @@ void Input::EventHook(const SDL_Event& e){
 	case SDL_MOUSEBUTTONDOWN:
 		// Save state and inform of change
 		mouseStates[e.button.button] = Input::Down | Input::ChangedThisFrameFlag;
+		break;
+
+	case SDL_JOYAXISMOTION:
+		switch (e.jaxis.axis) {
+		case JoyAxisLX:
+			LXAxis = (2 * ((f32)e.jaxis.value + 32768)) / 65535 - 1;
+			break;
+
+		case JoyAxisLY:
+			LYAxis = (2 * ((f32)e.jaxis.value + 32768)) / 65535 - 1;
+			break;
+
+		case JoyAxisRX:
+			RXAxis = (2 * ((f32)e.jaxis.value + 32768)) / 65535 - 1;
+			break;
+
+		case JoyAxisRY:
+			RYAxis = (2 * ((f32)e.jaxis.value + 32768)) / 65535 - 1;
+			break;
+
+		}
+		break;
+
+	case SDL_JOYBUTTONUP:
+		controllerStates[e.jbutton.button] = Input::Up | Input::ChangedThisFrameFlag;
+		break;
+
+	case SDL_JOYBUTTONDOWN:
+		controllerStates[e.jbutton.button] = Input::Down | Input::ChangedThisFrameFlag;
 		break;
 	}
 }
@@ -141,21 +194,15 @@ bool Input::GetKeyUp(s32 k){
 }
 
 bool Input::GetControllerButton(s32 k) {
-	// Get rid of the "unused parameter" warning
-	(void) k;
-	throw "Not implemented";
+	return findin(controllerStates, k) & 1;
 }
 
 bool Input::GetControllerButtonDown(s32 k) {
-	// Get rid of the "unused parameter" warning
-	(void) k;
-	throw "Not implemented";
+	return findin(controllerStates, k) == (Input::ChangedThisFrameFlag | Input::Down);
 }
 
 bool Input::GetControllerButtonUp(s32 k) {
-	// Get rid of the "unused parameter" warning
-	(void) k;
-	throw "Not implemented";
+	return findin(controllerStates, k) == (Input::ChangedThisFrameFlag | Input::Up);
 }
 
 bool Input::GetMapped(s32 k) {

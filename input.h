@@ -43,10 +43,28 @@ public:
 		MouseRight = SDL_BUTTON_RIGHT,
 	};
 
+	enum {
+		JoyAxisLX = 0,
+		JoyAxisLY = 1,
+		JoyAxisRX = 4,
+		JoyAxisRY = 5
+	};
+
+	enum {
+		JoyButtonA = 1,
+		JoyButtonB = 2,
+		JoyButtonX = 3,
+		JoyButtonRB = 6
+	};
+
 	static std::map<s32, s32> keyStates;
 	static std::map<s32, s32> mouseStates;
+	static std::map<s32, s32> controllerStates;
 	static vec2 mouseDelta;
 	static MappedCode mappings[MappingName::Count];
+	static SDL_Joystick* controller;
+	static s32 controllerIndex;
+	static f32 LXAxis, LYAxis, RXAxis, RYAxis;
 
 public:
 	Input();
