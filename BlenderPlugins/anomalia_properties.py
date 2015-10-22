@@ -38,6 +38,7 @@ class ObjectPanel(bpy.types.Panel):
 
 		# Bell
 		elif(otyp == 10):
+			layout.row().prop(context.active_object, "anom_bellnumber")
 			layout.row().prop(context.active_object, "anom_targetentity")
 
 		# Door
@@ -100,6 +101,7 @@ class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
 			ob.anom_newarea = ao.anom_newarea
 			ob.anom_portaldst = ao.anom_portaldst
 			ob.anom_objecttype = ao.anom_objecttype
+			ob.anom_bellnumber = ao.anom_bellnumber
 			ob.anom_targetentity = ao.anom_targetentity
 			ob.anom_interactaction = ao.anom_interactaction
 			ob.anom_doorordered = ao.anom_doorordered
@@ -188,6 +190,9 @@ def register():
 	obj.anom_targetentity = StringProperty(name="Target Entity")
 	obj.anom_interactaction = StringProperty(name="Action")
 
+	# Bell
+	obj.anom_bellnumber = IntProperty(name="Order in Sequence", min=0, max=20, default=0)
+
 	# Area boundary
 	obj.anom_newarea = StringProperty(name="Level Name")
 
@@ -218,6 +223,7 @@ def unregister():
 	del obj.anom_newarea
 	del obj.anom_portaldst
 	del obj.anom_doorcount
+	del obj.anom_bellnumber
 	del obj.anom_objecttype
 	del obj.anom_doorordered
 	del obj.anom_targetentity

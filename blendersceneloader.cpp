@@ -247,12 +247,18 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				} break;
 
 				case 10/*Bells*/:{
+					u32 bellNumber = 0;
+
 					auto targetEntStr = findin(userdata, std::string{"anom_targetentity"});
+					auto bellNumberStr = findin(userdata, std::string{"anom_bellnumber"});
 					if(targetEntStr.size() == 0) {
 						throw "Bell " + ent->GetName() + " is missing a target entity";
 					}
+					if(bellNumberStr.size() > 0) {
+						bellNumber = std::stol(bellNumberStr);
+					}
 
-					ent->AddComponent<Bell>(targetEntStr);
+					ent->AddComponent<Bell>(targetEntStr, bellNumber);
 				} break;
 
 				default: throw "Unknown object type";
