@@ -107,6 +107,7 @@ void Player::OnUpdate() {
 	// Cheat
 	if(Input::GetKeyDown(SDLK_F12)){
 		canInfinijump = !canInfinijump;
+		std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
 	}
 
 	if(Input::GetMappedDown(Input::Jump)){

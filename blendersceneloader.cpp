@@ -22,6 +22,7 @@
 #include "interactable.h"
 #include "checkpoint.h"
 #include "entity.h"
+#include "bell.h"
 #include "app.h"
 
 using namespace rapidxml;
@@ -243,6 +244,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 				case 9/*Movable Object*/:{
 					ent->AddComponent<Movable>();
+				} break;
+
+				case 10/*Bells*/:{
+					ent->AddComponent<Bell>();
 				} break;
 
 				default: throw "Unknown object type";
