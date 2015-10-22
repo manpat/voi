@@ -1,0 +1,121 @@
+
+material _missing_material_
+{
+    receive_shadows off
+    technique
+    {
+        pass
+        {
+            ambient 0.1 0.1 0.1 1.0
+            diffuse 0.8 0.0 0.0 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.3 0.3 0.3 1.0
+        }
+    }
+}
+
+// Portal genrated by blender2ogre 0.6.0
+
+material Portal 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Portal
+        {
+            ambient 0.0 0.0 0.0 1.0
+            diffuse 0.0 0.0 0.0 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Stone genrated by blender2ogre 0.6.0
+
+material Stone 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Stone
+        {
+            ambient 0.4969330132007599 0.4910208284854889 0.4910208284854889 1.0
+            diffuse 0.39754641648451106 0.3928166686418155 0.3928166686418155 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.4969330132007599 0.4910208284854889 0.4910208284854889 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// GreyStone genrated by blender2ogre 0.6.0
+
+material GreyStone 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass GreyStone
+        {
+            ambient 0.2746773064136505 0.2746773064136505 0.2746773064136505 1.0
+            diffuse 0.21974184840532907 0.21974184840532907 0.21974184840532907 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.2746773064136505 0.2746773064136505 0.2746773064136505 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}

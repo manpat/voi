@@ -262,7 +262,7 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 		// Post drawing of portal scene
 		rs->resetClipPlanes();
 	} else if (invocationType == "Mir") {
-		rs->_setCullingMode(Ogre::CULL_CLOCKWISE);
+		//rs->_setCullingMode(Ogre::CULL_CLOCKWISE);
 	} else if (invocationType == "MiS") {
 		// Post drawing of mirror scene
 		//camera->ogreCamera->setCustomViewMatrix(false);
