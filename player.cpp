@@ -102,8 +102,20 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
+	static bool canInfinijump = false;
+
+	// Cheat
+	if(Input::GetKeyDown(SDLK_F12)){
+		canInfinijump = !canInfinijump;
+	}
+
 	if(Input::GetMappedDown(Input::Jump)){
-		velocity += vec3::UNIT_Y*jumpImpulse;
+		auto rayres = physicsManager->Raycast(
+			entity->GetGlobalPosition(),
+			-entity->GetUp() * 2.2f,
+			entity->layer);
+		
+		if(rayres || canInfinijump) velocity += vec3::UNIT_Y*jumpImpulse;
 	}
 
 	entity->collider->SetVelocity(velocity);
