@@ -37,7 +37,7 @@ void Mirror::OnInit() {
 	// TODO: add convenience functions for ONLY setting alpha
 	// SetColor(Ogre::ColourValue{0.5f, 0.8f, 1.0f, 0.5f});
 	// SetColor(Ogre::ColourValue{0.398094f, 0.51999f, 0.47197f, 0.5f});
-	SetColor(Ogre::ColourValue{0.49761f, 0.64999f, 0.58996f, 0.5f});
+	SetColor(Ogre::ColourValue{0.49761f, 0.64999f, 0.58996f, 0.2f});
 }
 
 void Mirror::SetColor(const Ogre::ColourValue& color) {

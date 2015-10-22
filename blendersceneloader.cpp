@@ -383,7 +383,7 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 
 	if(e->physicsType != PhysicsType::None){
 		if(!coltypeattr) {
-			error("RigidBody missing collider type");
+			error("RigidBody "+ e->name +" missing collider type");
 		}
 
 		std::string coltype{coltypeattr->value()};

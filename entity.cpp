@@ -324,6 +324,9 @@ void Entity::SetLayer(s32 l, bool hidden) {
 
 	if(ogreEntity){
 		ogreEntity->setRenderQueueGroup((hidden?RENDER_QUEUE_HIDDEN:RENDER_QUEUE_LAYER) + (u8)layer);
+		
+		// HACK: Remove as soon as possible
+		ogreEntity->getMesh()->_setBounds(Ogre::AxisAlignedBox(Ogre::AxisAlignedBox::EXTENT_INFINITE));
 	}
 
 	if(collider){

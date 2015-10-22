@@ -34,7 +34,7 @@ App::App(){
 
 	std::cout << "Scenes found: \n";
 	for(auto& d: *fsls){
-		std::cout << "\t" << d.basename.substr(0, d.basename.find_first_of('.')) << "\n";
+		std::cout << "\t" << d.basename.substr(0, d.basename.find_last_of('.')) << "\n";
 		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
 	}
 	std::cout << std::endl;
