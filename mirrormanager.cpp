@@ -14,8 +14,6 @@
 #include <algorithm>
 #include <cassert>
 
-// TODO: Do bitmasks
-// TODO: Fix Z fighting
 // TODO: Fix culling
 // TODO: Lerp colors in HSV color space
 
