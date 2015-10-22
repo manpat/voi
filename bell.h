@@ -4,7 +4,13 @@
 #include "component.h"
 
 struct Bell : Component {
-	Bell() : Component(this) {}
+	Entity* target = nullptr;
+	std::string targetName;
+
+	Bell(const std::string& tn) : Component(this), targetName(tn) {}
+
+	static void RegisterAudio();
+	void OnAwake() override;
 };
 
 #endif
