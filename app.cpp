@@ -28,7 +28,18 @@
 template<> App* Singleton<App>::instance = nullptr;
 
 App::App(){
-	std::cout << "Load custom level? Leave blank for default.\nName: ";
+	Ogre::FileSystemArchiveFactory fsfactory;
+	auto fs = fsfactory.createInstance("GameData/Scenes", true);
+	auto fsls = fs->findFileInfo("*.scene");
+
+	std::cout << "Scenes found: \n";
+	for(auto& d: *fsls){
+		std::cout << "\t" << d.basename.substr(0, d.basename.find_first_of('.')) << "\n";
+		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
+	}
+	std::cout << std::endl;
+
+	std::cout << "Load custom level? Leave blank for default (temple).\nName: ";
 	std::getline(std::cin, customLevelName);
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -62,17 +73,6 @@ App::App(){
 	ogreRoot->clearEventTimes();
 	inFocus = true;
 	shouldQuit = false;
-
-	Ogre::FileSystemArchiveFactory fsfactory;
-	auto fs = fsfactory.createInstance("GameData/Scenes", true);
-	auto fsls = fs->findFileInfo("*.scene");
-
-	std::cout << "Scenes found: \n";
-	for(auto& d: *fsls){
-		std::cout << "\t" << d.basename.substr(0, d.basename.find_first_of('.')) << "\n";
-		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
-	}
-	std::cout << std::endl;
 
 	//SetGameState(GameState::PLAYING);
 	SetGameState(!customLevelName.empty() ? GameState::PLAYING : GameState::MAIN_MENU);
@@ -143,7 +143,6 @@ void App::InitOgre(){
 	// I'm pretty sure none of the createRenderWindow parameters actually do anything
 	window = ogreRoot->createRenderWindow("", 0, 0, false /*fullscreen*/, &windowParams);
 
-	// sceneManager = ogreRoot->createSceneManager(Ogre::ST_GENERIC, "SceneManager");
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_INTERIOR, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();
 }
