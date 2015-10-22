@@ -18,6 +18,7 @@
 #include "mirrormanager.h"
 #include "entitymanager.h"
 #include "doorcomponent.h"
+#include "movableobject.h"
 #include "interactable.h"
 #include "checkpoint.h"
 #include "entity.h"
@@ -238,6 +239,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					collider->SetTrigger(true);
 					ent->SetVisible(false);
 					ent->AddComponent<Checkpoint>();
+				} break;
+
+				case 9/*Movable Object*/:{
+					ent->AddComponent<Movable>();
 				} break;
 
 				default: throw "Unknown object type";

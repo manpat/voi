@@ -20,7 +20,6 @@ void AreaTriggerComponent::OnUpdate(){
 		audioMan->SetLowpass(a*a*a*22000.0f+20.0f);
 		audioMan->SetReverbMix(b);
 		audioMan->SetReverbTime(b*20000.0f);
-		std::cout << b << std::endl;
 	}else{
 		// Assumes that there's only one area trigger component
 		audioMan->SetLowpass(22000.0);
