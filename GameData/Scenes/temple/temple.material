@@ -14,20 +14,125 @@ material _missing_material_
     }
 }
 
-// Portal genrated by blender2ogre 0.6.0
+// Material.001 genrated by blender2ogre 0.6.0
 
-material Portal 
+material Material.001__indoorassetpractice.blend 
 {
     receive_shadows on 
 
     technique
     {
-        pass Portal
+        pass Material.001
         {
-            ambient 0.0 0.0 0.0 1.0
-            diffuse 0.0 0.0 0.0 1.0
+            ambient 0.39311352372169495 0.39311352372169495 0.39311352372169495 1.0
+            diffuse 0.31449082366363434 0.31449082366363434 0.31449082366363434 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.0 0.0 0.0 1.0
+            emissive 0.39311352372169495 0.39311352372169495 0.39311352372169495 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Material.002 genrated by blender2ogre 0.6.0
+
+material Material.002__indoorassetpractice.blend 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Material.002
+        {
+            ambient 0.17886139452457428 0.17886139452457428 0.17886139452457428 1.0
+            diffuse 0.1430891177518534 0.1430891177518534 0.1430891177518534 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.17886139452457428 0.17886139452457428 0.17886139452457428 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Material genrated by blender2ogre 0.6.0
+
+material Material__indoorassetpractice.blend 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Material
+        {
+            ambient 0.2738305926322937 0.2738305926322937 0.2738305926322937 1.0
+            diffuse 0.21906447737015 0.21906447737015 0.21906447737015 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.2738305926322937 0.2738305926322937 0.2738305926322937 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// LightStone genrated by blender2ogre 0.6.0
+
+material LightStone 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass LightStone
+        {
+            ambient 0.7105532884597778 0.7105532884597778 0.7105532884597778 1.0
+            diffuse 0.5684426392382775 0.5684426392382775 0.5684426392382775 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.7105532884597778 0.7105532884597778 0.7105532884597778 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -119,20 +224,20 @@ material Water
         }
     }
 }
-// Stone genrated by blender2ogre 0.6.0
+// Portal genrated by blender2ogre 0.6.0
 
-material Stone 
+material Portal 
 {
     receive_shadows on 
 
     technique
     {
-        pass Stone
+        pass Portal
         {
-            ambient 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
-            diffuse 0.3975378334155355 0.39230735886554946 0.39230735886554946 1.0
+            ambient 0.0 0.0 0.0 1.0
+            diffuse 0.0 0.0 0.0 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
+            emissive 0.0 0.0 0.0 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -154,20 +259,20 @@ material Stone
         }
     }
 }
-// LightStone genrated by blender2ogre 0.6.0
+// Stone genrated by blender2ogre 0.6.0
 
-material LightStone 
+material Stone 
 {
     receive_shadows on 
 
     technique
     {
-        pass LightStone
+        pass Stone
         {
-            ambient 0.7105532884597778 0.7105532884597778 0.7105532884597778 1.0
-            diffuse 0.5684426392382775 0.5684426392382775 0.5684426392382775 1.0
+            ambient 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
+            diffuse 0.3975378334155355 0.39230735886554946 0.39230735886554946 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.7105532884597778 0.7105532884597778 0.7105532884597778 1.0
+            emissive 0.4969222843647003 0.49038419127464294 0.49038419127464294 1.0
 
             alpha_to_coverage off
             colour_write on

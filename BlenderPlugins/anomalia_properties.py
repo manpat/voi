@@ -23,7 +23,7 @@ class ObjectPanel(bpy.types.Panel):
 
 		otyp = context.active_object.get("anom_objecttype", 0)
 
-		if(otyp in [0,3,4,9]):
+		if(otyp in [0,3,4,9,10]):
 			row.prop(context.active_object, "anom_hidden")
 
 		# Portal
@@ -35,6 +35,11 @@ class ObjectPanel(bpy.types.Panel):
 			row = layout.row()
 			row.prop(context.active_object, "anom_targetentity")
 			row.prop(context.active_object, "anom_interactaction")
+
+		# Bell
+		elif(otyp == 10):
+			layout.row().prop(context.active_object, "anom_bellnumber")
+			layout.row().prop(context.active_object, "anom_targetentity")
 
 		# Door
 		elif(otyp == 4):
@@ -96,6 +101,7 @@ class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
 			ob.anom_newarea = ao.anom_newarea
 			ob.anom_portaldst = ao.anom_portaldst
 			ob.anom_objecttype = ao.anom_objecttype
+			ob.anom_bellnumber = ao.anom_bellnumber
 			ob.anom_targetentity = ao.anom_targetentity
 			ob.anom_interactaction = ao.anom_interactaction
 			ob.anom_doorordered = ao.anom_doorordered
@@ -111,13 +117,14 @@ class OBJECT_OT_speakerconsistentiser(bpy.types.Operator):
 	def execute(self, context):
 		ao = context.active_object
 		for ob in context.selected_objects:
-			if(ob == ao or ob.type != 'SPEAKER'):
+			if(ob == ao):
 				continue
 
 			ob.anom_soundmix = ao.anom_soundmix
 			ob.anom_soundtype = ao.anom_soundtype
 			ob.anom_soundpath = ao.anom_soundpath
 			ob.anom_soundsize = ao.anom_soundsize
+			ob.anom_soundsynth = ao.anom_soundsynth
 			ob.anom_soundreverb = ao.anom_soundreverb
 
 		return {'FINISHED'}
@@ -150,6 +157,7 @@ def poll_object_layer(scene):
 
 def register():
 	obtypes = [
+		('b', 'Bell', "A bell, yo'", '', 10),
 		('v', 'Movable', 'An object that can be picked up', '', 9),
 		('c', 'Checkpoint', 'A respawn point', '', 8),
 		('e', 'Level Entry', 'Target area of a Halflife Point', '', 7),
@@ -178,9 +186,12 @@ def register():
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
 
-	# Interact / Trigger
+	# Interact / Trigger / Bell
 	obj.anom_targetentity = StringProperty(name="Target Entity")
 	obj.anom_interactaction = StringProperty(name="Action")
+
+	# Bell
+	obj.anom_bellnumber = IntProperty(name="Order in Sequence", min=0, max=20, default=0)
 
 	# Area boundary
 	obj.anom_newarea = StringProperty(name="Level Name")
@@ -212,6 +223,7 @@ def unregister():
 	del obj.anom_newarea
 	del obj.anom_portaldst
 	del obj.anom_doorcount
+	del obj.anom_bellnumber
 	del obj.anom_objecttype
 	del obj.anom_doorordered
 	del obj.anom_targetentity

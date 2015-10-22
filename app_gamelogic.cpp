@@ -7,6 +7,7 @@
 #include <OGRE/OgreEntity.h>
 
 #include "app.h"
+#include "bell.h"
 #include "input.h"
 #include "player.h"
 #include "camera.h"
@@ -57,10 +58,13 @@ void App::Init(){
 		audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 		audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
 		audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
+		Bell::RegisterAudio();
+
 		audioGeneratorsRegistered = true;
 	}
 
 	Load(!customLevelName.empty() ? customLevelName : "temple");
+	// Load("mirrortest2");
 }
 
 /*

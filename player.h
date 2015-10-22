@@ -4,12 +4,14 @@
 #include "component.h"
 
 struct Portal;
+struct Movable;
 struct PortalTrigger;
 
 struct Player : Component {
 	f32 cameraYaw = 0.f;
 	f32 cameraPitch = 0.f;
-	PortalTrigger* portalTrigger;
+	Movable* heldObject = nullptr;
+	PortalTrigger* portalTrigger = nullptr;
 
 	Player() : Component{this} {}
 

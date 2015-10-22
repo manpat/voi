@@ -2,6 +2,7 @@
 #include "physicsmanager.h"
 #include "portalmanager.h"
 #include "entitymanager.h"
+#include "movableobject.h"
 #include "interactable.h"
 #include "checkpoint.h"
 #include "apptime.h"
@@ -78,6 +79,7 @@ void Player::OnUpdate() {
 	f32 boost = 8.f;
 	f32 jumpImpulse = 10.f;
 	f32 interactDistance = 4.f;
+	f32 pickupDistance = 4.f;
 
 	if(Input::GetMapped(Input::Boost)){
 		boost *= 1.5f;
@@ -100,8 +102,21 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
+	static bool canInfinijump = false;
+
+	// Cheat
+	if(Input::GetKeyDown(SDLK_F12)){
+		canInfinijump = !canInfinijump;
+		std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
+	}
+
 	if(Input::GetMappedDown(Input::Jump)){
-		velocity += vec3::UNIT_Y*jumpImpulse;
+		auto rayres = physicsManager->Raycast(
+			entity->GetGlobalPosition(),
+			-entity->GetUp() * 2.2f,
+			entity->layer);
+		
+		if(rayres || canInfinijump) velocity += vec3::UNIT_Y*jumpImpulse;
 	}
 
 	entity->collider->SetVelocity(velocity);
@@ -114,25 +129,33 @@ void Player::OnUpdate() {
 		Respawn();
 	}
 
+	if(heldObject) {
+		heldObject->entity->SetGlobalPosition(
+			cameraEnt->GetGlobalPosition() + cameraEnt->GetForward()*pickupDistance);
+	}
+
 	// Interact
 	if(Input::GetMappedDown(Input::Interact)){
+		if(heldObject) {
+			heldObject->NotifyDrop();
+			heldObject = nullptr;
+			return;
+		}
+
 		auto rayres = physicsManager->Raycast(
 			cameraEnt->GetGlobalPosition() + cameraEnt->GetForward()*0.25f,
 			cameraEnt->GetForward() * interactDistance,
 			entity->layer);
 
 		if(rayres){
-			auto interactable = rayres.collider->entity->FindComponent<Interactable>();
+			auto ent = rayres.collider->entity;
 
-			std::cout
-				<< rayres.collider->entity->GetName()
-				<< "\tIs interactable? "  
-				<< std::boolalpha
-				<< (interactable != nullptr)
-				<< std::endl;
-
-			if(interactable){
+			if(auto interactable = ent->FindComponent<Interactable>()) {
 				interactable->Activate();
+
+			}else if(auto movable = ent->FindComponent<Movable>()) {
+				heldObject = movable;
+				heldObject->NotifyPickup();
 			}
 		}
 	}
