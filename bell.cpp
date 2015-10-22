@@ -12,15 +12,15 @@ void Bell::OnAwake() {
 	}
 }
 
-// struct BellAudioGenerator : AudioGenerator {
-// 	f32 Generate(f64 elapsed) override {
-// 		auto A = ntof(128);
-// 		auto o = Wave::Sine(elapsed * A);
+struct BellAudioGenerator : AudioGenerator {
+	f32 Generate(f64 elapsed) override {
+		// auto A = ntof(128);
+		// auto o = Wave::Sine(elapsed * A);
 
-// 		return o;
-// 	}
-// };
+		return 0.f;
+	}
+};
 
 void Bell::RegisterAudio() {
-	// AudioManager::GetSingleton()->RegisterAudioGeneratorType<BellAudioGenerator>("bell");	
+	AudioManager::GetSingleton()->RegisterAudioGeneratorType<BellAudioGenerator>("bell");
 }
