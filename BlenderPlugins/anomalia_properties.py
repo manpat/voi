@@ -23,7 +23,7 @@ class ObjectPanel(bpy.types.Panel):
 
 		otyp = context.active_object.get("anom_objecttype", 0)
 
-		if(otyp in [0,3,4]):
+		if(otyp in [0,3,4,9]):
 			row.prop(context.active_object, "anom_hidden")
 
 		# Portal
@@ -150,6 +150,7 @@ def poll_object_layer(scene):
 
 def register():
 	obtypes = [
+		('v', 'Movable', 'An object that can be picked up', '', 9),
 		('c', 'Checkpoint', 'A respawn point', '', 8),
 		('e', 'Level Entry', 'Target area of a Halflife Point', '', 7),
 		('l', 'Halflife Point', 'A trigger that loads a new area when entered', '', 6),
