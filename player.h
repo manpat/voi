@@ -12,6 +12,7 @@ struct Player : Component {
 	f32 cameraPitch = 0.f;
 	Movable* heldObject = nullptr;
 	PortalTrigger* portalTrigger = nullptr;
+	bool isJumping = false;
 
 	Player() : Component{this} {}
 

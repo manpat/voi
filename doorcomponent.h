@@ -12,12 +12,14 @@ struct DoorComponent : Component {
 	MoverComponent* mover = nullptr;
 	vec3 closedPosition = vec3::ZERO;
 	vec3 openPosition = vec3::ZERO;
+	f32 openTime = 2.f;
 	u32 requiredMask = 1;
 	u32 switchStates = 0;
 	bool isOpen = false;
 	bool ordered = false;
 
-	DoorComponent(u32 rc = 1, bool o = false) : Component{this}, requiredMask((1u<<rc) - 1), ordered(o) {}
+	DoorComponent(u32 rc = 1, bool o = false, f32 ot = 2.f) : 
+		Component{this}, openTime(ot), requiredMask((1u<<rc) - 1), ordered(o) {}
 
 	void OnAwake() override;
 	void OnMessage(const std::string&, const OpaqueType&) override;

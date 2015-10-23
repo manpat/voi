@@ -115,8 +115,13 @@ void Player::OnUpdate() {
 			entity->GetGlobalPosition(),
 			-entity->GetUp() * 2.2f,
 			entity->layer);
+
+		if(rayres) isJumping = false;
 		
-		if(rayres || canInfinijump) velocity += vec3::UNIT_Y*jumpImpulse;
+		if(!isJumping || canInfinijump) {
+			velocity += vec3::UNIT_Y*jumpImpulse;
+			isJumping = true;
+		}
 	}
 
 	entity->collider->SetVelocity(velocity);

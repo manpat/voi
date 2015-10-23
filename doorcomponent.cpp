@@ -15,14 +15,18 @@ void DoorComponent::OnAwake() {
 	isOpen = false;
 }
 
-void DoorComponent::OnMessage(const std::string& msg, const OpaqueType&){
+void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
+	auto trigent = (*ot.Get<Component*>(true))->entity;
+
 	if(msg == "open"){
 		switchStates = ~0u;
 		UpdateState();
+		trigent->SendMessage("dooropen", (Component*)this);
 
 	}else if(msg == "close"){
 		switchStates = 0;
 		UpdateState();
+		trigent->SendMessage("doorclose", (Component*)this);
 
 	}else if(msg.substr(0, 6) == "unlock"){
 		auto numStr = msg.substr(6);
@@ -45,11 +49,22 @@ void DoorComponent::OnMessage(const std::string& msg, const OpaqueType&){
 				switchStates = 0;
 				std::cout << "Invalid combination" << std::endl;
 			}
+
 			UpdateState();
+			if(!isOpen) {
+				trigent->SendMessage((switchStates==0)?"incorrect":"correct", (Component*)this);
+			}else{
+				trigent->SendMessage("dooropen", (Component*)this);
+			}
 
 		}else{
 			switchStates |= (1<<num) & requiredMask;
 			UpdateState();
+			if(!isOpen) {
+				trigent->SendMessage("correct", (Component*)this);
+			}else{
+				trigent->SendMessage("dooropen", (Component*)this);
+			}
 		}
 	}
 }
@@ -58,11 +73,11 @@ void DoorComponent::UpdateState() {
 	// If all required switch states are set
 	if((switchStates&requiredMask) == requiredMask){
 		// Do the things
-		if(!isOpen) mover->MoveTo(openPosition, 2.f);
+		if(!isOpen) mover->MoveTo(openPosition, openTime);
 		isOpen = true;
 
 	}else{
-		if(isOpen) mover->MoveTo(closedPosition, 2.f);
+		if(isOpen) mover->MoveTo(closedPosition, openTime);
 		isOpen = false;
 	}
 }

@@ -12,6 +12,7 @@
 #include "player.h"
 #include "camera.h"
 #include "apptime.h"
+#include "bellmanager.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
@@ -58,7 +59,7 @@ void App::Init(){
 		audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 		audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
 		audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
-		Bell::RegisterAudio();
+		BellManager::RegisterAudio();
 
 		audioGeneratorsRegistered = true;
 	}
@@ -134,6 +135,7 @@ void App::Load(const std::string& nLevel){
 	layerRenderingManager = std::make_shared<LayerRenderingManager>();
 	portalManager = std::make_shared<PortalManager>();
 	mirrorManager = std::make_shared<MirrorManager>();
+	bellManager = std::make_shared<BellManager>();
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
 	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
@@ -204,6 +206,7 @@ void App::ResetScene() {
 
 void App::Terminate() {
 	ResetScene();
+	bellManager.reset();
 	portalManager.reset();
 	mirrorManager.reset();
 	layerRenderingManager.reset();

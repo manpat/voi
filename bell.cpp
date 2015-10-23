@@ -1,29 +1,9 @@
 #include "synthcomponent.h"
-#include "audiogenerator.h"
 #include "entitymanager.h"
-#include "audiomanager.h"
 #include "interactable.h"
+#include "bellmanager.h"
 #include "entity.h"
 #include "bell.h"
-
-struct BellAudioGenerator : AudioGenerator {
-	u32 note = 120;
-	f64 savedElapsed = -1.0;
-	bool triggered = false;
-
-	f32 Generate(f64 elapsed) override {
-		if(triggered){
-			savedElapsed = elapsed;
-			triggered = false;
-		}
-
-		f32 env = 1.0 - clamp((elapsed-savedElapsed)/4.0, 0.0, 1.0);
-		auto f = ntof(note);
-		auto o = Wave::Sin(elapsed * f) * (env + 0.1);
-
-		return o;
-	}
-};
 
 void Bell::OnAwake() {
 	entity->AddComponent<Interactable>();
@@ -38,9 +18,9 @@ void Bell::OnAwake() {
 	if(synth && synth->synthName == "bell") {
 		static u32 notes[] = {
 			0,
-			5,
-			8,
-			12,
+			4,
+			7,
+			11,
 		};
 
 		bellGen = std::dynamic_pointer_cast<BellAudioGenerator>(synth->generator);
@@ -48,18 +28,29 @@ void Bell::OnAwake() {
 	}else{
 		std::cout << "WARNING!! Bell missing audio generator" << std::endl;
 	}
+
+	BellManager::GetSingleton()->AddBell(this);
 }
 
 void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
-	if(target && msg == "interact"){
-		target->SendMessage("unlock"+std::to_string(bellNumber), (Component*)this);
+	if(!target) return;
+
+	if(msg == "interact"){
 		std::cout << "Bell unlock " << bellNumber << std::endl;
 		if(bellGen){
-			bellGen->triggered = true;
+			bellGen->Trigger();
 		}
-	}
-}
+		target->SendMessage("unlock"+std::to_string(bellNumber), (Component*)this);
+		
+	}else if(msg == "correct") {
+		std::cout << "Bell unlock " << bellNumber << " correct" << std::endl;
 
-void Bell::RegisterAudio() {
-	AudioManager::GetSingleton()->RegisterAudioGeneratorType<BellAudioGenerator>("bell");
+	}else if(msg == "incorrect") {
+		std::cout << "Bell unlock " << bellNumber << " incorrect" << std::endl;
+		BellManager::GetSingleton()->StopAllBells();
+
+	}else if(msg == "dooropen") {
+		std::cout << "Bell unlock " << bellNumber << " dooropen" << std::endl;
+		BellManager::GetSingleton()->CorrectCombination();
+	}
 }

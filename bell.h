@@ -13,7 +13,6 @@ struct Bell : Component {
 
 	Bell(const std::string& tn, u32 num) : Component(this), targetName(tn), bellNumber(num) {}
 
-	static void RegisterAudio();
 	void OnAwake() override;
 	void OnMessage(const std::string&, const OpaqueType&) override;
 };

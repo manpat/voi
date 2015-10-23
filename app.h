@@ -10,6 +10,7 @@
 class Input;
 struct Camera;
 struct Checkpoint;
+struct BellManager;
 struct AudioManager;
 struct PortalManager;
 struct MirrorManager;
@@ -60,6 +61,7 @@ struct App : Singleton<App> {
 	Ogre::SceneNode* rootNode;
 
 	std::shared_ptr<Input> input;
+	std::shared_ptr<BellManager> bellManager;
 	std::shared_ptr<AudioManager> audioManager;
 	std::shared_ptr<MirrorManager> mirrorManager;
 	std::shared_ptr<PortalManager> portalManager;

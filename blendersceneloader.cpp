@@ -205,8 +205,9 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 				case 4/*Door*/: {
 					auto lockCount = std::stol(findin(userdata, std::string{"anom_doorcount"}, std::string{"1"}));
+					auto doorTime = std::stof(findin(userdata, std::string{"anom_doormovetime"}, std::string{"2.0"}));
 					auto doorOrdered = findin(userdata, std::string{"anom_doorordered"}) == "1";
-					ent->AddComponent<DoorComponent>(lockCount, doorOrdered);
+					ent->AddComponent<DoorComponent>(lockCount, doorOrdered, doorTime);
 				} break;
 
 				case 5/*Generic Trigger*/:{

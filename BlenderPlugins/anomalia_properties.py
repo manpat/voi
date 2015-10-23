@@ -45,6 +45,7 @@ class ObjectPanel(bpy.types.Panel):
 		elif(otyp == 4):
 			layout.row().prop(context.active_object, "anom_doorcount")
 			layout.row().prop(context.active_object, "anom_doorordered")
+			layout.row().prop(context.active_object, "anom_doormovetime")
 
 		# Halflife Point
 		elif(otyp == 6):
@@ -104,6 +105,7 @@ class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
 			ob.anom_bellnumber = ao.anom_bellnumber
 			ob.anom_targetentity = ao.anom_targetentity
 			ob.anom_interactaction = ao.anom_interactaction
+			ob.anom_doormovetime = ao.anom_doormovetime
 			ob.anom_doorordered = ao.anom_doorordered
 			ob.anom_doorcount = ao.anom_doorcount
 
@@ -197,6 +199,7 @@ def register():
 	obj.anom_newarea = StringProperty(name="Level Name")
 
 	# Door
+	obj.anom_doormovetime = FloatProperty(name="Move Time", min=0.5, max=10.0, default=2.0)
 	obj.anom_doorordered = BoolProperty(name="Ordered Sequence")
 	obj.anom_doorcount = IntProperty(name="Lock Count", min=1, max=30, default=1)
 
@@ -226,6 +229,7 @@ def unregister():
 	del obj.anom_bellnumber
 	del obj.anom_objecttype
 	del obj.anom_doorordered
+	del obj.anom_doormovetime
 	del obj.anom_targetentity
 	del obj.anom_interactaction
 
