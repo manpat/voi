@@ -14,20 +14,20 @@ material _missing_material_
     }
 }
 
-// LightStone genrated by blender2ogre 0.6.0
+// Stone genrated by blender2ogre 0.6.0
 
-material LightStone 
+material Stone 
 {
     receive_shadows on 
 
     technique
     {
-        pass LightStone
+        pass Stone
         {
-            ambient 0.708375871181488 0.708375871181488 0.708375871181488 1.0
-            diffuse 0.5667007053896889 0.5667007053896889 0.5667007053896889 1.0
+            ambient 0.4969330132007599 0.4910208284854889 0.4910208284854889 1.0
+            diffuse 0.39754641648451106 0.3928166686418155 0.3928166686418155 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.708375871181488 0.708375871181488 0.708375871181488 1.0
+            emissive 0.4969330132007599 0.4910208284854889 0.4910208284854889 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -49,20 +49,20 @@ material LightStone
         }
     }
 }
-// Stone genrated by blender2ogre 0.6.0
+// LightStone genrated by blender2ogre 0.6.0
 
-material Stone 
+material LightStone 
 {
     receive_shadows on 
 
     technique
     {
-        pass Stone
+        pass LightStone
         {
-            ambient 0.4969330132007599 0.4910208284854889 0.4910208284854889 1.0
-            diffuse 0.39754641648451106 0.3928166686418155 0.3928166686418155 1.0
+            ambient 0.708375871181488 0.708375871181488 0.708375871181488 1.0
+            diffuse 0.5667007053896889 0.5667007053896889 0.5667007053896889 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.4969330132007599 0.4910208284854889 0.4910208284854889 1.0
+            emissive 0.708375871181488 0.708375871181488 0.708375871181488 1.0
 
             alpha_to_coverage off
             colour_write on
