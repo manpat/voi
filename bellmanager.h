@@ -41,13 +41,9 @@ struct BellAudioGenerator : AudioGenerator {
 
 		if(playing) savedElapsed = elapsed;
 
-<<<<<<< HEAD
-		f32 env = 1.0 - clamp((elapsed-savedElapsed)/2.0, 0.0, 1.0);
+		f64 env = 1.0 - clamp((elapsed-savedElapsed)/2.0, 0.0, 1.0);
 		env = std::pow(env, 2.0);
-=======
-		f32 env = (f32)(1.0 - clamp((elapsed-savedElapsed)/3.0, 0.0, 1.0));
-		env = std::pow(env, 2.0f);
->>>>>>> bf5114262f4fd2cbac37c3d7fb7f704fa7344d58
+		
 		f64 f = ntof(note);
 		f64 ph = f * elapsed;
 
