@@ -15,8 +15,9 @@ AreaTriggerManager::AreaTriggerManager() {
 
 }
 
-void AreaTriggerManager::TriggerSceneLoad(AreaTriggerComponent* atc, vec3 o) {
+void AreaTriggerManager::TriggerSceneLoad(AreaTriggerComponent* atc, vec3 o, quat q) {
 	posOffset = o;
+	rotOffset = q;
 	toLevel = atc->toLevel;
 	toNode = atc->entity->GetName();
 }
@@ -31,17 +32,17 @@ void AreaTriggerManager::Update() {
 
 		app->Load(toLevel);
 		vec3 spawnPos = vec3::ZERO;
-
+		quat spawnRot = quat::IDENTITY;
 
 		auto spawnNode = entMgr->FindEntity(toNode);
 		if(!spawnNode) std::cout << "Couldn't find entity in new level " + toNode;
 		else {
-			spawnPos = spawnNode->GetGlobalPosition() + posOffset;
+			spawnRot = spawnNode->GetGlobalOrientation() * rotOffset;
+			spawnPos = spawnNode->GetGlobalPosition() + spawnRot * posOffset;
 		}
 
 		app->player->entity->collider->SetPosition(spawnPos);
-		// TODO: Orientation
-		//app->camera->cameraNode->set
+		app->camera->entity->SetGlobalOrientation(spawnRot);
 
 		toLevel = "";
 	}
