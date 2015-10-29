@@ -1,0 +1,34 @@
+<scene export_time="1446128390.882716" previous_export_time="0" exported_by="jared" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Level" >
+      <position x="-0.499991" y="4.500000" z="-13.136359" />
+      <rotation qx="0.000000" qw="1.000000" qz="-0.000000" qy="0.000000" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <entity lock_rot_z="False" damping_rot="0.1589999943971634" lock_trans_x="False" velocity_min="0.0" lock_trans_z="False" lock_trans_y="False" meshFile="Cube.mesh" lock_rot_x="False" name="Cube" physics_type="STATIC" mass="1.0" damping_trans="0.02539999969303608" inertia_tensor="0.4000000059604645" mass_radius="1.0" friction_x="1.0" friction_y="1.0" actor="False" velocity_max="0.0" friction_z="1.0" ghost="False" anisotropic_friction="False" lock_rot_y="False" >
+        <dimensions x="17.000022888183594" y="11.000005722045898" z="24.00000762939453" />
+      </entity>
+    </node>
+    <node name="Lamp" >
+      <position x="4.076245" y="5.903862" z="-1.005454" />
+      <rotation qx="0.169076" qw="0.570947" qz="-0.272171" qy="0.755880" />
+      <scale x="1.000000" y="1.000000" z="1.000000" />
+      <light powerScale="1.0" shadow="true" name="Lamp" type="point" >
+        <position x="4.076245" y="5.903862" z="-1.005454" />
+        <lightAttenuation constant="1.0" linear="0.03333335240683057" quadratic="0.0" range="5000" />
+        <colourDiffuse r="1.0" b="1.0" g="1.0" />
+        <colourSpecular r="1.0" b="1.0" g="1.0" />
+        <colourShadow r="1.0" b="1.0" g="1.0" />
+      </light>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="D:\Projects\Ogre\src\Anomalia\GameData\Scenes\level21\level21.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourBackground r="0.05087608844041824" b="0.05087608844041824" g="0.05087608844041824" />
+    <colourDiffuse r="0.05087608844041824" b="0.05087608844041824" g="0.05087608844041824" />
+    <colourAmbient r="0.0" b="0.0" g="0.0" />
+  </environment>
+</scene>
