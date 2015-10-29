@@ -1,0 +1,42 @@
+<scene previous_export_time="0" exported_by="jared" formatVersion="1.0.1" export_time="1446120056.392185" >
+  <nodes >
+    <node name="Cube" >
+      <position z="-5.000000" y="-0.500000" x="-0.500000" />
+      <rotation qw="1.000000" qz="-0.000000" qy="0.000000" qx="0.000000" />
+      <scale z="4.999998" y="0.500000" x="1.499999" />
+      <entity lock_trans_x="False" lock_rot_z="False" mass="1.0" anisotropic_friction="False" velocity_min="0.0" inertia_tensor="0.4000000059604645" lock_trans_y="False" ghost="False" lock_rot_x="False" actor="False" damping_trans="0.02539999969303608" name="Cube" velocity_max="0.0" mass_radius="1.0" lock_trans_z="False" damping_rot="0.1589999943971634" friction_x="1.0" lock_rot_y="False" friction_z="1.0" physics_type="STATIC" meshFile="Cube.mesh" friction_y="1.0" >
+        <dimensions z="39.00000762939453" y="11.000041007995605" x="17.000003814697266" />
+      </entity>
+    </node>
+    <node name="Lamp" >
+      <position z="-1.005454" y="5.903862" x="4.076245" />
+      <rotation qw="0.570947" qz="-0.272171" qy="0.755880" qx="0.169076" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <light type="point" powerScale="1.0" shadow="true" name="Lamp" >
+        <position z="-1.005454" y="5.903862" x="4.076245" />
+        <lightAttenuation linear="0.03333335240683057" constant="1.0" range="5000" quadratic="0.0" />
+        <colourDiffuse g="1.0" b="1.0" r="1.0" />
+        <colourSpecular g="1.0" b="1.0" r="1.0" />
+        <colourShadow g="1.0" b="1.0" r="1.0" />
+      </light>
+    </node>
+    <node name="Camera" >
+      <position z="6.507640" y="5.343665" x="7.481132" />
+      <rotation qw="0.781600" qz="-0.212922" qy="0.334251" qx="0.481707" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <camera name="Camera" fov="0.5033799435163735" projectionType="perspective" >
+        <clipping far="100.0" farPlaneDist="100.0" near="0.10000000149011612" nearPlaneDist="0.10000000149011612" />
+      </camera>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="D:\Projects\Ogre\src\Anomalia\GameData\Scenes\level11\level11.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourDiffuse g="0.05087608844041824" b="0.05087608844041824" r="0.05087608844041824" />
+    <colourBackground g="0.05087608844041824" b="0.05087608844041824" r="0.05087608844041824" />
+    <colourAmbient g="0.0" b="0.0" r="0.0" />
+  </environment>
+</scene>
