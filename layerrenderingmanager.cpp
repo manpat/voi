@@ -120,6 +120,7 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 
 void LayerRenderingManager::preRenderQueues() {
 	// TODO: Double check that this works as assumed, or if postRenderQueue would be more appropriate.
+	// TODO: only do this if mirrors visible
 	MirrorManager::GetSingleton()->UpdateCullFrustum(App::GetSingleton()->camera->ogreCamera);
 }
 

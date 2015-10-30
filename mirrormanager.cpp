@@ -137,30 +137,44 @@ void MirrorManager::AddMirror(Mirror* mirror) {
 	}
 }
 
-void MirrorManager::CalcCullFrustumFromBounds(Ogre::AxisAlignedBox vf) {
-	vec3 size = vf.getSize();
-	vec3 min = vf.getMinimum();
-	vec3 max = vf.getMaximum();
+void MirrorManager::CalcCullFrustumFromBounds(Ogre::AxisAlignedBox bounds) {
+	// Get extents from axis aligned box bounds
+	vec3 size = bounds.getSize();
+	vec3 min = bounds.getMinimum();
+	vec3 max = bounds.getMaximum();
 
-	mat4 mat(
+	// Build orthogonal matrix from bounds
+	mat4 frustumMat(
 		2.0f / size.x,	0,				0,				-(max.x + min.x) / size.x,
 		0,				2.0f / size.y,	0,				-(max.y + min.y) / size.y,
-		0,				0,				-2.0f / size.z,	-(max.z + min.z) / size.z,
+		0,				0,				2.0f / size.z,	-(max.z + min.z) / size.z,
 		0,				0,				0,				1.0f
 	);
 
-	cullFrustum.setCustomProjectionMatrix(true, mat);
+	// Pass in matrix to get orthogonal frustum
+	cullFrustum.setCustomProjectionMatrix(true, frustumMat);
 }
 
-void MirrorManager::UpdateCullFrustum(Ogre::Frustum* cf) {
-	Ogre::AxisAlignedBox virtualFrustums;
+void MirrorManager::UpdateCullFrustum(Ogre::Frustum* camFrustum) {
+	// TODO: Fix getWorldBoundingBox returning excessive values when rotated
+	Ogre::AxisAlignedBox camBounds(camFrustum->getWorldBoundingBox());
+	// Set initial bounds to contain camera frustum
+	Ogre::AxisAlignedBox bounds(camBounds);
+	std::cout << bounds << std::endl;
 
-	// TODO:
-	// Calculate bounds to contain cameraFrustum and all visible virtual mirror frustums.
-	// Calculate visibility of virtual mirror frustums by checking if entity is visible in camera frustum
+	// Iterate mirrors
+	for (auto m = mirrors.begin(); m < mirrors.end(); m++) {
+		// Skip invisible mirrors
+		if (!(*m)->isVisible || !camFrustum->isVisible((*m)->entity->ogreEntity->getWorldBoundingBox())) {
+			continue;
+		}
+	
+		// Merge virtual frustum
+		for (u8 c = 0; c < 8; ++c) {
+			// Multiply by mirrors reflection matrix
+			bounds.merge((*m)->reflectionMat * camBounds.getAllCorners()[c]);
+		}
+	}
 
-	virtualFrustums.setMinimum(vec3(-9999, -9999, -9999)); // left, down, backward
-	virtualFrustums.setMaximum(vec3(9999, 9999, 9999)); // right, up, forward
-
-	CalcCullFrustumFromBounds(virtualFrustums);
+	CalcCullFrustumFromBounds(bounds);
 }
