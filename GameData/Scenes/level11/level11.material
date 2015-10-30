@@ -49,6 +49,41 @@ material Stone
         }
     }
 }
+// Exit genrated by blender2ogre 0.6.0
+
+material Exit 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Exit
+        {
+            ambient 0.33432283997535706 0.15858638286590576 0.06392630934715271 1.0
+            diffuse 0.26745827596572447 0.1268691081832216 0.05114104823978316 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.33432283997535706 0.15858638286590576 0.06392630934715271 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
 // DarkStone genrated by blender2ogre 0.6.0
 
 material DarkStone 
@@ -63,6 +98,181 @@ material DarkStone
             diffuse 0.12159999790191645 0.12159999790191645 0.12159999790191645 1.0
             specular 0.5 0.5 0.5 1.0 12.5
             emissive 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Stone.001 genrated by blender2ogre 0.6.0
+
+material Stone.001 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Stone.001
+        {
+            ambient 0.49000000953674316 0.49000000953674316 0.49000000953674316 1.0
+            diffuse 0.39200001347064983 0.39200001347064983 0.39200001347064983 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.49000000953674316 0.49000000953674316 0.49000000953674316 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// DarkStone.001 genrated by blender2ogre 0.6.0
+
+material DarkStone.001 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass DarkStone.001
+        {
+            ambient 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+            diffuse 0.12159999790191645 0.12159999790191645 0.12159999790191645 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Stone.002 genrated by blender2ogre 0.6.0
+
+material Stone.002 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Stone.002
+        {
+            ambient 0.49000000953674316 0.49000000953674316 0.49000000953674316 1.0
+            diffuse 0.39200001347064983 0.39200001347064983 0.39200001347064983 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.49000000953674316 0.49000000953674316 0.49000000953674316 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// DarkStone.002 genrated by blender2ogre 0.6.0
+
+material DarkStone.002 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass DarkStone.002
+        {
+            ambient 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+            diffuse 0.12159999790191645 0.12159999790191645 0.12159999790191645 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Switch genrated by blender2ogre 0.6.0
+
+material Switch 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Switch
+        {
+            ambient 0.05126946419477463 0.014443841762840748 0.09305896610021591 1.0
+            diffuse 0.04101557196699934 0.01155507358245661 0.07444717398952205 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.05126946419477463 0.014443841762840748 0.09305896610021591 1.0
 
             alpha_to_coverage off
             colour_write on
