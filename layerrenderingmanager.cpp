@@ -110,6 +110,17 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		// Fade the color
 		rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "MiF");
 	}
+
+	if (!visibleMirrors.empty()) {
+		App::GetSingleton()->camera->ogreCamera->setCullingFrustum(&MirrorManager::GetSingleton()->cullFrustum);
+	} else {
+		App::GetSingleton()->camera->ogreCamera->setCullingFrustum(0);
+	}
+}
+
+void LayerRenderingManager::preRenderQueues() {
+	// TODO: Double check that this works as assumed, or if postRenderQueue would be more appropriate.
+	MirrorManager::GetSingleton()->UpdateCullFrustum(App::GetSingleton()->camera->ogreCamera);
 }
 
 // TODO: Holy shit, clean this mess up
@@ -213,12 +224,12 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 			Ogre::SOP_KEEP, // passOp
 			false); // twoSidedOperation
 
-		mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
-		camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
+		//mirror->cullFrustum.setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
+		//camera->ogreCamera->setCullingFrustum(&mirror->cullFrustum);
 		//camera->ogreCamera->setCustomViewMatrix(true, camera->ogreCamera->getViewMatrix() * mirror->reflectionMat);
 
 		// Set render system view matrix to match camera view matrix as per update in render queue ended
-		rs->_setViewMatrix(camera->ogreCamera->getViewMatrix());
+		rs->_setViewMatrix(camera->ogreCamera->getViewMatrix(true) * mirror->reflectionMat);
 		rs->setInvertVertexWinding(true);
 		//rs->_setCullingMode(Ogre::CULL_ANTICLOCKWISE);
 		rs->addClipPlane(mirror->clipPlane);
@@ -266,7 +277,7 @@ void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invo
 	} else if (invocationType == "MiS") {
 		// Post drawing of mirror scene
 		//camera->ogreCamera->setCustomViewMatrix(false);
-		camera->ogreCamera->setCullingFrustum(0);
+		//camera->ogreCamera->setCullingFrustum(0);
 		rs->setInvertVertexWinding(false);
 		rs->resetClipPlanes();
 	}

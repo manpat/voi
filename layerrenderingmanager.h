@@ -28,6 +28,7 @@ struct LayerRenderingManager : Ogre::RenderQueueListener {
 	u32 GetNumLayers() const {return numLayers;}
 	void SetCamera(Camera*);
 
+	void preRenderQueues() override;
 	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;
 	void renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) override;
 

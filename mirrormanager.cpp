@@ -10,6 +10,7 @@
 #include "meshinfo.h"
 #include "entity.h"
 #include "app.h"
+#include "camera.h"
 
 #include <algorithm>
 #include <cassert>
@@ -32,7 +33,7 @@ void Mirror::OnInit() {
 	mirrorMan->AddMirror(this);
 
 	entity->ogreEntity->setRenderQueueGroup(RENDER_QUEUE_MIRRORED + mirrorId);
-	CalculateReflectionMatrixAndClipPlane();
+	CalcReflectionMatrixAndClipPlane();
 
 	// TODO: add convenience functions for ONLY setting alpha
 	// SetColor(Ogre::ColourValue{0.5f, 0.8f, 1.0f, 0.5f});
@@ -63,7 +64,7 @@ Ogre::SubMesh* Mirror::GetSubMesh() {
 	return *entity->ogreEntity->getMesh()->getSubMeshIterator().begin();
 }
 
-void Mirror::CalculateReflectionMatrixAndClipPlane() {
+void Mirror::CalcReflectionMatrixAndClipPlane() {
 	auto mesh = GetOgreSubMeshVertices(GetSubMesh());
 
 	if (mesh.size() >= 3) {
@@ -110,6 +111,20 @@ void Mirror::CalculateReflectionMatrixAndClipPlane() {
 template<>
 MirrorManager* Singleton<MirrorManager>::instance = nullptr;
 
+void MakeOrtho2D(float left, float right,
+				float bottom, float top,
+				float zNear, float zFar,
+				Ogre::Matrix4& result) {
+  float width = right-left;
+  float height = top-bottom;
+  float depth = zFar-zNear;
+
+  // naive initialization
+  result = Ogre::Matrix4::ZERO;
+
+
+}
+
 void MirrorManager::AddMirror(Mirror* mirror) {
 	if (mirror != nullptr) {
 		mirror->mirrorId = (s32)mirrors.size();
@@ -120,4 +135,32 @@ void MirrorManager::AddMirror(Mirror* mirror) {
 		auto& numLayers = App::GetSingleton()->layerRenderingManager->numLayers;
 		numLayers = std::max((u32)mirror->layer + 1, numLayers);
 	}
+}
+
+void MirrorManager::CalcCullFrustumFromBounds(Ogre::AxisAlignedBox vf) {
+	vec3 size = vf.getSize();
+	vec3 min = vf.getMinimum();
+	vec3 max = vf.getMaximum();
+
+	mat4 mat(
+		2.0f / size.x,	0,				0,				-(max.x + min.x) / size.x,
+		0,				2.0f / size.y,	0,				-(max.y + min.y) / size.y,
+		0,				0,				-2.0f / size.z,	-(max.z + min.z) / size.z,
+		0,				0,				0,				1.0f
+	);
+
+	cullFrustum.setCustomProjectionMatrix(true, mat);
+}
+
+void MirrorManager::UpdateCullFrustum(Ogre::Frustum* cf) {
+	Ogre::AxisAlignedBox virtualFrustums;
+
+	// TODO:
+	// Calculate bounds to contain cameraFrustum and all visible virtual mirror frustums.
+	// Calculate visibility of virtual mirror frustums by checking if entity is visible in camera frustum
+
+	virtualFrustums.setMinimum(vec3(-9999, -9999, -9999)); // left, down, backward
+	virtualFrustums.setMaximum(vec3(9999, 9999, 9999)); // right, up, forward
+
+	CalcCullFrustumFromBounds(virtualFrustums);
 }
