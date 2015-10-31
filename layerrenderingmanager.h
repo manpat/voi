@@ -19,6 +19,7 @@ namespace Ogre {
 }
 
 struct Camera;
+struct Mirror;
 
 struct LayerRenderingManager : Ogre::RenderQueueListener {
 	LayerRenderingManager();
@@ -36,6 +37,7 @@ struct LayerRenderingManager : Ogre::RenderQueueListener {
 	Camera* camera;
 	u32 numLayers = 0;
 	u32 currentLayer;
+	std::vector<Mirror*> visibleMirrors;
 };
 
 #endif // LAYER_RENDERING_MANAGER

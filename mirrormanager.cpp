@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <cassert>
 
-// TODO: Fix culling
 // TODO: Lerp colors in HSV color space
 
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
@@ -111,20 +110,6 @@ void Mirror::CalcReflectionMatrixAndClipPlane() {
 template<>
 MirrorManager* Singleton<MirrorManager>::instance = nullptr;
 
-void MakeOrtho2D(float left, float right,
-				float bottom, float top,
-				float zNear, float zFar,
-				Ogre::Matrix4& result) {
-  float width = right-left;
-  float height = top-bottom;
-  float depth = zFar-zNear;
-
-  // naive initialization
-  result = Ogre::Matrix4::ZERO;
-
-
-}
-
 void MirrorManager::AddMirror(Mirror* mirror) {
 	if (mirror != nullptr) {
 		mirror->mirrorId = (s32)mirrors.size();
@@ -155,24 +140,48 @@ void MirrorManager::CalcCullFrustumFromBounds(Ogre::AxisAlignedBox bounds) {
 	cullFrustum.setCustomProjectionMatrix(true, frustumMat);
 }
 
-void MirrorManager::UpdateCullFrustum(Ogre::Frustum* camFrustum) {
-	// TODO: Fix getWorldBoundingBox returning excessive values when rotated
-	Ogre::AxisAlignedBox camBounds(camFrustum->getWorldBoundingBox());
+void MirrorManager::UpdateCullFrustum(Ogre::Camera* camFrustum) {
+	Ogre::AxisAlignedBox camBounds;
+	vec4 camFrustumCorners[] = {
+		// Near
+		{-1, 1, 1, 1},
+		{1, 1, 1, 1},
+		{1, -1, 1, 1},
+		{-1, -1, 1, 1},
+		// Far
+		{-1, 1, -1, 1},
+		{1, 1, -1, 1},
+		{1, -1, -1, 1},
+		{-1, -1, -1, 1}
+	};
+
+	// Get inverse view projection matrix
+	auto invCamFrustumMat = (camFrustum->getProjectionMatrix() * camFrustum->getViewMatrix(true)).inverse();
+
+	// Iterate frustum corners
+	for (u8 c = 0; c < 8; ++c) {
+		// Map frustum to unit cube
+		camFrustumCorners[c] = invCamFrustumMat * camFrustumCorners[c];
+		camFrustumCorners[c] /= camFrustumCorners[c].w;
+
+		// Flatten vector and merge camera frustum
+		camBounds.merge(vec3(camFrustumCorners[c].x, camFrustumCorners[c].y, camFrustumCorners[c].z));
+	}
+
 	// Set initial bounds to contain camera frustum
 	Ogre::AxisAlignedBox bounds(camBounds);
-	std::cout << bounds << std::endl;
 
 	// Iterate mirrors
 	for (auto m = mirrors.begin(); m < mirrors.end(); m++) {
 		// Skip invisible mirrors
-		if (!(*m)->isVisible || !camFrustum->isVisible((*m)->entity->ogreEntity->getWorldBoundingBox())) {
+		if (!(*m)->isVisible || !camBounds.intersects((*m)->entity->ogreEntity->getWorldBoundingBox(true))) {
 			continue;
 		}
-	
-		// Merge virtual frustum
+
+		// Iterate frustum corners
 		for (u8 c = 0; c < 8; ++c) {
-			// Multiply by mirrors reflection matrix
-			bounds.merge((*m)->reflectionMat * camBounds.getAllCorners()[c]);
+			// Multiply flattened vector by mirrors reflection matrix and merge virtual frustum
+			bounds.merge((*m)->reflectionMat * vec3(camFrustumCorners[c].x, camFrustumCorners[c].y, camFrustumCorners[c].z));
 		}
 	}
 
