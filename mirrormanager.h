@@ -11,7 +11,7 @@ struct Mirror : Component {
 	Mirror(s32);
 
 	void OnInit() override;
-	void SetColor(const Ogre::ColourValue&);
+	void SetColour(const Ogre::ColourValue&);
 	Ogre::ColourValue GetColour();
 	void SetOpacity(const f32); 
 	void LerpColor(const Ogre::ColourValue&, const Ogre::ColourValue&, const f32);

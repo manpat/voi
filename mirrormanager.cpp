@@ -33,10 +33,12 @@ void Mirror::OnInit() {
 	entity->ogreEntity->setRenderQueueGroup(RENDER_QUEUE_MIRRORED + mirrorId);
 	CalcReflectionMatrixAndClipPlane();
 
-	SetColor(Ogre::ColourValue{0.49761f, 0.64999f, 0.58996f, 0.2f});
+	// Default mirror colour
+	SetColour(Ogre::ColourValue(0.49761f, 0.64999f, 0.58996f, 0.2f));
 }
 
-void Mirror::SetColor(const Ogre::ColourValue& color) {
+// Apply new colour to mirror
+void Mirror::SetColour(const Ogre::ColourValue& color) {
 	auto mat = entity->ogreEntity->getSubEntity(0)->getMaterial();
 
 	mat->setDiffuse(color);
@@ -44,16 +46,18 @@ void Mirror::SetColor(const Ogre::ColourValue& color) {
 	mat->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 }
 
-Ogre::ColourValue GetColour() {
-	// TODO
-	return Ogre::ColourValue::Black;
+// Retreive colour of mirror
+Ogre::ColourValue Mirror::GetColour() {
+	return entity->ogreEntity->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->getDiffuse();
 }
 
-void Mirror::SetOpacity(const f32) {
-	// TODO
+// Set opacity or alpha component only of mirror colour
+void Mirror::SetOpacity(const f32 a) {
+	auto colour = GetColour();
+	SetColour(Ogre::ColourValue(colour.r, colour.g, colour.b, a));
 }
 
-// Linearly interpolate between two colours
+// Linearly interpolate between two colours and apply to mirror
 void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rhs, const f32 delta) {
 	Ogre::ColourValue lhsv, rhsv;
 
@@ -71,7 +75,7 @@ void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rh
 	rgba.setHSB(h, s, v);
 
 	// Apply to mirror
-	SetColor(rgba);
+	SetColour(rgba);
 }
 
 Ogre::SubMesh* Mirror::GetSubMesh() {
