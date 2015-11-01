@@ -3,6 +3,7 @@
 #include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
+#include <OGRE/OgreColourValue.h>
 
 #include "layerrenderingmanager.h"
 #include "mirrormanager.h"
@@ -14,8 +15,6 @@
 
 #include <algorithm>
 #include <cassert>
-
-// TODO: Lerp colors in HSV color space
 
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
 //#define ERROR(msg) std::err << "MirrorMan EXCEPTION: " << msg << std::endl;
@@ -34,28 +33,44 @@ void Mirror::OnInit() {
 	entity->ogreEntity->setRenderQueueGroup(RENDER_QUEUE_MIRRORED + mirrorId);
 	CalcReflectionMatrixAndClipPlane();
 
-	// TODO: add convenience functions for ONLY setting alpha
-	// SetColor(Ogre::ColourValue{0.5f, 0.8f, 1.0f, 0.5f});
-	// SetColor(Ogre::ColourValue{0.398094f, 0.51999f, 0.47197f, 0.5f});
 	SetColor(Ogre::ColourValue{0.49761f, 0.64999f, 0.58996f, 0.2f});
 }
 
 void Mirror::SetColor(const Ogre::ColourValue& color) {
 	auto mat = entity->ogreEntity->getSubEntity(0)->getMaterial();
 
-	mat->setSelfIllumination(color);
 	mat->setDiffuse(color);
+	mat->setSelfIllumination(color);
 	mat->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 }
 
-// Linearly interpolate between two colours
-void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rhs, f32 delta) {
-	f32 r = lhs.r + delta * (rhs.r - lhs.r);
-	f32 g = lhs.g + delta * (rhs.g - lhs.g);
-	f32 b = lhs.b + delta * (rhs.b - lhs.b);
-	f32 a = lhs.a + delta * (rhs.a - lhs.a);
+Ogre::ColourValue GetColour() {
+	// TODO
+	return Ogre::ColourValue::Black;
+}
 
-	Ogre::ColourValue rgba(r, g, b, a);
+void Mirror::SetOpacity(const f32) {
+	// TODO
+}
+
+// Linearly interpolate between two colours
+void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rhs, const f32 delta) {
+	Ogre::ColourValue lhsv, rhsv;
+
+	// Convert to HSV colour space
+	lhs.getHSB(&lhsv.r, &lhsv.g, &lhsv.b);
+	rhs.getHSB(&rhsv.r, &rhsv.g, &rhsv.b);
+
+	// Lerp between hues, saturations and values by delta
+	f32 h = lhsv.r + delta * (rhsv.r - lhsv.r);
+	f32 s = lhsv.g + delta * (rhsv.g - lhsv.g);
+	f32 v = lhsv.b + delta * (rhsv.b - lhsv.b);
+
+	// Convert back to RGB colour space
+	Ogre::ColourValue rgba(0, 0, 0, lhs.a + delta * (rhs.a - lhs.a));
+	rgba.setHSB(h, s, v);
+
+	// Apply to mirror
 	SetColor(rgba);
 }
 
@@ -136,7 +151,7 @@ void MirrorManager::CalcCullFrustumFromBounds(Ogre::AxisAlignedBox bounds) {
 		0,				0,				0,				1.0f
 	);
 
-	// Pass in matrix to get orthogonal frustum
+	// Pass in matrix to get orthogonal culling frustum
 	cullFrustum.setCustomProjectionMatrix(true, frustumMat);
 }
 
@@ -172,7 +187,7 @@ void MirrorManager::UpdateCullFrustum(Ogre::Camera* camFrustum) {
 	Ogre::AxisAlignedBox bounds(camBounds);
 
 	// Iterate mirrors
-	for (auto m = mirrors.begin(); m < mirrors.end(); m++) {
+	for (auto m = mirrors.begin(); m < mirrors.end(); ++m) {
 		// Skip invisible mirrors
 		if (!(*m)->isVisible || !camBounds.intersects((*m)->entity->ogreEntity->getWorldBoundingBox(true))) {
 			continue;

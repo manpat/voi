@@ -11,10 +11,12 @@ struct Mirror : Component {
 	Mirror(s32);
 
 	void OnInit() override;
-	void CalcReflectionMatrixAndClipPlane();
 	void SetColor(const Ogre::ColourValue&);
-	void LerpColor(const Ogre::ColourValue&, const Ogre::ColourValue&, f32);
+	Ogre::ColourValue GetColour();
+	void SetOpacity(const f32); 
+	void LerpColor(const Ogre::ColourValue&, const Ogre::ColourValue&, const f32);
 	Ogre::SubMesh* GetSubMesh();
+	void CalcReflectionMatrixAndClipPlane();
 
 	s32 mirrorId;
 	s32 layer;
