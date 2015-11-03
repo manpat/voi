@@ -64,8 +64,7 @@ void App::Init(){
 		audioGeneratorsRegistered = true;
 	}
 
-	Load(!customLevelName.empty() ? customLevelName : "temple");
-	// Load("mirrortest2");
+	Load(!customLevelName.empty() ? customLevelName : "hub");
 }
 
 /*

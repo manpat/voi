@@ -32,14 +32,22 @@ App::App(){
 	auto fs = fsfactory.createInstance("GameData/Scenes", true);
 	auto fsls = fs->findFileInfo("*.scene");
 
-	std::cout << "Scenes found: \n";
 	for(auto& d: *fsls){
-		std::cout << "\t" << d.basename.substr(0, d.basename.find_last_of('.')) << "\n";
 		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
+	}
+
+	// Sort found scenes by name
+	std::sort(scenes.begin(), scenes.end(), [](const SceneFileInfo& a, const SceneFileInfo& b){
+		return a.name < b.name;
+	});
+
+	std::cout << "Scenes found: \n";
+	for(auto& s: scenes) {
+		std::cout << "\t" << s.name.substr(0, s.name.find_last_of('.')) << "\n";
 	}
 	std::cout << std::endl;
 
-	std::cout << "Load custom level? Leave blank for default (temple).\nName: ";
+	std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
 	std::getline(std::cin, customLevelName);
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -109,7 +117,10 @@ void App::InitOgre(){
 		Ogre::String pluginFileName("plugins_linux.cfg"), 
 			configFileName(""), logFileName("ogre.log");
 	#endif
-	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, configFileName, logFileName));
+	
+	auto lm = new Ogre::LogManager();
+	lm->createLog(logFileName, true, false, false);
+	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, configFileName, ""));
 
 	auto renderSystemList = ogreRoot->getAvailableRenderers();
 	if(renderSystemList.size() == 0){
