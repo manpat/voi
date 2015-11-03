@@ -1,7 +1,8 @@
+#include <OGRE/OgreMaterialManager.h>
 #include <OGRE/OgreSubEntity.h>
+#include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreSubMesh.h>
 #include <OGRE/OgreEntity.h>
-#include <OGRE/OgreSceneNode.h>
 
 #include "layerrenderingmanager.h"
 #include "physicsmanager.h"
@@ -9,8 +10,6 @@
 #include "meshinfo.h"
 #include "camera.h"
 #include "entity.h"
-#include "app.h"
-
 #include <cassert>
 
 Portal::Portal(s32 l0, s32 l1) : Component{this} {
@@ -22,11 +21,18 @@ template<>
 PortalManager* Singleton<PortalManager>::instance = nullptr;
 
 PortalManager::PortalManager() {
-	// TODO: Remove if unused
+	auto& matman = Ogre::MaterialManager::getSingleton();
+	portalMaterial = matman.create("Portal",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+		true /* Manual material */);
+
+	portalMaterial->setSelfIllumination(Ogre::ColourValue(0.1f, 0.1f, 0.1f)); // Skycolor
+	portalMaterial->setCullingMode(Ogre::CULL_NONE); // Draw back and front face
+	portalMaterial->setDepthBias(10.f, 0.f);
 }
 
 PortalManager::~PortalManager(){
-	// TODO: Remove if unused
+
 }
 
 void PortalManager::AddPortal(Portal* portal){
@@ -39,12 +45,12 @@ void PortalManager::AddPortal(Portal* portal){
 
 	portal->shouldDraw = true;
 
-	auto& numLayers = App::GetSingleton()->layerRenderingManager->numLayers;
+	auto& numLayers = LayerRenderingManager::GetSingleton()->numLayers;
 	numLayers = std::max((u32)portal->layer[1]+1, numLayers);
 }
 
 void Portal::OnInit(){
-	auto prtMgr = App::GetSingleton()->portalManager;
+	auto prtMgr = PortalManager::GetSingleton();
 
 	assert(layer[0] < 10 && layer[1] < 10);
 	prtMgr->AddPortal(this);
@@ -60,23 +66,22 @@ void Portal::OnInit(){
 	portalSubmesh = portalSubEnt->getSubMesh();
 
 	// This assumes that subMeshes and subEntities match one to one
-	portalSubEnt->getMaterial()->setSelfIllumination(Ogre::ColourValue(0.1f, 0.1f, 0.1f)); // Skycolor
-	portalSubEnt->getMaterial()->setCullingMode(Ogre::CULL_NONE); // Draw back and front face
-	portalSubEnt->getMaterial()->setDepthBias(10.f, 0.f);
-
+	portalSubEnt->setMaterial(prtMgr->portalMaterial);
 	portalSubEnt->setRenderQueueGroup(RENDER_QUEUE_PORTAL+portalId);
 
 	auto mesh = GetOgreSubMeshVertices(portalSubmesh);
 
 	auto forward = vec3::UNIT_Z;
 	auto posOffset = vec3::ZERO;
+	f32 fwdlength = 0.9f;
 	for(u32 i = 0; i < mesh.size()-2; i++){
 		posOffset = mesh[i];
 		auto p1 = mesh[i+1] - posOffset;
 		auto p2 = mesh[i+2] - posOffset;
 
 		auto cross = p1.crossProduct(p2);
-		if(cross.length() > 0.9){
+		if(cross.length() > fwdlength){
+			fwdlength = cross.length();
 			forward = cross.normalisedCopy();
 			break;
 		}

@@ -13,6 +13,9 @@
 
 #include <cassert>
 
+template<>
+LayerRenderingManager* Singleton<LayerRenderingManager>::instance = nullptr;
+
 LayerRenderingManager::LayerRenderingManager() {
 	rqis = App::GetSingleton()->ogreRoot->createRenderQueueInvocationSequence("LayerInvocationSequence");
 	App::GetSingleton()->sceneManager->addRenderQueueListener(this);

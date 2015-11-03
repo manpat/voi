@@ -3,6 +3,7 @@
 
 #include <OGRE/OgreRenderQueueListener.h>
 
+#include "singleton.h"
 #include "common.h"
 
 enum {
@@ -21,7 +22,7 @@ namespace Ogre {
 struct Camera;
 struct Mirror;
 
-struct LayerRenderingManager : Ogre::RenderQueueListener {
+struct LayerRenderingManager : Ogre::RenderQueueListener, Singleton<LayerRenderingManager> {
 	LayerRenderingManager();
 	~LayerRenderingManager();
 

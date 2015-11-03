@@ -11,6 +11,7 @@
 namespace Ogre {
 	class Root;
 	class Viewport;
+	class Material;
 	class SubEntity;
 }
 
@@ -29,6 +30,7 @@ struct Portal : Component {
 
 struct PortalManager : Singleton<PortalManager> {
 	std::vector<Portal*> portals;
+	Ogre::MaterialPtr portalMaterial;
 
 	PortalManager();
 	~PortalManager();
