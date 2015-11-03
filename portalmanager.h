@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <OGRE/OgreSharedPtr.h>
 
 #include "common.h"
 #include "singleton.h"
@@ -13,6 +14,8 @@ namespace Ogre {
 	class Viewport;
 	class Material;
 	class SubEntity;
+
+	using MaterialPtr = SharedPtr<Material>;
 }
 
 struct Camera;
