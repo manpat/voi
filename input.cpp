@@ -25,6 +25,8 @@ f32 Input::LYAxis = 0.0f;
 f32 Input::RXAxis = 0.0f;
 f32 Input::RYAxis = 0.0f;
 
+bool Input::doCapture = true;
+
 Input::Input(){
 	App::GetSingleton()->RegisterSDLHook(&EventHook);
 	SDL_Init(SDL_INIT_JOYSTICK);
@@ -84,6 +86,7 @@ void Input::EventHook(const SDL_Event& e){
 	case SDL_MOUSEBUTTONDOWN:
 		// Save state and inform of change
 		mouseStates[e.button.button] = Input::Down | Input::ChangedThisFrameFlag;
+		doCapture = true;
 		break;
 
 	case SDL_JOYAXISMOTION:
@@ -124,17 +127,18 @@ void Input::Update(){
 	// The reason that this isn't being handled with SDLs event queue
 	//	is the mouse warping
 
-	s32 mx, my;
-	SDL_GetMouseState(&mx, &my);
+	if(App::GetSingleton()->IsInFocus() && doCapture){
+		s32 mx, my;
+		SDL_GetMouseState(&mx, &my);
 
-	auto ww = App::GetSingleton()->GetWindowWidth();
-	auto wh = App::GetSingleton()->GetWindowHeight();
+		auto ww = App::GetSingleton()->GetWindowWidth();
+		auto wh = App::GetSingleton()->GetWindowHeight();
 
-	mouseDelta.x = mx / static_cast<f32>(ww) * 2.f - 1.f;
-	mouseDelta.y =-my / static_cast<f32>(wh) * 2.f + 1.f;
+		mouseDelta.x = mx / static_cast<f32>(ww) * 2.f - 1.f;
+		mouseDelta.y =-my / static_cast<f32>(wh) * 2.f + 1.f;
 
-	if(App::GetSingleton()->IsInFocus())
 		SDL_WarpMouseInWindow(App::GetSingleton()->sdlWindow, ww/2, wh/2);
+	}
 }
 
 void Input::EndFrame(){

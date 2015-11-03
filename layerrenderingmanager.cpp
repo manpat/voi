@@ -258,7 +258,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 	}
 }
 
-void LayerRenderingManager::renderQueueEnded(u8 queueId, const std::string& invocation, bool& repeatThisInvocation) {
+void LayerRenderingManager::renderQueueEnded(u8 /*queueId*/, const std::string& invocation, bool& /*repeatThisInvocation*/) {
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 

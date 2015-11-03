@@ -20,7 +20,6 @@
 #include "soundcomponent.h"
 #include "synthcomponent.h"
 #include "physicsmanager.h"
-#include "ogitorsceneloader.h"
 #include "blendersceneloader.h"
 #include "areatriggermanager.h"
 #include "layerrenderingmanager.h"
@@ -92,6 +91,10 @@ void App::Update(){
 	// Return to menu on ESC
 	if (Input::GetMappedDown(Input::Cancel)) {
 		SetGameState(GameState::MAIN_MENU);
+	}
+
+	if(Input::GetKeyDown(SDLK_F2)) {
+		Input::doCapture = !Input::doCapture;
 	}
 
 	input->EndFrame();

@@ -66,6 +66,8 @@ public:
 	static s32 controllerIndex;
 	static f32 LXAxis, LYAxis, RXAxis, RYAxis;
 
+	static bool doCapture;
+
 public:
 	Input();
 	~Input();
