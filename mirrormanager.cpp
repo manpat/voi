@@ -34,7 +34,11 @@ void Mirror::OnInit() {
 	CalcReflectionMatrixAndClipPlane();
 
 	// Default mirror colour
-	SetColour(Ogre::ColourValue(0.49761f, 0.64999f, 0.58996f, 0.2f));
+	if (GetColour() == Ogre::ColourValue::Black) {
+		SetColour(Ogre::ColourValue(0.49761f, 0.64999f, 0.58996f, 0.2f));
+	} else {
+		SetOpacity(0.2f);
+	}
 }
 
 // Apply new colour to mirror
