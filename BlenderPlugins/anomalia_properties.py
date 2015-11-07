@@ -1,7 +1,9 @@
 #!BPY
 
-import sys
 import bpy
+import sys
+import math
+import mathutils
 from bpy.props import *
 
 class ObjectPanel(bpy.types.Panel):
@@ -86,6 +88,69 @@ class SpeakerPanel(bpy.types.Panel):
 		if(len(context.selected_objects) > 1):
 			layout.row().operator("anomalia.speaker_consistentiser")
 
+class WorldPanel(bpy.types.Panel):
+	bl_label = "Anomalia Scene Properties"
+	bl_idname = "SCENE_PT_anomalia"
+
+	bl_space_type = "PROPERTIES"
+	bl_region_type = "WINDOW"
+	bl_context = "world"
+
+	def draw(self, context):
+		world = context.world
+
+		layout = self.layout
+		layout.row().prop(world, "anom_skycolor")
+		layout.row().prop(world, "anom_ambientcolor")
+		layout.row()
+		layout.row().prop(world, "anom_fogtype")
+		layout.row().prop(world, "anom_fogcolor")
+		
+		fogtype = world["anom_fogtype"]
+
+		if(fogtype == 1):
+			row = layout.row()
+			row.prop(world, "anom_foglinearstart")
+			row.prop(world, "anom_foglinearend")
+
+		elif(fogtype == 2 or fogtype == 3):
+			layout.row().prop(world, "anom_fogdensity")
+
+		if(bpy.data.objects.get("Player") is None):
+			layout.row().operator("anomalia.spawner")
+
+#
+# 	  ,ad8888ba,
+# 	 d8"'    `"8b                                                 ,d
+# 	d8'        `8b                                                88
+# 	88          88 8b,dPPYba,   ,adPPYba, 8b,dPPYba, ,adPPYYba, MM88MMM ,adPPYba,  8b,dPPYba, ,adPPYba,
+# 	88          88 88P'    "8a a8P_____88 88P'   "Y8 ""     `Y8   88   a8"     "8a 88P'   "Y8 I8[    ""
+# 	Y8,        ,8P 88       d8 8PP""""""" 88         ,adPPPPP88   88   8b       d8 88          `"Y8ba,
+# 	 Y8a.    .a8P  88b,   ,a8" "8b,   ,aa 88         88,    ,88   88,  "8a,   ,a8" 88         aa    ]8I
+# 	  `"Y8888Y"'   88`YbbdP"'   `"Ybbd8"' 88         `"8bbdP"Y8   "Y888 `"YbbdP"'  88         `"YbbdP"'
+# 	               88
+# 	               88
+
+class WORLD_OT_spawner(bpy.types.Operator):
+	bl_idname = "anomalia.spawner"
+	bl_label = "Make Player Spawner"
+	bl_description = "Creates a proxy object that specifies player spawn position and orientation"
+
+	def execute(self, context):
+		scene = bpy.context.scene
+		obj = bpy.data.objects.new("Player", None)
+
+		cam = bpy.data.cameras.new("PlayerCam")
+		ocam = bpy.data.objects.new("PlayerCam", cam)
+
+		ocam.location = (0, 0, 2.4)
+		ocam.rotation_euler = (math.pi/2, 0, 0)
+		ocam.parent = obj
+
+		scene.objects.link(obj)
+		scene.objects.link(ocam)
+
+		return {'FINISHED'}
 
 class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
 	bl_idname = "anomalia.consistentiser"
@@ -131,6 +196,18 @@ class OBJECT_OT_speakerconsistentiser(bpy.types.Operator):
 
 		return {'FINISHED'}
 
+#
+# 	88b           d88            88
+# 	888b         d888            ""
+# 	88`8b       d8'88
+# 	88 `8b     d8' 88 ,adPPYYba, 88 8b,dPPYba,
+# 	88  `8b   d8'  88 ""     `Y8 88 88P'   `"8a
+# 	88   `8b d8'   88 ,adPPPPP88 88 88       88
+# 	88    `888'    88 88,    ,88 88 88       88
+# 	88     `8'     88 `"8bbdP"Y8 88 88       88
+#
+#
+
 bl_info = {
 	"name": "Anomalia Properties",
 	"author": "Patrick Monaghan",
@@ -156,6 +233,28 @@ def poll_object_layer(scene):
 			if v and i != obj.anom_layer:
 				obj.anom_layer = i
 				break
+
+def poll_player(scene):
+	world = bpy.context.world
+
+	pl = bpy.data.objects.get("Player")
+	if(pl is None):
+		return
+	cam = bpy.data.objects.get("PlayerCam")
+
+	loc = pl.location
+	rot = cam.orientation
+
+	world.playerspawn_position = loc
+	world.playerspawn_rotation = rot
+
+def skycol_update(self, context):
+	col = self["anom_skycolor"]
+	context.world.horizon_color = col
+
+def ambcol_update(self, context):
+	col = self["anom_ambientcolor"]
+	context.world.ambient_color = col
 
 def register():
 	obtypes = [
@@ -204,9 +303,9 @@ def register():
 	obj.anom_doorcount = IntProperty(name="Lock Count", min=1, max=30, default=1)
 
 	sptypes = [
-		('_', 'None', 'Not a sound', 0),
-		('f', 'File', 'A sound loaded from a file', 1),
-		('s', 'Synthesizer', 'A synthesized sound', 2),
+		('_', 'None', 'Not a sound', '', 0),
+		('f', 'File', 'A sound loaded from a file', '', 1),
+		('s', 'Synthesizer', 'A synthesized sound', '', 2),
 	]
 
 	obj.anom_soundtype = EnumProperty(items=sptypes, name="Speaker Type", default='_')
@@ -216,11 +315,46 @@ def register():
 	obj.anom_soundreverb = FloatProperty(name="Reverb Time", default=10000.0, min=10.0, max=20000.0)
 	obj.anom_soundmix = FloatProperty(name="Reverb Mix", default=100.0, min=0.0, max=100.0)
 
+	scn = bpy.types.World
+	fogtypes = [
+		('_', 'None', '', '', 0),
+		('l', 'Linear', '', '', 1),
+		('e', 'Exp', '', '', 2),
+		('2', 'Exp2', '', '', 3),
+	]
+
+	scn.anom_skycolor = FloatVectorProperty(name="Sky Color", subtype='COLOR', 
+		min=0.0, max=1.0, size=3, default=(0,0,0), update=skycol_update)
+
+	scn.anom_ambientcolor = FloatVectorProperty(name="Ambient Color", subtype='COLOR', 
+		min=0.0, max=1.0, size=3, default=(0,0,0), update=ambcol_update)
+
+	scn.anom_fogtype = EnumProperty(items=fogtypes, name="Fog Type", default='l')
+	scn.anom_fogcolor = FloatVectorProperty(name="Fog Color", subtype='COLOR', 
+		min=0.0, max=1.0, size=3, default=(0,0,0))
+
+	scn.anom_fogdensity = FloatProperty(name="Fog Density", min=0.0, max=1.0)
+	scn.anom_foglinearend = FloatProperty(name="Fog Linear End", min=0.0)
+	scn.anom_foglinearstart = FloatProperty(name="Fog Linear Start", min=0.0)
+
 	bpy.app.handlers.scene_update_post.append(poll_object_layer)
+	bpy.app.handlers.scene_update_post.append(poll_player)
+
 	bpy.utils.register_module(__name__)
 
 def unregister():
+	scn = bpy.types.World
 	obj = bpy.types.Object
+
+	del scn.anom_skycolor
+	del scn.anom_ambientcolor
+
+	del scn.anom_fogtype
+	del scn.anom_fogcolor
+	del scn.anom_fogdensity
+	del scn.anom_foglinearend
+	del scn.anom_foglinearstart
+
 	del obj.anom_layer
 	del obj.anom_hidden
 	del obj.anom_newarea

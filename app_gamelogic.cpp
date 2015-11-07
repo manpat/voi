@@ -138,16 +138,22 @@ void App::Load(const std::string& nLevel){
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
 	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
 
-	auto playerEnt = entityManager->CreateEntity("Player", vec3{ 0,2,0 });
-	auto cameraEnt = entityManager->CreateEntity("Camera", vec3{ 0,1.4f,0 });
+	const auto playerHeight = 3.f;
+	const auto playerCenter = playerHeight/2.f;
+
+	// Created at half height above ground because collider origins are from the center
+	auto playerEnt = entityManager->CreateEntity("Player", vec3{ 0, playerCenter, 0 });
+	auto cameraEnt = entityManager->CreateEntity("Camera");
 	playerEnt->AddChild(cameraEnt);
+	cameraEnt->SetGlobalPosition(vec3{0, playerHeight-0.2f, 0});
+
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");
 	layerRenderingManager->SetCamera(camera);
 
 	playerEnt->AddComponent<AudioListenerComponent>();
 
 	player = playerEnt->AddComponent<Player>();
-	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, 3.f, 2.f}, true);
+	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, playerHeight, 2.f}, true);
 	playerCollider->DisableRotation();
 	playerEnt->SetLayer(0);
 

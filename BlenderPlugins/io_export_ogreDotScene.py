@@ -3647,27 +3647,52 @@ class _OgreCommonExport_(_TXML_):
         # Environ settings
         world = context.scene.world
         if world: # multiple scenes - other scenes may not have a world
-            _c = {'colourAmbient':world.ambient_color, 'colourBackground':world.horizon_color, 'colourDiffuse':world.horizon_color}
-            for ctag in _c:
-                a = doc.createElement(ctag); environ.appendChild( a )
-                color = _c[ctag]
-                a.setAttribute('r', '%s'%color.r)
-                a.setAttribute('g', '%s'%color.g)
-                a.setAttribute('b', '%s'%color.b)
+            ################### Manpat edit (commented out)
+            # _c = {'colourAmbient':world.ambient_color, 'colourBackground':world.horizon_color, 'colourDiffuse':world.horizon_color}
+            # for ctag in _c:
+            #     a = doc.createElement(ctag); environ.appendChild( a )
+            #     color = _c[ctag]
+            #     a.setAttribute('r', '%s'%color.r)
+            #     a.setAttribute('g', '%s'%color.g)
+            #     a.setAttribute('b', '%s'%color.b)
+            ################### Manpat edit
 
-        if world and world.mist_settings.use_mist:
-            a = doc.createElement('fog'); environ.appendChild( a )
-            a.setAttribute('linearStart', '%s'%world.mist_settings.start )
-            mist_falloff = world.mist_settings.falloff
-            if mist_falloff == 'QUADRATIC': a.setAttribute('mode', 'exp')    # on DTD spec (none | exp | exp2 | linear)
-            elif mist_falloff == 'LINEAR': a.setAttribute('mode', 'linear')
-            else: a.setAttribute('mode', 'exp2')
-            #a.setAttribute('mode', world.mist_settings.falloff.lower() )    # not on DTD spec
-            a.setAttribute('linearEnd', '%s' %(world.mist_settings.start+world.mist_settings.depth))
-            a.setAttribute('expDensity', world.mist_settings.intensity)
-            a.setAttribute('colourR', world.horizon_color.r)
-            a.setAttribute('colourG', world.horizon_color.g)
-            a.setAttribute('colourB', world.horizon_color.b)
+            ################### Manpat edit (added)
+            for prop in world.items():
+                propname, val = prop
+                if not propname.startswith('_'):
+                    vtype = type(val).__name__
+                    user = doc.createElement('user_data')
+                    environ.appendChild(user)
+                    user.setAttribute( 'name', propname )
+                    if(vtype == "IDPropertyArray"):
+                        vtype = "array %s" % len(val)
+                        st = ""
+                        for v in val:
+                            st += str(v) + " "
+
+                        user.setAttribute('value', st)
+                    else:
+                        user.setAttribute('value', str(val))
+                        
+                    user.setAttribute( 'type', vtype )
+            ################### Manpat edit
+
+        ################### Manpat edit (commented out)
+        # if world and world.mist_settings.use_mist:
+        #     a = doc.createElement('fog'); environ.appendChild( a )
+        #     a.setAttribute('linearStart', '%s'%world.mist_settings.start )
+        #     mist_falloff = world.mist_settings.falloff
+        #     if mist_falloff == 'QUADRATIC': a.setAttribute('mode', 'exp')    # on DTD spec (none | exp | exp2 | linear)
+        #     elif mist_falloff == 'LINEAR': a.setAttribute('mode', 'linear')
+        #     else: a.setAttribute('mode', 'exp2')
+        #     #a.setAttribute('mode', world.mist_settings.falloff.lower() )    # not on DTD spec
+        #     a.setAttribute('linearEnd', '%s' %(world.mist_settings.start+world.mist_settings.depth))
+        #     a.setAttribute('expDensity', world.mist_settings.intensity)
+        #     a.setAttribute('colourR', world.horizon_color.r)
+        #     a.setAttribute('colourG', world.horizon_color.g)
+        #     a.setAttribute('colourB', world.horizon_color.b)
+        ################### Manpat edit
 
         return doc
 

@@ -47,6 +47,7 @@ App::App(const std::string& levelArg){
 	}
 	std::cout << std::endl;
 
+	// For debugging
 	if(levelArg.size() > 0) {
 		customLevelName = levelArg;
 	}else{
