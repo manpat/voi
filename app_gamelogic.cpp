@@ -1,13 +1,9 @@
 #include <OGRE/OgreParticleSystemManager.h>
 #include <OGRE/OgreParticleSystem.h>
 #include <OGRE/OgreSceneManager.h>
-#include <OGRE/OgreManualObject.h>
-#include <OGRE/OgreSubEntity.h>
-#include <OGRE/OgreSubMesh.h>
-#include <OGRE/OgreEntity.h>
+// #include <OGRE/OgreManualObject.h>
 
 #include "app.h"
-#include "bell.h"
 #include "input.h"
 #include "player.h"
 #include "camera.h"

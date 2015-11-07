@@ -1,7 +1,6 @@
 #ifndef MESHINFO_H
 #define MESHINFO_H
 
-#include <OGRE\OgrePlane.h>
 #include <vector>
 #include "common.h"
 

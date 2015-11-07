@@ -2,8 +2,6 @@
 #include <OGRE/OgreException.h>
 #include <string>
 
-extern void unittest_Entity();
-
 #ifdef _WIN32
 	#undef main
 #endif
@@ -11,7 +9,6 @@ s32 main(int, char**){
 	try{
 		App app;
 		app.Run();
-		// unittest_Entity();
 
 	}catch(const Ogre::Exception& e){
 		std::cout << "OGRE Exception!\n" << e.what() << std::endl;
