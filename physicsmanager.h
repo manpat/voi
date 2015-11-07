@@ -120,6 +120,9 @@ struct ColliderComponent : Component {
 	vec3 GetPosition() const;
 	void SetPosition(const vec3&);
 
+	quat GetOrientation() const;
+	void SetOrientation(const quat&);
+
 protected:
 	bool dynamic = false;
 

@@ -408,6 +408,16 @@ void ColliderComponent::SetPosition(const vec3& p) {
 	body->setWorldTransform(world);
 }
 
+quat ColliderComponent::GetOrientation() const {
+	return bt2o(body->getWorldTransform().getRotation());
+}
+
+void ColliderComponent::SetOrientation(const quat& o) {
+	auto world = body->getWorldTransform();
+	world.setRotation(o2bt(o));
+	body->setWorldTransform(world);
+}
+
 
 /*
 	  ,ad8888ba,                                           88                          

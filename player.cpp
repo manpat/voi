@@ -199,4 +199,6 @@ void Player::Respawn(vec3 pos, s32 layer) {
 void Player::SetToOrientation(const quat& orientation) {
 	cameraPitch = orientation.getPitch().valueRadians();
 	cameraYaw = orientation.getYaw().valueRadians();
+
+	App::GetSingleton()->camera->entity->SetGlobalOrientation(orientation);
 }

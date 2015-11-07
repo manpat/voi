@@ -23,7 +23,8 @@ void AreaTriggerManager::TriggerSceneLoad(AreaTriggerComponent* atc, vec3 o, qua
 }
 
 void AreaTriggerManager::Update() {
-	if(toLevel.size() > 0){
+	// Walk out of half-life point
+	if (toLevel.size() > 0) {
 		auto app = App::GetSingleton();
 		auto entMgr = EntityManager::GetSingleton();
 
@@ -35,14 +36,15 @@ void AreaTriggerManager::Update() {
 		quat spawnRot = quat::IDENTITY;
 
 		auto spawnNode = entMgr->FindEntity(toNode);
-		if(!spawnNode) std::cout << "Couldn't find entity in new level " + toNode;
-		else {
-			spawnRot = spawnNode->GetGlobalOrientation() * rotOffset;
-			spawnPos = spawnNode->GetGlobalPosition() + spawnRot * posOffset;
+		if (!spawnNode) {
+			std::cout << "Couldn't find entity in new level " + toNode;
+		} else {
+			spawnPos = spawnNode->GetGlobalOrientation() * posOffset + spawnNode->GetGlobalPosition();
+			spawnRot = spawnNode->GetGlobalOrientation() + rotOffset;
 		}
 
 		app->player->entity->collider->SetPosition(spawnPos);
-		app->camera->entity->SetGlobalOrientation(spawnRot);
+		app->player->SetToOrientation(spawnRot);
 
 		toLevel = "";
 	}

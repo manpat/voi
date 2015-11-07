@@ -274,7 +274,12 @@ void Entity::SetPosition(const vec3& n) {
 }
 void Entity::SetGlobalPosition(const vec3& n) {
 	if(!ogreSceneNode) throw "Tried to set position of Entity with no Ogre::SceneNode";
-	ogreSceneNode->_setDerivedPosition(n);
+
+	if (collider != nullptr) {
+		collider->SetPosition(n);
+	} else {
+		ogreSceneNode->_setDerivedPosition(n);
+	}
 }
 void Entity::SetOrientation(const quat& n) {
 	if(!ogreSceneNode) throw "Tried to set orientation of Entity with no Ogre::SceneNode";
@@ -282,7 +287,12 @@ void Entity::SetOrientation(const quat& n) {
 }
 void Entity::SetGlobalOrientation(const quat& n) {
 	if(!ogreSceneNode) throw "Tried to set orientation of Entity with no Ogre::SceneNode";
-	ogreSceneNode->_setDerivedOrientation(n);
+
+	if (collider != nullptr) {
+		collider->SetOrientation(n);
+	} else {
+		ogreSceneNode->_setDerivedOrientation(n);
+	}
 }
 void Entity::SetScale(const vec3& n) {
 	if(!ogreSceneNode) throw "Tried to set scale of Entity with no Ogre::SceneNode";
