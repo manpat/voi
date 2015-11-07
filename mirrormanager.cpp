@@ -8,7 +8,6 @@
 #include "layerrenderingmanager.h"
 #include "mirrormanager.h"
 #include "component.h"
-#include "meshinfo.h"
 #include "entity.h"
 #include "app.h"
 #include "camera.h"
@@ -82,52 +81,23 @@ void Mirror::LerpColor(const Ogre::ColourValue& lhs, const Ogre::ColourValue& rh
 	SetColour(rgba);
 }
 
-Ogre::SubMesh* Mirror::GetSubMesh() {
-	return *entity->ogreEntity->getMesh()->getSubMeshIterator().begin();
-}
-
 void Mirror::CalcReflectionMatrixAndClipPlane() {
-	auto mesh = GetOgreSubMeshVertices(GetSubMesh());
+	auto plane = entity->GetWorldPlaneFromMesh();
 
-	if (mesh.size() >= 3) {
-		// Calculate normal from mesh vertices
-		auto p1 = mesh[1] - mesh[0];
-		auto p2 = mesh[2] - mesh[0];
+	auto n = -plane.normal;
+	auto l = plane.d;
 
-		auto normal = p1.crossProduct(p2);
-		normal.normalise();
-		
-		// p is a point on the plane
-		auto p = vec3::ZERO;
+	// Translate and rotate to origin
+	// Scale by -1 along the Y axis (up)
+	// Translate and rotate back
+	reflectionMat = mat4(
+		1 - 2 * (n.x * n.x),	-2 * n.x * n.y,			-2 * n.x * n.z,			2 * l * n.x,
+		-2 * n.x * n.y,			1 - 2 * (n.y * n.y),	-2 * n.y * n.z,			2 * l * n.y,
+		-2 * n.x * n.z,			-2 * n.y * n.z,			1 - 2 * (n.z * n.z),	2 * l * n.z,
+		0,						0,						0,						1
+	);
 
-		// Determine that point from the average of all points for later on when aligning to orientation
-		for (u32 v = 0; v < mesh.size(); ++v) {
-			p += mesh[v];
-		}
-
-		p /= (f32)mesh.size();
-
-		// Offset p by the node position
-		auto mirrorNode = entity->ogreEntity->getParentSceneNode();
-		p += mirrorNode->_getDerivedPosition();
-
-		// n is the normal or unit vector perpendicular to the plane
-		auto n = entity->ogreEntity->getParentSceneNode()->_getDerivedOrientation() * normal;
-		auto pn = p.dotProduct(n);
-
-		// Translate and rotate to origin
-		// Scale by -1 along the Y axis (up)
-		// Translate and rotate back
-		reflectionMat = mat4(
-			1 - 2 * (n.x * n.x),	-2 * n.x * n.y,			-2 * n.x * n.z,			2 * pn * n.x,
-			-2 * n.x * n.y,			1 - 2 * (n.y * n.y),	-2 * n.y * n.z,			2 * pn * n.y,
-			-2 * n.x * n.z,			-2 * n.y * n.z,			1 - 2 * (n.z * n.z),	2 * pn * n.z,
-			0,						0,						0,						1
-		);
-
-		// pn is length
-		clipPlane = Ogre::Plane(n, pn);
-	}
+	clipPlane = Ogre::Plane(n, l);
 }
 
 template<>

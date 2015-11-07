@@ -134,8 +134,8 @@ struct Entity {
 	vec3 GetGlobalForward() const;
 	const vec3& GetScale() const;
 	const vec3& GetGlobalScale() const;
-
 	const mat4& GetFullTransform() const;
+	Ogre::Plane GetWorldPlaneFromMesh() const;
 
 	void SetPosition(const vec3&);
 	void SetGlobalPosition(const vec3&);

@@ -39,8 +39,10 @@ void AreaTriggerManager::Update() {
 		if (!spawnNode) {
 			std::cout << "Couldn't find entity in new level " + toNode;
 		} else {
-			spawnPos = spawnNode->GetGlobalOrientation() * posOffset + spawnNode->GetGlobalPosition();
-			spawnRot = spawnNode->GetGlobalOrientation() + rotOffset;
+			auto spawnNodeOri = vec3::UNIT_Z.getRotationTo(spawnNode->GetWorldPlaneFromMesh().normal);
+
+			spawnPos = spawnNodeOri * posOffset + spawnNode->GetGlobalPosition();
+			spawnRot = spawnNodeOri + rotOffset;
 		}
 
 		app->player->entity->collider->SetPosition(spawnPos);

@@ -2,6 +2,7 @@
 #include "physicsmanager.h"
 #include "entitymanager.h"
 #include "component.h"
+#include "meshinfo.h"
 #include "entity.h"
 #include "pool.h"
 #include "app.h"
@@ -265,6 +266,42 @@ const vec3& Entity::GetGlobalScale() const {
 const mat4& Entity::GetFullTransform() const {
 	if(!ogreSceneNode) throw "Tried to get transform of Entity with no Ogre::SceneNode";
 	return ogreSceneNode->_getFullTransform();
+}
+
+Ogre::Plane Entity::GetWorldPlaneFromMesh() const {
+	auto mesh = GetOgreSubMeshVertices(*ogreEntity->getMesh()->getSubMeshIterator().begin());
+
+	if (mesh.size() >= 3) {
+		// Calculate normal from mesh vertices
+		auto p1 = mesh[1] - mesh[0];
+		auto p2 = mesh[2] - mesh[0];
+
+		auto normal = p2.crossProduct(p1);
+		normal.normalise();
+		
+		// p is a point on the plane
+		auto p = vec3::ZERO;
+
+		// Determine that point from the average of all points for later on when aligning to orientation
+		for (u32 v = 0; v < mesh.size(); ++v) {
+			p += mesh[v];
+		}
+
+		p /= (f32)mesh.size();
+
+		// Offset p by the node position
+		auto node = ogreEntity->getParentSceneNode();
+		p += node->_getDerivedPosition();
+
+		// n is the normal or unit vector perpendicular to the plane
+		auto n = ogreEntity->getParentSceneNode()->_getDerivedOrientation() * normal;
+		auto l = p.dotProduct(n);
+
+		// l is length
+		return Ogre::Plane(n, l);
+	}
+
+	return Ogre::Plane();
 }
 
 

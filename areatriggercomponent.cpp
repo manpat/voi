@@ -36,7 +36,7 @@ void AreaTriggerComponent::OnTriggerEnter(ColliderComponent* o) {
 
 		auto camera = App::GetSingleton()->camera;
 		auto prot = camera->entity->GetGlobalOrientation();
-		auto trot = entity->GetGlobalOrientation();
+		auto trot = vec3::UNIT_Z.getRotationTo(entity->GetWorldPlaneFromMesh().normal);
 
 		AreaTriggerManager::GetSingleton()->TriggerSceneLoad(this, ppos - tpos, prot - trot);
 	}

@@ -15,7 +15,6 @@ struct Mirror : Component {
 	Ogre::ColourValue GetColour();
 	void SetOpacity(const f32); 
 	void LerpColor(const Ogre::ColourValue&, const Ogre::ColourValue&, const f32);
-	Ogre::SubMesh* GetSubMesh();
 	void CalcReflectionMatrixAndClipPlane();
 
 	s32 mirrorId;
