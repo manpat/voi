@@ -5,9 +5,14 @@
 #ifdef _WIN32
 	#undef main
 #endif
-s32 main(int, char**){
+s32 main(int na, char** aa){
 	try{
-		App app;
+		std::string level;
+		if(na > 1) {
+			level = std::string{aa[1]};
+		}
+
+		App app(level);
 		app.Run();
 
 	}catch(const Ogre::Exception& e){

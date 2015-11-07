@@ -27,7 +27,7 @@
 
 template<> App* Singleton<App>::instance = nullptr;
 
-App::App(){
+App::App(const std::string& levelArg){
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance("GameData/Scenes", true);
 	auto fsls = fs->findFileInfo("*.scene");
@@ -47,8 +47,12 @@ App::App(){
 	}
 	std::cout << std::endl;
 
-	std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
-	std::getline(std::cin, customLevelName);
+	if(levelArg.size() > 0) {
+		customLevelName = levelArg;
+	}else{
+		std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
+		std::getline(std::cin, customLevelName);
+	}
 
 	SDL_Init(SDL_INIT_VIDEO);
 

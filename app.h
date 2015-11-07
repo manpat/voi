@@ -85,7 +85,7 @@ private:
 	std::string customLevelName;
 
 public:
-	App();
+	App(const std::string& levelArg = "");
 	~App();
 
 	void Run();
