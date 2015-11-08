@@ -135,6 +135,10 @@ void App::Load(const std::string& nLevel){
 	mirrorManager = std::make_shared<MirrorManager>();
 	bellManager = std::make_shared<BellManager>();
 
+	// Reset to defaults in case a level doesn't have a spawn point
+	playerSpawnOrientation = quat::IDENTITY;
+	playerSpawnPosition = vec3::ZERO;
+
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
 	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
 
@@ -142,10 +146,11 @@ void App::Load(const std::string& nLevel){
 	const auto playerCenter = playerHeight/2.f;
 
 	// Created at half height above ground because collider origins are from the center
-	auto playerEnt = entityManager->CreateEntity("Player", vec3{0, playerCenter, 0});
+	auto playerEnt = entityManager->CreateEntity("Player", playerSpawnPosition + vec3{0, playerCenter, 0});
 	auto cameraEnt = entityManager->CreateEntity("Camera");
 	playerEnt->AddChild(cameraEnt);
-	cameraEnt->SetGlobalPosition(vec3{0, playerHeight-0.2f, 0});
+	cameraEnt->SetGlobalPosition(playerSpawnPosition + vec3{0, playerHeight-0.2f, 0});
+	cameraEnt->SetGlobalOrientation(playerSpawnOrientation); // TODO: Test if this works
 
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");
 	layerRenderingManager->SetCamera(camera);

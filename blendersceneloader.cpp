@@ -96,6 +96,15 @@ void BlenderSceneLoader::ConstructScene(App* app){
 		nodeQueue.pop();
 
 		auto& ndef = *n.ndef;
+		if(ndef.name == "Player") {
+			assert((ndef.nodes.size() == 1) && "Player node must have single child node for orientation");
+			auto& cam = ndef.nodes[0];
+
+			app->playerSpawnPosition = ndef.position;
+			app->playerSpawnOrientation = cam.rotation;
+			continue;
+		}
+
 		auto node = n.parentNode->createChildSceneNode(ndef.name, ndef.position, ndef.rotation);
 		node->setScale(ndef.scale);
 

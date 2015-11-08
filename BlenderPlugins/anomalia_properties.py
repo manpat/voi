@@ -234,20 +234,6 @@ def poll_object_layer(scene):
 				obj.anom_layer = i
 				break
 
-def poll_player(scene):
-	world = bpy.context.world
-
-	pl = bpy.data.objects.get("Player")
-	if(pl is None):
-		return
-	cam = bpy.data.objects.get("PlayerCam")
-
-	loc = pl.location
-	rot = cam.orientation
-
-	world.playerspawn_position = loc
-	world.playerspawn_rotation = rot
-
 def skycol_update(self, context):
 	col = self["anom_skycolor"]
 	context.world.horizon_color = col
@@ -338,7 +324,6 @@ def register():
 	scn.anom_foglinearstart = FloatProperty(name="Fog Linear Start", min=0.0)
 
 	bpy.app.handlers.scene_update_post.append(poll_object_layer)
-	bpy.app.handlers.scene_update_post.append(poll_player)
 
 	bpy.utils.register_module(__name__)
 

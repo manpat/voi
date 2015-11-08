@@ -74,6 +74,9 @@ struct App : Singleton<App> {
 	Player* player = nullptr;
 	Camera* camera = nullptr;
 
+	quat playerSpawnOrientation;
+	vec3 playerSpawnPosition;
+
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;
 

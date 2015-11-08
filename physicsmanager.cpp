@@ -335,12 +335,14 @@ void ColliderComponent::OnInit() {
 void ColliderComponent::OnDestroy() {
 	auto physman = PhysicsManager::GetSingleton();
 
-	physman->world->removeRigidBody(body);
+	if(physman)
+		physman->world->removeRigidBody(body);
 	delete motionState;
 	delete body;
 	delete collider;
 
-	physman->NotifyColliderRemoval(this);
+	if(physman)
+		physman->NotifyColliderRemoval(this);
 }
 
 void ColliderComponent::DisableRotation(){
