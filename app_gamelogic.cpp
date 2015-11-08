@@ -140,13 +140,12 @@ void App::Load(const std::string& nLevel){
 
 	const auto playerHeight = 3.f;
 	const auto playerCenter = playerHeight/2.f;
-	const auto error = 0; // HACK: This fixes a crash on scene load. I don't know why it works
 
 	// Created at half height above ground because collider origins are from the center
-	auto playerEnt = entityManager->CreateEntity("Player", vec3{0, playerCenter+error, 0});
+	auto playerEnt = entityManager->CreateEntity("Player", vec3{0, playerCenter, 0});
 	auto cameraEnt = entityManager->CreateEntity("Camera");
 	playerEnt->AddChild(cameraEnt);
-	cameraEnt->SetGlobalPosition(vec3{0, playerHeight-0.2f+error, 0});
+	cameraEnt->SetGlobalPosition(vec3{0, playerHeight-0.2f, 0});
 
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");
 	layerRenderingManager->SetCamera(camera);
