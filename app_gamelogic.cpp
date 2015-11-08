@@ -145,11 +145,13 @@ void App::Load(const std::string& nLevel){
 	const auto playerHeight = 3.f;
 	const auto playerCenter = playerHeight/2.f;
 
+	playerSpawnPosition += vec3{0, playerCenter, 0};
+
 	// Created at half height above ground because collider origins are from the center
-	auto playerEnt = entityManager->CreateEntity("Player", playerSpawnPosition + vec3{0, playerCenter, 0});
+	auto playerEnt = entityManager->CreateEntity("Player", playerSpawnPosition);
 	auto cameraEnt = entityManager->CreateEntity("Camera");
 	playerEnt->AddChild(cameraEnt);
-	cameraEnt->SetGlobalPosition(playerSpawnPosition + vec3{0, playerHeight-0.2f, 0});
+	cameraEnt->SetGlobalPosition(playerSpawnPosition + vec3{0, playerCenter-0.2f, 0});
 	cameraEnt->SetGlobalOrientation(playerSpawnOrientation); // TODO: Test if this works
 
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");

@@ -36,7 +36,7 @@ struct PortalTrigger : Component {
 };
 
 void Player::OnInit() {
-	auto portalTriggerEnt = EntityManager::GetSingleton()->CreateEntity("PortalTrigger", entity->GetPosition());
+	auto portalTriggerEnt = EntityManager::GetSingleton()->CreateEntity("PortalTrigger", entity->GetGlobalPosition());
 	portalTrigger = portalTriggerEnt->AddComponent<PortalTrigger>();
 
 	auto portalTriggerCol = portalTriggerEnt->AddComponent<SphereColliderComponent>(vec3{0.5f}, true);
@@ -182,11 +182,13 @@ void Player::OnLayerChange(){
 }
 
 void Player::Respawn() {
-	auto cp = App::GetSingleton()->currentCheckpoint;
+	auto app = App::GetSingleton();
+	auto cp = app->currentCheckpoint;
 	if(cp){
 		Respawn(cp->entity->collider->GetPosition(), cp->entity->layer);
 	}else{
-		Respawn({0,2,0}, 0);
+		Respawn(app->playerSpawnPosition, 0);
+		SetToOrientation(app->playerSpawnOrientation);
 	}
 }
 	
