@@ -24,11 +24,26 @@ protected:
 		None, Static, Dynamic
 	};
 
+	enum class FogType {
+		None, Linear, Exp, Exp2
+	};
+
 	struct EntityDef : Object {
 		std::string mesh;
 		vec3 bounds;
 		PhysicsType physicsType;
 		ColliderType colliderType;
+	};
+
+	struct EnvironmentDef {
+		FogType fogType;
+		f32 fogDensity;
+		f32 fogStart;
+		f32 fogEnd;
+
+		f32 fogColor[3];
+		f32 skyColor[3];
+		f32 ambientColor[3];
 	};
 
 public:
@@ -42,6 +57,7 @@ public:
 	};
 
 	std::vector<Node> nodes;
+	EnvironmentDef environment;
 
 	void Load(const std::string& path, App*) override;
 
@@ -49,6 +65,7 @@ protected:
 	void ConstructScene(App*);
 	void DestroyScene(App*);
 
+	EnvironmentDef ParseEnvironment(rapidxml::xml_node<>* node);
 	std::vector<Node> ParseNodes(rapidxml::xml_node<>* node);
 	std::shared_ptr<EntityDef> ParseEntity(rapidxml::xml_node<>* node);
 

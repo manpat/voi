@@ -58,6 +58,7 @@ void BlenderSceneLoader::Load(const std::string& filename, App* app) {
 	}
 
 	nodes = ParseNodes(node->first_node("nodes"));
+	environment = ParseEnvironment(node->first_node("environment"));
 	delete[] data;
 
 	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Meshes", "FileSystem");
@@ -71,7 +72,8 @@ void BlenderSceneLoader::Load(const std::string& filename, App* app) {
 void BlenderSceneLoader::ConstructScene(App* app){
 	auto rootNode = app->rootNode;
 	auto entMgr = app->entityManager;
-	// auto physMgr = app->physicsManager;
+
+	// TODO: Set environment parameters
 
 	struct NodeParentPair {
 		Ogre::SceneNode* parentNode;
@@ -322,6 +324,47 @@ void BlenderSceneLoader::ConstructScene(App* app){
 	}
 }
 
+auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> EnvironmentDef {
+	EnvironmentDef env;
+	if(!node) return env;
+
+	auto udnode = node->first_node("user_data");
+	if(!udnode) return env;
+
+	auto ud = ParseUserData(udnode);
+	auto fogtype = std::stol(findin(ud, std::string{"anom_fogtype"}, std::string{"0"}));
+	assert(fogtype >= 0 && fogtype <= 3);
+
+	env.fogType = static_cast<FogType>(fogtype);
+	env.fogDensity = std::stod(findin(ud, std::string{"anom_fogdensity"}, std::string{"0.01"}));
+	env.fogStart = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"0"}));
+	env.fogEnd = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"0"}));
+
+	auto skyStr = findin(ud, std::string{"anom_skycolor"}, std::string{"0 0 0"});
+	auto ambiStr = findin(ud, std::string{"anom_ambientcolor"}, std::string{"0 0 0"});
+	auto fogColStr = findin(ud, std::string{"anom_fogcolor"}, std::string{"0 0 0"});
+
+	auto ParseColor3 = [](std::string str, f32 (&c)[3]) {
+		try {
+			u64 idx = 0;
+			for(u8 i = 0; i < 3; i++){
+				c[i] = std::stod(str, &idx);
+				str = str.substr(idx);
+			}
+
+		} catch(const std::exception& e) {
+			c[0] = c[1] = c[2] = 1.f;
+			std::cout << "Color parsing failed" << std::endl;
+		}
+	};
+
+	ParseColor3(skyStr, env.skyColor);
+	ParseColor3(ambiStr, env.ambientColor);
+	ParseColor3(fogColStr, env.fogColor);
+
+	return env;
+}
+
 auto BlenderSceneLoader::ParseNodes(xml_node<>* node) -> std::vector<Node> {
 	std::vector<Node> nodes;
 	if(!node) return nodes;
@@ -449,6 +492,7 @@ quat BlenderSceneLoader::ParseQuaternion(xml_node<>* node){
 
 auto BlenderSceneLoader::ParseUserData(xml_node<>* node) -> UserData {
 	UserData ud;
+	if(!node) return ud;
 
 	for(auto n = node; n; n = n->next_sibling("user_data")){
 		auto name = n->first_attribute("name");

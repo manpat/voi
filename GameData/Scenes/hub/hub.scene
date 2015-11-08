@@ -179,5 +179,7 @@
       <file name="/home/patrick/Documents/Qantm/TheGoodCIU/anomalia/GameData/Scenes/hub/hub.material" />
     </item>
   </externals>
-  <environment />
+  <environment>
+    <user_data type="array 3" value="0.03740964084863663 0.03740964084863663 0.03740964084863663 " name="anom_skycolor" />
+  </environment>
 </scene>
