@@ -104,18 +104,26 @@ void EntityManager::LateUpdate(){
 }
 
 void EntityManager::DestroyAllEntities(){
-	for(auto it = entities.begin(); it != entities.end(); ++it){
+	for (auto it = entities.begin(); it != entities.end();) {
 		auto e = *it;
-		if(!e) continue;
+
+		if (!e) {
+			++it;
+			continue;
+		}
 
 		// Don't try to destroy children
 		std::cout << "Destroying " << e->GetName() << std::endl;
 		e->Destroy();
+		it = entities.erase(it);
+
 		delete e;
 		e = nullptr;
 	}
 
-	entities.clear();
+	//entities.clear();
+	assert(entities.empty());
+
 	// For some reason, std::queue doesn't have a clear, this is equivalent
 	// This avoids the case where the scene is destroyed before newComponents
 	//	are processed, leading to OnAwake being called on null components

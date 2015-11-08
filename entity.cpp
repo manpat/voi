@@ -31,12 +31,24 @@ void Entity::Init(){
 }
 
 void Entity::Destroy(){
-	for(auto it = components.begin(); it != components.end(); ++it){
+	for (auto it = components.begin(); it != components.end();) {
 		auto c = *it;
+
+		if (!c) {
+			++it;
+			continue;
+		}
+
 		c->OnDestroy();
+		it = components.erase(it);
+
 		delete c;
+		c = nullptr;
 	}
-	components.clear();
+
+	//components.clear();
+	assert(components.empty());
+
 	children.clear();
 
 	if(ogreSceneNode){

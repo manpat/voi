@@ -32,6 +32,7 @@ void AreaTriggerManager::Update() {
 		std::cout << "Goto node " << toNode << " with offset " << posOffset << std::endl;
 
 		app->Load(toLevel);
+
 		vec3 spawnPos = vec3::ZERO;
 		quat spawnRot = quat::IDENTITY;
 
