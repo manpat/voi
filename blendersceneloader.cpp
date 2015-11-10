@@ -5,6 +5,7 @@
 #include <queue>
 
 #include <OGRE/OgreResourceGroupManager.h>
+#include <OGRE/OgreMaterialManager.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
 
@@ -330,6 +331,20 @@ void BlenderSceneLoader::ConstructScene(App* app){
 		for(auto& child: ndef.nodes){
 			nodeQueue.push({node, ent, &child});
 		}
+	}
+
+	// Make everything shadeless
+	auto matIt = Ogre::MaterialManager::getSingletonPtr()->getResourceIterator();
+	while(matIt.hasMoreElements()) {
+		auto res = matIt.current()->second;
+		auto mat = static_cast<Ogre::Material*>(res.get());
+
+		mat->setShadingMode(Ogre::SO_FLAT);
+		
+		auto pass = mat->getTechnique(0)->getPass(0);
+		pass->setEmissive(pass->getDiffuse());
+
+		matIt.moveNext();
 	}
 }
 
