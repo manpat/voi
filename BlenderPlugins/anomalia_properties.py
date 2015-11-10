@@ -106,7 +106,7 @@ class WorldPanel(bpy.types.Panel):
 		layout.row().prop(world, "anom_fogtype")
 		layout.row().prop(world, "anom_fogcolor")
 		
-		fogtype = world["anom_fogtype"]
+		fogtype = world.get("anom_fogtype", 1)
 
 		if(fogtype == 1):
 			row = layout.row()
