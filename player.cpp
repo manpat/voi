@@ -36,7 +36,7 @@ struct PortalTrigger : Component {
 };
 
 void Player::OnInit() {
-	auto portalTriggerEnt = EntityManager::GetSingleton()->CreateEntity("PortalTrigger", entity->GetGlobalPosition());
+	auto portalTriggerEnt = EntityManager::GetSingleton()->CreateEntity("PortalTrigger");
 	portalTrigger = portalTriggerEnt->AddComponent<PortalTrigger>();
 
 	auto portalTriggerCol = portalTriggerEnt->AddComponent<SphereColliderComponent>(vec3{0.5f}, true);
