@@ -74,8 +74,6 @@ void BlenderSceneLoader::ConstructScene(App* app){
 	auto rootNode = app->rootNode;
 	auto entMgr = app->entityManager;
 
-	// TODO: Set environment parameters
-
 	struct NodeParentPair {
 		Ogre::SceneNode* parentNode;
 		Entity* parent;
@@ -332,20 +330,6 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			nodeQueue.push({node, ent, &child});
 		}
 	}
-
-	// Make everything shadeless
-	auto matIt = Ogre::MaterialManager::getSingletonPtr()->getResourceIterator();
-	while(matIt.hasMoreElements()) {
-		auto res = matIt.current()->second;
-		auto mat = static_cast<Ogre::Material*>(res.get());
-
-		mat->setShadingMode(Ogre::SO_FLAT);
-		
-		auto pass = mat->getTechnique(0)->getPass(0);
-		pass->setEmissive(pass->getDiffuse());
-
-		matIt.moveNext();
-	}
 }
 
 auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> EnvironmentDef {
@@ -360,9 +344,9 @@ auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> Environ
 	assert(fogtype >= 0 && fogtype <= 3);
 
 	env.fogType = static_cast<FogType>(fogtype);
-	env.fogDensity = std::stod(findin(ud, std::string{"anom_fogdensity"}, std::string{"0.01"}));
+	env.fogDensity = std::stod(findin(ud, std::string{"anom_fogdensity"}, std::string{"0.001"}));
 	env.fogStart = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"0"}));
-	env.fogEnd = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"0"}));
+	env.fogEnd = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"1"}));
 
 	auto skyStr = findin(ud, std::string{"anom_skycolor"}, std::string{"0 0 0"});
 	auto ambiStr = findin(ud, std::string{"anom_ambientcolor"}, std::string{"0 0 0"});
