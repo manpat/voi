@@ -48,8 +48,8 @@ struct BellAudioGenerator : AudioGenerator {
 		f64 ph = f * elapsed;
 
 		auto o = Wave::Sin(ph*0.5) * 0.05;
-		o += Wave::Sin(ph) * env * 0.5;
-		o += Wave::Triangle(ph*0.5) * (playing?0.5:0.0);
+		o += Wave::Sin(ph) * env * 0.3;
+		o += Wave::Triangle(ph*0.5) * (playing?0.3:0.0);
 
 		return (f32)o;
 	}

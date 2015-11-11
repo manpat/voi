@@ -40,7 +40,8 @@
 
 */
 
-#include "testaudiogenerators.h"
+#include "AudioGenerators/testaudiogenerators.h"
+#include "AudioGenerators/hub.h"
 
 void App::Init(){
 	std::cout << "App Init" << std::endl;
@@ -54,6 +55,8 @@ void App::Init(){
 		audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 		audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
 		audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
+
+		audioManager->RegisterAudioGeneratorType<HubAudioGenerator>("hub");
 		BellManager::RegisterAudio();
 
 		audioGeneratorsRegistered = true;
