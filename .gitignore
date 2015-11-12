@@ -17,7 +17,7 @@ lib/
 
 # Ignore blender backups/logs
 *.blend?
-Working/_ogre_debug.txt
+_ogre_debug.txt
 
 # Source dir as working dir
 *.dll
