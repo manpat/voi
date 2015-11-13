@@ -175,9 +175,6 @@ void App::Load(const std::string& nLevel){
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
 	camera->cameraNode->attachObject(psystem);
 
-	auto g = 0.1f;
-	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
-
 	layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 
 	// Set up environment parameters
@@ -187,8 +184,9 @@ void App::Load(const std::string& nLevel){
 		env.fogDensity,
 		env.fogStart, env.fogEnd);
 
-	Ogre::ColourValue skyColor{env.skyColor[0], env.skyColor[1], env.skyColor[2]};
+	skyColor = Ogre::ColourValue{env.skyColor[0], env.skyColor[1], env.skyColor[2]};
 	camera->viewport->setBackgroundColour(skyColor);
+	portalManager->SetPortalColor(skyColor);
 
 	// TODO: Do something with environment.ambientColor
 

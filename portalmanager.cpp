@@ -49,6 +49,10 @@ void PortalManager::AddPortal(Portal* portal){
 	numLayers = std::max((u32)portal->layer[1]+1, numLayers);
 }
 
+void PortalManager::SetPortalColor(const Ogre::ColourValue& col){
+	portalMaterial->setSelfIllumination(col);
+}
+
 void Portal::OnInit(){
 	auto prtMgr = PortalManager::GetSingleton();
 

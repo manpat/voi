@@ -14,6 +14,7 @@ namespace Ogre {
 	class Viewport;
 	class Material;
 	class SubEntity;
+	class ColourValue;
 
 	using MaterialPtr = SharedPtr<Material>;
 }
@@ -39,6 +40,7 @@ struct PortalManager : Singleton<PortalManager> {
 	~PortalManager();
 
 	void AddPortal(Portal*);
+	void SetPortalColor(const Ogre::ColourValue&);
 };
 
 #endif

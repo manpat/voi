@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <OGRE/OgreColourValue.h>
 
 #include "common.h"
 #include "singleton.h"
@@ -76,6 +77,7 @@ struct App : Singleton<App> {
 
 	quat playerSpawnOrientation;
 	vec3 playerSpawnPosition;
+	Ogre::ColourValue skyColor;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;
