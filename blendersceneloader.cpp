@@ -333,7 +333,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 }
 
 auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> EnvironmentDef {
-	EnvironmentDef env;
+	EnvironmentDef env{};
 	if(!node) return env;
 
 	auto udnode = node->first_node("user_data");
@@ -344,9 +344,9 @@ auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> Environ
 	assert(fogtype >= 0 && fogtype <= 3);
 
 	env.fogType = static_cast<FogType>(fogtype);
-	env.fogDensity = std::stod(findin(ud, std::string{"anom_fogdensity"}, std::string{"0.001"}));
-	env.fogStart = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"0"}));
-	env.fogEnd = std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"1"}));
+	env.fogDensity = (f32)std::stod(findin(ud, std::string{"anom_fogdensity"}, std::string{"0.001"}));
+	env.fogStart = (f32)std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"0"}));
+	env.fogEnd = (f32)std::stod(findin(ud, std::string{"anom_foglinearstart"}, std::string{"1"}));
 
 	auto skyStr = findin(ud, std::string{"anom_skycolor"}, std::string{"0 0 0"});
 	auto ambiStr = findin(ud, std::string{"anom_ambientcolor"}, std::string{"0 0 0"});
@@ -356,13 +356,13 @@ auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> Environ
 		try {
 			u64 idx = 0;
 			for(u8 i = 0; i < 3; i++){
-				c[i] = std::stod(str, &idx);
+				c[i] = (f32)std::stod(str, &idx);
 				str = str.substr(idx);
 			}
 
 		} catch(const std::exception& e) {
 			c[0] = c[1] = c[2] = 1.f;
-			std::cout << "Color parsing failed" << std::endl;
+			std::cout << "Color parsing failed, error:" << e.what() << std::endl;
 		}
 	};
 
