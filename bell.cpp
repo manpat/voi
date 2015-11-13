@@ -21,6 +21,11 @@ void Bell::OnAwake() {
 			4,
 			7,
 			11,
+
+			12,
+			16,
+			19,
+			23,
 		};
 
 		bellGen = std::dynamic_pointer_cast<BellAudioGenerator>(synth->generator);
