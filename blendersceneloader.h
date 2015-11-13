@@ -25,7 +25,8 @@ protected:
 	};
 
 	enum class FogType {
-		None, Linear, Exp, Exp2
+		// The order of this matches Ogre::FogMode
+		None, Exp, Exp2, Linear
 	};
 
 	struct EntityDef : Object {

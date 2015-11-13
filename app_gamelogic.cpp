@@ -40,7 +40,8 @@
 
 */
 
-#include "testaudiogenerators.h"
+#include "AudioGenerators/testaudiogenerators.h"
+#include "AudioGenerators/hub.h"
 
 void App::Init(){
 	std::cout << "App Init" << std::endl;
@@ -54,6 +55,8 @@ void App::Init(){
 		audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 		audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
 		audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
+
+		audioManager->RegisterAudioGeneratorType<HubAudioGenerator>("hub");
 		BellManager::RegisterAudio();
 
 		audioGeneratorsRegistered = true;
@@ -140,7 +143,9 @@ void App::Load(const std::string& nLevel){
 	playerSpawnPosition = vec3::ZERO;
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(sceneInfo->path, "FileSystem");
-	BlenderSceneLoader{}.Load(sceneInfo->path+sceneInfo->name, this);
+	BlenderSceneLoader scnLdr{};
+	scnLdr.Load(sceneInfo->path+sceneInfo->name, this);
+	auto& env = scnLdr.environment;
 
 	const auto playerHeight = 3.f;
 	const auto playerCenter = playerHeight/2.f;
@@ -172,6 +177,37 @@ void App::Load(const std::string& nLevel){
 	camera->viewport->setBackgroundColour(Ogre::ColourValue(g, g, g));
 
 	layerRenderingManager->SetupRenderQueueInvocationSequence(0);
+
+	// Set up environment parameters
+	sceneManager->setFog(
+		(Ogre::FogMode)env.fogType,
+		Ogre::ColourValue{env.fogColor[0], env.fogColor[1], env.fogColor[2]},
+		env.fogDensity,
+		env.fogStart, env.fogEnd);
+
+	Ogre::ColourValue skyColor{env.skyColor[0], env.skyColor[1], env.skyColor[2]};
+	camera->viewport->setBackgroundColour(skyColor);
+
+	// TODO: Do something with environment.ambientColor
+
+	// Make everything shadeless
+	auto matIt = Ogre::MaterialManager::getSingletonPtr()->getResourceIterator();
+	while(matIt.hasMoreElements()) {
+		auto res = matIt.current()->second;
+		auto mat = static_cast<Ogre::Material*>(res.get());
+		if(mat->getName() == "Portal") {
+			matIt.moveNext();
+			continue;
+		}
+
+		mat->setShadingMode(Ogre::SO_FLAT);
+
+		auto pass = mat->getTechnique(0)->getPass(0);
+		pass->setEmissive(pass->getDiffuse());
+
+		matIt.moveNext();
+	}
+
 
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();
