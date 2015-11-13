@@ -157,17 +157,19 @@ void App::Load(const std::string& nLevel){
 	auto cameraEnt = entityManager->CreateEntity("Camera");
 	playerEnt->AddChild(cameraEnt);
 	cameraEnt->SetGlobalPosition(playerSpawnPosition + vec3{0, playerCenter-0.2f, 0});
-	cameraEnt->SetGlobalOrientation(playerSpawnOrientation); // TODO: Test if this works
 
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");
 	layerRenderingManager->SetCamera(camera);
 
-	playerEnt->AddComponent<AudioListenerComponent>();
-
 	player = playerEnt->AddComponent<Player>();
+	// NOTE: Orientation doesn't seem to work here
+	player->SetToOrientation(playerSpawnOrientation);
+	
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, playerHeight, 2.f}, true);
 	playerCollider->DisableRotation();
 	playerEnt->SetLayer(0);
+
+	playerEnt->AddComponent<AudioListenerComponent>();
 
 	auto psystem = sceneManager->createParticleSystem("Dust", "Environment/Dust");
 	psystem->setRenderQueueGroup(RENDER_QUEUE_PARTICLES);
