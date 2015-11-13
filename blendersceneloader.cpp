@@ -360,9 +360,10 @@ auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> Environ
 				str = str.substr(idx);
 			}
 
+		// Ignore the actual exception
 		} catch(const std::exception&) {
 			c[0] = c[1] = c[2] = 1.f;
-			std::cout << "Color parsing failed, error:" << e.what() << std::endl;
+			std::cout << "Color parsing failed" << std::endl;
 		}
 	};
 
