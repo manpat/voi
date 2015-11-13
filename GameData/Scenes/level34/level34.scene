@@ -1,4 +1,4 @@
-<scene export_time="1447390328.069871" exported_by="assnt" formatVersion="1.0.1" previous_export_time="1447390284.696737" >
+<scene export_time="1447390636.080758" exported_by="assnt" formatVersion="1.0.1" previous_export_time="1447390328.069871" >
   <nodes >
     <node name="Player" >
       <position x="7.000000" z="-0.000000" y="0.000000" />
@@ -87,11 +87,11 @@
       </entity>
     </node>
     <node name="Cube" >
-      <position x="0.468125" z="0.001432" y="3.050000" />
+      <position x="0.468124" z="0.001432" y="3.050000" />
       <rotation qx="0.000000" qy="0.000000" qz="-0.000000" qw="1.000000" />
-      <scale x="7.489996" z="7.499997" y="3.000000" />
+      <scale x="1.000000" z="1.000000" y="1.000000" />
       <entity velocity_min="0.0" velocity_max="0.0" mass="1.0" friction_y="1.0" collisionPrim="triangle_mesh" damping_rot="0.1589999943971634" damping_trans="0.02539999969303608" anisotropic_friction="False" lock_rot_z="False" meshFile="Cube.mesh" physics_type="STATIC" name="Cube" mass_radius="1.0" actor="False" ghost="False" lock_rot_x="False" lock_trans_y="False" friction_z="1.0" lock_trans_x="False" lock_trans_z="False" lock_rot_y="False" friction_x="1.0" inertia_tensor="0.4000000059604645" >
-        <dimensions x="16.977327346801758" z="15.012492179870605" y="6.099999904632568" />
+        <dimensions x="16.977325439453125" z="15.012493133544922" y="6.100000381469727" />
       </entity>
     </node>
     <node name="Bell" >
