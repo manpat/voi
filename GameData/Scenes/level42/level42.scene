@@ -1,4 +1,4 @@
-<scene exported_by="assnt" previous_export_time="1447137006.405451" export_time="1447137076.823132" formatVersion="1.0.1" >
+<scene exported_by="assnt" previous_export_time="1447137076.823132" export_time="1447374652.397443" formatVersion="1.0.1" >
   <nodes >
     <node name="Portal4" >
       <position z="-25.000000" x="-4.500000" y="2.000000" />
@@ -61,7 +61,7 @@
       <rotation qx="0.000000" qz="-0.000000" qw="1.000000" qy="0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
       <entity velocity_max="0.0" lock_rot_y="False" damping_trans="0.02539999969303608" friction_x="1.0" lock_trans_y="False" damping_rot="0.1589999943971634" mass="1.0" inertia_tensor="0.4000000059604645" actor="False" anisotropic_friction="False" friction_z="1.0" lock_trans_z="False" mass_radius="1.0" velocity_min="0.0" name="Cube" lock_trans_x="False" lock_rot_x="False" meshFile="Cube.mesh" physics_type="STATIC" ghost="False" lock_rot_z="False" collisionPrim="triangle_mesh" friction_y="1.0" >
-        <dimensions z="36.00000762939453" x="21.0000057220459" y="11.000004768371582" />
+        <dimensions z="36.00000762939453" x="21.0000057220459" y="11.000006675720215" />
       </entity>
     </node>
   </nodes>

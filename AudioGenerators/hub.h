@@ -11,8 +11,8 @@ struct HubAudioGenerator : AudioGenerator {
 		f64 env = std::min(elapsed * 0.1, 1.0);
 
 		auto o = Wave::Sin(ph);
-		o += Wave::Sin(ph * (1.005 + Wave::Sin(elapsed * 0.1) * 0.0002)) * 0.3;
-		o += Wave::Sin(ph * 3.0/2.0) * 0.2;
+		o += Wave::Sin(ph * (1.005f + Wave::Sin(elapsed * 0.1f) * 0.0002f)) * 0.3f;
+		o += Wave::Sin(ph * 3.0f/2.0f) * 0.2f;
 
 		// o += Wave::Noise() * 0.15 * Wave::Sin(std::max((elapsed - 3.0) * 0.03, 0.0));
 		o += (Wave::Saw(ph)*0.1 + Wave::Noise()) * 0.08 * Wave::Sin(std::max((elapsed - 3.0) * 0.03, 0.0));
