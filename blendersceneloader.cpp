@@ -360,7 +360,7 @@ auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> Environ
 				str = str.substr(idx);
 			}
 
-		} catch(const std::exception& e) {
+		} catch(const std::exception&) {
 			c[0] = c[1] = c[2] = 1.f;
 			std::cout << "Color parsing failed, error:" << e.what() << std::endl;
 		}
@@ -435,7 +435,10 @@ auto BlenderSceneLoader::ParseEntity(xml_node<>* node) -> std::shared_ptr<Entity
 
 	if(e->physicsType != PhysicsType::None){
 		if(!coltypeattr) {
-			error("RigidBody "+ e->name +" missing collider type");
+			std::cout << "RigidBody "+ e->name +" missing collider type, defaulting to mesh collider\n";
+			e->colliderType = ColliderType::Mesh;
+
+			return e;
 		}
 
 		std::string coltype{coltypeattr->value()};
