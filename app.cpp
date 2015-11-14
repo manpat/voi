@@ -5,11 +5,14 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_syswm.h>
+#ifdef _WIN32
+#	include <SDL2/SDL_syswm.h>
+#endif
 
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreFileSystem.h>
 
 #include "app.h"
 #include "menu.h"
@@ -23,8 +26,6 @@
 #include "entitymanager.h"
 #include "physicsmanager.h"
 #include "areatriggermanager.h"
-
-#include <OGRE/OgreFileSystem.h>
 
 template<> App* Singleton<App>::instance = nullptr;
 
