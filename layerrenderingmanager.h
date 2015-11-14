@@ -7,6 +7,7 @@
 #include "common.h"
 
 enum {
+	RENDER_QUEUE_UI = Ogre::RENDER_QUEUE_OVERLAY,
 	RENDER_QUEUE_LAYER = Ogre::RENDER_QUEUE_MAIN, // 50 - 59
 
 	RENDER_QUEUE_PORTAL = Ogre::RENDER_QUEUE_2, // 20 - 49

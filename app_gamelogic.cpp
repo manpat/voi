@@ -7,6 +7,7 @@
 #include "input.h"
 #include "player.h"
 #include "camera.h"
+#include "cursor.h"
 #include "apptime.h"
 #include "bellmanager.h"
 #include "audiomanager.h"
@@ -210,6 +211,7 @@ void App::Load(const std::string& nLevel){
 		matIt.moveNext();
 	}
 
+	cursor = new Cursor();
 
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();

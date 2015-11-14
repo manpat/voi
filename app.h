@@ -9,6 +9,7 @@
 #include "singleton.h"
 
 class Input;
+class Cursor;
 struct Camera;
 struct Checkpoint;
 struct BellManager;
@@ -74,10 +75,12 @@ struct App : Singleton<App> {
 	Checkpoint* currentCheckpoint = nullptr;
 	Player* player = nullptr;
 	Camera* camera = nullptr;
+	Cursor* cursor = nullptr;
 
 	quat playerSpawnOrientation;
 	vec3 playerSpawnPosition;
 	Ogre::ColourValue skyColor;
+
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;

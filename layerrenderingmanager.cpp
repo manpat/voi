@@ -124,6 +124,8 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		// Disable custum culling frustum
 		camera->setCullingFrustum(0);
 	}
+
+	rqis->add(RENDER_QUEUE_UI, "ui");
 }
 
 void LayerRenderingManager::preRenderQueues() {

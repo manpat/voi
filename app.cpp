@@ -16,6 +16,7 @@
 #include "input.h"
 #include "camera.h"
 #include "common.h"
+#include "cursor.h"
 #include "apptime.h"
 
 #include "audiomanager.h"
