@@ -143,6 +143,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			// Set layer
 			auto layerStr = findin(userdata, std::string{"anom_layer"}, std::string{"0"});
 			auto hiddenStr = findin(userdata, std::string{"anom_hidden"}, std::string{"0"});
+			auto invisibleStr = findin(userdata, std::string{"anom_invisible"}, std::string{"0"});
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
@@ -150,6 +151,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			assert(layer < 10);
 
 			ent->SetLayer(layer, hiddenStr == "1");
+			ent->ogreEntity->setVisible(invisibleStr == "0");
 
 			// Set up colliders
 			ColliderComponent* collider = nullptr;

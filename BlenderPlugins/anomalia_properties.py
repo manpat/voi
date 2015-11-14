@@ -21,6 +21,9 @@ class ObjectPanel(bpy.types.Panel):
 		row.prop(context.active_object, "anom_objecttype")
 
 		row = layout.row()
+		row.prop(context.active_object, "anom_invisible")
+
+		row = layout.row()
 		row.prop(context.active_object, "anom_layer")
 
 		otyp = context.active_object.get("anom_objecttype", 0)
@@ -164,7 +167,9 @@ class OBJECT_OT_anomaliaconsistentiser(bpy.types.Operator):
 				continue
 
 			ob.anom_layer = ao.anom_layer
+			ob.anom_hidden = ao.anom_hidden
 			ob.anom_newarea = ao.anom_newarea
+			ob.anom_invisible = ao.anom_invisible
 			ob.anom_portaldst = ao.anom_portaldst
 			ob.anom_objecttype = ao.anom_objecttype
 			ob.anom_bellnumber = ao.anom_bellnumber
@@ -267,6 +272,7 @@ def register():
 	obj.anom_objecttype = EnumProperty(items=obtypes,
 		name="Object Type", default='_')
 
+	obj.anom_invisible = BoolProperty(name="Invisible", default=False)
 	obj.anom_hidden = BoolProperty(name="Object Hidden", default=False)
 
 	# Portal / Mirror
