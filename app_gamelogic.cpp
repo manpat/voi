@@ -41,6 +41,7 @@
 */
 
 #include "AudioGenerators/testaudiogenerators.h"
+#include "AudioGenerators/ambience.h"
 #include "AudioGenerators/hub.h"
 
 void App::Init(){
@@ -55,6 +56,7 @@ void App::Init(){
 		audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 		audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
 		audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
+		audioManager->RegisterAudioGeneratorType<LowRumbleAudioGenerator>("lowrumble");
 
 		audioManager->RegisterAudioGeneratorType<HubAudioGenerator>("hub");
 		BellManager::RegisterAudio();
@@ -132,7 +134,7 @@ void App::Load(const std::string& nLevel){
 	}
 
 	// sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
-	sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 20.0f, 40.0f);
+	// sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 20.0f, 40.0f);
 	layerRenderingManager = std::make_shared<LayerRenderingManager>();
 	portalManager = std::make_shared<PortalManager>();
 	mirrorManager = std::make_shared<MirrorManager>();

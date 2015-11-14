@@ -25,26 +25,19 @@ void SynthComponent::OnInit() {
 	cfmod(channel->setMode(FMOD_3D));
 	cfmod(channel->set3DMinMaxDistance(size, 10000.0f));
 
-	auto newReverb = [&]() -> FMOD::DSP* {
-		FMOD::DSP* rvb;
-		cfmod(audioMan->system->createDSPByType(FMOD_DSP_TYPE_SFXREVERB, &rvb));
-		cfmod(channel->addDSP(1, rvb));
+	cfmod(audioMan->system->createDSPByType(FMOD_DSP_TYPE_SFXREVERB, &reverb));
+	cfmod(channel->addDSP(1, reverb));
 
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_DRYLEVEL, -60.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DRYLEVEL, -60.0);
 
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, 100.0);
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, 10000.);
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_LATEDELAY, 10.);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, 100.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, 10000.);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_LATEDELAY, 10.);
 
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_DIFFUSION, 100.0);
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_DENSITY, 100.0);
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_HFDECAYRATIO, 40.0);
-		rvb->setParameterFloat(FMOD_DSP_SFXREVERB_HIGHCUT, 1000.0);
-
-		return rvb;
-	};
-
-	reverb = newReverb();
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DIFFUSION, 100.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DENSITY, 100.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HFDECAYRATIO, 40.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HIGHCUT, 1000.0);
 }
 
 void SynthComponent::OnAwake(){
@@ -79,7 +72,9 @@ void SynthComponent::SetReverbTime(f32 ms){
 }
 
 void SynthComponent::SetReverbMix(f32 mx){
+	reverb->setBypass(mx == 0.f);
 	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, mx);
+	reverb->setWetDryMix(mx, mx, (100.f - mx)/100.f);
 }
 
 FMOD_RESULT F_CALLBACK 

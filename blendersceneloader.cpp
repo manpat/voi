@@ -313,10 +313,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 					auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
 					auto reverbStr = findin(ndef.userData,
-						std::string{"anom_soundsynthreverb"});
+						std::string{"anom_soundreverb"});
 
 					auto mixStr = findin(ndef.userData,
-						std::string{"anom_soundsynthmix"});
+						std::string{"anom_soundmix"});
 
 					if(reverbStr.size() > 0) synthreverb = std::stof(reverbStr);
 					if(mixStr.size() > 0) synthmix = std::stof(mixStr);
