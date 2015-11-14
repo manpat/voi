@@ -101,11 +101,10 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 			app->playerSpawnPosition = ndef.position;
 
-			// TODO: Yaw works if pitch is netural and pitch works if yaw is netrual, otherwise fucked.
-			quat camPitch(cam.rotation.getPitch() - Ogre::Degree(90), vec3::UNIT_X);
-			quat camYaw(cam.rotation.Inverse().getRoll() - Ogre::Degree(180), vec3::UNIT_Y);
+			quat playerSpawnPitch(cam.rotation.getPitch() - Ogre::Degree(90), vec3::UNIT_X);
+			quat playerSpawnYaw(ndef.rotation.getYaw(), vec3::UNIT_Y);
 
-			app->playerSpawnOrientation = camPitch * camYaw;
+			app->playerSpawnOrientation = playerSpawnPitch * playerSpawnYaw;
 
 			continue;
 		}
