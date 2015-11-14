@@ -1,4 +1,4 @@
-<scene formatVersion="1.0.1" exported_by="patrick" export_time="1447501559.7838182" previous_export_time="1447501473.007723" >
+<scene formatVersion="1.0.1" exported_by="patrick" export_time="1447504305.2080286" previous_export_time="1447504203.4413671" >
   <nodes >
     <node name="CollisionBox" >
       <position z="-3.868750" y="-0.809375" x="0.040625" />
@@ -6,7 +6,7 @@
       <scale z="1.000000" y="1.000000" x="1.000000" />
       <user_data value="1" type="int" name="anom_invisible" />
       <entity lock_rot_z="False" actor="False" mass="1.0" lock_rot_x="False" meshFile="Cube.006.mesh" ghost="False" friction_z="1.0" friction_y="1.0" inertia_tensor="0.4000000059604645" lock_rot_y="False" lock_trans_y="False" friction_x="1.0" physics_type="STATIC" anisotropic_friction="False" mass_radius="1.0" name="Cube.006" damping_trans="0.03999999910593033" velocity_min="0.0" velocity_max="0.0" lock_trans_x="False" lock_trans_z="False" damping_rot="0.10000000149011612" collisionPrim="triangle_mesh" >
-        <dimensions z="35.400001525878906" y="1.5" x="19.200000762939453" />
+        <dimensions z="43.77303695678711" y="1.5" x="19.200000762939453" />
       </entity>
     </node>
     <node name="Portal" >
