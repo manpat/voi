@@ -49,20 +49,20 @@ material Stone
         }
     }
 }
-// Mid genrated by blender2ogre 0.6.0
+// Dark genrated by blender2ogre 0.6.0
 
-material Mid 
+material Dark 
 {
     receive_shadows on 
 
     technique
     {
-        pass Mid
+        pass Dark
         {
-            ambient 0.2461937516927719 0.2461937516927719 0.2461937516927719 1.0
-            diffuse 0.19695500428907575 0.19695500428907575 0.19695500428907575 1.0
+            ambient 0.11927521228790283 0.11927521228790283 0.11927521228790283 1.0
+            diffuse 0.0954201712521936 0.0954201712521936 0.0954201712521936 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.2461937516927719 0.2461937516927719 0.2461937516927719 1.0
+            emissive 0.11927521228790283 0.11927521228790283 0.11927521228790283 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -84,20 +84,20 @@ material Mid
         }
     }
 }
-// Dark genrated by blender2ogre 0.6.0
+// Mid genrated by blender2ogre 0.6.0
 
-material Dark 
+material Mid 
 {
     receive_shadows on 
 
     technique
     {
-        pass Dark
+        pass Mid
         {
-            ambient 0.11927521228790283 0.11927521228790283 0.11927521228790283 1.0
-            diffuse 0.0954201712521936 0.0954201712521936 0.0954201712521936 1.0
+            ambient 0.2461937516927719 0.2461937516927719 0.2461937516927719 1.0
+            diffuse 0.19695500428907575 0.19695500428907575 0.19695500428907575 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.11927521228790283 0.11927521228790283 0.11927521228790283 1.0
+            emissive 0.2461937516927719 0.2461937516927719 0.2461937516927719 1.0
 
             alpha_to_coverage off
             colour_write on
