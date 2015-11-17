@@ -32,7 +32,7 @@ public:
 		Down = 1,
 
 		// This flag is for indicating that a key changed during a frame
-		//	Can be used for triggering things that should only happen once per 
+		//	Can be used for triggering things that should only happen once per
 		//	key press.
 		ChangedThisFrameFlag = 1<<8
 	};
@@ -108,7 +108,7 @@ public:
 
 	static void Update();
 	static void EndFrame();
-	
+
 protected:
 	static void EventHook(const SDL_Event&);
 };

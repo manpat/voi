@@ -12,7 +12,7 @@
 //	to ensure data is valid during the lifetime of OpaqueType and that it is freed
 //	when necessary. OpaqueType will *not* free memory
 //
-// Note: Type information is NOT portable. 
+// Note: Type information is NOT portable.
 // It *may* be used so long as you compare it with typeid(T)
 // Do NOT use hardcoded strings or hashes to compare type information
 

@@ -117,7 +117,7 @@ void Player::OnUpdate() {
 			entity->layer);
 
 		if(rayres) isJumping = false;
-		
+
 		if(!isJumping || canInfinijump) {
 			velocity += vec3::UNIT_Y*jumpImpulse;
 			isJumping = true;
@@ -167,7 +167,7 @@ void Player::OnUpdate() {
 
 	// // This prints out what you're looking at
 	// auto rayres = PhysicsManager::GetSingleton()->Raycast(
-	// 	entity->GetPosition()+vec3::UNIT_Y*0.2f -ori.zAxis()*0.3f, 
+	// 	entity->GetPosition()+vec3::UNIT_Y*0.2f -ori.zAxis()*0.3f,
 	// 	-ori.zAxis()*10.f,
 	// 	/*entity->layer*/-1,
 	// 	collider->collisionGroups);
@@ -191,7 +191,7 @@ void Player::Respawn() {
 		SetToOrientation(app->playerSpawnOrientation);
 	}
 }
-	
+
 void Player::Respawn(vec3 pos, s32 layer) {
 	entity->collider->SetPosition(pos);
 	entity->collider->SetVelocity({ 0,0,0 });

@@ -17,7 +17,7 @@ void SoundComponent::OnInit() {
 }
 
 void SoundComponent::OnAwake(){
-	// Unpausing in OnAwake rather than in OnInit means that the entity 
+	// Unpausing in OnAwake rather than in OnInit means that the entity
 	//	has a chance to move to where it should be
 	cfmod(channel->setPaused(false));
 }

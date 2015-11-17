@@ -10,7 +10,7 @@ namespace Ogre {
 }
 
 class Cursor {
-public: 
+public:
 	Cursor();
 	~Cursor();
 

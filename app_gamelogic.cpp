@@ -155,7 +155,7 @@ void App::Load(const std::string& nLevel){
 	player = playerEnt->AddComponent<Player>();
 	// NOTE: Orientation doesn't seem to work here
 	player->SetToOrientation(playerSpawnOrientation);
-	
+
 	auto playerCollider = playerEnt->AddComponent<CapsuleColliderComponent>(vec3{2.f, playerHeight, 2.f}, true);
 	playerCollider->DisableRotation();
 	playerEnt->SetLayer(0);

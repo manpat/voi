@@ -41,7 +41,7 @@ void SynthComponent::OnInit() {
 }
 
 void SynthComponent::OnAwake(){
-	// Unpausing in OnAwake rather than in OnInit means that the entity 
+	// Unpausing in OnAwake rather than in OnInit means that the entity
 	//	has a chance to move to where it should be
 	cfmod(channel->setPaused(false));
 }
@@ -77,7 +77,7 @@ void SynthComponent::SetReverbMix(f32 mx){
 	reverb->setWetDryMix(mx, mx, (100.f - mx)/100.f);
 }
 
-FMOD_RESULT F_CALLBACK 
+FMOD_RESULT F_CALLBACK
 SynthComponent::GeneratorFunction(FMOD_DSP_STATE* state, f32*, f32* outbuffer, u32 length, s32, s32*){
 	s32 samplerate = 0;
 	cfmod(state->callbacks->getsamplerate(state, &samplerate));

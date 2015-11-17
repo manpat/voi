@@ -13,7 +13,7 @@ Cursor::Cursor() {
 	mat = Ogre::MaterialManager::getSingleton().create("Cursor", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 	auto matPass = mat->getTechnique(0)->getPass(0);
-	
+
 	matPass->createTextureUnitState("cursor.png");
 	matPass->setDepthWriteEnabled(false);
 	matPass->setDepthCheckEnabled(false);
@@ -32,7 +32,7 @@ Cursor::Cursor() {
 	auto right = -left;
 	auto bottom = -top;
 	cursor->setCorners(left, top, right, bottom);
-	
+
 	cursor->setMaterial("Cursor");
 
 	cursor->setRenderQueueGroup(RENDER_QUEUE_UI);
