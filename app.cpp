@@ -25,7 +25,7 @@
 #include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
-#include "areatriggermanager.h"
+#include "halflifepointmanager.h"
 
 template<> App* Singleton<App>::instance = nullptr;
 
@@ -80,7 +80,7 @@ App::App(const std::string& levelArg){
 	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();
-	areaTriggerManager = std::make_shared<AreaTriggerManager>();
+	halflifePointManager = std::make_shared<HalfLifePointManager>();
 
 	window->setActive(true);
 	window->setAutoUpdated(false);

@@ -1,14 +1,14 @@
 #ifndef AG_HUB_H
 #define AG_HUB_H
 
-#include "audiogenerator.h"
+#include "../audiogenerator.h"
 
 struct HubAudioGenerator : AudioGenerator {
 	f32 Generate(f64 elapsed) override {
-		f64 f = ntof(120-12);
+		const f64 f = ntof(120-12);
 		f64 ph = f * elapsed;
 
-		f64 env = std::min(elapsed * 0.1, 1.0);
+		f32 env = Env::Ramp(elapsed, 10.f);
 
 		auto o = Wave::Sin(ph);
 		o += (Wave::Sin(ph * (1.005f + Wave::Sin(elapsed * 0.1f) * 0.0002f)) * 0.3f);

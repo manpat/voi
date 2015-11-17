@@ -1,5 +1,5 @@
-#include "areatriggercomponent.h"
-#include "areatriggermanager.h"
+#include "halflifepointcomponent.h"
+#include "halflifepointmanager.h"
 #include "physicsmanager.h"
 #include "audiomanager.h"
 #include "entity.h"
@@ -7,7 +7,7 @@
 #include "camera.h"
 #include "app.h"
 
-void AreaTriggerComponent::OnUpdate(){
+void HalfLifePointComponent::OnUpdate(){
 	auto audioMan = AudioManager::GetSingleton();
 	auto player = App::GetSingleton()->player;
 	auto ppos = player->entity->collider->GetPosition();
@@ -28,7 +28,7 @@ void AreaTriggerComponent::OnUpdate(){
 	}
 }
 
-void AreaTriggerComponent::OnTriggerEnter(ColliderComponent* o) {
+void HalfLifePointComponent::OnTriggerEnter(ColliderComponent* o) {
 	// Walk into half-life point
 	if (auto p = o->entity->FindComponent<Player>()) {
 		auto ppos = p->entity->collider->GetPosition();
@@ -38,6 +38,6 @@ void AreaTriggerComponent::OnTriggerEnter(ColliderComponent* o) {
 		auto prot = camera->entity->GetGlobalOrientation();
 		auto trot = vec3::UNIT_Z.getRotationTo(entity->GetWorldPlaneFromMesh().normal);
 
-		AreaTriggerManager::GetSingleton()->TriggerSceneLoad(this, ppos - tpos, prot - trot);
+		HalfLifePointManager::GetSingleton()->TriggerSceneLoad(this, ppos - tpos, prot - trot);
 	}
 }

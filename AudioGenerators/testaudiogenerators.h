@@ -1,7 +1,7 @@
 #ifndef TESTAUDIOGENERATORS_H
 #define TESTAUDIOGENERATORS_H
 
-#include "audiogenerator.h"
+#include "../audiogenerator.h"
 
 struct DoorAudioGenerator : AudioGenerator {
 	f32 Generate(f64 elapsed) override {

@@ -14,6 +14,13 @@ namespace Wave {
 	f32 Noise();
 }
 
+namespace Env {
+	f32 Ramp(f32 phase, f32 length);
+	f32 ExpRamp(f32 phase, f32 length, f32 exp = 2.0);
+
+	// TODO: ADR
+}
+
 // Inherit from this
 struct AudioGenerator {
 	virtual ~AudioGenerator() {};

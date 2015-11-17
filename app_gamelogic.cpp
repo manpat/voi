@@ -18,7 +18,7 @@
 #include "synthcomponent.h"
 #include "physicsmanager.h"
 #include "blendersceneloader.h"
-#include "areatriggermanager.h"
+#include "halflifepointmanager.h"
 #include "layerrenderingmanager.h"
 
 #include "entity.h"
@@ -41,9 +41,7 @@
 
 */
 
-#include "AudioGenerators/testaudiogenerators.h"
-#include "AudioGenerators/ambience.h"
-#include "AudioGenerators/hub.h"
+void InitAudioGenerators(std::shared_ptr<AudioManager> audioManager);
 
 void App::Init(){
 	std::cout << "App Init" << std::endl;
@@ -51,17 +49,7 @@ void App::Init(){
 	// HACK: Move somewhere good
 	static bool audioGeneratorsRegistered = false;
 	if(!audioGeneratorsRegistered){
-		audioManager->RegisterAudioGeneratorType<DoorAudioGenerator>("door");
-		audioManager->RegisterAudioGeneratorType<TrophyAudioGenerator>("trophy");
-		audioManager->RegisterAudioGeneratorType<FourWayAudioGenerator>("4way");
-		audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
-		audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");
-		audioManager->RegisterAudioGeneratorType<NoiseAudioGenerator>("noise");
-		audioManager->RegisterAudioGeneratorType<LowRumbleAudioGenerator>("lowrumble");
-
-		audioManager->RegisterAudioGeneratorType<HubAudioGenerator>("hub");
-		BellManager::RegisterAudio();
-
+		InitAudioGenerators(audioManager);
 		audioGeneratorsRegistered = true;
 	}
 
@@ -82,7 +70,7 @@ void App::Init(){
 	             88
 */
 void App::Update(){
-	areaTriggerManager->Update();
+	halflifePointManager->Update();
 
 	input->Update();
 	entityManager->Update();

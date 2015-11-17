@@ -1,7 +1,7 @@
 #include <OGRE/OgreSceneNode.h>
 
-#include "areatriggercomponent.h"
-#include "areatriggermanager.h"
+#include "halflifepointcomponent.h"
+#include "halflifepointmanager.h"
 #include "physicsmanager.h"
 #include "entitymanager.h"
 #include "entity.h"
@@ -9,20 +9,20 @@
 #include "camera.h"
 #include "app.h"
 
-template<> AreaTriggerManager* Singleton<AreaTriggerManager>::instance = nullptr;
+template<> HalfLifePointManager* Singleton<HalfLifePointManager>::instance = nullptr;
 
-AreaTriggerManager::AreaTriggerManager() {
+HalfLifePointManager::HalfLifePointManager() {
 
 }
 
-void AreaTriggerManager::TriggerSceneLoad(AreaTriggerComponent* atc, vec3 o, quat q) {
+void HalfLifePointManager::TriggerSceneLoad(HalfLifePointComponent* atc, vec3 o, quat q) {
 	posOffset = o;
 	rotOffset = q;
 	toLevel = atc->toLevel;
 	toNode = atc->entity->GetName();
 }
 
-void AreaTriggerManager::Update() {
+void HalfLifePointManager::Update() {
 	// Walk out of half-life point
 	if (toLevel.size() > 0) {
 		auto app = App::GetSingleton();

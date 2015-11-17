@@ -17,7 +17,7 @@ struct LowRumbleAudioGenerator : AudioGenerator {
 		o = clamp(o, -1.0f, 1.0f);
 
 		lowpass = lowpass + (f32)a * (o - lowpass);
-		return lowpass * 0.1f * clamp(std::pow((f32)elapsed, 3.f), 0.f, 1.f);
+		return lowpass * 0.1f * Env::ExpRamp((f32)elapsed, 1.f, 3.f);
 	}
 };
 
