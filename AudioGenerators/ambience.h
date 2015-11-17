@@ -21,4 +21,12 @@ struct LowRumbleAudioGenerator : AudioGenerator {
 	}
 };
 
+struct ChoirAudioGenerator : AudioGenerator {
+	f32 Generate(f64 elapsed) override {
+		(void) elapsed;
+
+		return 0.f;
+	}
+};
+
 #endif

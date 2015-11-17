@@ -325,7 +325,7 @@ def register():
 	scn.anom_fogcolor = FloatVectorProperty(name="Fog Color", subtype='COLOR', 
 		min=0.0, max=1.0, size=3, default=(0,0,0))
 
-	scn.anom_fogdensity = FloatProperty(name="Fog Density", min=0.0, max=1.0)
+	scn.anom_fogdensity = FloatProperty(name="Fog Density", min=0.0, max=1.0, soft_max=0.2, step=1, precision=3)
 	scn.anom_foglinearend = FloatProperty(name="Fog Linear End", min=0.0)
 	scn.anom_foglinearstart = FloatProperty(name="Fog Linear Start", min=0.0)
 
