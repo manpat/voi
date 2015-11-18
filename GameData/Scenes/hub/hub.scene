@@ -1,199 +1,199 @@
-<scene export_time="1447329393.651099" formatVersion="1.0.1" previous_export_time="1447327803.795292" exported_by="patrick" >
+<scene formatVersion="1.0.1" exported_by="patrick" previous_export_time="1447327803.795292" export_time="1447850349.8729506" >
   <nodes >
     <node name="Speaker.003" >
-      <position x="13.543058" z="-16.977234" y="23.348877" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="23.348877" z="-16.977234" x="13.543058" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="2" type="int" name="anom_soundtype" />
       <user_data value="hub" type="str" name="anom_soundsynth" />
       <user_data value="9.809581756591797" type="float" name="anom_soundsize" />
     </node>
     <node name="Speaker.002" >
-      <position x="-14.456942" z="-16.977234" y="23.348877" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="23.348877" z="-16.977234" x="-14.456942" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="2" type="int" name="anom_soundtype" />
       <user_data value="hub" type="str" name="anom_soundsynth" />
       <user_data value="9.809581756591797" type="float" name="anom_soundsize" />
     </node>
     <node name="Speaker.001" >
-      <position x="-14.456942" z="-64.977234" y="27.348877" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="27.348877" z="-64.977234" x="-14.456942" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="2" type="int" name="anom_soundtype" />
       <user_data value="hub" type="str" name="anom_soundsynth" />
       <user_data value="9.809581756591797" type="float" name="anom_soundsize" />
     </node>
     <node name="Speaker" >
-      <position x="13.543058" z="-64.977234" y="27.348877" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="27.348877" z="-64.977234" x="13.543058" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="2" type="int" name="anom_soundtype" />
       <user_data value="hub" type="str" name="anom_soundsynth" />
       <user_data value="9.809581756591797" type="float" name="anom_soundsize" />
     </node>
     <node name="Level 1 Entrance.003" >
-      <position x="-0.500000" z="-65.090912" y="20.772728" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="20.772728" z="-65.090912" x="-0.500000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="0" type="int" name="anom_objecttype" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.014" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.014.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="39.0" z="10.0" y="7.0" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.014.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.014" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="7.0" z="10.0" x="39.0" />
       </entity>
       <node name="EndOfLevelBend.004" >
-        <position x="-2.500000" z="-6.909088" y="-2.772728" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Plane.004" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Plane.004.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="15.0" z="20.0" y="6.0" />
+        <position y="-2.772728" z="-6.909088" x="-2.500000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Plane.004.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Plane.004" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="6.0" z="20.0" x="15.0" />
         </entity>
       </node>
       <node name="level44" >
-        <position x="0.000000" z="-13.909088" y="-0.772728" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
+        <position y="-0.772728" z="-13.909088" x="0.000000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
         <user_data value="6" type="int" name="anom_objecttype" />
         <user_data value="level44" type="str" name="anom_newarea" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.007" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.007.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="3.0" z="0.0" y="4.0" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.007.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.007" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="4.0" z="0.0" x="3.0" />
         </entity>
       </node>
     </node>
     <node name="Level 1 Entrance.002" >
-      <position x="-0.500000" z="-55.090912" y="14.772727" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="14.772727" z="-55.090912" x="-0.500000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="0" type="int" name="anom_objecttype" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.012" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.012.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="39.0" z="10.0" y="7.0" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.012.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.012" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="7.0" z="10.0" x="39.0" />
       </entity>
       <node name="EndOfLevelBend.003" >
-        <position x="-2.500000" z="-6.909088" y="-2.772727" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Plane.003" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Plane.003.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="15.0" z="20.0" y="6.0" />
+        <position y="-2.772727" z="-6.909088" x="-2.500000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Plane.003.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Plane.003" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="6.0" z="20.0" x="15.0" />
         </entity>
       </node>
-      <node name="level41" >
-        <position x="0.000000" z="-13.909088" y="-0.772727" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
+      <node name="level3" >
+        <position y="-0.772727" z="-13.909088" x="0.000000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
         <user_data value="6" type="int" name="anom_objecttype" />
-        <user_data value="level41" type="str" name="anom_newarea" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.007" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.007.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="3.0" z="0.0" y="4.0" />
+        <user_data value="level3" type="str" name="anom_newarea" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.007.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.007" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="4.0" z="0.0" x="3.0" />
         </entity>
       </node>
     </node>
     <node name="Level 1 Entrance.001" >
-      <position x="-0.500000" z="-45.090912" y="8.772727" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="8.772727" z="-45.090912" x="-0.500000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="0" type="int" name="anom_objecttype" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.009" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.009.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="39.0" z="10.0" y="7.0" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.009.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.009" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="7.0" z="10.0" x="39.0" />
       </entity>
       <node name="EndOfLevelBend.002" >
-        <position x="-2.500000" z="-6.909088" y="-2.772727" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Plane.002" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Plane.002.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="15.0" z="20.0" y="6.0" />
+        <position y="-2.772727" z="-6.909088" x="-2.500000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Plane.002.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Plane.002" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="6.0" z="20.0" x="15.0" />
         </entity>
       </node>
-      <node name="level32" >
-        <position x="0.000000" z="-13.909092" y="-0.772727" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
+      <node name="level2" >
+        <position y="-0.772727" z="-13.909092" x="0.000000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
         <user_data value="6" type="int" name="anom_objecttype" />
-        <user_data value="level32" type="str" name="anom_newarea" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.007" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.007.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="3.0" z="0.0" y="4.0" />
+        <user_data value="level2" type="str" name="anom_newarea" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.007.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.007" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="4.0" z="0.0" x="3.0" />
         </entity>
       </node>
     </node>
     <node name="hub" >
-      <position x="-11.000000" z="22.499996" y="2.000000" />
-      <rotation qw="0.707107" qy="-0.707107" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="2.000000" z="22.499996" x="-11.000000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="7" type="int" name="anom_objecttype" />
       <user_data value="level32" type="str" name="anom_newarea" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.007" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.007.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="3.0" z="0.0" y="4.0" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.007.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.007" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="4.0" z="0.0" x="3.0" />
       </entity>
     </node>
     <node name="Cube.001" >
-      <position x="-12.000000" z="-59.500000" y="2.000000" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.008" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.008.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="1.0" z="3.0" y="4.0" />
+      <position y="2.000000" z="-59.500000" x="-12.000000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.008.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.008" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="4.0" z="3.0" x="1.0" />
       </entity>
     </node>
     <node name="Cube" >
-      <position x="-17.000000" z="22.500000" y="2.000000" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.006" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.006.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="1.0" z="3.0" y="4.0" />
+      <position y="2.000000" z="22.500000" x="-17.000000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.006.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.006" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="4.0" z="3.0" x="1.0" />
       </entity>
     </node>
     <node name="EndGame" >
-      <position x="-0.095959" z="-42.555557" y="16.893940" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="16.893940" z="-42.555557" x="-0.095959" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="0" type="int" name="anom_objecttype" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.005" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.005.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="39.0" z="94.0" y="30.0" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.005.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.005" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="30.0" z="94.0" x="39.0" />
       </entity>
     </node>
     <node name="Level 1 Entrance" >
-      <position x="-0.500000" z="-35.090912" y="2.772727" />
-      <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <position y="2.772727" z="-35.090912" x="-0.500000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
       <user_data value="0" type="int" name="anom_objecttype" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.003" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.003.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="39.0" z="10.0" y="7.0" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.003.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.003" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="7.0" z="10.0" x="39.0" />
       </entity>
       <node name="EndOfLevelBend.001" >
-        <position x="-2.500000" z="-6.909088" y="-2.772727" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Plane.001" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Plane.001.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="15.0" z="20.0" y="6.0" />
+        <position y="-2.772727" z="-6.909088" x="-2.500000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Plane.001.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Plane.001" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="6.0" z="20.0" x="15.0" />
         </entity>
       </node>
-      <node name="level12" >
-        <position x="0.000000" z="-13.909092" y="-0.772727" />
-        <rotation qw="1.000000" qy="0.000000" qz="-0.000000" qx="0.000000" />
-        <scale x="1.000000" z="1.000000" y="1.000000" />
+      <node name="level1" >
+        <position y="-0.772727" z="-13.909092" x="0.000000" />
+        <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
         <user_data value="6" type="int" name="anom_objecttype" />
-        <user_data value="level12" type="str" name="anom_newarea" />
+        <user_data value="level1" type="str" name="anom_newarea" />
         <user_data value="0" type="int" name="anom_layer" />
-        <entity mass="1.0" friction_z="1.0" collisionPrim="box" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Cube.007" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Cube.007.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-          <dimensions x="3.0" z="0.0" y="4.0" />
+        <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Cube.007.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="box" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Cube.007" lock_trans_x="False" velocity_min="0.0" >
+          <dimensions y="4.0" z="0.0" x="3.0" />
         </entity>
       </node>
     </node>
     <node name="Lamp" >
-      <position x="1.076245" z="-19.005453" y="13.903862" />
-      <rotation qw="0.570947" qy="0.755880" qz="-0.272171" qx="0.169076" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
-      <light type="point" name="Lamp" shadow="true" powerScale="1.0" >
-        <position x="1.076245" z="-19.005453" y="13.903862" />
-        <lightAttenuation quadratic="0.0" range="5000" linear="0.03333335240683057" constant="1.0" />
+      <position y="13.903862" z="-19.005453" x="1.076245" />
+      <rotation qx="0.169076" qz="-0.272171" qy="0.755880" qw="0.570947" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <light powerScale="1.0" shadow="true" type="point" name="Lamp" >
+        <position y="13.903862" z="-19.005453" x="1.076245" />
+        <lightAttenuation quadratic="0.0" constant="1.0" linear="0.03333335240683057" range="5000" />
         <colourDiffuse b="1.0" r="1.0" g="1.0" />
         <colourSpecular b="1.0" r="1.0" g="1.0" />
         <colourShadow b="1.0" r="1.0" g="1.0" />
       </light>
     </node>
     <node name="EndOfLevelBend" >
-      <position x="-18.000000" z="20.000000" y="0.000000" />
-      <rotation qw="0.707107" qy="-0.707107" qz="-0.000000" qx="0.000000" />
-      <scale x="1.000000" z="1.000000" y="1.000000" />
-      <entity mass="1.0" friction_z="1.0" collisionPrim="triangle_mesh" actor="False" anisotropic_friction="False" ghost="False" lock_rot_y="False" lock_rot_z="False" lock_rot_x="False" friction_y="1.0" lock_trans_z="False" damping_rot="0.10000000149011612" damping_trans="0.03999999910593033" mass_radius="1.0" name="Plane" lock_trans_x="False" lock_trans_y="False" velocity_max="0.0" meshFile="Plane.mesh" friction_x="1.0" physics_type="STATIC" inertia_tensor="0.4000000059604645" velocity_min="0.0" >
-        <dimensions x="15.0" z="20.0" y="6.0" />
+      <position y="0.000000" z="20.000000" x="-18.000000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <entity actor="False" anisotropic_friction="False" mass="1.0" friction_z="1.0" meshFile="Plane.mesh" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" collisionPrim="triangle_mesh" ghost="False" lock_rot_y="False" velocity_max="0.0" lock_rot_z="False" physics_type="STATIC" mass_radius="1.0" friction_y="1.0" lock_trans_y="False" lock_trans_z="False" friction_x="1.0" lock_rot_x="False" name="Plane" lock_trans_x="False" velocity_min="0.0" >
+        <dimensions y="6.0" z="20.0" x="15.0" />
       </entity>
     </node>
   </nodes>
