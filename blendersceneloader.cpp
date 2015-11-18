@@ -340,7 +340,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 }
 
 auto BlenderSceneLoader::ParseEnvironment(rapidxml::xml_node<>* node) -> EnvironmentDef {
-	EnvironmentDef env;
+	EnvironmentDef env{};
 	if(!node) return env;
 
 	auto udnode = node->first_node("user_data");

@@ -54,7 +54,7 @@ void Entity::Destroy(){
 	if(ogreSceneNode){
 		// ogreSceneNode->removeAndDestroyAllChildren();
 
-		// Don't destroy children because they should be 
+		// Don't destroy children because they should be
 		//	managed by other entities
 		ogreSceneNode->removeAllChildren();
 		App::GetSingleton()->sceneManager->destroySceneNode(ogreSceneNode);
@@ -290,7 +290,7 @@ Ogre::Plane Entity::GetWorldPlaneFromMesh() const {
 
 		auto normal = p2.crossProduct(p1);
 		normal.normalise();
-		
+
 		// p is a point on the plane
 		auto p = vec3::ZERO;
 

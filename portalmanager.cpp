@@ -23,7 +23,7 @@ PortalManager* Singleton<PortalManager>::instance = nullptr;
 PortalManager::PortalManager() {
 	auto& matman = Ogre::MaterialManager::getSingleton();
 	portalMaterial = matman.create("Portal",
-		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 		true /* Manual material */);
 
 	portalMaterial->setSelfIllumination(Ogre::ColourValue(0.1f, 0.1f, 0.1f)); // Skycolor

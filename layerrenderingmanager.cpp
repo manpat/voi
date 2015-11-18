@@ -80,8 +80,8 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 	// Prepare for portal/mirror drawing by clearing the stencil buffer
 	rqis->add(1, "Prep");
 
-	// Draw each portal to the stencil buffer with a ref value of 
-	//	the dstlayer 
+	// Draw each portal to the stencil buffer with a ref value of
+	//	the dstlayer
 	for(auto p: visiblePortals){
 		rqis->add(RENDER_QUEUE_PORTAL + p.portal->portalId, "Prt");
 	}
@@ -205,7 +205,7 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 	} else if(invocationType == "Mir") {
 		auto mirrorId = queueId - RENDER_QUEUE_MIRRORED;
 		auto mirror = MirrorManager::GetSingleton()->mirrors[mirrorId];
-	
+
 		if (!mirror->isVisible) {
 			skipThisInvocation = true;
 			return;

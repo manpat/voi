@@ -52,17 +52,17 @@ Input::~Input(){
 }
 
 /*
-	                                                          
-	88        88                         88                   
-	88        88                         88                   
-	88        88                         88                   
-	88aaaaaaaa88  ,adPPYba,   ,adPPYba,  88   ,d8  ,adPPYba,  
-	88""""""""88 a8"     "8a a8"     "8a 88 ,a8"   I8[    ""  
-	88        88 8b       d8 8b       d8 8888[      `"Y8ba,   
-	88        88 "8a,   ,a8" "8a,   ,a8" 88`"Yba,  aa    ]8I  
-	88        88  `"YbbdP"'   `"YbbdP"'  88   `Y8a `"YbbdP"'  
-	                                                          
-	                                                          
+
+	88        88                         88
+	88        88                         88
+	88        88                         88
+	88aaaaaaaa88  ,adPPYba,   ,adPPYba,  88   ,d8  ,adPPYba,
+	88""""""""88 a8"     "8a a8"     "8a 88 ,a8"   I8[    ""
+	88        88 8b       d8 8b       d8 8888[      `"Y8ba,
+	88        88 "8a,   ,a8" "8a,   ,a8" 88`"Yba,  aa    ]8I
+	88        88  `"YbbdP"'   `"YbbdP"'  88   `Y8a `"YbbdP"'
+
+
 */
 void Input::EventHook(const SDL_Event& e){
 	switch(e.type){
@@ -73,7 +73,7 @@ void Input::EventHook(const SDL_Event& e){
 
 	case SDL_KEYDOWN:
 		// Ignore repeats
-		if(e.key.repeat == 0) 
+		if(e.key.repeat == 0)
 			// Save state and inform of change
 			keyStates[e.key.keysym.sym] = Input::Down | Input::ChangedThisFrameFlag;
 		break;
@@ -121,7 +121,7 @@ void Input::EventHook(const SDL_Event& e){
 }
 
 void Input::Update(){
-	// Get mouse delta from center, convert to range (-1, 1), 
+	// Get mouse delta from center, convert to range (-1, 1),
 	//	move mouse back to center
 
 	// The reason that this isn't being handled with SDLs event queue
@@ -152,17 +152,17 @@ void Input::EndFrame(){
 }
 
 /*
-	                                                                         
-	  ,ad8888ba,                                                             
-	 d8"'    `"8b              ,d      ,d                                    
-	d8'                        88      88                                    
-	88             ,adPPYba, MM88MMM MM88MMM ,adPPYba, 8b,dPPYba, ,adPPYba,  
-	88      88888 a8P_____88   88      88   a8P_____88 88P'   "Y8 I8[    ""  
-	Y8,        88 8PP"""""""   88      88   8PP""""""" 88          `"Y8ba,   
-	 Y8a.    .a88 "8b,   ,aa   88,     88,  "8b,   ,aa 88         aa    ]8I  
-	  `"Y88888P"   `"Ybbd8"'   "Y888   "Y888 `"Ybbd8"' 88         `"YbbdP"'  
-	                                                                         
-	                                                                         
+
+	  ,ad8888ba,
+	 d8"'    `"8b              ,d      ,d
+	d8'                        88      88
+	88             ,adPPYba, MM88MMM MM88MMM ,adPPYba, 8b,dPPYba, ,adPPYba,
+	88      88888 a8P_____88   88      88   a8P_____88 88P'   "Y8 I8[    ""
+	Y8,        88 8PP"""""""   88      88   8PP""""""" 88          `"Y8ba,
+	 Y8a.    .a88 "8b,   ,aa   88,     88,  "8b,   ,aa 88         aa    ]8I
+	  `"Y88888P"   `"Ybbd8"'   "Y888   "Y888 `"Ybbd8"' 88         `"YbbdP"'
+
+
 */
 vec2 Input::GetMouseDelta(){
 	return mouseDelta;
@@ -216,7 +216,7 @@ bool Input::GetMapped(s32 k) {
 
 	if (map.keyCode > 0 && GetKey(map.keyCode)) {
 		return true;
-	} 
+	}
 	if (map.mouseCode > 0 && GetButton(map.mouseCode)) {
 		return true;
 	}

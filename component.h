@@ -24,9 +24,9 @@ struct Component {
 	// Unique identifier, id 0 is invalid
 	u32 id = 0;
 	// This is for fast type comparisons
-	size_t typeHash = 0; 
+	size_t typeHash = 0;
 	// This is for debugging
-	std::string typeName = "Component"; 
+	std::string typeName = "Component";
 	// This determines whether OnUpdate is triggered
 	bool enabled = true;
 
@@ -34,16 +34,16 @@ struct Component {
 	Component(C*) : id(++componentIdCounter), typeHash(typeid(C).hash_code()), typeName(getTypeName<C>()) {}
 	virtual ~Component() {}
 
-	// OnInit is called after the component has been initialised and attached to 
+	// OnInit is called after the component has been initialised and attached to
 	//	an entity
 	virtual void OnInit() {};
 
 	// OnAwake is called before the before the first update after initialisation
 	virtual void OnAwake() {};
-	
+
 	// OnRemove is called after the owning entity calls RemoveComponent
 	virtual void OnRemove() {};
-	
+
 	// OnDestroy is called before the component is destroyed
 	virtual void OnDestroy() {};
 
@@ -63,7 +63,7 @@ struct Component {
 	virtual void OnTriggerEnter(ColliderComponent*) {};
 	virtual void OnTriggerLeave(ColliderComponent*) {};
 
-	// OnMessage is called when SendMessage is called on the owning entity 
+	// OnMessage is called when SendMessage is called on the owning entity
 	virtual void OnMessage(const std::string&, const OpaqueType&) {};
 
 	// Checks derived component type

@@ -15,8 +15,8 @@ protected:
 	};
 
 	enum class ColliderType {
-		Box, Capsule, Sphere, 
-		Cylinder, Cone, 
+		Box, Capsule, Sphere,
+		Cylinder, Cone,
 		ConvexHull, Mesh
 	};
 

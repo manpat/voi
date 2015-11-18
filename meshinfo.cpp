@@ -4,7 +4,7 @@
 
 std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh* sm){
 	auto mesh = sm->parent;
-	auto vertexData = sm->useSharedVertices? 
+	auto vertexData = sm->useSharedVertices?
 		mesh->sharedVertexData : sm->vertexData;
 
 	auto posElem = vertexData->vertexDeclaration
@@ -15,7 +15,7 @@ std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh* sm){
 
 	u8* vertex = static_cast<u8*>(
 		vbuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
-	
+
 	auto vertexCount = vertexData->vertexCount;
 
 	std::vector<vec3> vertices;
@@ -34,7 +34,7 @@ std::vector<vec3> GetOgreSubMeshVertices(Ogre::SubMesh* sm){
 
 std::vector<vec3> GetOgreSubMeshVerticesFlat(Ogre::SubMesh* sm){
 	auto mesh = sm->parent;
-	auto vertexData = sm->useSharedVertices? 
+	auto vertexData = sm->useSharedVertices?
 		mesh->sharedVertexData : sm->vertexData;
 
 	auto indexData = sm->indexData;
@@ -53,7 +53,7 @@ std::vector<vec3> GetOgreSubMeshVerticesFlat(Ogre::SubMesh* sm){
 
 	u8* vertex = static_cast<u8*>(
 		vbuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
-	
+
 	std::vector<vec3> vertices;
 	vertices.reserve(indexData->indexCount);
 

@@ -30,7 +30,7 @@ struct AudioManager : Singleton<AudioManager> {
 	void SetLowpass(f32);
 	void SetReverbTime(f32);
 	void SetReverbMix(f32);
-	
+
 	std::shared_ptr<AudioGenerator> CreateAudioGenerator(const std::string&);
 
 	template<class GenType>

@@ -13,7 +13,7 @@ template<class T>
 std::string getTypeName() {
 	static char nameBuff[100];
 	static s32 status = 0;
-	size_t buffLength = 100;	
+	size_t buffLength = 100;
 
 	return std::string{abi::__cxa_demangle(typeid(T).name(), nameBuff, &buffLength, &status)};
 }

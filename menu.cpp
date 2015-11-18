@@ -49,7 +49,7 @@ void Menu::Update(App* app, f32 dt) {
 
 	auto nyaw = cos(m_delta) * 0.02f;
 	auto npitch = cos(m_delta * 2) * 0.02f;
-	
+
 	auto oriYaw = Ogre::Quaternion(Ogre::Radian(nyaw), vec3::UNIT_Y);
 	auto ori = Ogre::Quaternion(Ogre::Radian(npitch), oriYaw.xAxis()) * oriYaw;
 	app->camera->cameraNode->setOrientation(ori);

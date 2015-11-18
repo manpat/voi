@@ -40,8 +40,8 @@ struct Entity {
 	// Parent entity, null if root entity
 	Entity* parent;
 
-	// Collider pointer for caching purposes, since most entities 
-	//	will have one. It assumes each entity will only ever have 
+	// Collider pointer for caching purposes, since most entities
+	//	will have one. It assumes each entity will only ever have
 	//	one collider
 	ColliderComponent* collider;
 
@@ -86,7 +86,7 @@ struct Entity {
 	void RemoveChild(Entity*);
 	// DestroyChild detaches and destroys a child entity
 	void DestroyChild(Entity*);
-	// OrphanSelf detaches self from parent 
+	// OrphanSelf detaches self from parent
 	void OrphanSelf();
 
 	// AddComponent<C,A...> constructs a component with type C with arguments
@@ -108,8 +108,8 @@ struct Entity {
 	// If zero arguments are given, a nullptr packet is sent to OnMessage
 	// If one argument is given, a copy of that argument is sent to OnMessage
 	// If more than one argument is given, a std::tuple of all arguments is sent to OnMessage
-	// 
-	// For example: entity->SendMessage("messageType", 1, 2, 3.f, 'a'); sends the 
+	//
+	// For example: entity->SendMessage("messageType", 1, 2, 3.f, 'a'); sends the
 	//	packet std::tuple<s32, s32, f32, char>
 	template<class... A>
 	void SendMessage(const std::string&, A... arguments);
@@ -142,7 +142,7 @@ struct Entity {
 	void SetOrientation(const quat&);
 	void SetGlobalOrientation(const quat&);
 	void SetScale(const vec3&);
-	
+
 	// Move by this value
 	void Translate(const vec3&);
 	// Move from from point a to b, by progress

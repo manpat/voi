@@ -16,7 +16,7 @@ void Interactable::OnAwake(){
 	if(!target && targetName.size() > 0){
 		target = EntityManager::GetSingleton()->FindEntity(targetName);
 		if(!target){
-			std::cout << "Interactable " << entity->GetName() 
+			std::cout << "Interactable " << entity->GetName()
 				<< " didn't find target " << targetName << std::endl;
 		}
 	}

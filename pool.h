@@ -4,7 +4,7 @@
 #include "common.h"
 
 // Frame pool is a double buffered memory pool for POD
-//	Buffers are swapped once per frame. 
+//	Buffers are swapped once per frame.
 //	Allocated objects are valid for at least one frame after allocation.
 // 	Destructors are not called on freeing.
 struct FramePool {
