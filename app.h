@@ -9,8 +9,9 @@
 #include "singleton.h"
 
 class Input;
-class Cursor;
 struct Camera;
+struct UiImage;
+struct UiManager;
 struct Checkpoint;
 struct BellManager;
 struct AudioManager;
@@ -63,6 +64,7 @@ struct App : Singleton<App> {
 	Ogre::SceneNode* rootNode;
 
 	std::shared_ptr<Input> input;
+	std::shared_ptr<UiManager> uiManager;
 	std::shared_ptr<BellManager> bellManager;
 	std::shared_ptr<AudioManager> audioManager;
 	std::shared_ptr<MirrorManager> mirrorManager;
@@ -75,7 +77,7 @@ struct App : Singleton<App> {
 	Checkpoint* currentCheckpoint = nullptr;
 	Player* player = nullptr;
 	Camera* camera = nullptr;
-	Cursor* cursor = nullptr;
+	UiImage* cursor = nullptr;
 
 	quat playerSpawnOrientation;
 	vec3 playerSpawnPosition;

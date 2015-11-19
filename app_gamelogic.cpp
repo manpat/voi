@@ -7,8 +7,9 @@
 #include "input.h"
 #include "player.h"
 #include "camera.h"
-#include "cursor.h"
 #include "apptime.h"
+#include "uiimage.h"
+#include "uimanager.h"
 #include "bellmanager.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
@@ -85,6 +86,7 @@ void App::Update(){
 	areaTriggerManager->Update();
 
 	input->Update();
+	uiManager->Update();
 	entityManager->Update();
 	physicsManager->Update();
 	audioManager->Update();
@@ -211,7 +213,10 @@ void App::Load(const std::string& nLevel){
 		matIt.moveNext();
 	}
 
-	cursor = new Cursor();
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/UI", "FileSystem");
+
+	cursor = uiManager->CreateObject<UiImage>("Cursor");
+	cursor->SetImage("cursor.png");
 
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();

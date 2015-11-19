@@ -19,9 +19,8 @@
 #include "input.h"
 #include "camera.h"
 #include "common.h"
-#include "cursor.h"
 #include "apptime.h"
-
+#include "uimanager.h"
 #include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
@@ -77,6 +76,7 @@ App::App(const std::string& levelArg){
 	InitOgre();
 
 	input = std::make_shared<Input>();
+	uiManager = std::make_shared<UiManager>();
 	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();
