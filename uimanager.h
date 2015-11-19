@@ -3,7 +3,10 @@
 
 #include <vector>
 
+#include "app.h"
 #include "singleton.h"
+
+#include "OGRE/OgreSceneNode.h"
 
 struct UiObject;
 
