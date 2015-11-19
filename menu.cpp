@@ -46,7 +46,7 @@ void Menu::Init(App* app) {
 
 	app->layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 
-	app->sceneManager->setFog(Ogre::FOG_NONE);
+	app->sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue::Black, 0.01f);
 	app->camera->viewport->setBackgroundColour(Ogre::ColourValue::Black);
 	app->portalManager->SetPortalColor(Ogre::ColourValue::White);
 
