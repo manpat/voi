@@ -16,17 +16,24 @@ void DoorComponent::OnAwake() {
 }
 
 void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
-	auto trigent = (*ot.Get<Component*>(true))->entity;
+	if(msg == "forceopen") {
+		mover->MoveTo(openPosition, 0.001f);
+		return;
+	}
+
+	auto trigcomp = *ot.Get<Component*>(false);
 
 	if(msg == "open"){
 		switchStates = ~0u;
 		UpdateState();
-		trigent->SendMessage("dooropen", (Component*)this);
+		if(trigcomp)
+			trigcomp->entity->SendMessage("dooropen", (Component*)this);
 
 	}else if(msg == "close"){
 		switchStates = 0;
 		UpdateState();
-		trigent->SendMessage("doorclose", (Component*)this);
+		if(trigcomp)
+			trigcomp->entity->SendMessage("doorclose", (Component*)this);
 
 	}else if(msg.substr(0, 6) == "unlock"){
 		auto numStr = msg.substr(6);
@@ -51,19 +58,25 @@ void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
 			}
 
 			UpdateState();
-			if(!isOpen) {
-				trigent->SendMessage((switchStates==0)?"incorrect":"correct", (Component*)this);
-			}else{
-				trigent->SendMessage("dooropen", (Component*)this);
+
+			if(trigcomp){
+				if(!isOpen) {
+					trigcomp->entity->SendMessage((switchStates==0)?"incorrect":"correct", (Component*)this);
+				}else{
+					trigcomp->entity->SendMessage("dooropen", (Component*)this);
+				}
 			}
 
 		}else{
 			switchStates |= (1<<num) & requiredMask;
 			UpdateState();
-			if(!isOpen) {
-				trigent->SendMessage("correct", (Component*)this);
-			}else{
-				trigent->SendMessage("dooropen", (Component*)this);
+
+			if(trigcomp){
+				if(!isOpen) {
+					trigcomp->entity->SendMessage("correct", (Component*)this);
+				}else{
+					trigcomp->entity->SendMessage("dooropen", (Component*)this);
+				}
 			}
 		}
 	}

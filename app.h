@@ -13,6 +13,7 @@ struct Camera;
 struct UiImage;
 struct UiManager;
 struct Checkpoint;
+struct HubManager;
 struct BellManager;
 struct AudioManager;
 struct PortalManager;
@@ -65,6 +66,7 @@ struct App : Singleton<App> {
 
 	std::shared_ptr<Input> input;
 	std::shared_ptr<UiManager> uiManager;
+	std::shared_ptr<HubManager> hubManager;
 	std::shared_ptr<BellManager> bellManager;
 	std::shared_ptr<AudioManager> audioManager;
 	std::shared_ptr<MirrorManager> mirrorManager;

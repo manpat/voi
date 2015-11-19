@@ -21,6 +21,7 @@
 #include "common.h"
 #include "apptime.h"
 #include "uimanager.h"
+#include "hubmanager.h"
 #include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
@@ -77,6 +78,7 @@ App::App(const std::string& levelArg){
 
 	input = std::make_shared<Input>();
 	uiManager = std::make_shared<UiManager>();
+	hubManager = std::make_shared<HubManager>();
 	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();

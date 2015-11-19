@@ -4,6 +4,7 @@
 #include "halflifepointmanager.h"
 #include "physicsmanager.h"
 #include "entitymanager.h"
+#include "hubmanager.h"
 #include "entity.h"
 #include "player.h"
 #include "camera.h"
@@ -48,6 +49,9 @@ void HalfLifePointManager::Update() {
 
 		app->player->entity->collider->SetPosition(spawnPos);
 		app->player->SetToOrientation(spawnRot);
+
+		if(toLevel == "hub")
+			HubManager::GetSingleton()->NotifyReturnToHub();
 
 		toLevel = "";
 	}

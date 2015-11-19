@@ -10,6 +10,7 @@
 #include "apptime.h"
 #include "uiimage.h"
 #include "uimanager.h"
+#include "hubmanager.h"
 #include "bellmanager.h"
 #include "audiomanager.h"
 #include "portalmanager.h"
@@ -80,6 +81,8 @@ void App::Update(){
 	audioManager->Update();
 	entityManager->LateUpdate();
 
+	hubManager->Update();
+
 	// Return to menu on ESC
 	if (Input::GetMappedDown(Input::Cancel)) {
 		SetGameState(GameState::MAIN_MENU);
@@ -87,6 +90,10 @@ void App::Update(){
 
 	if(Input::GetKeyDown(SDLK_F2)) {
 		Input::doCapture = !Input::doCapture;
+	}
+
+	if(Input::GetKeyDown(SDLK_F5)) {
+		hubManager->NotifyReturnToHub();
 	}
 
 	input->EndFrame();
