@@ -6,15 +6,15 @@
 struct UiObject {
 public:
 	enum class Alignment : u8 {
-		TOPLEFT,
-		TOPCENTER,
-		TOPRIGHT,
-		CENTERLEFT,
-		CENTER,
-		CENTERRIGHT,
-		BOTTOMLEFT,
-		BOTTOMCENTER,
-		BOTTOMRIGHT
+		TopLeft,
+		TopCenter,
+		TopRight,
+		CenterLeft,
+		Center,
+		CenterRight,
+		BottomLeft,
+		BottomCenter,
+		BottomRight
 	};
 
 	UiObject();
