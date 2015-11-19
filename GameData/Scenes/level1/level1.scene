@@ -1,4 +1,4 @@
-<scene exported_by="patrick" export_time="1447942883.563334" formatVersion="1.0.1" previous_export_time="1447942538.0526729" >
+<scene exported_by="patrick" export_time="1447944210.8334675" formatVersion="1.0.1" previous_export_time="1447942883.563334" >
   <nodes >
     <node name="level1" >
       <position z="-49.504002" x="9.000000" y="1.666667" />
@@ -34,7 +34,7 @@
       <scale z="1.000000" x="1.000000" y="1.000000" />
       <user_data name="anom_objecttype" type="int" value="0" />
       <entity lock_rot_z="False" friction_z="1.0" damping_rot="0.10000000149011612" physics_type="STATIC" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_trans_x="False" mass="1.0" friction_x="1.0" inertia_tensor="0.4000000059604645" name="Plane" meshFile="Plane.mesh" lock_trans_z="False" mass_radius="1.0" lock_rot_y="False" velocity_min="0.0" lock_rot_x="False" lock_trans_y="False" velocity_max="0.0" friction_y="1.0" ghost="False" actor="False" >
-        <dimensions z="16.0" x="13.0" y="4.0" />
+        <dimensions z="25.0" x="13.0" y="4.0" />
       </entity>
     </node>
     <node name="Player" >
@@ -51,8 +51,8 @@
       </node>
     </node>
     <node name="Cube" >
-      <position z="-0.546783" x="11.060367" y="2.172085" />
-      <rotation qy="1.000000" qz="-0.000000" qw="0.000000" qx="0.000000" />
+      <position z="0.053217" x="16.060368" y="2.172085" />
+      <rotation qy="0.707107" qz="-0.000000" qw="0.707107" qx="0.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
       <user_data name="anom_layer" type="int" value="0" />
       <user_data name="anom_objecttype" type="int" value="3" />
@@ -68,7 +68,7 @@
       <scale z="1.000000" x="1.000000" y="1.000000" />
       <user_data name="anom_layer" type="int" value="0" />
       <entity lock_rot_z="False" friction_z="1.0" damping_rot="0.10000000149011612" physics_type="STATIC" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_trans_x="False" mass="1.0" friction_x="1.0" collisionPrim="triangle_mesh" name="Plane.006" meshFile="Plane.006.mesh" lock_trans_z="False" mass_radius="1.0" lock_rot_y="False" velocity_min="0.0" lock_rot_x="False" lock_trans_y="False" velocity_max="0.0" friction_y="1.0" inertia_tensor="0.4000000059604645" ghost="False" actor="False" >
-        <dimensions z="17.0" x="31.0" y="14.0" />
+        <dimensions z="16.0" x="31.00405502319336" y="14.0" />
       </entity>
     </node>
     <node name="Stairs" >
