@@ -3,7 +3,7 @@
 
 #include "uiobject.h"
 
-#include "OGRE/OgreSharedPtr.h"
+#include <OGRE/OgreSharedPtr.h>
 
 namespace Ogre {
 	class Rectangle2D;

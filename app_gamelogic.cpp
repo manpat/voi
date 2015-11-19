@@ -124,8 +124,6 @@ void App::Load(const std::string& nLevel){
 		throw "Scene " + nLevel + " not found";
 	}
 
-	// sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 10.0f, 30.0f);
-	// sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue(0.1f, 0.1f, 0.1f), 0.05f, 20.0f, 40.0f);
 	layerRenderingManager = std::make_shared<LayerRenderingManager>();
 	portalManager = std::make_shared<PortalManager>();
 	mirrorManager = std::make_shared<MirrorManager>();

@@ -3,10 +3,10 @@
 #include "app.h"
 #include "layerrenderingmanager.h"
 
-#include "OGRE/OgreSceneNode.h"
-#include "OGRE/OgreTechnique.h"
-#include "OGRE/OgreRectangle2D.h"
-#include "OGRE/OgreMaterialManager.h"
+#include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreTechnique.h>
+#include <OGRE/OgreRectangle2D.h>
+#include <OGRE/OgreMaterialManager.h>
 
 UiImage::UiImage() {
 

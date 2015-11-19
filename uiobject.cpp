@@ -1,5 +1,5 @@
 #include "uiobject.h"
-#include "OGRE/OgreSceneManager.h"
+#include <OGRE/OgreSceneManager.h>
 
 UiObject::UiObject() {
 
