@@ -8,7 +8,7 @@ struct HubAudioGenerator : AudioGenerator {
 		const f64 f = ntof(120-12);
 		f64 ph = f * elapsed;
 
-		f32 env = Env::Ramp(elapsed, 10.f);
+		f32 env = Env::Ramp((f32)elapsed, 10.f);
 
 		auto o = Wave::Sin(ph);
 		o += (Wave::Sin(ph * (1.005f + Wave::Sin(elapsed * 0.1f) * 0.0002f)) * 0.3f);

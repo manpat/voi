@@ -51,7 +51,7 @@ struct BellAudioGenerator : AudioGenerator {
 		o += Wave::Sin(ph) * env * 0.3;
 		o += Wave::Triangle(ph*0.5) * (playing?0.3:0.0);
 
-		return (f32)o * Env::Ramp(elapsed, 3.f) * 0.5f;
+		return (f32)o * Env::Ramp((f32)elapsed, 3.f) * 0.5f;
 	}
 };
 

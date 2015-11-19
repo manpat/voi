@@ -24,10 +24,10 @@ material Object2
     {
         pass Object2
         {
-            ambient 0.5488512516021729 0.0 0.007198606617748737 1.0
-            diffuse 0.43908100782455506 0.0 0.005758885380013068 1.0
+            ambient 1.0 0.0 0.0 1.0
+            diffuse 0.800000011920929 0.0 0.0 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.5488512516021729 0.0 0.007198606617748737 1.0
+            emissive 1.0 0.0 0.0 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -59,10 +59,10 @@ material Object
     {
         pass Object
         {
-            ambient 0.0 0.5 0.5 1.0
-            diffuse 0.0 0.4000000059604645 0.4000000059604645 1.0
+            ambient 0.5 0.5 1.0 1.0
+            diffuse 0.4000000059604645 0.4000000059604645 0.800000011920929 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.0 0.5 0.5 1.0
+            emissive 0.5 0.5 1.0 1.0
 
             alpha_to_coverage off
             colour_write on
