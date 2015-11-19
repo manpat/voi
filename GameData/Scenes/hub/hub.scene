@@ -1,10 +1,11 @@
-<scene export_time="1447939925.65155" exported_by="patrick" previous_export_time="1447939872.342205" formatVersion="1.0.1" >
+<scene export_time="1447940574.3388839" exported_by="patrick" previous_export_time="1447939925.65155" formatVersion="1.0.1" >
   <nodes >
     <node name="FinalDoor" >
       <position x="-0.500000" z="-80.000000" y="26.500000" />
       <rotation qx="0.000000" qz="-0.000000" qw="1.000000" qy="0.000000" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data type="int" value="4" name="anom_objecttype" />
+      <user_data type="float" value="5.0" name="anom_doormovetime" />
       <entity damping_trans="0.03999999910593033" inertia_tensor="0.4000000059604645" name="Cube.000" friction_y="1.0" lock_trans_y="False" ghost="False" lock_trans_z="False" friction_x="1.0" physics_type="STATIC" collisionPrim="triangle_mesh" lock_trans_x="False" lock_rot_z="False" meshFile="Cube.000.mesh" lock_rot_x="False" velocity_max="0.0" mass_radius="1.0" mass="1.0" damping_rot="0.10000000149011612" velocity_min="0.0" anisotropic_friction="False" lock_rot_y="False" friction_z="1.0" actor="False" >
         <dimensions x="3.0" z="1.0" y="5.099999904632568" />
       </entity>

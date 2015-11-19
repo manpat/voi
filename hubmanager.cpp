@@ -7,10 +7,10 @@ HubManager* Singleton<HubManager>::instance = nullptr;
 
 void HubManager::NotifyReturnToHub() {
 	doneMyThang = false;
-	if(lastLevelCompleted < 3)
+	if(lastLevelCompleted < 2)
 		lastLevelCompleted++;
 	else
-		lastLevelCompleted = 4;
+		lastLevelCompleted = 3;
 }
 
 void HubManager::Update() {
@@ -24,7 +24,6 @@ void HubManager::Update() {
 		entmgr->FindEntity("Stairs.Level2"),
 		entmgr->FindEntity("Stairs.Level3"),
 		entmgr->FindEntity("Stairs.Level4"),
-		entmgr->FindEntity("FinalDoor"),
 	};
 
 	for(s32 i = 0; i < lastLevelCompleted; i++) {
@@ -34,4 +33,9 @@ void HubManager::Update() {
 
 	stairs[lastLevelCompleted]->SetLayer(0);
 	stairs[lastLevelCompleted]->SendMessage("open", (Component*)nullptr);
+
+	if(lastLevelCompleted == 3) {
+		auto door = entmgr->FindEntity("FinalDoor");
+		door->SendMessage("open", (Component*)nullptr);
+	}
 }
