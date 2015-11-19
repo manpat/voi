@@ -97,7 +97,7 @@ AudioListenerComponent::AudioListenerComponent() : Component(this) {}
 void AudioListenerComponent::OnUpdate() {
 	auto cam = App::GetSingleton()->camera;
 	auto sys = AudioManager::GetSingleton()->system;
-	
+
 	// TODO: Fuck this off when camera gets better
 	auto ori = cam->cameraNode->_getDerivedOrientation();
 

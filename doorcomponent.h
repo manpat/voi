@@ -18,7 +18,7 @@ struct DoorComponent : Component {
 	bool isOpen = false;
 	bool ordered = false;
 
-	DoorComponent(u32 rc = 1, bool o = false, f32 ot = 2.f) : 
+	DoorComponent(u32 rc = 1, bool o = false, f32 ot = 2.f) :
 		Component{this}, openTime(ot), requiredMask((1u<<rc) - 1), ordered(o) {}
 
 	void OnAwake() override;

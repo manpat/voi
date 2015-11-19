@@ -7,7 +7,7 @@ void GenericTrigger::OnAwake(){
 	if(!target && targetName.size() > 0){
 		target = EntityManager::GetSingleton()->FindEntity(targetName);
 		if(!target){
-			std::cout << "GenericTrigger " << entity->GetName() 
+			std::cout << "GenericTrigger " << entity->GetName()
 				<< " didn't find target " << targetName << std::endl;
 		}
 	}

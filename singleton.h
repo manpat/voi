@@ -10,7 +10,7 @@ protected:
 
 public:
 	Singleton(){
-		if(instance) 
+		if(instance)
 			throw "Tried to instantiate more than one " + getTypeName<C>();
 
 		instance = static_cast<C*>(this);

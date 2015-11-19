@@ -14,20 +14,90 @@ material _missing_material_
     }
 }
 
-// Material genrated by blender2ogre 0.6.0
+// Object2 genrated by blender2ogre 0.6.0
 
-material Material 
+material Object2 
 {
     receive_shadows on 
 
     technique
     {
-        pass Material
+        pass Object2
         {
-            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
-            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
+            ambient 1.0 0.0 0.0 1.0
+            diffuse 0.800000011920929 0.0 0.0 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+            emissive 1.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Object genrated by blender2ogre 0.6.0
+
+material Object 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Object
+        {
+            ambient 0.5 0.5 1.0 1.0
+            diffuse 0.4000000059604645 0.4000000059604645 0.800000011920929 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.5 0.5 1.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Mirror genrated by blender2ogre 0.6.0
+
+material Mirror 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Mirror
+        {
+            ambient 0.3662526309490204 0.4910208284854889 0.5149176120758057 1.0
+            diffuse 0.2930021091252879 0.3928166686418155 0.4119340957989408 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.3662526309490204 0.4910208284854889 0.5149176120758057 1.0
 
             alpha_to_coverage off
             colour_write on

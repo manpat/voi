@@ -10,7 +10,7 @@ void Bell::OnAwake() {
 
 	target = EntityManager::GetSingleton()->FindEntity(targetName);
 	if(!target){
-		std::cout << "Bell " << entity->GetName() 
+		std::cout << "Bell " << entity->GetName()
 			<< " didn't find target " << targetName << std::endl;
 	}
 
@@ -46,7 +46,7 @@ void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
 			bellGen->Trigger();
 		}
 		target->SendMessage("unlock"+std::to_string(bellNumber), (Component*)this);
-		
+
 	}else if(msg == "correct") {
 		std::cout << "Bell unlock " << bellNumber << " correct" << std::endl;
 

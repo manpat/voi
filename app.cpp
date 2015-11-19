@@ -24,7 +24,7 @@
 #include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
-#include "areatriggermanager.h"
+#include "halflifepointmanager.h"
 
 template<> App* Singleton<App>::instance = nullptr;
 
@@ -58,7 +58,7 @@ App::App(const std::string& levelArg){
 
 	SDL_Init(SDL_INIT_VIDEO);
 
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); 
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	sdlWindow = SDL_CreateWindow("Anomalia",
@@ -80,7 +80,7 @@ App::App(const std::string& levelArg){
 	audioManager = std::make_shared<AudioManager>();
 	entityManager = std::make_shared<EntityManager>();
 	physicsManager = std::make_shared<PhysicsManager>();
-	areaTriggerManager = std::make_shared<AreaTriggerManager>();
+	halflifePointManager = std::make_shared<HalfLifePointManager>();
 
 	window->setActive(true);
 	window->setAutoUpdated(false);
@@ -114,17 +114,17 @@ App::~App(){
 void App::InitOgre(){
 	#ifdef _WIN32
 		#ifdef _DEBUG
-			Ogre::String pluginFileName("plugins_win_d.cfg"), 
+			Ogre::String pluginFileName("plugins_win_d.cfg"),
 				configFileName(""), logFileName("ogre_d.log");
 		#else
-			Ogre::String pluginFileName("plugins_win.cfg"), 
+			Ogre::String pluginFileName("plugins_win.cfg"),
 				configFileName(""), logFileName("ogre.log");
 		#endif
 	#else
-		Ogre::String pluginFileName("plugins_linux.cfg"), 
+		Ogre::String pluginFileName("plugins_linux.cfg"),
 			configFileName(""), logFileName("ogre.log");
 	#endif
-	
+
 	auto lm = new Ogre::LogManager();
 	lm->createLog(logFileName, true, false, false);
 	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, configFileName, ""));
@@ -230,7 +230,7 @@ void App::Run(){
 		auto dt = duration_cast<duration<f64>>(end - begin).count();
 		begin = end;
 
-		auto newTitle = "Anomalia " + std::to_string(1.0/dt) 
+		auto newTitle = "Anomalia " + std::to_string(1.0/dt)
 			+ "fps\tTriangles: " + std::to_string(window->getTriangleCount());
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
 

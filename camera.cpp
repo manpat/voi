@@ -29,7 +29,7 @@ void Camera::OnInit(){
 	auto start = (1.f-size)*0.5f;
 
 	viewport = app->window->addViewport(ogreCamera,
-		100 /*z order*/, 
+		100 /*z order*/,
 		start /* left */, start /* top */,
 		size /* width */, size /* height */);
 

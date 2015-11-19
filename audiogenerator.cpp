@@ -36,6 +36,16 @@ namespace Wave {
 	}
 }
 
+namespace Env {
+	f32 Ramp(f32 phase, f32 length) {
+		return clamp(phase/length, 0.f, 1.f);
+	}
+
+	f32 ExpRamp(f32 phase, f32 length, f32 exp) {
+		return clamp(std::pow(phase/length, exp), 0.f, 1.f);
+	}
+}
+
 f64 ntof(u8 n) {
 	return 220.0 * std::pow(2.0, ((s32)n - 128) / 12.0);
 }

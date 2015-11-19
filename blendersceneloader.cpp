@@ -9,8 +9,8 @@
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
 
+#include "halflifepointcomponent.h"
 #include "layerrenderingmanager.h"
-#include "areatriggercomponent.h"
 #include "physicsmanager.h"
 #include "soundcomponent.h"
 #include "synthcomponent.h"
@@ -244,7 +244,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 					auto dstlevel = findin(userdata, std::string{"anom_newarea"});
 					if(dstlevel.size() == 0) throw "Invalid 'newarea' for level trigger " + ent->GetName();
 
-					ent->AddComponent<AreaTriggerComponent>(dstlevel);
+					ent->AddComponent<HalfLifePointComponent>(dstlevel);
 					collider->SetTrigger(true);
 					ent->ogreEntity->setVisible(false);
 				} break;

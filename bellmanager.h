@@ -43,7 +43,7 @@ struct BellAudioGenerator : AudioGenerator {
 
 		f64 env = 1.0 - clamp((elapsed-savedElapsed)/2.0, 0.0, 1.0);
 		env = std::pow(env, 2.0);
-		
+
 		f64 f = ntof(note);
 		f64 ph = f * elapsed;
 
@@ -51,7 +51,7 @@ struct BellAudioGenerator : AudioGenerator {
 		o += Wave::Sin(ph) * env * 0.3;
 		o += Wave::Triangle(ph*0.5) * (playing?0.3:0.0);
 
-		return (f32)o;
+		return (f32)o * Env::Ramp((f32)elapsed, 3.f) * 0.5f;
 	}
 };
 

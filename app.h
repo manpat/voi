@@ -19,7 +19,7 @@ struct PortalManager;
 struct MirrorManager;
 struct EntityManager;
 struct PhysicsManager;
-struct AreaTriggerManager;
+struct HalfLifePointManager;
 struct LayerRenderingManager;
 
 enum {
@@ -71,7 +71,7 @@ struct App : Singleton<App> {
 	std::shared_ptr<PortalManager> portalManager;
 	std::shared_ptr<EntityManager> entityManager;
 	std::shared_ptr<PhysicsManager> physicsManager;
-	std::shared_ptr<AreaTriggerManager> areaTriggerManager;
+	std::shared_ptr<HalfLifePointManager> halflifePointManager;
 	std::shared_ptr<LayerRenderingManager> layerRenderingManager;
 
 	Checkpoint* currentCheckpoint = nullptr;
@@ -99,7 +99,7 @@ public:
 	~App();
 
 	void Run();
-	void ResetScene();
+	void Terminate();
 	void Load(const std::string&);
 
 	// Hooks
@@ -121,7 +121,7 @@ protected:
 
 	void Init();
 	void Update();
-	void Terminate();
+	void ResetScene();
 };
 
 #endif

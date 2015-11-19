@@ -422,14 +422,14 @@ void ColliderComponent::SetOrientation(const quat& o) {
 
 
 /*
-	  ,ad8888ba,                                           88                          
-	 d8"'    `"8b                                    ,d    ""                          
-	d8'                                              88                                
-	88            8b,dPPYba,  ,adPPYba, ,adPPYYba, MM88MMM 88  ,adPPYba,  8b,dPPYba,   
-	88            88P'   "Y8 a8P_____88 ""     `Y8   88    88 a8"     "8a 88P'   `"8a  
-	Y8,           88         8PP""""""" ,adPPPPP88   88    88 8b       d8 88       88  
-	 Y8a.    .a8P 88         "8b,   ,aa 88,    ,88   88,   88 "8a,   ,a8" 88       88  
-	  `"Y8888Y"'  88          `"Ybbd8"' `"8bbdP"Y8   "Y888 88  `"YbbdP"'  88       88  
+	  ,ad8888ba,                                           88
+	 d8"'    `"8b                                    ,d    ""
+	d8'                                              88
+	88            8b,dPPYba,  ,adPPYba, ,adPPYYba, MM88MMM 88  ,adPPYba,  8b,dPPYba,
+	88            88P'   "Y8 a8P_____88 ""     `Y8   88    88 a8"     "8a 88P'   `"8a
+	Y8,           88         8PP""""""" ,adPPPPP88   88    88 8b       d8 88       88
+	 Y8a.    .a8P 88         "8b,   ,aa 88,    ,88   88,   88 "8a,   ,a8" 88       88
+	  `"Y8888Y"'  88          `"Ybbd8"' `"8bbdP"Y8   "Y888 88  `"YbbdP"'  88       88
 */
 void BoxColliderComponent::CreateCollider() {
 	auto hs = dimensions/2.f;

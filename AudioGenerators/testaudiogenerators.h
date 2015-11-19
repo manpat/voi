@@ -1,7 +1,7 @@
 #ifndef TESTAUDIOGENERATORS_H
 #define TESTAUDIOGENERATORS_H
 
-#include "audiogenerator.h"
+#include "../audiogenerator.h"
 
 struct DoorAudioGenerator : AudioGenerator {
 	f32 Generate(f64 elapsed) override {
@@ -36,7 +36,7 @@ struct TrophyAudioGenerator : AudioGenerator {
 		}else{
 			o += Wave::Triangle(elapsed * A * 5.0/4.0);
 		}
-		
+
 		o += Wave::Saw(elapsed * A / 2.0);
 		if(bar8 > 0.5){
 			o += Wave::Triangle(elapsed * A / 3.0);

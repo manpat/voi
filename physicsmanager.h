@@ -12,7 +12,7 @@
 
 // TODO: Non-mesh colliders are created with their center at origin
 //	This is a problem because meshes don't have to be centered on their origin
-//	
+//
 //	Probably have the blender plugin export an offset
 
 struct ColliderComponent;
@@ -25,7 +25,7 @@ struct PhysicsManager : Singleton<PhysicsManager> {
 	using Solver = btSequentialImpulseConstraintSolver;
 	using World = btDiscreteDynamicsWorld;
 
-private: 
+private:
 	struct ColliderPair {
 		ColliderComponent* collider0;
 		ColliderComponent* collider1;
@@ -68,7 +68,7 @@ public:
 	//	colliders in that layer. Layer < 0 will hit all layers.
 	RaycastResult Linecast(const vec3& begin, const vec3& end, s32 layer = -1, u32 collisionMask = ~0u);
 
-	// Raycast is the same as Linecast except it takes direction*distance 
+	// Raycast is the same as Linecast except it takes direction*distance
 	//	instead of end
 	RaycastResult Raycast(const vec3& begin, const vec3& dir, s32 layer = -1, u32 collisionMask = ~0u);
 
@@ -100,7 +100,7 @@ struct ColliderComponent : Component {
 
 	vec3 dimensions = vec3::ZERO;
 
-	ColliderComponent(const vec3& _dim, bool _dynamic = false) : Component{this}, 
+	ColliderComponent(const vec3& _dim, bool _dynamic = false) : Component{this},
 		dimensions{_dim}, dynamic{_dynamic} {}
 	void OnInit() override;
 	void OnDestroy() override;

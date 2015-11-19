@@ -1,0 +1,36 @@
+<scene previous_export_time="1447768775.3502862" export_time="1447769129.097907" exported_by="patrick" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Player" >
+      <position z="28.000000" y="0.000000" x="0.000000" />
+      <rotation qz="-0.000000" qy="0.000000" qx="0.000000" qw="1.000000" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <node name="PlayerCam" >
+        <position z="-0.000000" y="2.400000" x="0.000000" />
+        <rotation qz="-0.000000" qy="0.000000" qx="0.707107" qw="0.707107" />
+        <scale z="1.000000" y="1.000000" x="1.000000" />
+        <camera projectionType="perspective" name="PlayerCam" fov="0.5033799435163735" >
+          <clipping farPlaneDist="100.0" nearPlaneDist="0.10000000149011612" far="100.0" near="0.10000000149011612" />
+        </camera>
+      </node>
+    </node>
+    <node name="Stairwell" >
+      <position z="-0.000000" y="0.000000" x="0.000000" />
+      <rotation qz="-0.000000" qy="0.000000" qx="0.000000" qw="1.000000" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <entity name="Cube" inertia_tensor="0.4000000059604645" ghost="False" lock_rot_x="False" lock_rot_y="False" lock_trans_z="False" physics_type="STATIC" damping_trans="0.02539999969303608" velocity_min="0.0" anisotropic_friction="False" lock_trans_y="False" velocity_max="0.0" mass_radius="1.0" collisionPrim="triangle_mesh" friction_x="1.0" lock_trans_x="False" friction_y="1.0" actor="False" lock_rot_z="False" friction_z="1.0" mass="1.0" meshFile="Cube.mesh" damping_rot="0.1589999943971634" >
+        <dimensions z="57.0" y="132.0" x="55.0" />
+      </entity>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="/home/patrick/Documents/Qantm/TheGoodCIU/anomalia/GameData/Scenes/experimental/stairwell/stairwell.material" />
+    </item>
+  </externals>
+  <environment >
+    <user_data name="anom_fogcolor" value="1.0 1.0 1.0 " type="array 3" />
+    <user_data name="anom_fogtype" value="2" type="int" />
+    <user_data name="anom_fogdensity" value="0.027199989184737206" type="float" />
+    <user_data name="anom_foglinearend" value="35.31999588012695" type="float" />
+  </environment>
+</scene>
