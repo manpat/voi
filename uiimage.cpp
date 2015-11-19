@@ -30,7 +30,7 @@ void UiImage::Init() {
 
 	rect->setRenderQueueGroup(RENDER_QUEUE_UI);
 	rect->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
-	rect->setCorners(-0.1, 0.1, 0.1, -0.1);
+	rect->setCorners(-0.1f, 0.1f, 0.1f, -0.1f);
 
 	node->attachObject(rect);
 }
@@ -46,7 +46,7 @@ void UiImage::SetImage(const std::string& filename, bool resize) {
 
 void UiImage::ResizeObjectToImage() {
 	if (!matPass->getTextureUnitState(0)->_getTexturePtr().isNull()) {
-		size = vec2(matPass->getTextureUnitState(0)->_getTexturePtr()->getWidth(), matPass->getTextureUnitState(0)->_getTexturePtr()->getHeight());
+		size = vec2((f32)matPass->getTextureUnitState(0)->_getTexturePtr()->getWidth(), (f32)matPass->getTextureUnitState(0)->_getTexturePtr()->getHeight());
 	}
 	else {
 		std::cout << "Can't get texture pointer to UI object " << GetName() << ", Defaulting to 128x128\n";
