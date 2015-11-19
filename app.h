@@ -97,7 +97,7 @@ public:
 	~App();
 
 	void Run();
-	void ResetScene();
+	void Terminate();
 	void Load(const std::string&);
 
 	// Hooks
@@ -119,7 +119,7 @@ protected:
 
 	void Init();
 	void Update();
-	void Terminate();
+	void ResetScene();
 };
 
 #endif
