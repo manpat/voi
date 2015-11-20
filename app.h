@@ -84,7 +84,11 @@ struct App : Singleton<App> {
 	quat playerSpawnOrientation;
 	vec3 playerSpawnPosition;
 	Ogre::ColourValue skyColor;
+	Ogre::ColourValue fogColor = Ogre::ColourValue::Black;
+	f32 fogDensity = 0.1f;
 
+	Ogre::ColourValue targetFogColor;
+	f32 targetFogDensity;
 
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;
@@ -110,6 +114,10 @@ public:
 
 	// Setters
 	void SetGameState(GameState);
+
+	void SetFogColor(const Ogre::ColourValue&);
+	void SetSkyColor(const Ogre::ColourValue&);
+	void SetFogDensity(f32);
 
 	// Getters
 	s32 GetWindowWidth() const;

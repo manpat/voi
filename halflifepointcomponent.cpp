@@ -18,9 +18,13 @@ void HalfLifePointComponent::OnUpdate(){
 		auto a = std::max((dist-10.0f)/30.0f, 0.0f); // (0, 1)
 		auto b = std::max(1.0f-dist/40.0f, 0.0f); // (0, 1)
 
-		audioMan->SetLowpass(a*a*a*22000.0f+20.0f);
-		audioMan->SetReverbMix(b);
-		audioMan->SetReverbTime(b*20000.0f);
+		auto lp = audioMan->targetLowPassAmt;
+		auto rm = audioMan->targetReverbMix;
+		auto rt = audioMan->targetReverbTime;
+
+		audioMan->SetLowpass(std::min(lp, a*a*a*22000.0f+20.0f));
+		audioMan->SetReverbMix(std::max(rm, b));
+		audioMan->SetReverbTime(std::max(rt, b*20000.0f));
 	}else{
 		// Assumes that there's only one area trigger component
 		audioMan->SetLowpass(22000.0);

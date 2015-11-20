@@ -46,8 +46,10 @@ void Menu::Init(App* app) {
 
 	app->layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 
-	app->sceneManager->setFog(Ogre::FOG_EXP, Ogre::ColourValue::Black, 0.01f);
-	app->camera->viewport->setBackgroundColour(Ogre::ColourValue::Black);
+	app->SetFogColor(Ogre::ColourValue::Black);
+	app->SetSkyColor(Ogre::ColourValue::Black);
+	app->SetFogDensity(0.01f);
+	
 	app->portalManager->SetPortalColor(Ogre::ColourValue(0.366f, 0.491f, 0.515f));
 
 	m_delta = 0.f;

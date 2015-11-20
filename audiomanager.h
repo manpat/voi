@@ -20,6 +20,13 @@ struct AudioManager : Singleton<AudioManager> {
 	FMOD::ChannelGroup* mastergroup;
 	FMOD::DSP* lowPass;
 	FMOD::DSP* reverb;
+	f32 targetLowPassAmt = 22000.f;
+	f32 targetReverbTime = 0.f;
+	f32 targetReverbMix = 0.f;
+
+	f32 lowPassAmt = 22000.f;
+	f32 reverbTime = 0.f;
+	f32 reverbMix = 0.f;
 
 	std::map<std::string, std::shared_ptr<AudioGeneratorFactoryBase>> audioGeneratorTemplates;
 

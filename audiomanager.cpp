@@ -66,19 +66,31 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::Update() {
+	const f32 smoothing = 9.f;
+	lowPassAmt = (lowPassAmt * (smoothing-1.f) + targetLowPassAmt) / smoothing;
+	reverbTime = (reverbTime * (smoothing-1.f) + targetReverbTime) / smoothing;
+	reverbMix = (reverbMix * (smoothing-1.f) + targetReverbMix) / smoothing;
+
+	cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, lowPassAmt));
+	cfmod(reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, reverbTime));
+	cfmod(reverb->setWetDryMix(1.0, 1.0, reverbMix));
+
 	cfmod(system->update());
 }
 
 void AudioManager::SetLowpass(f32 v){
-	cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, v));
+	// cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, v));
+	targetLowPassAmt = v;
 }
 
 void AudioManager::SetReverbMix(f32 mx){
-	reverb->setWetDryMix(1.0, 1.0, mx);
+	// reverb->setWetDryMix(1.0, 1.0, mx);
+	targetReverbMix = mx;
 }
 
 void AudioManager::SetReverbTime(f32 ms){
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, ms);
+	// reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, ms);
+	targetReverbTime = ms;
 }
 
 std::shared_ptr<AudioGenerator> AudioManager::CreateAudioGenerator(const std::string& name){
