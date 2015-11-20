@@ -316,7 +316,6 @@ Ogre::Plane Entity::GetWorldPlaneFromMesh() const {
 	return Ogre::Plane();
 }
 
-
 void Entity::SetPosition(const vec3& n) {
 	if(!ogreSceneNode) throw "Tried to set local position of Entity with no Ogre::SceneNode";
 	ogreSceneNode->setPosition(n);

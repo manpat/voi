@@ -24,8 +24,8 @@ struct HalfLifePointManager;
 struct LayerRenderingManager;
 
 enum {
-	WIDTH = 1024,
-	HEIGHT = 576
+	WIDTH = 1024 << 1,
+	HEIGHT = 576 << 1
 };
 
 namespace Ogre {
@@ -81,8 +81,8 @@ struct App : Singleton<App> {
 	Camera* camera = nullptr;
 	UiImage* cursor = nullptr;
 
-	quat playerSpawnOrientation;
 	vec3 playerSpawnPosition;
+	quat playerSpawnOrientation;
 	Ogre::ColourValue skyColor;
 	Ogre::ColourValue fogColor = Ogre::ColourValue::Black;
 	f32 fogDensity = 0.2f;

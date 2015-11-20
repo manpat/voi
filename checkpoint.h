@@ -8,6 +8,9 @@ struct Checkpoint : Component {
 
 	void OnTriggerEnter(ColliderComponent*) override;
 	void OnDestroy() override;
+
+	vec3 playerSpawnPosition;
+	quat playerSpawnOrientation;
 };
 
 #endif
