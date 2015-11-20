@@ -1,4 +1,4 @@
-<scene exported_by="tvolp" export_time="1447979640.682468" previous_export_time="1447942883.563334" formatVersion="1.0.1" >
+<scene exported_by="tvolp" export_time="1447989001.262468" previous_export_time="1447988799.123468" formatVersion="1.0.1" >
   <nodes >
     <node name="Checkpoint 3" >
       <position x="12.998745" y="-27.625000" z="18.499546" />
@@ -243,8 +243,10 @@
     </item>
   </externals>
   <environment >
-    <colourBackground r="0.025393793359398842" g="0.025393793359398842" b="0.025393793359398842" />
-    <colourAmbient r="0.0" g="0.0" b="0.0" />
-    <colourDiffuse r="0.025393793359398842" g="0.025393793359398842" b="0.025393793359398842" />
+    <user_data name="anom_fogcolor" value="0.15743398666381836 0.15743398666381836 0.15743398666381836 " type="array 3" />
+    <user_data name="anom_foglinearend" value="4.080004692077637" type="float" />
+    <user_data name="anom_skycolor" value="0.025393793359398842 0.025393793359398842 0.025393793359398842 " type="array 3" />
+    <user_data name="anom_fogtype" value="2" type="int" />
+    <user_data name="anom_fogdensity" value="0.05000000074505806" type="float" />
   </environment>
 </scene>

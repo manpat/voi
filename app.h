@@ -81,8 +81,8 @@ struct App : Singleton<App> {
 	Camera* camera = nullptr;
 	UiImage* cursor = nullptr;
 
-	quat playerSpawnOrientation;
 	vec3 playerSpawnPosition;
+	quat playerSpawnOrientation;
 	Ogre::ColourValue skyColor;
 	Ogre::ColourValue fogColor = Ogre::ColourValue::Black;
 	f32 fogDensity = 0.1f;

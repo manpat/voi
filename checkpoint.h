@@ -6,9 +6,11 @@
 struct Checkpoint : Component {
 	Checkpoint() : Component(this) {}
 
-	void OnInit() override;
 	void OnTriggerEnter(ColliderComponent*) override;
 	void OnDestroy() override;
+
+	vec3 playerSpawnPosition;
+	quat playerSpawnOrientation;
 };
 
 #endif

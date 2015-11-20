@@ -184,9 +184,11 @@ void Player::OnLayerChange(){
 void Player::Respawn() {
 	auto app = App::GetSingleton();
 	auto cp = app->currentCheckpoint;
-	if(cp){
-		Respawn(cp->entity->collider->GetPosition(), cp->entity->layer);
-	}else{
+
+	if (cp) {
+		Respawn(cp->playerSpawnPosition, cp->entity->layer);
+		SetToOrientation(cp->playerSpawnOrientation);
+	} else {
 		Respawn(app->playerSpawnPosition, 0);
 		SetToOrientation(app->playerSpawnOrientation);
 	}
