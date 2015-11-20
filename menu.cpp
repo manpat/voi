@@ -32,25 +32,25 @@ void Menu::Init(App* app) {
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
 	BlenderSceneLoader scnLdr{};
 	scnLdr.Load("GameData/Scenes/menu/menu.scene", app);
-	//auto& env = scnLdr.environment;
+	auto& env = scnLdr.environment;
 
 	auto cameraEnt = app->entityManager->CreateEntity("Camera");
 	app->camera = cameraEnt->AddComponent<Camera>();
 	app->layerRenderingManager->SetCamera(app->camera);
 
-	auto cameraPos = vec3(-1, 8, 0);
+	auto cameraPos = vec3(5, 2, 10);
 	app->camera->cameraNode->setPosition(cameraPos);
 
-	auto targetPos = cameraPos + vec3(-0.4f, 0.1f, -1);
+	auto targetPos = cameraPos + vec3(-0.5, 0., -1);
 	app->camera->ogreCamera->lookAt(targetPos);
 
 	app->layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 
-	app->SetFogColor(Ogre::ColourValue::Black);
-	app->SetSkyColor(Ogre::ColourValue::Black);
-	app->SetFogDensity(0.01f);
-	
-	app->portalManager->SetPortalColor(Ogre::ColourValue(0.366f, 0.491f, 0.515f));
+	app->SetFogColor(Ogre::ColourValue{env.fogColor[0], env.fogColor[1], env.fogColor[2]});
+	app->SetSkyColor(Ogre::ColourValue{env.skyColor[0], env.skyColor[1], env.skyColor[2]});
+	app->SetFogDensity(env.fogDensity);
+		
+	//app->portalManager->SetPortalColor(Ogre::ColourValue(0.366f, 0.491f, 0.515f));
 
 	m_delta = 0.f;
 }

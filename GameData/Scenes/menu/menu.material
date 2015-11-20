@@ -14,20 +14,20 @@ material _missing_material_
     }
 }
 
-// Object2 genrated by blender2ogre 0.6.0
+// Material genrated by blender2ogre 0.6.0
 
-material Object2 
+material Material 
 {
     receive_shadows on 
 
     technique
     {
-        pass Object2
+        pass Material
         {
-            ambient 1.0 0.0 0.0 1.0
-            diffuse 0.800000011920929 0.0 0.0 1.0
+            ambient 0.10247385501861572 0.10247385501861572 0.10247385501861572 1.0
+            diffuse 0.08197908523647612 0.08197908523647612 0.08197908523647612 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 1.0 0.0 0.0 1.0
+            emissive 0.10247385501861572 0.10247385501861572 0.10247385501861572 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -59,10 +59,10 @@ material Object
     {
         pass Object
         {
-            ambient 0.5 0.5 1.0 1.0
-            diffuse 0.4000000059604645 0.4000000059604645 0.800000011920929 1.0
+            ambient 0.0 0.0 0.0 1.0
+            diffuse 0.0 0.0 0.0 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.5 0.5 1.0 1.0
+            emissive 0.0 0.0 0.0 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -94,10 +94,10 @@ material Mirror
     {
         pass Mirror
         {
-            ambient 0.3662526309490204 0.4910208284854889 0.5149176120758057 1.0
-            diffuse 0.2930021091252879 0.3928166686418155 0.4119340957989408 1.0
+            ambient 0.8656784892082214 1.0 0.9366015195846558 1.0
+            diffuse 0.6925428016862689 0.800000011920929 0.7492812268328848 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.3662526309490204 0.4910208284854889 0.5149176120758057 1.0
+            emissive 0.8656784892082214 1.0 0.9366015195846558 1.0
 
             alpha_to_coverage off
             colour_write on
