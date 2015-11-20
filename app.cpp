@@ -222,6 +222,14 @@ void App::Run(){
 			default: throw "Invalid gamestate";
 		}
 
+		// Lerp fog settings
+		const float smoothing = 40.f;
+		fogColor = (fogColor * (smoothing-1.f) + targetFogColor) / smoothing;
+		fogDensity = (fogDensity * (smoothing-1.f) + targetFogDensity) / smoothing;
+
+		camera->viewport->setBackgroundColour(skyColor);
+		sceneManager->setFog(Ogre::FOG_EXP, fogColor, fogDensity); 
+
 		// Updates systems
 		Update();
 
@@ -311,6 +319,18 @@ void App::SetGameState(GameState gs) {
 
 	// Finally set the actual game state
 	gameState = gs;
+}
+
+void App::SetFogColor(const Ogre::ColourValue& ncol) {
+	targetFogColor = ncol;
+}
+
+void App::SetSkyColor(const Ogre::ColourValue& ncol) {
+	skyColor = ncol;
+}
+
+void App::SetFogDensity(f32 ndens) {
+	targetFogDensity = ndens;
 }
 
 /*
