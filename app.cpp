@@ -223,7 +223,7 @@ void App::Run(){
 		}
 
 		// Lerp fog settings
-		const float smoothing = 40.f;
+		const float smoothing = 80.f;
 		fogColor = (fogColor * (smoothing-1.f) + targetFogColor) / smoothing;
 		fogDensity = (fogDensity * (smoothing-1.f) + targetFogDensity) / smoothing;
 

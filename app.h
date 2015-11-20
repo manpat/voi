@@ -85,7 +85,7 @@ struct App : Singleton<App> {
 	vec3 playerSpawnPosition;
 	Ogre::ColourValue skyColor;
 	Ogre::ColourValue fogColor = Ogre::ColourValue::Black;
-	f32 fogDensity = 0.1f;
+	f32 fogDensity = 0.2f;
 
 	Ogre::ColourValue targetFogColor;
 	f32 targetFogDensity;
