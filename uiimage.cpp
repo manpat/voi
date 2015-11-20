@@ -25,12 +25,13 @@ void UiImage::Init() {
 	matPass->setDepthCheckEnabled(false);
 	matPass->setLightingEnabled(false);
 	matPass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+	//matPass->setCullingMode(Ogre::CULL_NONE);
 
 	rect = new Ogre::Rectangle2D(true);
 
 	rect->setRenderQueueGroup(RENDER_QUEUE_UI);
-	rect->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
 	rect->setCorners(-0.1f, 0.1f, 0.1f, -0.1f);
+	rect->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
 
 	node->attachObject(rect);
 }

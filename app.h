@@ -24,8 +24,8 @@ struct HalfLifePointManager;
 struct LayerRenderingManager;
 
 enum {
-	WIDTH = 1024,
-	HEIGHT = 576
+	WIDTH = 1024 << 1,
+	HEIGHT = 576 << 1
 };
 
 namespace Ogre {
