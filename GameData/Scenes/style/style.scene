@@ -1,0 +1,51 @@
+<scene previous_export_time="1448089124.4281828" exported_by="patrick" export_time="1448089332.9283938" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Cube.002" >
+      <position z="-0.000000" x="-13.000000" y="1.500000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <entity lock_trans_z="False" lock_rot_x="False" damping_trans="0.02539999969303608" mass="1.0" meshFile="Cube.002.mesh" lock_rot_y="False" inertia_tensor="0.4000000059604645" velocity_min="0.0" mass_radius="1.0" lock_trans_x="False" friction_x="1.0" physics_type="STATIC" friction_y="1.0" ghost="False" name="Cube.002" damping_rot="0.1589999943971634" friction_z="1.0" anisotropic_friction="False" lock_rot_z="False" velocity_max="0.0" actor="False" lock_trans_y="False" >
+        <dimensions z="10.000004768371582" x="10.000003814697266" y="1.0" />
+      </entity>
+    </node>
+    <node name="Player" >
+      <position z="4.000000" x="0.000000" y="0.000000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <node name="PlayerCam" >
+        <position z="-0.000000" x="0.000000" y="2.400000" />
+        <rotation qx="0.707107" qz="-0.000000" qy="0.000000" qw="0.707107" />
+        <scale z="1.000000" x="1.000000" y="1.000000" />
+        <camera name="PlayerCam" fov="0.5033799435163735" projectionType="perspective" >
+          <clipping nearPlaneDist="0.10000000149011612" far="100.0" farPlaneDist="100.0" near="0.10000000149011612" />
+        </camera>
+      </node>
+    </node>
+    <node name="Cube.001" >
+      <position z="-0.000000" x="0.000000" y="6.000000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <entity lock_trans_z="False" lock_rot_x="False" damping_trans="0.02539999969303608" mass="1.0" meshFile="Cube.001.mesh" lock_rot_y="False" inertia_tensor="0.4000000059604645" velocity_min="0.0" mass_radius="1.0" lock_trans_x="False" friction_x="1.0" physics_type="STATIC" friction_y="1.0" ghost="False" name="Cube.001" damping_rot="0.1589999943971634" friction_z="1.0" anisotropic_friction="False" lock_rot_z="False" velocity_max="0.0" actor="False" lock_trans_y="False" >
+        <dimensions z="10.000004768371582" x="10.000003814697266" y="1.0" />
+      </entity>
+    </node>
+    <node name="Cube" >
+      <position z="-0.000000" x="0.000000" y="-0.500000" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale z="1.000000" x="1.000000" y="1.000000" />
+      <entity lock_trans_z="False" lock_rot_x="False" damping_trans="0.02539999969303608" mass="1.0" meshFile="Cube.mesh" lock_rot_y="False" inertia_tensor="0.4000000059604645" velocity_min="0.0" mass_radius="1.0" lock_trans_x="False" friction_x="1.0" physics_type="STATIC" friction_y="1.0" ghost="False" name="Cube" damping_rot="0.1589999943971634" friction_z="1.0" anisotropic_friction="False" lock_rot_z="False" velocity_max="0.0" actor="False" lock_trans_y="False" >
+        <dimensions z="10.000004768371582" x="10.000003814697266" y="1.0" />
+      </entity>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="/home/patrick/Documents/Qantm/TheGoodCIU/anomalia/GameData/Scenes/style/style.material" />
+    </item>
+  </externals>
+  <environment >
+    <user_data name="anom_fogtype" type="int" value="2" />
+    <user_data name="anom_fogdensity" type="float" value="0.0" />
+    <user_data name="anom_skycolor" type="array 3" value="0.0 0.0 0.0 " />
+  </environment>
+</scene>

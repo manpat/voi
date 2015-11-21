@@ -23,9 +23,10 @@ struct PhysicsManager;
 struct HalfLifePointManager;
 struct LayerRenderingManager;
 
+// TODO: Move elsewhere
 enum {
-	WIDTH = 1024 << 1,
-	HEIGHT = 576 << 1
+	WIDTH = 1024,
+	HEIGHT = 576
 };
 
 namespace Ogre {
@@ -95,6 +96,7 @@ struct App : Singleton<App> {
 
 	bool inFocus;
 	bool shouldQuit;
+	u32 width, height;
 
 private:
 	GameState gameState = GameState::NONE;
@@ -128,6 +130,7 @@ public:
 
 protected:
 	void InitOgre();
+	void LoadConfig();
 
 	void Init();
 	void Update();

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <chrono>
 #include <string>
 #include <cmath>
@@ -10,9 +11,10 @@
 #endif
 
 #include <OGRE/OgreRoot.h>
+#include <OGRE/OgreFileSystem.h>
+#include <OGRE/OgreConfigFile.h>
 #include <OGRE/OgreRenderSystem.h>
 #include <OGRE/OgreRenderWindow.h>
-#include <OGRE/OgreFileSystem.h>
 
 #include "app.h"
 #include "menu.h"
@@ -30,6 +32,7 @@
 template<> App* Singleton<App>::instance = nullptr;
 
 App::App(const std::string& levelArg){
+	// Look for available scenes
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance("GameData/Scenes", true);
 	auto fsls = fs->findFileInfo("*.scene");
@@ -57,7 +60,13 @@ App::App(const std::string& levelArg){
 		std::getline(std::cin, customLevelName);
 	}
 
-	SDL_Init(SDL_INIT_VIDEO);
+	// Find and parse config file
+	LoadConfig();
+
+	// Init SDL and create window
+	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+		throw "SDL_Init failed";
+	}
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -65,13 +74,13 @@ App::App(const std::string& levelArg){
 	sdlWindow = SDL_CreateWindow("Anomalia",
 					SDL_WINDOWPOS_UNDEFINED,
 					SDL_WINDOWPOS_UNDEFINED,
-					WIDTH, HEIGHT,
+					width, height,
 					SDL_WINDOW_OPENGL);
 
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
 
 	// TODO: refactor into input module
-	SDL_WarpMouseInWindow(sdlWindow, WIDTH/2, HEIGHT/2);
+	SDL_WarpMouseInWindow(sdlWindow, width/2, height/2);
 	SDL_ShowCursor(false);
 
 	InitOgre();
@@ -100,6 +109,35 @@ App::~App(){
 	entityManager.reset();
 }
 
+void App::LoadConfig() {
+	Ogre::FileSystemArchiveFactory fsfactory;
+	auto fs = fsfactory.createInstance(".", false);
+
+	// Test if config exists
+	if(fs->exists("anomalia.cfg")) {
+		// If so, load it and configure
+		Ogre::ConfigFile conf;
+		conf.load("anomalia.cfg");
+		
+		auto wStr = conf.getSetting("width", "Anomalia", std::to_string(WIDTH));
+		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
+		width = std::stol(wStr);
+		height = std::stol(hStr);
+	}else{
+		// Otherwise, create one and write default values
+		std::ostringstream sstr;
+		sstr << "[Anomalia]\n";
+		sstr << "width = " << WIDTH << "\n";
+		sstr << "height = " << HEIGHT << "\n";
+
+		auto ncfgFile = fs->create("anomalia.cfg");
+		ncfgFile->write(sstr.str().data(), sstr.tellp());
+
+		width = WIDTH;
+		height = HEIGHT;
+	}
+}
+
 /*
 
 	88             88           ,ad8888ba,
@@ -116,20 +154,17 @@ App::~App(){
 void App::InitOgre(){
 	#ifdef _WIN32
 		#ifdef _DEBUG
-			Ogre::String pluginFileName("plugins_win_d.cfg"),
-				configFileName(""), logFileName("ogre_d.log");
+			Ogre::String pluginFileName("plugins_win_d.cfg"), logFileName("ogre_d.log");
 		#else
-			Ogre::String pluginFileName("plugins_win.cfg"),
-				configFileName(""), logFileName("ogre.log");
+			Ogre::String pluginFileName("plugins_win.cfg"), logFileName("ogre.log");
 		#endif
 	#else
-		Ogre::String pluginFileName("plugins_linux.cfg"),
-			configFileName(""), logFileName("ogre.log");
+		Ogre::String pluginFileName("plugins_linux.cfg"), logFileName("ogre.log");
 	#endif
 
 	auto lm = new Ogre::LogManager();
-	lm->createLog(logFileName, true, false, false);
-	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, configFileName, ""));
+	lm->createLog(logFileName, true, false, false); // Stops ogre's dump to console
+	ogreRoot = std::unique_ptr<Ogre::Root>(new Ogre::Root(pluginFileName, "", ""));
 
 	auto renderSystemList = ogreRoot->getAvailableRenderers();
 	if(renderSystemList.size() == 0){
@@ -153,15 +188,16 @@ void App::InitOgre(){
 
 	windowParams["externalWindowHandle"] = std::to_string(winHandle);
 	windowParams["externalGLContext"] = std::to_string(winGlContext);
-	windowParams["externalGLControl"] = "True";
+	windowParams["externalGLControl"] = "true";
 #else
-	windowParams["currentGLContext"] = std::string("True");
+	windowParams["externalGLControl"] = "true";
+	windowParams["currentGLContext"] = "true";
 #endif
 
 	windowParams["FSAA"] = "0";
 	windowParams["vsync"] = "true";
-	// I'm pretty sure none of the createRenderWindow parameters actually do anything
-	window = ogreRoot->createRenderWindow("", 0, 0, false /*fullscreen*/, &windowParams);
+	// The only parameter that actually does anything is windowParams
+	window = ogreRoot->createRenderWindow("", 0, 0, false, &windowParams);
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_INTERIOR, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();
@@ -352,11 +388,11 @@ auto App::GetGameState() const -> GameState {
 }
 
 s32 App::GetWindowWidth() const {
-	return WIDTH;
+	return width;
 }
 
 s32 App::GetWindowHeight() const {
-	return HEIGHT;
+	return height;
 }
 
 bool App::IsInFocus() const {
