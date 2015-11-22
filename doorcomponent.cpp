@@ -2,6 +2,8 @@
 #include "physicsmanager.h"
 #include "doorcomponent.h"
 #include "entity.h"
+#include "player.h"
+#include "app.h"
 
 void DoorComponent::OnAwake() {
 	mover = entity->AddComponent<MoverComponent>();
@@ -83,14 +85,21 @@ void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
 }
 
 void DoorComponent::UpdateState() {
-	// If all required switch states are set
-	if((switchStates&requiredMask) == requiredMask){
-		// Do the things
-		if(!isOpen) mover->MoveTo(openPosition, openTime);
-		isOpen = true;
+	auto player = App::GetSingleton()->player;
 
-	}else{
+	// If all required switch states are set
+	if ((switchStates&requiredMask) == requiredMask) {
+		// Do the things
+		if (!isOpen) {
+			mover->MoveTo(openPosition, openTime);
+		}
+
+		isOpen = true;
+		player->shakeCount--;
+
+	} else {
 		if(isOpen) mover->MoveTo(closedPosition, openTime);
 		isOpen = false;
+		player->shakeCount--;
 	}
 }
