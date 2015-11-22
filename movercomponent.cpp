@@ -13,8 +13,9 @@ void MoverComponent::OnUpdate(){
 	if(a > 1.f){
 		moving = false;
 		npos = fromPosition + positionDiff;
+		entity->SendMessage("movecomplete");
 
-		App::GetSingleton()->player->shakeCount--;
+		App::GetSingleton()->player->shakeCount--; // Manpat: I don't like this
 	}else{
 		npos = fromPosition + positionDiff * a;
 		a += (f32)AppTime::scaledDeltaTime / animationLength;

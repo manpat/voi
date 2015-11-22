@@ -1,3 +1,4 @@
+#include "metahelpers.h"
 #include "opaquetype.h"
 #include "component.h"
 #include "pool.h"
@@ -20,27 +21,6 @@ C* Entity::FindComponent(){
 
 	return static_cast<C*>(*it);
 }
-
-template<size_t C, class F, class... T>
-struct ArgumentPackImpl {
-	using type = std::tuple<F, T...>;
-};
-template<class F, class... T>
-struct ArgumentPackImpl<1, F, T...> {
-	using type = F;
-};
-
-template<class F, class... T>
-struct CountPack {
-	enum{ count =  CountPack<T...>::count+1 };
-};
-template<class F>
-struct CountPack<F> {
-	enum{ count = 1 };
-};
-
-template<class... T>
-using ArgumentPack = typename ArgumentPackImpl<CountPack<T...>::count, T...>::type;
 
 template<class... A>
 void Entity::SendMessage(const std::string& type, A... args){

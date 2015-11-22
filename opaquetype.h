@@ -2,6 +2,7 @@
 #define OPAQUE_TYPE_H
 
 #include "common.h"
+#include "metahelpers.h"
 
 // OpaqueType is a safe way to pass around pointers to data of different types
 //	It assumes that you know the type of the data when you access it
@@ -39,8 +40,8 @@ struct OpaqueType {
 
 	// If fatal, Get will throw with a type mismatch
 	//	else it will return nullptr
-	template<class T>
-	T* Get(bool fatal = true) const;
+	template<class... Ts>
+	ArgumentPack<Ts...>* Get(bool fatal = true) const;
 };
 
 #include "opaquetype.inl"

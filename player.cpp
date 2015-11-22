@@ -221,17 +221,17 @@ void Player::SetToOrientation(const quat& orientation) {
 }
 
 void Player::ShakeCamera(bool shake, f32 amount) {
-	auto camera = App::GetSingleton()->camera->entity;
+	// auto camera = App::GetSingleton()->camera->entity;
 
-	if (shake && amount > 0) {
-		auto shakeAmount = vec3(
-			(rand() % 1000) / 1000.0f * amount,
-			(rand() % 1000) / 1000.0f * amount,
-			(rand() % 1000) / 1000.0f * amount
-		);
+	// if (shake && amount > 0) {
+	// 	auto shakeAmount = vec3(
+	// 		(rand() % 1000) / 1000.0f * amount,
+	// 		(rand() % 1000) / 1000.0f * amount,
+	// 		(rand() % 1000) / 1000.0f * amount
+	// 	);
 
-		camera->SetPosition(shakeAmount);
-	} else {
-		camera->SetPosition(vec3::ZERO);
-	}
+	// 	camera->SetPosition(shakeAmount);
+	// } else {
+	// 	camera->SetPosition(vec3::ZERO);
+	// }
 }

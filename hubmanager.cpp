@@ -32,10 +32,10 @@ void HubManager::Update() {
 	}
 
 	stairs[lastLevelCompleted]->SetLayer(0);
-	stairs[lastLevelCompleted]->SendMessage("open", (Component*)nullptr);
+	stairs[lastLevelCompleted]->SendMessage("open");
 
 	if(lastLevelCompleted == 3) {
 		auto door = entmgr->FindEntity("FinalDoor");
-		door->SendMessage("open", (Component*)nullptr);
+		door->SendMessage("open");
 	}
 }
