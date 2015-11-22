@@ -41,7 +41,7 @@ void Menu::Init(App* app) {
 	auto cameraPos = vec3(5, 2, 10);
 	app->camera->cameraNode->setPosition(cameraPos);
 
-	auto targetPos = cameraPos + vec3(-0.5, 0., -1);
+	auto targetPos = cameraPos + vec3(-0.6f, 0., -1);
 	app->camera->ogreCamera->lookAt(targetPos);
 
 	app->layerRenderingManager->SetupRenderQueueInvocationSequence(0);
