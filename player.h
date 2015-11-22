@@ -13,7 +13,7 @@ struct Player : Component {
 	Movable* heldObject = nullptr;
 	PortalTrigger* portalTrigger = nullptr;
 	bool isJumping = false;
-	int shakeCount = -1;
+	vec3 localCameraPosition = vec3::ZERO;
 
 	Player() : Component{this} {}
 
@@ -25,7 +25,7 @@ struct Player : Component {
 	void Respawn();
 	void Respawn(vec3 pos, s32 layer);
 	void SetToOrientation(const quat&);
-	void ShakeCamera(bool, f32 = 0.0f);
+	void ShakeCamera(f32);
 };
 
 #endif

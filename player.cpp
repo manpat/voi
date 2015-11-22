@@ -45,6 +45,7 @@ void Player::OnInit() {
 	portalTriggerCol->SetAutosleep(false);
 
 	entity->AddChild(portalTriggerEnt);
+	localCameraPosition = App::GetSingleton()->camera->entity->GetPosition();
 }
 
 void Player::OnAwake() {
@@ -157,8 +158,6 @@ void Player::OnUpdate() {
 
 			if(auto interactable = ent->FindComponent<Interactable>()) {
 				interactable->Activate();
-				//shakeCount = (shakeCount < 0 ? 1 : shakeCount + 1);
-				//std::cout << "activ8: " << shakeCount << std::endl;
 
 			}else if(auto movable = ent->FindComponent<Movable>()) {
 				heldObject = movable;
@@ -178,16 +177,7 @@ void Player::OnUpdate() {
 	// 	std::cout << rayres.collider->entity->GetName() << std::endl;
 	// }
 
-	if (shakeCount != -1) {
-		if (shakeCount <= 0) {
-			ShakeCamera(false);
-			shakeCount = -1;
-		} else {
-			ShakeCamera(true, 0.1f);
-		}
-
-		std::cout << shakeCount << std::endl;
-	}
+	ShakeCamera(Input::GetKey('g') ? 0.1f : 0);
 }
 
 void Player::OnLayerChange(){
@@ -220,18 +210,15 @@ void Player::SetToOrientation(const quat& orientation) {
 	App::GetSingleton()->camera->entity->SetGlobalOrientation(orientation);
 }
 
-void Player::ShakeCamera(bool shake, f32 amount) {
+void Player::ShakeCamera(f32 amount) {
 	auto camera = App::GetSingleton()->camera->entity;
+	auto shakeAmount = vec3::ZERO;
 
-	if (shake && amount > 0) {
-		auto shakeAmount = vec3(
-			(rand() % 1000) / 1000.0f * amount,
-			(rand() % 1000) / 1000.0f * amount,
-			(rand() % 1000) / 1000.0f * amount
-		);
-
-		camera->SetPosition(shakeAmount);
-	} else {
-		camera->SetPosition(vec3::ZERO);
+	if (amount > 0) {
+		shakeAmount.x = (rand() % 1000) / 1000.0f * amount;
+		shakeAmount.y = (rand() % 1000) / 1000.0f * amount;
+		shakeAmount.z = (rand() % 1000) / 1000.0f * amount;
 	}
+
+	camera->SetPosition(localCameraPosition + shakeAmount);
 }
