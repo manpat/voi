@@ -1,5 +1,6 @@
 #include "movercomponent.h"
 #include "physicsmanager.h"
+#include "synthcomponent.h"
 #include "doorcomponent.h"
 #include "entity.h"
 #include "player.h"
@@ -15,6 +16,11 @@ void DoorComponent::OnAwake() {
 	closedPosition = entity->collider->GetPosition();
 	openPosition = closedPosition + entity->GetGlobalUp()*entity->collider->dimensions.y;
 	isOpen = false;
+
+	synth = entity->FindComponent<SynthComponent>();
+	if(synth) {
+		synth->SetPaused(true);
+	}
 }
 
 void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
@@ -22,6 +28,7 @@ void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
 		switchStates = ~0u;
 		isOpen = true;
 		mover->MoveTo(openPosition, 0.001f);
+		if(synth) synth->SetPaused(true);
 
 	}else if(msg == "open"){
 		switchStates = ~0u;
@@ -84,6 +91,10 @@ void DoorComponent::OnMessage(const std::string& msg, const OpaqueType& ot){
 				comp->entity->SendMessage("dooropen", (Component*)this);
 			}
 		}
+
+	}else if(msg == "movecomplete") {
+		std::cout << "Door move complete" << std::endl;
+		if(synth) synth->SetPaused(true);
 	}
 }
 
@@ -95,6 +106,8 @@ void DoorComponent::UpdateState() {
 		// Do the things
 		if (!isOpen) {
 			mover->MoveTo(openPosition, openTime);
+			std::cout << "Door move Start" << std::endl;
+			if(synth) synth->SetPaused(false);
 		}
 
 		isOpen = true;
@@ -103,6 +116,8 @@ void DoorComponent::UpdateState() {
 	} else {
 		if(isOpen) {
 			mover->MoveTo(closedPosition, openTime);
+			std::cout << "Door move Start" << std::endl;
+			if(synth) synth->SetPaused(false);
 		}
 
 		isOpen = false;

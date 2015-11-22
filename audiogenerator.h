@@ -23,6 +23,8 @@ namespace Env {
 
 // Inherit from this
 struct AudioGenerator {
+	bool paused = false;
+
 	virtual ~AudioGenerator() {};
 	virtual f32 Generate(f64 phase) = 0;
 };

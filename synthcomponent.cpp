@@ -78,6 +78,10 @@ void SynthComponent::SetReverbMix(f32 mx){
 	reverb->setWetDryMix(1.f, mx, 0); // (100.f - mx)/100.f
 }
 
+void SynthComponent::SetPaused(bool p){
+	generator->paused = p;
+}
+
 FMOD_RESULT F_CALLBACK
 SynthComponent::GeneratorFunction(FMOD_DSP_STATE* state, f32*, f32* outbuffer, u32 length, s32, s32*){
 	s32 samplerate = 0;

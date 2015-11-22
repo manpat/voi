@@ -110,6 +110,9 @@ App::~App(){
 }
 
 void App::LoadConfig() {
+	// TODO: More configuration
+	// - Mouse sensitivity
+
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance(".", false);
 
@@ -259,7 +262,7 @@ void App::Run(){
 		}
 
 		// Lerp fog settings
-		const float smoothing = 80.f;
+		const float smoothing = 120.f;
 		fogColor = (fogColor * (smoothing-1.f) + targetFogColor) / smoothing;
 		fogDensity = (fogDensity * (smoothing-1.f) + targetFogDensity) / smoothing;
 

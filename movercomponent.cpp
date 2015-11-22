@@ -15,7 +15,7 @@ void MoverComponent::OnUpdate(){
 		npos = fromPosition + positionDiff;
 		entity->SendMessage("movecomplete");
 
-		App::GetSingleton()->player->shakeCount--; // Manpat: I don't like this
+		// App::GetSingleton()->player->shakeCount--; // Manpat: I don't like this
 	}else{
 		npos = fromPosition + positionDiff * a;
 		a += (f32)AppTime::scaledDeltaTime / animationLength;
