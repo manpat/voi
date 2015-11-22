@@ -45,7 +45,7 @@ void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
 		if(bellGen){
 			bellGen->Trigger();
 		}
-		target->SendMessage("unlock"+std::to_string(bellNumber), (Component*)this);
+		target->SendMessage("unlock", (Component*)this, /*u32*/bellNumber);
 
 	}else if(msg == "correct") {
 		std::cout << "Bell unlock " << bellNumber << " correct" << std::endl;

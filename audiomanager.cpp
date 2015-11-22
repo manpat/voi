@@ -66,7 +66,7 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::Update() {
-	const f32 smoothing = 9.f;
+	const f32 smoothing = 40.f;
 	lowPassAmt = (lowPassAmt * (smoothing-1.f) + targetLowPassAmt) / smoothing;
 	reverbTime = (reverbTime * (smoothing-1.f) + targetReverbTime) / smoothing;
 	reverbMix = (reverbMix * (smoothing-1.f) + targetReverbMix) / smoothing;

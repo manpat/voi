@@ -26,15 +26,17 @@ void OpaqueType::Set(T* d){
 	data = static_cast<void*>(d);
 }
 
-template<class T>
-T* OpaqueType::Get(bool fatal) const{
-	if(typeid(T).hash_code() != hash){
+template<class... Ts>
+ArgumentPack<Ts...>* OpaqueType::Get(bool fatal) const{
+	using RetType = ArgumentPack<Ts...>;
+
+	if(typeid(RetType).hash_code() != hash){
 		if(fatal){
-			throw std::string("OpaqueType type mismatch: Get<") + getTypeName<T>() + "> {" + name + "}";
+			throw std::string("OpaqueType type mismatch: Get<") + getTypeName<RetType>() + "> {" + name + "}";
 		}
 
 		return nullptr;
 	}
 
-	return static_cast<T*>(data);
+	return static_cast<RetType*>(data);
 }

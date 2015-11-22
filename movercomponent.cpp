@@ -11,6 +11,8 @@ void MoverComponent::OnUpdate(){
 	if(a > 1.f){
 		moving = false;
 		npos = fromPosition + positionDiff;
+		entity->SendMessage("movecomplete");
+
 	}else{
 		npos = fromPosition + positionDiff * a;
 		a += (f32)AppTime::scaledDeltaTime / animationLength;

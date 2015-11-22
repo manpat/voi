@@ -4,11 +4,13 @@
 #include "component.h"
 
 struct ColliderComponent;
+struct SynthComponent;
 struct MoverComponent;
 
 // TODO: A way to trigger events when combination is (in)correct
 
 struct DoorComponent : Component {
+	SynthComponent* synth = nullptr;
 	MoverComponent* mover = nullptr;
 	vec3 closedPosition = vec3::ZERO;
 	vec3 openPosition = vec3::ZERO;

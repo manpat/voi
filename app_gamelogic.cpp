@@ -214,6 +214,10 @@ void App::Load(const std::string& nLevel){
 	cursor = uiManager->CreateObject<UiImage>("Cursor");
 	cursor->SetImage("cursor.png");
 
+	audioManager->SetReverbTime(5000.f);
+	audioManager->SetReverbMix(10.f);
+	audioManager->SetLowpass(20000.f);
+
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();
 	std::cout << "Scene load for " << nLevel << " took " << diff << "s" << std::endl;
