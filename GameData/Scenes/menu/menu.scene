@@ -1,13 +1,5 @@
 <scene formatVersion="1.0.1" export_time="1448225952.026736" exported_by="Tim" previous_export_time="1448225935.502023" >
   <nodes >
-    <node name="Text" >
-      <position z="3.585940" x="-6.211400" y="4.477550" />
-      <rotation qx="0.674380" qy="0.212631" qw="0.674380" qz="-0.212631" />
-      <scale z="1.000000" x="1.000000" y="1.000000" />
-      <entity meshFile="Mesh.mesh" lock_trans_y="False" actor="False" damping_rot="0.10000000149011612" friction_y="1.0" mass_radius="1.0" lock_rot_y="False" anisotropic_friction="False" friction_z="1.0" ghost="False" velocity_min="0.0" damping_trans="0.03999999910593033" friction_x="1.0" lock_rot_x="False" lock_trans_x="False" inertia_tensor="0.4000000059604645" physics_type="STATIC" lock_trans_z="False" velocity_max="0.0" lock_rot_z="False" name="Mesh" mass="1.0" >
-        <dimensions z="3.305999994277954" x="5.12600040435791" y="0.0" />
-      </entity>
-    </node>
     <node name="Cube" >
       <position z="-12.000000" x="0.000000" y="4.001000" />
       <rotation qx="0.000000" qy="0.000000" qw="1.000000" qz="-0.000000" />

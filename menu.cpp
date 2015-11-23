@@ -10,6 +10,8 @@
 #include "input.h"
 #include "entity.h"
 #include "camera.h"
+#include "uiimage.h"
+#include "uimanager.h"
 #include "entitymanager.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
@@ -28,6 +30,16 @@ void Menu::Init(App* app) {
 	app->portalManager = std::make_shared<PortalManager>();
 	app->mirrorManager = std::make_shared<MirrorManager>();
 	//app->bellManager = std::make_shared<BellManager>();
+	
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/UI", "FileSystem");
+
+	title = app->uiManager->CreateObject<UiImage>("Title");
+	title->SetImage("title.png");
+	title->SetPosition(-0.5f, 0.3f);
+
+	menu = app->uiManager->CreateObject<UiImage>("Menu");
+	menu->SetImage("menu.png");
+	menu->SetPosition(-0.74f, 0.03f);
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
 	BlenderSceneLoader scnLdr{};

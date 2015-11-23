@@ -9,6 +9,8 @@ namespace Ogre {
 }
 
 struct App;
+struct UiImage;
+struct UiManager;
 
 class Menu {
 public:
@@ -21,6 +23,11 @@ public:
 private:
 	Ogre::SceneNode* m_node = nullptr;
 	Ogre::ManualObject* m_quad = nullptr;
+
+	UiManager* m_uiManager = nullptr;
+	UiImage* title = nullptr;
+	UiImage* menu = nullptr;
+
 	f32 m_delta = 0.f;
 };
 
