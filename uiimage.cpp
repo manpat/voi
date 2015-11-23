@@ -58,8 +58,8 @@ void UiImage::SetPosition(f32 x, f32 y) {
 }
 
 void UiImage::SetSize(u32 w, u32 h) {
-	size.x = w;
-	size.y = h;
+	size.x = (f32)w;
+	size.y = (f32)h;
 
 	CalculateTransform();
 }
