@@ -3,6 +3,7 @@
 #include "app.h"
 #include "layerrenderingmanager.h"
 
+#include <OGRE/OgreColourValue.h>
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreTechnique.h>
 #include <OGRE/OgreRectangle2D.h>
@@ -36,6 +37,10 @@ void UiImage::Init() {
 	node->attachObject(rect);
 }
 
+void UiImage::SetColour(f32 r, f32 g, f32 b, f32 a) {
+	matPass->setDiffuse(Ogre::ColourValue(r, g, b, a));
+}
+
 void UiImage::SetImage(const std::string& filename, bool resize) {
 	matPass->createTextureUnitState(filename);
 
@@ -43,6 +48,28 @@ void UiImage::SetImage(const std::string& filename, bool resize) {
 		ResizeObjectToImage();
 
 	rect->setMaterial(GetName());
+}
+
+void UiImage::SetPosition(f32 x, f32 y) {
+	position.x = x;
+	position.y = y;
+
+	CalculateTransform();
+}
+
+void UiImage::SetSize(u32 w, u32 h) {
+	size.x = w;
+	size.y = h;
+
+	CalculateTransform();
+}
+
+void UiImage::SetVisible(bool visible) {
+	rect->setVisible(visible);
+}
+
+Ogre::AxisAlignedBox UiImage::GetAABB() {
+	return rect->getBoundingBox();
 }
 
 void UiImage::ResizeObjectToImage() {
@@ -53,14 +80,63 @@ void UiImage::ResizeObjectToImage() {
 		std::cout << "Can't get texture pointer to UI object " << GetName() << ", Defaulting to 128x128\n";
 		size = vec2(128, 128);
 	}
-
-	auto left = -((WIDTH / 2.0f) - ((WIDTH / 2.0f) - (size.x / 2.0f))) / WIDTH;
-	auto top = ((HEIGHT / 2.0f) - ((HEIGHT / 2.0f) - (size.y / 2.0f))) / HEIGHT;
-	auto right = -left;
-	auto bottom = -top;
-	rect->setCorners(left, top, right, bottom);
+	
+	CalculateTransform();
 }
 
-void UiImage::SetVisible(bool visible) {
-	rect->setVisible(visible);
+void UiImage::CalculateTransform() {
+	vec2 screenOffset, screenSize;
+
+	switch (alignment) {
+	case Alignment::TopLeft:
+		screenOffset.x = 0.0f;
+		screenOffset.y = size.y / HEIGHT;
+		break;
+	case Alignment::TopCenter:
+		screenOffset.x = (size.x / WIDTH) / 2;
+		screenOffset.y = size.y / HEIGHT;
+		break;
+	case Alignment::TopRight:
+		screenOffset.x = size.x / WIDTH;
+		screenOffset.y = size.y / HEIGHT;
+		break;
+	case Alignment::CenterLeft:
+		screenOffset.x = 0.0f;
+		screenOffset.y = (size.y / HEIGHT) / 2;
+		break;
+	case Alignment::Center:
+		screenOffset.x = (size.x / WIDTH) / 2;
+		screenOffset.y = (size.y / HEIGHT) / 2;
+		break;
+	case Alignment::CenterRight:
+		screenOffset.x = size.x / WIDTH;
+		screenOffset.y = (size.y / HEIGHT) / 2;
+		break;
+	case Alignment::BottomLeft:
+		screenOffset.x = 0.0f;
+		screenOffset.y = 0.0f;
+		break;
+	case Alignment::BottomCenter:
+		screenOffset.x = (size.x / WIDTH) / 2;
+		screenOffset.y = 0.0f;
+		break;
+	case Alignment::BottomRight:
+		screenOffset.x = size.x / WIDTH;
+		screenOffset.y = 0.0f;
+		break;
+	default:
+		screenOffset.x = (size.x / WIDTH) / 2;
+		screenOffset.y = (size.y / HEIGHT) / 2;
+		break;
+	}
+
+	screenSize.x = size.x / WIDTH;
+	screenSize.y = size.y / HEIGHT;
+
+	auto left = position.x - screenOffset.x;
+	auto bottom = position.y - screenOffset.y;
+	auto top = bottom + screenSize.y;
+	auto right = left + screenSize.x;
+
+	rect->setCorners(left, top, right, bottom);
 }

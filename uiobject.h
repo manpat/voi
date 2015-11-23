@@ -20,25 +20,29 @@ public:
 	UiObject();
 	~UiObject();
 
-	// Position in screenspace, -1.0 to 1.0
-	void SetPosition(f32 x, f32 y);
-	// Size in pixels
-	void SetSize(u32 w, u32 h);
-
-	virtual void SetColour();
-
+	// Sets the location of the object's anchor. i.e. UiObject::Alignment::Center
+	void SetAlignment(Alignment alignment);
+	// Sets whether this object checks for mouseclicks
 	void SetClickable(bool clickable = true);
-
+	// Set's the colour of the object
+	virtual void SetColour();
+	// Sets whether this object is modified when being hovered over
+	void SetHoverable(bool hoverable = true);
+	// Position in screenspace, -1.0 to 1.0
+	virtual void SetPosition(f32 x, f32 y);
+	// Size in pixels
+	virtual void SetSize(u32 w, u32 h);
+	// Sets whether the object is visible on screen
 	virtual void SetVisible();
 
-	// Returns position in screenspace, -1.0 to 1.0
-	virtual vec2 GetPosition();
-	// Returns size in pixels
-	virtual vec2 GetSize();
-
-	void GetAABB();
+	virtual Ogre::AxisAlignedBox GetAABB();
 
 	const std::string& GetName() const;
+	// Returns position in screenspace, -1.0 to 1.0
+	virtual vec2 GetPosition();
+
+	// Returns size in pixels
+	virtual vec2 GetSize();
 
 	// Ogre Properties
 	Ogre::SceneNode* node;
@@ -48,11 +52,11 @@ public:
 protected:
 	// Properties
 	vec2 position = vec2(0.0f, 0.0f);
-	vec2 size = vec2(10, 10);
-	Alignment alignment;
+	vec2 size = vec2(128, 128);
+	Alignment alignment = Alignment::Center;
 
-	bool clickable;
-	bool hoverable;
+	bool clickable = false;
+	bool hoverable = false;
 };
 
 #endif//UIOBJECT_H
