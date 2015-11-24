@@ -9,6 +9,10 @@ UiObject::~UiObject() {
 
 }
 
+void UiObject::Destroy() {
+
+}
+
 void UiObject::SetAlignment(Alignment a) {
 	alignment = a;
 }

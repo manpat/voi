@@ -50,6 +50,8 @@ struct UiManager : Singleton<UiManager> {
 		delete o;
 	}
 
+	void DestroyAllObjects();
+
 };
 
 #endif//UNIMANAGER_H
