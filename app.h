@@ -97,6 +97,7 @@ struct App : Singleton<App> {
 	bool inFocus;
 	bool shouldQuit;
 	u32 width, height;
+	u8 multisampleLevel;
 
 private:
 	GameState gameState = GameState::NONE;
