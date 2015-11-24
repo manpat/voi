@@ -31,31 +31,32 @@
 
 template<> App* Singleton<App>::instance = nullptr;
 
-App::App(const std::string& levelArg){
+App::App(const std::string& levelArg) {
 	// Look for available scenes
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance("GameData/Scenes", true);
 	auto fsls = fs->findFileInfo("*.scene");
 
-	for(auto& d: *fsls){
-		scenes.push_back(SceneFileInfo{d.basename, "GameData/Scenes/"+d.path});
+	for (auto& d : *fsls) {
+		scenes.push_back(SceneFileInfo{ d.basename, "GameData/Scenes/" + d.path });
 	}
 
 	// Sort found scenes by name
-	std::sort(scenes.begin(), scenes.end(), [](const SceneFileInfo& a, const SceneFileInfo& b){
+	std::sort(scenes.begin(), scenes.end(), [](const SceneFileInfo& a, const SceneFileInfo& b) {
 		return a.name < b.name;
 	});
 
 	std::cout << "Scenes found: \n";
-	for(auto& s: scenes) {
+	for (auto& s : scenes) {
 		std::cout << "\t" << s.name.substr(0, s.name.find_last_of('.')) << "\n";
 	}
 	std::cout << std::endl;
 
 	// For debugging
-	if(levelArg.size() > 0) {
+	if (levelArg.size() > 0) {
 		customLevelName = levelArg;
-	}else{
+	}
+	else {
 		std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
 		std::getline(std::cin, customLevelName);
 	}
@@ -64,12 +65,18 @@ App::App(const std::string& levelArg){
 	LoadConfig();
 
 	// Init SDL and create window
-	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		throw "SDL_Init failed";
 	}
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	if (multisampleLevel > 1 && multisampleLevel < 17) {
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisampleLevel);
+		glEnable(GL_MULTISAMPLE);
+	}
 
 	sdlWindow = SDL_CreateWindow("Anomalia",
 					SDL_WINDOWPOS_UNDEFINED,
@@ -126,18 +133,22 @@ void App::LoadConfig() {
 		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
 		width = std::stol(wStr);
 		height = std::stol(hStr);
+
+		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
+		multisampleLevel = std::stoi(mslStr);
 	}else{
 		// Otherwise, create one and write default values
 		std::ostringstream sstr;
 		sstr << "[Anomalia]\n";
 		sstr << "width = " << WIDTH << "\n";
 		sstr << "height = " << HEIGHT << "\n";
-
+		sstr << "multisampleLevel = 4\n";
 		auto ncfgFile = fs->create("anomalia.cfg");
 		ncfgFile->write(sstr.str().data(), sstr.tellp());
 
 		width = WIDTH;
 		height = HEIGHT;
+		multisampleLevel = 4;
 	}
 }
 
