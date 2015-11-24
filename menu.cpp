@@ -31,11 +31,11 @@ void Menu::Init(App* app) {
 	app->mirrorManager = std::make_shared<MirrorManager>();
 	//app->bellManager = std::make_shared<BellManager>();
 
-	title = app->uiManager->CreateObject<UiImage>("Title");
+	title = app->uiManager->CreateObject<UiImage>("MenuTitle");
 	title->SetImage("title.png");
 	title->SetPosition(-0.5f, 0.3f);
 
-	menu = app->uiManager->CreateObject<UiImage>("Menu");
+	menu = app->uiManager->CreateObject<UiImage>("MenuSubtitles");
 	menu->SetImage("menu.png");
 	menu->SetPosition(-0.74f, 0.03f);
 

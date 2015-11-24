@@ -234,6 +234,9 @@ void App::ResetScene() {
 	// Destroy all existing entities
 	entityManager->DestroyAllEntities();
 
+	// Destroy all existing UI Objects
+	uiManager->DestroyAllObjects();
+
 	// Clear scene completely
 	sceneManager->clearScene();
 

@@ -19,6 +19,8 @@ struct UiObject {
 	UiObject();
 	virtual ~UiObject();
 
+	virtual void Destroy();
+
 	// Sets the location of the object's anchor. i.e. UiObject::Alignment::Center
 	void SetAlignment(Alignment alignment);
 	// Sets whether this object checks for mouseclicks

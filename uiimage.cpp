@@ -3,10 +3,11 @@
 #include "app.h"
 #include "layerrenderingmanager.h"
 
-#include <OGRE/OgreColourValue.h>
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreTechnique.h>
+#include <OGRE/OgreColourValue.h>
 #include <OGRE/OgreRectangle2D.h>
+#include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreMaterialManager.h>
 
 UiImage::UiImage() {
@@ -27,7 +28,6 @@ void UiImage::Init() {
 	matPass->setDepthCheckEnabled(false);
 	matPass->setLightingEnabled(false);
 	matPass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-	// matPass->setCullingMode(Ogre::CULL_NONE);
 
 	rect = new Ogre::Rectangle2D(true);
 
@@ -36,6 +36,14 @@ void UiImage::Init() {
 	rect->setCorners(-0.1f, 0.1f, 0.1f, -0.1f);
 
 	node->attachObject(rect);
+}
+
+void UiImage::Destroy() {
+	if (node) {
+		App::GetSingleton()->sceneManager->destroySceneNode(node);
+	}
+	rect = nullptr;
+	matPass = nullptr;
 }
 
 void UiImage::SetColour(f32 r, f32 g, f32 b, f32 a) {
