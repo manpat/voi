@@ -176,14 +176,7 @@ void App::Load(const std::string& nLevel){
 	layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 
 	// Set up environment parameters
-	// sceneManager->setFog(
-	// 	(Ogre::FogMode)env.fogType,
-	// 	Ogre::ColourValue{env.fogColor[0], env.fogColor[1], env.fogColor[2]},
-	// 	env.fogDensity,
-	// 	env.fogStart, env.fogEnd);
-
 	SetFogColor(Ogre::ColourValue{env.fogColor[0], env.fogColor[1], env.fogColor[2]});
-	std::cout << env.fogDensity << std::endl;
 	SetSkyColor(Ogre::ColourValue{env.skyColor[0], env.skyColor[1], env.skyColor[2]});
 	SetFogDensity(env.fogDensity);
 
