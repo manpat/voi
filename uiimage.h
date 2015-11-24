@@ -16,8 +16,6 @@ public:
 	~UiImage();
 
 	void Init();
-
-	void Destroy() override;
 	
 	// Doesn't work
 	void SetColour(f32 r, f32 g, f32 b, f32 a) override;

@@ -15,6 +15,9 @@ UiImage::UiImage() {
 }
 
 UiImage::~UiImage() {
+	if (node) {
+		App::GetSingleton()->sceneManager->destroySceneNode(node);
+	}
 	delete rect;
 	rect = nullptr;
 	matPass = nullptr;
@@ -36,14 +39,6 @@ void UiImage::Init() {
 	rect->setCorners(-0.1f, 0.1f, 0.1f, -0.1f);
 
 	node->attachObject(rect);
-}
-
-void UiImage::Destroy() {
-	if (node) {
-		App::GetSingleton()->sceneManager->destroySceneNode(node);
-	}
-	rect = nullptr;
-	matPass = nullptr;
 }
 
 void UiImage::SetColour(f32 r, f32 g, f32 b, f32 a) {
