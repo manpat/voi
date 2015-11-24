@@ -62,8 +62,6 @@ void BlenderSceneLoader::Load(const std::string& filename, App* app) {
 	environment = ParseEnvironment(node->first_node("environment"));
 	delete[] data;
 
-	// Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Meshes", "FileSystem");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem");
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	// Construct scene

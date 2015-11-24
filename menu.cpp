@@ -30,8 +30,6 @@ void Menu::Init(App* app) {
 	app->portalManager = std::make_shared<PortalManager>();
 	app->mirrorManager = std::make_shared<MirrorManager>();
 	//app->bellManager = std::make_shared<BellManager>();
-	
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/UI", "FileSystem");
 
 	title = app->uiManager->CreateObject<UiImage>("Title");
 	title->SetImage("title.png");

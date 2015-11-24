@@ -4,7 +4,6 @@
 #include "common.h"
 
 struct UiObject {
-public:
 	enum class Alignment : u8 {
 		TopLeft,
 		TopCenter,
@@ -18,7 +17,7 @@ public:
 	};
 
 	UiObject();
-	~UiObject();
+	virtual ~UiObject();
 
 	// Sets the location of the object's anchor. i.e. UiObject::Alignment::Center
 	void SetAlignment(Alignment alignment);

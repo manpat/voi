@@ -222,6 +222,9 @@ void App::InitOgre(){
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_INTERIOR, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();
+
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/UI", "FileSystem", "Persistent");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Particles", "FileSystem", "Persistent");
 }
 
 /*

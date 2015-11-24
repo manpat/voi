@@ -209,8 +209,6 @@ void App::Load(const std::string& nLevel){
 		matIt.moveNext();
 	}
 
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/UI", "FileSystem");
-
 	cursor = uiManager->CreateObject<UiImage>("Cursor");
 	cursor->SetImage("cursor.png");
 
@@ -247,7 +245,6 @@ void App::ResetScene() {
 
 	// Destroy particle systems and particle templates
 	sceneManager->destroyAllParticleSystems();
-	Ogre::ParticleSystemManager::getSingleton().removeAllTemplates();
 
 	// Clear default resouce group resources
 	Ogre::ResourceGroupManager::getSingleton().clearResourceGroup(defaultResGrp);
