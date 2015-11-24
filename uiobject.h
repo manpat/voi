@@ -25,7 +25,7 @@ public:
 	// Sets whether this object checks for mouseclicks
 	void SetClickable(bool clickable = true);
 	// Set's the colour of the object
-	virtual void SetColour();
+	virtual void SetColour(f32 r, f32 g, f32 b, f32 a);
 	// Sets whether this object is modified when being hovered over
 	void SetHoverable(bool hoverable = true);
 	// Position in screenspace, -1.0 to 1.0
@@ -33,16 +33,16 @@ public:
 	// Size in pixels
 	virtual void SetSize(u32 w, u32 h);
 	// Sets whether the object is visible on screen
-	virtual void SetVisible();
+	virtual void SetVisible(bool);
 
-	virtual Ogre::AxisAlignedBox GetAABB();
+	virtual Ogre::AxisAlignedBox GetAABB() const;
 
 	const std::string& GetName() const;
 	// Returns position in screenspace, -1.0 to 1.0
-	virtual vec2 GetPosition();
+	virtual vec2 GetPosition() const;
 
 	// Returns size in pixels
-	virtual vec2 GetSize();
+	virtual vec2 GetSize() const;
 
 	// Ogre Properties
 	Ogre::SceneNode* node;

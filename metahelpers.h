@@ -12,14 +12,14 @@ struct ArgumentPackImpl<1, F, T...> {
 
 template<class F, class... T>
 struct CountPack {
-	enum{ count =  CountPack<T...>::count+1 };
+	enum{ value =  CountPack<T...>::value+1 };
 };
 template<class F>
 struct CountPack<F> {
-	enum{ count = 1 };
+	enum{ value = 1 };
 };
 
 template<class... T>
-using ArgumentPack = typename ArgumentPackImpl<CountPack<T...>::count, T...>::type;
+using ArgumentPack = typename ArgumentPackImpl<CountPack<T...>::value, T...>::type;
 
 #endif

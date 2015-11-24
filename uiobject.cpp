@@ -17,7 +17,7 @@ void UiObject::SetClickable(bool c) {
 	clickable = c;
 }
 
-void UiObject::SetColour() {
+void UiObject::SetColour(f32 r, f32 g, f32 b, f32 a) {
 	
 }
 
@@ -35,11 +35,11 @@ void UiObject::SetSize(u32 w, u32 h) {
 	size.y = (f32)h;
 }
 
-void UiObject::SetVisible() {
+void UiObject::SetVisible(bool) {
 	
 }
 
-Ogre::AxisAlignedBox UiObject::GetAABB() {
+Ogre::AxisAlignedBox UiObject::GetAABB() const {
 	Ogre::AxisAlignedBox aab;
 	return aab;
 }
@@ -48,10 +48,10 @@ const std::string& UiObject::GetName() const {
 	return node->getName();
 }
 
-vec2 UiObject::GetPosition() {
+vec2 UiObject::GetPosition() const {
 	return position;
 }
 
-vec2 UiObject::GetSize() {
+vec2 UiObject::GetSize() const {
 	return size;
 }
