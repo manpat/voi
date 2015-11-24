@@ -41,7 +41,6 @@ void UiManager::DestroyAllObjects() {
 			continue;
 		}
 
-		o->Destroy();
 		it = uiObjects.erase(it);
 
 		delete o;
