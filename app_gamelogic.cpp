@@ -187,9 +187,10 @@ void App::Load(const std::string& nLevel){
 	SetSkyColor(Ogre::ColourValue{env.skyColor[0], env.skyColor[1], env.skyColor[2]});
 	SetFogDensity(env.fogDensity);
 
-	portalManager->SetPortalColor(skyColor);
+	// TODO: Lerp this
+	sceneManager->setAmbientLight(Ogre::ColourValue{env.ambientColor[0], env.ambientColor[1], env.ambientColor[2]});
 
-	// TODO: Do something with environment.ambientColor
+	portalManager->SetPortalColor(skyColor);
 
 	// Make everything shadeless
 	auto matIt = Ogre::MaterialManager::getSingletonPtr()->getResourceIterator();

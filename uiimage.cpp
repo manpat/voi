@@ -14,6 +14,7 @@ UiImage::UiImage() {
 }
 
 UiImage::~UiImage() {
+	delete rect;
 	rect = nullptr;
 	matPass = nullptr;
 }
