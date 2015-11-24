@@ -84,7 +84,14 @@ App::App(const std::string& levelArg) {
 					width, height,
 					SDL_WINDOW_OPENGL);
 
+	if(!sdlWindow) {
+		throw "SDL Window creation failed";
+	}
+
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
+	if(!sdlGLContext) {
+		throw "GL Context creation failed";
+	}
 
 	// TODO: refactor into input module
 	SDL_WarpMouseInWindow(sdlWindow, width/2, height/2);
@@ -131,10 +138,10 @@ void App::LoadConfig() {
 		
 		auto wStr = conf.getSetting("width", "Anomalia", std::to_string(WIDTH));
 		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
+		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
+
 		width = std::stol(wStr);
 		height = std::stol(hStr);
-
-		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
 		multisampleLevel = std::stoi(mslStr);
 	}else{
 		// Otherwise, create one and write default values
