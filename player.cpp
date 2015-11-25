@@ -177,7 +177,7 @@ void Player::OnUpdate() {
 	// 	std::cout << rayres.collider->entity->GetName() << std::endl;
 	// }
 
-	ShakeCamera(Input::GetKey('g') ? 0.1f : 0); // For testing
+	ShakeCamera(Input::GetKey('g') ? 0.05f : 0); // For testing
 }
 
 void Player::OnLayerChange(){

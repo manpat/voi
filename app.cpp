@@ -288,7 +288,7 @@ void App::Run(){
 		fogDensity = (fogDensity * (smoothing-1.f) + targetFogDensity) / smoothing;
 
 		camera->viewport->setBackgroundColour(skyColor);
-		sceneManager->setFog(Ogre::FOG_EXP, fogColor, fogDensity); 
+		sceneManager->setFog(Ogre::FOG_EXP, fogColor, fogDensity);
 
 		// Updates systems
 		Update();

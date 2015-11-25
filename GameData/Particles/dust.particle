@@ -3,7 +3,7 @@ particle_system Environment/Dust {
 	billboard_type point
 	particle_height 0.03
 	particle_width 0.03
-	cull_each false
+	cull_each true
 	quota 10000
 
 	emitter Ellipsoid {

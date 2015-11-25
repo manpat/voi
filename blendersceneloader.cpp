@@ -205,6 +205,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				} break;
 
 				case 2/*Mirror*/:{
+					// auto waterParticles = findin(userdata, std::string{"anom_waterparticles"}, std::string{}) == "1";
 					ent->AddComponent<Mirror>(layer);
 				} break;
 

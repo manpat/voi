@@ -1,5 +1,6 @@
 #include "testaudiogenerators.h"
 #include "ambience.h"
+#include "bell.h"
 #include "hub.h"
 #include "sfx.h"
 
@@ -19,5 +20,5 @@ void InitAudioGenerators(std::shared_ptr<AudioManager> audioManager) {
 	audioManager->RegisterAudioGeneratorType<ChoirAudioGenerator>("choir");
 
 	audioManager->RegisterAudioGeneratorType<HubAudioGenerator>("hub");
-	BellManager::RegisterAudio();
+	audioManager->RegisterAudioGeneratorType<BellAudioGenerator>("bell");
 }

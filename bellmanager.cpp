@@ -1,3 +1,4 @@
+#include "AudioGenerators/bell.h"
 #include "audiomanager.h"
 #include "bellmanager.h"
 #include "bell.h"
@@ -24,8 +25,4 @@ void BellManager::CorrectCombination() {
 			b->bellGen->Stop();
 		}
 	}
-}
-
-void BellManager::RegisterAudio() {
-	AudioManager::GetSingleton()->RegisterAudioGeneratorType<BellAudioGenerator>("bell");
 }

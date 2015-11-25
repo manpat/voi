@@ -195,7 +195,8 @@ void App::Load(const std::string& nLevel){
 			continue;
 		}
 
-		mat->setShadingMode(Ogre::SO_FLAT);
+		// mat->setShadingMode(Ogre::SO_FLAT);
+		mat->setShadingMode(Ogre::SO_PHONG);
 
 		auto pass = mat->getTechnique(0)->getPass(0);
 		pass->setEmissive(pass->getDiffuse());

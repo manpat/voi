@@ -5,6 +5,8 @@
 #include "entity.h"
 #include "bell.h"
 
+#include "AudioGenerators/bell.h"
+
 void Bell::OnAwake() {
 	entity->AddComponent<Interactable>();
 

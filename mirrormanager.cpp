@@ -16,7 +16,7 @@
 #include <cassert>
 
 #define PRINT(msg) std::cout << "MirrorMan: " << msg << std::endl;
-//#define ERROR(msg) std::err << "MirrorMan EXCEPTION: " << msg << std::endl;
+//#define ERROR(msg) std::cerr << "MirrorMan EXCEPTION: " << msg << std::endl;
 
 Mirror::Mirror(s32 l) : Component(this) {
 	layer = l;

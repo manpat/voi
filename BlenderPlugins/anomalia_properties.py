@@ -35,6 +35,10 @@ class ObjectPanel(bpy.types.Panel):
 		if(otyp == 1):
 			row.prop(context.active_object, "anom_portaldst")
 
+		# Mirror
+		elif(otyp == 2):
+			row.prop(context.active_object, "anom_waterparticles")
+
 		# Interactible / Generic Trigger
 		elif(otyp == 3 or otyp == 5):
 			row = layout.row()
@@ -278,6 +282,7 @@ def register():
 	# Portal / Mirror
 	obj.anom_portaldst = IntProperty(name="Destination Layer",
 		min=0, max=10, default=1, subtype='UNSIGNED')
+	obj.anom_waterparticles = BoolProperty(name="Water Particles")
 
 	# Interact / Trigger / Bell
 	obj.anom_targetentity = StringProperty(name="Target Entity")
@@ -349,6 +354,7 @@ def unregister():
 	del obj.anom_layer
 	del obj.anom_hidden
 	del obj.anom_newarea
+	del obj.anom_particles
 	del obj.anom_portaldst
 	del obj.anom_doorcount
 	del obj.anom_bellnumber
