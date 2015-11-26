@@ -278,8 +278,7 @@ void App::Run(){
 				Menu::Inst().Update(this, (f32)AppTime::deltaTime);
 				break;
 			case GameState::PLAYING: break;
-			case GameState::PAUSED: throw "Paused state not implemented";
-			default: throw "Invalid gamestate";
+			case GameState::PAUSED: break;
 		}
 
 		// Lerp fog settings
