@@ -5,8 +5,11 @@
 template<>
 HubManager* Singleton<HubManager>::instance = nullptr;
 
-void HubManager::NotifyReturnToHub() {
+void HubManager::NotifyHubLoad() {
 	doneMyThang = false;
+}
+
+void HubManager::NotifyReturnToHub() {
 	if(lastLevelCompleted < 2)
 		lastLevelCompleted++;
 	else

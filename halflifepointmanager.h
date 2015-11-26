@@ -8,8 +8,8 @@ struct HalfLifePointComponent;
 struct HalfLifePointManager : Singleton<HalfLifePointManager> {
 	std::string toLevel;
 	std::string toNode;
-	quat rotOffset;
-	vec3 posOffset;
+	quat rotOffset{};
+	vec3 posOffset{};
 
 	HalfLifePointManager();
 

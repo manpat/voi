@@ -193,7 +193,7 @@ void App::Load(const std::string& nLevel){
 	SetSkyColor(Ogre::ColourValue{env.skyColor[0], env.skyColor[1], env.skyColor[2]});
 	SetFogDensity(env.fogDensity);
 
-	// TODO: Lerp this
+	// TODO: Lerp this, maybe
 	sceneManager->setAmbientLight(Ogre::ColourValue{env.ambientColor[0], env.ambientColor[1], env.ambientColor[2]});
 
 	portalManager->SetPortalColor(skyColor);
@@ -223,6 +223,9 @@ void App::Load(const std::string& nLevel){
 	audioManager->SetReverbTime(5000.f);
 	audioManager->SetReverbMix(10.f);
 	audioManager->SetLowpass(20000.f);
+
+	if(nLevel == "hub")
+		HubManager::GetSingleton()->NotifyHubLoad();
 
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();
@@ -254,7 +257,7 @@ void App::ResetScene() {
 	// Clear scene completely
 	sceneManager->clearScene();
 
-	// Destroy particle systems and particle templates
+	// Destroy particle systems
 	sceneManager->destroyAllParticleSystems();
 
 	// Clear default resouce group resources

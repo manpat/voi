@@ -49,7 +49,7 @@ void HalfLifePointManager::Update() {
 
 		app->player->entity->collider->SetPosition(spawnPos);
 		app->player->SetToOrientation(spawnRot);
-
+		
 		if(toLevel == "hub")
 			HubManager::GetSingleton()->NotifyReturnToHub();
 
