@@ -36,7 +36,7 @@ void Bell::OnAwake() {
 		std::cout << "WARNING!! Bell missing audio generator" << std::endl;
 	}
 
-	BellManager::GetSingleton()->AddBell(this);
+	BellManager::GetSingleton()->AddBell(targetName, this);
 }
 
 void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
@@ -54,10 +54,10 @@ void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
 
 	}else if(msg == "incorrect") {
 		std::cout << "Bell unlock " << bellNumber << " incorrect" << std::endl;
-		BellManager::GetSingleton()->StopAllBells();
+		BellManager::GetSingleton()->StopAllBells(targetName);
 
 	}else if(msg == "dooropen") {
 		std::cout << "Bell unlock " << bellNumber << " dooropen" << std::endl;
-		BellManager::GetSingleton()->CorrectCombination();
+		BellManager::GetSingleton()->CorrectCombination(targetName);
 	}
 }
