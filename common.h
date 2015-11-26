@@ -56,6 +56,12 @@ V findin(const std::unordered_map<K,V>& m, K k, V dv = V()){
 
 	return it->second;
 }
+template<typename MapT, typename K>
+bool existsin(const MapT& m, const K& k) {
+	auto it = m.find(k);
+	return it != m.end();
+}
+
 
 template<class T, class L, class U>
 T clamp(T v, L l = 0, U u = 1){
