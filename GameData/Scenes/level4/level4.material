@@ -14,20 +14,20 @@ material _missing_material_
     }
 }
 
-// Portal genrated by blender2ogre 0.6.0
+// Mid genrated by blender2ogre 0.6.0
 
-material Portal 
+material Mid 
 {
     receive_shadows on 
 
     technique
     {
-        pass Portal
+        pass Mid
         {
-            ambient 0.0 0.0 0.0 1.0
-            diffuse 0.0 0.0 0.0 1.0
+            ambient 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
+            diffuse 0.120000006556511 0.120000006556511 0.120000006556511 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.0 0.0 0.0 1.0
+            emissive 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -84,20 +84,20 @@ material Stone
         }
     }
 }
-// Mid genrated by blender2ogre 0.6.0
+// Dark genrated by blender2ogre 0.6.0
 
-material Mid 
+material Dark 
 {
     receive_shadows on 
 
     technique
     {
-        pass Mid
+        pass Dark
         {
-            ambient 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
-            diffuse 0.120000006556511 0.120000006556511 0.120000006556511 1.0
+            ambient 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
+            diffuse 0.08000000238418581 0.08000000238418581 0.08000000238418581 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
+            emissive 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -119,20 +119,20 @@ material Mid
         }
     }
 }
-// Dark genrated by blender2ogre 0.6.0
+// Portal genrated by blender2ogre 0.6.0
 
-material Dark 
+material Portal 
 {
     receive_shadows on 
 
     technique
     {
-        pass Dark
+        pass Portal
         {
-            ambient 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
-            diffuse 0.08000000238418581 0.08000000238418581 0.08000000238418581 1.0
+            ambient 0.0 0.0 0.0 1.0
+            diffuse 0.0 0.0 0.0 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
+            emissive 0.0 0.0 0.0 1.0
 
             alpha_to_coverage off
             colour_write on
