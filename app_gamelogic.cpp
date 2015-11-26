@@ -213,6 +213,7 @@ void App::Load(const std::string& nLevel){
 
 		auto pass = mat->getTechnique(0)->getPass(0);
 		pass->setEmissive(pass->getDiffuse());
+		pass->setDiffuse(Ogre::ColourValue::Black);
 
 		matIt.moveNext();
 	}
