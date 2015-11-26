@@ -72,6 +72,24 @@ void App::Init(){
 	             88
 */
 void App::Update(){
+	auto gameState = GetGameState();
+
+	// Pause or return to menu on ESC
+	if (Input::GetMappedDown(Input::Cancel) && gameState == GameState::PLAYING) {
+	//	SetGameState(GameState::PAUSED);
+	//
+	//} else if (Input::GetMappedDown(Input::Cancel) && gameState == GameState::PAUSED) {
+		SetGameState(GameState::MAIN_MENU);
+	//
+	//// Unpause on ENTER
+	//} else if (Input::GetMappedDown(Input::Select) && gameState == GameState::PAUSED) {
+	//	SetGameState(GameState::PLAYING);
+	}
+	//
+	//if (GetGameState() != GameState::PLAYING) {
+	//	return;
+	//}
+
 	halflifePointManager->Update();
 
 	input->Update();
@@ -82,11 +100,6 @@ void App::Update(){
 	entityManager->LateUpdate();
 
 	hubManager->Update();
-
-	// Return to menu on ESC
-	if (Input::GetMappedDown(Input::Cancel)) {
-		SetGameState(GameState::MAIN_MENU);
-	}
 
 	if(Input::GetKeyDown(SDLK_F2)) {
 		Input::doCapture = !Input::doCapture;
