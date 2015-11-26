@@ -6,12 +6,14 @@
 struct ColliderComponent;
 struct SynthComponent;
 struct MoverComponent;
+struct ShakeComponent;
 
 // TODO: A way to trigger events when combination is (in)correct
 
 struct DoorComponent : Component {
 	SynthComponent* synth = nullptr;
 	MoverComponent* mover = nullptr;
+	ShakeComponent* shake = nullptr;
 	vec3 closedPosition = vec3::ZERO;
 	vec3 openPosition = vec3::ZERO;
 	f32 openTime = 2.f;

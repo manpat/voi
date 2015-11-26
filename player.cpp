@@ -177,7 +177,7 @@ void Player::OnUpdate() {
 	// 	std::cout << rayres.collider->entity->GetName() << std::endl;
 	// }
 
-	ShakeCamera(Input::GetKey('g') ? 0.05f : 0); // For testing
+	maxShake = 0.0f;
 }
 
 void Player::OnLayerChange(){
@@ -211,6 +211,10 @@ void Player::SetToOrientation(const quat& orientation) {
 }
 
 void Player::ShakeCamera(f32 amount) {
+	if (maxShake >= amount) {
+		return;
+	}
+
 	auto camera = App::GetSingleton()->camera->entity;
 	auto shakeAmount = vec3::ZERO;
 
@@ -218,6 +222,8 @@ void Player::ShakeCamera(f32 amount) {
 		shakeAmount.x = (rand() % 1000) / 1000.0f * amount;
 		shakeAmount.y = (rand() % 1000) / 1000.0f * amount;
 		shakeAmount.z = (rand() % 1000) / 1000.0f * amount;
+
+		maxShake = amount;
 	}
 
 	camera->SetPosition(localCameraPosition + shakeAmount);

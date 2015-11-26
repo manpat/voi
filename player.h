@@ -14,6 +14,7 @@ struct Player : Component {
 	PortalTrigger* portalTrigger = nullptr;
 	bool isJumping = false;
 	vec3 localCameraPosition = vec3::ZERO;
+	f32 maxShake = 0.0f;
 
 	Player() : Component{this} {}
 
