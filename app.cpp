@@ -79,8 +79,8 @@ App::App(const std::string& levelArg) {
 	}
 
 	sdlWindow = SDL_CreateWindow("Anomalia",
-					SDL_WINDOWPOS_UNDEFINED,
-					SDL_WINDOWPOS_UNDEFINED,
+					SDL_WINDOWPOS_CENTERED,
+					SDL_WINDOWPOS_CENTERED,
 					width, height,
 					SDL_WINDOW_OPENGL);
 

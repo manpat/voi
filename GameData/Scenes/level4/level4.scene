@@ -1,5 +1,14 @@
-<scene export_time="1448509988.4812179" previous_export_time="1448509920.7725563" exported_by="patrick" formatVersion="1.0.1" >
+<scene export_time="1448510496.9112422" previous_export_time="1448510372.3807278" exported_by="patrick" formatVersion="1.0.1" >
   <nodes >
+    <node name="Cube.005" >
+      <position x="-0.500000" z="15.000000" y="-1.750000" />
+      <rotation qx="0.000000" qy="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale x="1.000000" z="1.000000" y="1.000000" />
+      <user_data type="int" name="anom_invisible" value="1" />
+      <entity physics_type="STATIC" lock_rot_z="False" damping_trans="0.03999999910593033" lock_trans_x="False" collisionPrim="box" lock_rot_x="False" anisotropic_friction="False" damping_rot="0.10000000149011612" name="Cube.034" lock_rot_y="False" meshFile="Cube.034.mesh" friction_y="1.0" inertia_tensor="0.4000000059604645" actor="False" friction_x="1.0" lock_trans_y="False" velocity_max="0.0" friction_z="1.0" ghost="False" velocity_min="0.0" mass_radius="1.0" mass="1.0" lock_trans_z="False" >
+        <dimensions x="13.0" z="12.0" y="2.5" />
+      </entity>
+    </node>
     <node name="Cube.004" >
       <position x="-0.500000" z="15.000000" y="-0.300000" />
       <rotation qx="0.000000" qy="0.000000" qz="-0.000000" qw="1.000000" />
