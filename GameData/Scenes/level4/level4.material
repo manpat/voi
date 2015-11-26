@@ -49,41 +49,6 @@ material Stone
         }
     }
 }
-// Mid genrated by blender2ogre 0.6.0
-
-material Mid 
-{
-    receive_shadows on 
-
-    technique
-    {
-        pass Mid
-        {
-            ambient 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
-            diffuse 0.120000006556511 0.120000006556511 0.120000006556511 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
-
-            alpha_to_coverage off
-            colour_write on
-            cull_hardware clockwise
-            depth_check on
-            depth_func less_equal
-            depth_write on
-            illumination_stage 
-            light_clip_planes off
-            light_scissor off
-            lighting on
-            normalise_normals off
-            polygon_mode solid
-            scene_blend one zero
-            scene_blend_op add
-            shading gouraud
-            transparent_sorting on
-
-        }
-    }
-}
 // Dark genrated by blender2ogre 0.6.0
 
 material Dark 
@@ -119,20 +84,20 @@ material Dark
         }
     }
 }
-// Water genrated by blender2ogre 0.6.0
+// Mid genrated by blender2ogre 0.6.0
 
-material Water 
+material Mid 
 {
     receive_shadows on 
 
     technique
     {
-        pass Water
+        pass Mid
         {
-            ambient 0.6385840773582458 0.7795683741569519 0.800000011920929 1.0
-            diffuse 0.5108672694991121 0.6236547086187407 0.6400000190734865 1.0
+            ambient 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
+            diffuse 0.120000006556511 0.120000006556511 0.120000006556511 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.6385840773582458 0.7795683741569519 0.800000011920929 1.0
+            emissive 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -168,6 +133,41 @@ material Portal
             diffuse 0.0 0.0 0.0 1.0
             specular 0.5 0.5 0.5 1.0 12.5
             emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Water genrated by blender2ogre 0.6.0
+
+material Water 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Water
+        {
+            ambient 0.6385840773582458 0.7795683741569519 0.800000011920929 1.0
+            diffuse 0.5108672694991121 0.6236547086187407 0.6400000190734865 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.6385840773582458 0.7795683741569519 0.800000011920929 1.0
 
             alpha_to_coverage off
             colour_write on

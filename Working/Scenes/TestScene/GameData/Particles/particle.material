@@ -1,9 +1,0 @@
-material Particle/Additive {
-	technique {
-		pass {
-			scene_blend add
-			shading flat
-			lighting off
-		}
-	}
-}
