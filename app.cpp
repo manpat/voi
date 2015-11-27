@@ -152,7 +152,7 @@ void App::LoadConfig() {
 		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
 		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
 		auto fsStr = conf.getSetting("fullscreen", "Anomalia", "0");
-		auto fovStr = conf.getSetting("fov", "Anomalia", "90");
+		auto fovStr = conf.getSetting("fov", "Anomalia", "60");
 
 		width = std::stol(wStr);
 		height = std::stol(hStr);
@@ -176,7 +176,7 @@ void App::LoadConfig() {
 		height = HEIGHT;
 		multisampleLevel = 4;
 		fullscreen = 0;
-		fovDegrees = 90;
+		fovDegrees = 60;
 	}
 }
 
