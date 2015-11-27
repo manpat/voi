@@ -14,6 +14,146 @@ material _missing_material_
     }
 }
 
+// Dark genrated by blender2ogre 0.6.0
+
+material Dark 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Dark
+        {
+            ambient 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
+            diffuse 0.08000000238418581 0.08000000238418581 0.08000000238418581 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Stone.003 genrated by blender2ogre 0.6.0
+
+material Stone.003 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Stone.003
+        {
+            ambient 0.3499999940395355 0.3499999940395355 0.3499999940395355 1.0
+            diffuse 0.2799999994039535 0.2799999994039535 0.2799999994039535 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.3499999940395355 0.3499999940395355 0.3499999940395355 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Mid.003 genrated by blender2ogre 0.6.0
+
+material Mid.003 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Mid.003
+        {
+            ambient 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+            diffuse 0.12159999790191645 0.12159999790191645 0.12159999790191645 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.15199999511241913 0.15199999511241913 0.15199999511241913 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Shaded.002 genrated by blender2ogre 0.6.0
+
+material Shaded.002 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Shaded.002
+        {
+            ambient 0.30000001192092896 0.30000001192092896 0.30000001192092896 1.0
+            diffuse 0.240000013113022 0.240000013113022 0.240000013113022 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.30000001192092896 0.30000001192092896 0.30000001192092896 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
 // Stone genrated by blender2ogre 0.6.0
 
 material Stone 
@@ -98,41 +238,6 @@ material Water
             diffuse 0.5108672694991121 0.6236547086187407 0.6400000190734865 1.0
             specular 0.5 0.5 0.5 1.0 12.5
             emissive 0.6385840773582458 0.7795683741569519 0.800000011920929 1.0
-
-            alpha_to_coverage off
-            colour_write on
-            cull_hardware clockwise
-            depth_check on
-            depth_func less_equal
-            depth_write on
-            illumination_stage 
-            light_clip_planes off
-            light_scissor off
-            lighting on
-            normalise_normals off
-            polygon_mode solid
-            scene_blend one zero
-            scene_blend_op add
-            shading gouraud
-            transparent_sorting on
-
-        }
-    }
-}
-// Dark genrated by blender2ogre 0.6.0
-
-material Dark 
-{
-    receive_shadows on 
-
-    technique
-    {
-        pass Dark
-        {
-            ambient 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
-            diffuse 0.08000000238418581 0.08000000238418581 0.08000000238418581 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0
 
             alpha_to_coverage off
             colour_write on

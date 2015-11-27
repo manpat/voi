@@ -1,5 +1,37 @@
-<scene previous_export_time="1448575047.791826" exported_by="patrick" export_time="1448579551.613453" formatVersion="1.0.1" >
+<scene previous_export_time="1448584946.628134" exported_by="patrick" export_time="1448585112.7590954" formatVersion="1.0.1" >
   <nodes >
+    <node name="Plane.004" >
+      <position x="66.820000" y="15.200002" z="-72.940010" />
+      <rotation qx="0.707107" qz="0.000000" qy="0.000000" qw="0.707107" />
+      <scale x="2.000000" y="2.000000" z="2.000000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.025" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.025.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="0.10000000894069672" y="5.200000762939453" z="1.5999969244003296" />
+      </entity>
+    </node>
+    <node name="Glyph4U.001" >
+      <position x="67.019997" y="15.200000" z="-70.739998" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale x="0.700000" y="0.700000" z="1.000000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.024" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.024.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="1.0" y="1.0" z="0.19999998807907104" />
+      </entity>
+    </node>
+    <node name="Glyph2G.001" >
+      <position x="67.019997" y="15.200000" z="-73.539986" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale x="0.700000" y="0.700000" z="1.000000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.022" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.022.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="1.0" y="1.0000001192092896" z="0.19999998807907104" />
+      </entity>
+    </node>
+    <node name="Glyph1E.001" >
+      <position x="67.019997" y="15.200002" z="-74.939995" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale x="0.700000" y="0.700000" z="1.000000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.021" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.021.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="1.0" y="0.9999999403953552" z="0.19999998807907104" />
+      </entity>
+    </node>
     <node name="LevelEntryBend.002" >
       <position x="68.000000" y="18.000000" z="-9.000000" />
       <rotation qx="0.000000" qz="-0.000000" qy="1.000000" qw="-0.000000" />
@@ -42,6 +74,7 @@
       <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
       <scale x="1.000000" y="1.000000" z="1.000000" />
       <user_data name="anom_objecttype" value="2" type="int" />
+      <user_data name="anom_layer" value="0" type="int" />
       <entity mass="1.0" lock_trans_z="False" friction_x="1.0" name="Plane" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" collisionPrim="box" velocity_max="0.0" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" lock_trans_y="False" actor="False" meshFile="Plane.mesh" lock_trans_x="False" physics_type="NO_COLLISION" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
         <dimensions x="21.0" y="0.0" z="19.0" />
       </entity>
@@ -411,6 +444,38 @@
       <user_data name="anom_objecttype" value="2" type="int" />
       <entity lock_trans_z="False" friction_x="1.0" name="Plane.004" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.004.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
         <dimensions x="15.0" y="0.0" z="15.0" />
+      </entity>
+    </node>
+    <node name="Glyph1E" >
+      <position x="52.000000" y="15.700000" z="-76.199997" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
+      <scale x="0.350000" y="0.350000" z="0.500000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.017" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.017.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="0.5" y="0.4999999701976776" z="0.09999999403953552" />
+      </entity>
+    </node>
+    <node name="Glyph2G" >
+      <position x="39.900002" y="15.700000" z="-80.800003" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale x="0.350000" y="0.350000" z="0.500000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.018" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.018.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="0.5" y="0.5000000596046448" z="0.09999999403953552" />
+      </entity>
+    </node>
+    <node name="Glyph3O" >
+      <position x="28.700001" y="15.700000" z="-72.800003" />
+      <rotation qx="0.000000" qz="-0.000000" qy="0.707107" qw="0.707107" />
+      <scale x="0.350000" y="0.350000" z="0.500000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.019" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.019.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="0.5" y="0.5" z="0.09999999403953552" />
+      </entity>
+    </node>
+    <node name="Glyph4U" >
+      <position x="45.000000" y="15.650000" z="-65.049995" />
+      <rotation qx="0.000000" qz="-0.000000" qy="-0.707107" qw="0.707107" />
+      <scale x="0.350000" y="0.350000" z="0.500000" />
+      <entity lock_trans_z="False" friction_x="1.0" name="Plane.020" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.020.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
+        <dimensions x="0.5" y="0.5" z="0.09999999403953552" />
       </entity>
     </node>
   </nodes>
