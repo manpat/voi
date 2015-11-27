@@ -99,6 +99,7 @@ struct App : Singleton<App> {
 	u32 width, height;
 	u8 multisampleLevel;
 	u8 fullscreen;
+	u8 fovDegrees;
 
 private:
 	GameState gameState = GameState::NONE;

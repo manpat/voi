@@ -152,11 +152,13 @@ void App::LoadConfig() {
 		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
 		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
 		auto fsStr = conf.getSetting("fullscreen", "Anomalia", "0");
+		auto fovStr = conf.getSetting("fov", "Anomalia", "90");
 
 		width = std::stol(wStr);
 		height = std::stol(hStr);
 		multisampleLevel = std::stoi(mslStr);
 		fullscreen = std::stoi(fsStr);
+		fovDegrees = std::stoi(fovStr);
 	}else{
 		// Otherwise, create one and write default values
 		std::ostringstream sstr;
@@ -174,6 +176,7 @@ void App::LoadConfig() {
 		height = HEIGHT;
 		multisampleLevel = 4;
 		fullscreen = 0;
+		fovDegrees = 90;
 	}
 }
 

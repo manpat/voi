@@ -107,6 +107,7 @@ void App::Update(){
 
 	if(Input::GetKeyDown(SDLK_F5)) {
 		hubManager->NotifyReturnToHub();
+		hubManager->NotifyHubLoad();
 	}
 
 	input->EndFrame();
@@ -166,10 +167,13 @@ void App::Load(const std::string& nLevel){
 	// Created at half height above ground because collider origins are from the center
 	auto playerEnt = entityManager->CreateEntity("Player", playerSpawnPosition);
 	auto cameraEnt = entityManager->CreateEntity("Camera");
+
 	playerEnt->AddChild(cameraEnt);
 	cameraEnt->SetGlobalPosition(playerSpawnPosition + vec3{0, playerCenter-0.2f, 0});
 
 	camera = cameraEnt->AddComponent<Camera>("MainCamera");
+	camera->ogreCamera->setFOVy(Ogre::Radian(Ogre::Degree(fovDegrees).valueRadians()));
+
 	layerRenderingManager->SetCamera(camera);
 
 	player = playerEnt->AddComponent<Player>();

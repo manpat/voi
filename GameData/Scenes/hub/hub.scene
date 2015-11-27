@@ -1,7 +1,7 @@
-<scene formatVersion="1.0.1" exported_by="tvolp" export_time="1448590034.138672" previous_export_time="1448555759.774733" >
+<scene formatVersion="1.0.1" exported_by="tvolp" export_time="1448591056.489432" previous_export_time="1448590880.582024" >
   <nodes >
     <node name="FinalDoor" >
-      <position x="-0.500000" z="-80.000000" y="26.500000" />
+      <position x="0.000000" z="-80.000000" y="26.500000" />
       <rotation qz="-0.000000" qx="0.000000" qy="0.000000" qw="1.000000" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data name="anom_objecttype" value="4" type="int" />
@@ -17,7 +17,7 @@
       </entity>
     </node>
     <node name="Stairs.Level4" >
-      <position x="0.000000" z="-58.000000" y="12.000000" />
+      <position x="0.500000" z="-58.000000" y="12.000000" />
       <rotation qz="-0.000000" qx="0.000000" qy="0.707107" qw="0.707107" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data name="anom_layer" value="1" type="int" />
@@ -34,7 +34,7 @@
       </entity>
     </node>
     <node name="Stairs.Level3" >
-      <position x="0.000000" z="-46.000000" y="6.000000" />
+      <position x="0.500000" z="-46.000000" y="6.000000" />
       <rotation qz="-0.000000" qx="0.000000" qy="0.707107" qw="0.707107" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data name="anom_layer" value="1" type="int" />
@@ -51,7 +51,7 @@
       </entity>
     </node>
     <node name="Stairs.Level2" >
-      <position x="0.000000" z="-34.000000" y="0.000000" />
+      <position x="0.500000" z="-34.000000" y="0.000000" />
       <rotation qz="-0.000000" qx="0.000000" qy="0.707107" qw="0.707107" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data name="anom_layer" value="1" type="int" />
@@ -262,7 +262,7 @@
       </entity>
     </node>
     <node name="Stairs.Level1" >
-      <position x="0.000000" z="-22.000000" y="-6.000000" />
+      <position x="0.500000" z="-22.000000" y="-6.000000" />
       <rotation qz="-0.000000" qx="0.000000" qy="0.707107" qw="0.707107" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data name="anom_invisible" value="0" type="int" />
