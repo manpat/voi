@@ -98,7 +98,8 @@ struct App : Singleton<App> {
 	bool shouldQuit;
 	u32 width, height;
 	u8 multisampleLevel;
-	u8 fullscreen;
+	u8 useFullscreen;
+	u8 useVsync;
 	u8 fovDegrees;
 
 private:

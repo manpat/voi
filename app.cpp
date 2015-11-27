@@ -88,7 +88,7 @@ App::App(const std::string& levelArg) {
 		throw "SDL Window creation failed";
 	}
 
-	switch (fullscreen) {
+	switch (useFullscreen) {
 		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
 			SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			break;
@@ -99,6 +99,8 @@ App::App(const std::string& levelArg) {
 			SDL_SetWindowFullscreen(sdlWindow, 0);
 			break;
 	}
+
+	SDL_GL_SetSwapInterval(useVsync);
 
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
 	if(!sdlGLContext) {
@@ -142,41 +144,48 @@ void App::LoadConfig() {
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance(".", false);
 
+	// Specify defaults
+	width = WIDTH;
+	height = HEIGHT;
+	multisampleLevel = 4;
+	useFullscreen = 0;
+	useVsync = 1;
+	fovDegrees = 60;
+
 	// Test if config exists
-	if(fs->exists("anomalia.cfg")) {
+	if (fs->exists("anomalia.cfg")) {
 		// If so, load it and configure
 		Ogre::ConfigFile conf;
 		conf.load("anomalia.cfg");
 		
-		auto wStr = conf.getSetting("width", "Anomalia", std::to_string(WIDTH));
-		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
-		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
-		auto fsStr = conf.getSetting("fullscreen", "Anomalia", "0");
-		auto fovStr = conf.getSetting("fov", "Anomalia", "60");
+		auto sectionStr = "Anomalia";
+		auto wStr = conf.getSetting("width", sectionStr, std::to_string(width));
+		auto hStr = conf.getSetting("height", sectionStr, std::to_string(height));
+		auto mslStr = conf.getSetting("multisampleLevel", sectionStr, std::to_string(multisampleLevel));
+		auto fsStr = conf.getSetting("fullscreen", sectionStr, std::to_string(useFullscreen));
+		auto fovStr = conf.getSetting("fov", sectionStr, std::to_string(fovDegrees));
+		auto vsyncStr = conf.getSetting("fov", sectionStr, std::to_string(useVsync));
 
 		width = std::stol(wStr);
 		height = std::stol(hStr);
 		multisampleLevel = std::stoi(mslStr);
-		fullscreen = std::stoi(fsStr);
+		useFullscreen = std::stoi(fsStr);
+		useVsync = std::stoi(vsyncStr);
 		fovDegrees = std::stoi(fovStr);
-	}else{
+	} else {
 		// Otherwise, create one and write default values
 		std::ostringstream sstr;
 
 		sstr << "[Anomalia]\n";
 		sstr << "width=" << WIDTH << "\n";
 		sstr << "height=" << HEIGHT << "\n";
-		sstr << "multisampleLevel=4\n";
-		sstr << "fullscreen=0\n";
+		sstr << "multisampleLevel=" << multisampleLevel << "\n";
+		sstr << "fullscreen=" << useFullscreen << "\n";
+		sstr << "vsync=" << useVsync << "\n";
+		sstr << "fov=" << fovDegrees << "\n";
 
 		auto ncfgFile = fs->create("anomalia.cfg");
 		ncfgFile->write(sstr.str().data(), sstr.tellp());
-
-		width = WIDTH;
-		height = HEIGHT;
-		multisampleLevel = 4;
-		fullscreen = 0;
-		fovDegrees = 60;
 	}
 }
 
@@ -237,9 +246,9 @@ void App::InitOgre(){
 #endif
 
 	windowParams["FSAA"] = "0";
-	windowParams["vsync"] = "true";
+	windowParams["vsync"] = useVsync > 0;
 	// The only parameter that actually does anything is windowParams
-	window = ogreRoot->createRenderWindow("", 0, 0, false, &windowParams);
+	window = ogreRoot->createRenderWindow("", 0, 0, useFullscreen > 0, &windowParams);
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_INTERIOR, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();
