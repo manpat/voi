@@ -98,6 +98,7 @@ struct App : Singleton<App> {
 	bool shouldQuit;
 	u32 width, height;
 	u8 multisampleLevel;
+	u8 fullscreen;
 
 private:
 	GameState gameState = GameState::NONE;

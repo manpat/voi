@@ -56,10 +56,10 @@ App::App(const std::string& levelArg) {
 	if (levelArg.size() > 0) {
 		customLevelName = levelArg;
 	}
-	else {
-		std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
-		std::getline(std::cin, customLevelName);
-	}
+	//else {
+	//	std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
+	//	std::getline(std::cin, customLevelName);
+	//}
 
 	// Find and parse config file
 	LoadConfig();
@@ -86,6 +86,18 @@ App::App(const std::string& levelArg) {
 
 	if(!sdlWindow) {
 		throw "SDL Window creation failed";
+	}
+
+	switch (fullscreen) {
+		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
+			SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			break;
+		case 1: // 1 = Fullscreen (videomode change)
+			SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN);
+			break;
+		default: // 0 = Windowed
+			SDL_SetWindowFullscreen(sdlWindow, 0);
+			break;
 	}
 
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
@@ -139,23 +151,29 @@ void App::LoadConfig() {
 		auto wStr = conf.getSetting("width", "Anomalia", std::to_string(WIDTH));
 		auto hStr = conf.getSetting("height", "Anomalia", std::to_string(HEIGHT));
 		auto mslStr = conf.getSetting("multisampleLevel", "Anomalia", "4");
+		auto fsStr = conf.getSetting("fullscreen", "Anomalia", "0");
 
 		width = std::stol(wStr);
 		height = std::stol(hStr);
 		multisampleLevel = std::stoi(mslStr);
+		fullscreen = std::stoi(fsStr);
 	}else{
 		// Otherwise, create one and write default values
 		std::ostringstream sstr;
+
 		sstr << "[Anomalia]\n";
-		sstr << "width = " << WIDTH << "\n";
-		sstr << "height = " << HEIGHT << "\n";
-		sstr << "multisampleLevel = 4\n";
+		sstr << "width=" << WIDTH << "\n";
+		sstr << "height=" << HEIGHT << "\n";
+		sstr << "multisampleLevel=4\n";
+		sstr << "fullscreen=0\n";
+
 		auto ncfgFile = fs->create("anomalia.cfg");
 		ncfgFile->write(sstr.str().data(), sstr.tellp());
 
 		width = WIDTH;
 		height = HEIGHT;
 		multisampleLevel = 4;
+		fullscreen = 0;
 	}
 }
 
