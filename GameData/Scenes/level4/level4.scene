@@ -1,9 +1,10 @@
-<scene previous_export_time="1448575113.881399" exported_by="patrick" export_time="1448589423.0421205" formatVersion="1.0.1" >
+<scene previous_export_time="1448589650.0016193" exported_by="patrick" export_time="1448589673.1367526" formatVersion="1.0.1" >
   <nodes >
     <node name="Plane" >
       <position x="-94.973152" y="10.999977" z="-109.457756" />
       <rotation qx="0.000000" qz="-0.000000" qy="0.000000" qw="1.000000" />
       <scale x="1.000000" y="1.000000" z="1.000000" />
+      <user_data name="anom_layer" value="1" type="int" />
       <entity lock_trans_z="False" friction_x="1.0" name="Plane.019" physics_type="STATIC" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.019.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
         <dimensions x="0.2000001221895218" y="1.600000023841858" z="3.4000000953674316" />
       </entity>
@@ -12,6 +13,7 @@
       <position x="-94.973152" y="10.999977" z="-110.657753" />
       <rotation qx="0.000000" qz="-0.000000" qy="0.707107" qw="0.707107" />
       <scale x="0.700000" y="0.700000" z="1.000000" />
+      <user_data name="anom_layer" value="1" type="int" />
       <entity lock_trans_z="False" friction_x="1.0" name="Plane.018" physics_type="NO_COLLISION" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.018.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
         <dimensions x="1.0" y="1.0" z="0.19999998807907104" />
       </entity>
@@ -20,14 +22,16 @@
       <position x="-94.973152" y="10.999977" z="-108.257759" />
       <rotation qx="0.000000" qz="-0.000000" qy="0.707107" qw="0.707107" />
       <scale x="0.700000" y="0.700000" z="1.000000" />
+      <user_data name="anom_layer" value="1" type="int" />
       <entity lock_trans_z="False" friction_x="1.0" name="Plane.017" physics_type="STATIC" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.017.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
         <dimensions x="1.0" y="1.0" z="0.19999998807907104" />
       </entity>
     </node>
     <node name="Glyph1E.001" >
-      <position x="-94.973152" y="10.999977" z="-109.457756" />
+      <position x="-95.973152" y="10.999977" z="-109.457756" />
       <rotation qx="0.000000" qz="-0.000000" qy="0.707107" qw="0.707107" />
       <scale x="0.700000" y="0.700000" z="1.000000" />
+      <user_data name="anom_layer" value="1" type="int" />
       <entity lock_trans_z="False" friction_x="1.0" name="Plane.016" physics_type="STATIC" anisotropic_friction="False" damping_trans="0.03999999910593033" lock_rot_x="False" velocity_max="0.0" lock_trans_y="False" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" lock_rot_z="False" lock_rot_y="False" mass_radius="1.0" actor="False" meshFile="Plane.016.mesh" lock_trans_x="False" mass="1.0" ghost="False" velocity_min="0.0" friction_z="1.0" friction_y="1.0" >
         <dimensions x="1.0" y="0.9999999403953552" z="0.19999998807907104" />
       </entity>
