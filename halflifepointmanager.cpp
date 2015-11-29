@@ -41,7 +41,7 @@ void HalfLifePointManager::Update() {
 		if (!spawnNode) {
 			std::cout << "Couldn't find entity in new level " + toNode;
 		} else {
-			auto spawnNodeOri = vec3::UNIT_Z.getRotationTo(spawnNode->GetWorldPlaneFromMesh().normal);
+			auto spawnNodeOri = spawnNode->GetGlobalOrientation();
 
 			spawnPos = spawnNodeOri * posOffset + spawnNode->GetGlobalPosition();
 			spawnRot = spawnNodeOri * rotOffset;
