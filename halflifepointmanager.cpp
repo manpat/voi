@@ -44,7 +44,7 @@ void HalfLifePointManager::Update() {
 			auto spawnNodeOri = spawnNode->GetGlobalOrientation();
 
 			spawnPos = spawnNodeOri * posOffset + spawnNode->GetGlobalPosition();
-			spawnRot = spawnNodeOri * rotOffset;
+			spawnRot = rotOffset * spawnNodeOri;
 		}
 
 		app->player->entity->collider->SetPosition(spawnPos);
