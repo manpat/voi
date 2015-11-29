@@ -44,7 +44,7 @@ void HalfLifePointManager::Update() {
 			auto spawnNodeOri = vec3::UNIT_Z.getRotationTo(spawnNode->GetWorldPlaneFromMesh().normal);
 
 			spawnPos = spawnNodeOri * posOffset + spawnNode->GetGlobalPosition();
-			spawnRot = spawnNodeOri + rotOffset;
+			spawnRot = spawnNodeOri * rotOffset;
 		}
 
 		app->player->entity->collider->SetPosition(spawnPos);
