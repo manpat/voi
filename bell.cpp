@@ -54,6 +54,9 @@ void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
 
 	}else if(msg == "incorrect") {
 		std::cout << "Bell unlock " << bellNumber << " incorrect" << std::endl;
+		if(bellGen){
+			bellGen->SetParam(1, 2);
+		}
 		BellManager::GetSingleton()->StopAllBells(targetName);
 
 	}else if(msg == "dooropen") {

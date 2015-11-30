@@ -25,10 +25,7 @@ void BellManager::CorrectCombination(const std::string& target) {
 	std::cout << "CorrectCombination" << std::endl;
 	for(auto& b: bells[target]) {
 		if(b->bellGen){
-			// b->bellGen->note += 12;
 			b->bellGen->SetParam(1, 1);
-			// b->bellGen->Start();
-			// b->bellGen->Stop();
 		}
 	}
 }

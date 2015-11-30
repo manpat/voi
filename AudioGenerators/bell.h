@@ -8,11 +8,12 @@ struct BellAudioGenerator : AudioGenerator {
 	f64 savedElapsed = -10000.0;
 	bool triggered = false;
 	bool playing = false;
-	bool correct = false;
+	u8 correctness = 0; // 0 - none, 1 - correct, 2 - incorrect
 
 	void Start() override {
-		if(correct) return;
+		if(correctness == 1) return;
 
+		correctness = 0;
 		triggered = true;
 		playing = true;
 	}
@@ -28,10 +29,8 @@ struct BellAudioGenerator : AudioGenerator {
 				break;
 
 			case 1: // Combination
-				if(val == 1) { // correct
-					correct = true;
-					playing = false;
-				}
+				correctness = val;
+				playing = false;
 				break;
 		}
 	}
@@ -45,12 +44,15 @@ struct BellAudioGenerator : AudioGenerator {
 		if(playing) savedElapsed = elapsed;
 
 		f64 env = 1.0 - Env::Ramp(elapsed-savedElapsed, 3.f);
-		// env = std::pow(env, 2.f);
 
-		f64 f = ntof(note + (correct?12:0));
+		const f64 incorrectRatio = 16.5f / 17.f;
+		f64 f = ntof(note + (correctness == 1 ? 12 : 0)) 
+			* ((correctness == 2) ? incorrectRatio : 1.0);
+
 		f64 ph = f * elapsed;
 
 		f32 o = 0.f; 
+		o += Wave::Sin(ntof(120) * 0.5 * elapsed) * ((correctness == 1) ? 0.f : 0.02f);
 		o += Wave::Triangle(ph) * env * 0.5f;
 		o += Wave::Sin(ph) * (playing?1.0f:0.0f) * 0.1f;
 

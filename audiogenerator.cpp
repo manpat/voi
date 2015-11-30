@@ -27,8 +27,9 @@ namespace Wave {
 	}
 
 	f32 Square(f64 phase, f64 width){
-		auto nph = std::fmod(phase, 1.0);
-		if(nph < width) return -1.0;
+		// phase -= std::floor(phase);
+		phase = std::fmod(phase, 1.0);
+		if(phase < width) return -1.0;
 
 		return 1.0;
 	}
@@ -39,10 +40,6 @@ namespace Wave {
 
 	f32 Noise(){
 		static u32 i = 0;
-		// static std::default_random_engine generator;
-		// static std::uniform_real_distribution<f32> distribution(-1.0f, 1.0f);
-
-		// return distribution(generator);
 		return noiseTable[(i++)%WaveSamples];
 	}
 
