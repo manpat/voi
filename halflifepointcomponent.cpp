@@ -12,11 +12,12 @@ void HalfLifePointComponent::OnUpdate(){
 	auto player = App::GetSingleton()->player;
 	auto ppos = player->entity->collider->GetPosition();
 	auto pos = entity->collider->GetPosition();
-	auto dist = (ppos-pos).length();
+	auto dist = (f32)(ppos-pos).length();
 
-	if(dist <= 40.0){
-		auto a = std::max((dist-10.0f)/30.0f, 0.0f); // (0, 1)
-		auto b = std::max(1.0f-dist/40.0f, 0.0f); // (0, 1)
+	const f32 maxDist = 20.0;
+	if(dist <= maxDist){
+		auto a = std::max((dist-maxDist/3.f)/maxDist*2.f/3.f, 0.f); // (0, 1)
+		auto b = std::max(1.0f-dist/maxDist, 0.0f); // (0, 1)
 
 		auto lp = audioMan->targetLowPassAmt;
 		auto rm = audioMan->targetReverbMix;

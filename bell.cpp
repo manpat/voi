@@ -30,8 +30,8 @@ void Bell::OnAwake() {
 			23,
 		};
 
-		bellGen = std::dynamic_pointer_cast<BellAudioGenerator>(synth->generator);
-		bellGen->note = 120 + notes[bellNumber];
+		bellGen = synth->generator;
+		bellGen->SetParam(0, 120 + notes[bellNumber]);
 	}else{
 		std::cout << "WARNING!! Bell missing audio generator" << std::endl;
 	}
@@ -45,7 +45,7 @@ void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
 	if(msg == "interact"){
 		std::cout << "Bell unlock " << bellNumber << std::endl;
 		if(bellGen){
-			bellGen->Trigger();
+			bellGen->Start();
 		}
 		target->SendMessage("unlock", (Component*)this, /*u32*/bellNumber);
 

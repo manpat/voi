@@ -12,6 +12,8 @@ namespace Wave {
 	f32 Saw(f64 phase);
 
 	f32 Noise();
+
+	void InitTables();
 }
 
 namespace Env {
@@ -23,10 +25,12 @@ namespace Env {
 
 // Inherit from this
 struct AudioGenerator {
-	bool paused = false;
-
 	virtual ~AudioGenerator() {};
 	virtual f32 Generate(f64 phase) = 0;
+
+	virtual void Start() {}
+	virtual void Stop() {}
+	virtual void SetParam(u32, s64) {};
 };
 
 struct AudioGeneratorFactoryBase {

@@ -79,7 +79,11 @@ void SynthComponent::SetReverbMix(f32 mx){
 }
 
 void SynthComponent::SetPaused(bool p){
-	generator->paused = p;
+	if(p) {
+		generator->Stop();
+	}else{
+		generator->Start();
+	}
 }
 
 FMOD_RESULT F_CALLBACK

@@ -8,6 +8,8 @@
 #include "../bellmanager.h"
 
 void InitAudioGenerators(std::shared_ptr<AudioManager> audioManager) {
+	Wave::InitTables();
+
 	// TODO: Remove these
 	audioManager->RegisterAudioGeneratorType<HighArpeggiatorAudioGenerator>("higharp");
 	audioManager->RegisterAudioGeneratorType<LowArpeggiatorAudioGenerator>("lowarp");

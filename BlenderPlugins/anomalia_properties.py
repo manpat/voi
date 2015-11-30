@@ -308,9 +308,9 @@ def register():
 	obj.anom_soundtype = EnumProperty(items=sptypes, name="Speaker Type", default='_')
 	obj.anom_soundpath = StringProperty(name="Sound Path")
 	obj.anom_soundsynth = StringProperty(name="Synth Name")
-	obj.anom_soundsize = FloatProperty(name="Sound Size", default=1.0, min=0.1, max=100.0)
-	obj.anom_soundreverb = FloatProperty(name="Reverb Time", default=10000.0, min=10.0, max=20000.0)
-	obj.anom_soundmix = FloatProperty(name="Reverb Mix", default=100.0, min=0.0, max=100.0)
+	obj.anom_soundsize = FloatProperty(name="Sound Size", default=6.0, min=0.1, max=100.0)
+	obj.anom_soundreverb = FloatProperty(name="Reverb Time", default=1000.0, min=10.0, max=20000.0)
+	obj.anom_soundmix = FloatProperty(name="Reverb Mix", default=0.0, min=0.0, max=100.0)
 
 	scn = bpy.types.World
 	fogtypes = [

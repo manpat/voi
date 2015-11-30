@@ -7,7 +7,7 @@ struct BellAudioGenerator;
 
 struct Bell : Component {
 	Entity* target = nullptr;
-	std::shared_ptr<BellAudioGenerator> bellGen;
+	std::shared_ptr<AudioGenerator> bellGen;
 	std::string targetName;
 	u32 bellNumber;
 

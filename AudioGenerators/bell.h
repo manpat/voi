@@ -8,14 +8,32 @@ struct BellAudioGenerator : AudioGenerator {
 	f64 savedElapsed = -10000.0;
 	bool triggered = false;
 	bool playing = false;
+	bool correct = false;
 
-	void Trigger() {
+	void Start() override {
+		if(correct) return;
+
 		triggered = true;
 		playing = true;
 	}
 
-	void Stop() {
+	void Stop() override {
 		playing = false;
+	}
+
+	void SetParam(u32 p, s64 val) {
+		switch(p){
+			case 0: // Set note
+				note = val;
+				break;
+
+			case 1: // Combination
+				if(val == 1) { // correct
+					correct = true;
+					playing = false;
+				}
+				break;
+		}
 	}
 
 	f32 Generate(f64 elapsed) override {
@@ -26,17 +44,17 @@ struct BellAudioGenerator : AudioGenerator {
 
 		if(playing) savedElapsed = elapsed;
 
-		f64 env = 1.0 - clamp((elapsed-savedElapsed)/2.0, 0.0, 1.0);
-		env = std::pow(env, 2.0);
+		f64 env = 1.0 - Env::Ramp(elapsed-savedElapsed, 3.f);
+		// env = std::pow(env, 2.f);
 
-		f64 f = ntof(note);
+		f64 f = ntof(note + (correct?12:0));
 		f64 ph = f * elapsed;
 
-		auto o = Wave::Sin(ph*0.5) * 0.05;
-		o += Wave::Sin(ph) * env * 0.3;
-		o += Wave::Triangle(ph*0.5) * (playing?0.3:0.0);
+		f32 o = 0.f; 
+		o += Wave::Triangle(ph) * env * 0.5f;
+		o += Wave::Sin(ph) * (playing?1.0f:0.0f) * 0.1f;
 
-		return (f32)o * Env::Ramp((f32)elapsed, 3.f) * 0.5f;
+		return o * Env::Ramp((f32)elapsed, 1.f);
 	}
 };
 

@@ -6,6 +6,10 @@
 struct DoorGrindAudioGenerator : AudioGenerator {
 	f32 lowpass = 0.f;
 	f32 o = 0.f;
+	bool paused = true;
+
+	void Start() override { paused = false; }
+	void Stop() override { paused = true; }
 
 	f32 Generate(f64 elapsed) override {
 		if(paused) return 0.f;

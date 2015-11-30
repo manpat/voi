@@ -309,6 +309,8 @@ void App::Run(){
 				break;
 			case GameState::PLAYING: break;
 			case GameState::PAUSED: break;
+			case GameState::NONE: break;
+			default: break;
 		}
 
 		// Lerp fog settings
