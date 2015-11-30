@@ -106,6 +106,7 @@ struct ColliderComponent : Component {
 	void OnDestroy() override;
 
 	void DisableRotation();
+	void SetContinuous(bool);
 	void SetTrigger(bool);
 	void SetKinematic(bool);
 	void SetAutosleep(bool);

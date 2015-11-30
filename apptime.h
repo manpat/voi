@@ -8,7 +8,9 @@ struct AppTime {
 	static f64 deltaTime;
 	static f64 scaledAppTime;
 	static f64 scaledDeltaTime;
+
 	static f64 timescale;
+	static f64 phystimescale;
 
 	static void Update(f64);
 };

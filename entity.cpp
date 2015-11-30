@@ -388,7 +388,6 @@ void Entity::SetLayer(s32 l, bool hidden) {
 		// Last 5 bits reserved for layer stuff
 		auto cg = collider->collisionGroups & ~((1<<6) - 1);
 		collider->collisionGroups = cg | 1<<layer;
-		collider->Refilter();
 	}
 
 	for(auto c = components.begin(); c != components.end(); ++c){

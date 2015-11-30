@@ -68,7 +68,7 @@ void PhysicsManager::Update(){
 		needsRefilter = false;
 	}
 
-	world->stepSimulation((btScalar)AppTime::deltaTime, 10);
+	world->stepSimulation((btScalar)AppTime::deltaTime * AppTime::phystimescale, 10);
 	currentStamp++;
 
 	// Remove all deleted and null trigger collisions
@@ -385,6 +385,13 @@ void ColliderComponent::SetAutosleep(bool as){
 void ColliderComponent::SetFriction(f32 val) {
 	body->setFriction(val);
 }
+
+void ColliderComponent::SetContinuous(bool /*c*/) {
+	// TODO: Unhackify this
+	body->setCcdMotionThreshold(0.3f);
+	body->setCcdSweptSphereRadius(2.f);
+}
+
 
 void ColliderComponent::Wakeup(){
 	body->activate();
