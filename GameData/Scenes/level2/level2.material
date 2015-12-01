@@ -49,15 +49,15 @@ material Stone.001
         }
     }
 }
-// DarkShaded genrated by blender2ogre 0.6.0
+// Mid genrated by blender2ogre 0.6.0
 
-material DarkShaded 
+material Mid 
 {
     receive_shadows on 
 
     technique
     {
-        pass DarkShaded
+        pass Mid
         {
             ambient 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
             diffuse 0.120000006556511 0.120000006556511 0.120000006556511 1.0
@@ -609,15 +609,15 @@ material Dark
         }
     }
 }
-// Mid genrated by blender2ogre 0.6.0
+// Mid.002 genrated by blender2ogre 0.6.0
 
-material Mid 
+material Mid.002 
 {
     receive_shadows on 
 
     technique
     {
-        pass Mid
+        pass Mid.002
         {
             ambient 0.15000000596046448 0.15000000596046448 0.15000000596046448 1.0
             diffuse 0.120000006556511 0.120000006556511 0.120000006556511 1.0
