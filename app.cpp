@@ -157,8 +157,8 @@ void App::LoadConfig() {
 	useVsync = 1;
 	fovDegrees = 60;
 
-	hMouseSensitivity = 18000;
-	vMouseSensitivity = 8000;
+	hMouseSensitivity = 180;
+	vMouseSensitivity = 80;
 
 	// Test if config exists
 	if (fs->exists("anomalia.cfg")) {

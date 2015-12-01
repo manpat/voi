@@ -86,8 +86,8 @@ void Player::OnUpdate() {
 	auto app = App::GetSingleton();
 
 	auto layerRenderingManager = app->layerRenderingManager;
-	auto hSens = (f32)app->hMouseSensitivity / app->GetWindowWidth();
-	auto vSens = (f32)app->vMouseSensitivity / app->GetWindowHeight();
+	auto hSens = (f32)app->hMouseSensitivity * app->GetWindowWidth() / 10000.f;
+	auto vSens = (f32)app->vMouseSensitivity * app->GetWindowHeight() / 10000.f;
 
 	auto camera = app->camera;
 	auto cameraEnt = camera->entity;
