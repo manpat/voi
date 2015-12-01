@@ -88,7 +88,7 @@ App::App(const std::string& levelArg) {
 		throw "SDL Window creation failed";
 	}
 
-	switch (useFullscreen) {
+	switch (fullscreenMode) {
 		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
 			SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			break;
@@ -100,12 +100,17 @@ App::App(const std::string& levelArg) {
 			break;
 	}
 
-	SDL_GL_SetSwapInterval(useVsync);
-
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
 	if(!sdlGLContext) {
 		throw "GL Context creation failed";
 	}
+
+	// Fullscreen setting may have changed resolution
+	// 	This assumes that width or height is never > ~4million
+	SDL_GetWindowSize(sdlWindow, (s32*)&width, (s32*)&height);
+
+	// 0 is disabled, 1 is vsync
+	SDL_GL_SetSwapInterval(useVsync);
 
 	// TODO: refactor into input module
 	SDL_WarpMouseInWindow(sdlWindow, width/2, height/2);
@@ -148,9 +153,12 @@ void App::LoadConfig() {
 	width = WIDTH;
 	height = HEIGHT;
 	multisampleLevel = 4;
-	useFullscreen = 0;
+	fullscreenMode = 0;
 	useVsync = 1;
 	fovDegrees = 60;
+
+	hMouseSensitivity = 18000;
+	vMouseSensitivity = 8000;
 
 	// Test if config exists
 	if (fs->exists("anomalia.cfg")) {
@@ -162,27 +170,38 @@ void App::LoadConfig() {
 		auto wStr = conf.getSetting("width", sectionStr, std::to_string(width));
 		auto hStr = conf.getSetting("height", sectionStr, std::to_string(height));
 		auto mslStr = conf.getSetting("multisampleLevel", sectionStr, std::to_string(multisampleLevel));
-		auto fsStr = conf.getSetting("fullscreen", sectionStr, std::to_string(useFullscreen));
+		auto fsStr = conf.getSetting("fullscreen", sectionStr, std::to_string(fullscreenMode));
 		auto fovStr = conf.getSetting("fov", sectionStr, std::to_string(fovDegrees));
-		auto vsyncStr = conf.getSetting("fov", sectionStr, std::to_string(useVsync));
+		auto vsyncStr = conf.getSetting("vsync", sectionStr, std::to_string(useVsync));
+
+		auto hSensStr = conf.getSetting("hMouseSensitivity", sectionStr, std::to_string(hMouseSensitivity));
+		auto vSensStr = conf.getSetting("vMouseSensitivity", sectionStr, std::to_string(vMouseSensitivity));
 
 		width = std::stol(wStr);
 		height = std::stol(hStr);
 		multisampleLevel = std::stoi(mslStr);
-		useFullscreen = std::stoi(fsStr);
+		fullscreenMode = std::stoi(fsStr);
 		useVsync = std::stoi(vsyncStr);
 		fovDegrees = std::stoi(fovStr);
+
+		hMouseSensitivity = std::stol(hSensStr);
+		vMouseSensitivity = std::stol(vSensStr);
 	} else {
 		// Otherwise, create one and write default values
 		std::ostringstream sstr;
 
 		sstr << "[Anomalia]\n";
-		sstr << "width=" << WIDTH << "\n";
-		sstr << "height=" << HEIGHT << "\n";
-		sstr << "multisampleLevel=" << multisampleLevel << "\n";
-		sstr << "fullscreen=" << useFullscreen << "\n";
-		sstr << "vsync=" << useVsync << "\n";
-		sstr << "fov=" << fovDegrees << "\n";
+		sstr << "width = " << WIDTH << "\n";
+		sstr << "height = " << HEIGHT << "\n";
+		sstr << "multisampleLevel = " << (u32)multisampleLevel << "\n\n";
+
+		sstr << "# 0 -> windowed\n# 1 -> fullscreen\n# 2 -> fake fullscreen\n";
+		sstr << "fullscreen = " << (u32)fullscreenMode << "\n";
+		sstr << "vsync = " << (u32)useVsync << "\n";
+		sstr << "fov = " << (u32)fovDegrees << "\n\n";
+
+		sstr << "hMouseSensitivity = " << hMouseSensitivity << "\n";
+		sstr << "vMouseSensitivity = " << vMouseSensitivity << "\n";
 
 		auto ncfgFile = fs->create("anomalia.cfg");
 		ncfgFile->write(sstr.str().data(), sstr.tellp());
@@ -248,7 +267,7 @@ void App::InitOgre(){
 	windowParams["FSAA"] = "0";
 	windowParams["vsync"] = useVsync > 0;
 	// The only parameter that actually does anything is windowParams
-	window = ogreRoot->createRenderWindow("", 0, 0, useFullscreen > 0, &windowParams);
+	window = ogreRoot->createRenderWindow("", 0, 0, fullscreenMode > 0, &windowParams);
 
 	sceneManager = ogreRoot->createSceneManager(Ogre::ST_INTERIOR, "SceneManager");
 	rootNode = sceneManager->getRootSceneNode();

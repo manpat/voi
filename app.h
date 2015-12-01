@@ -98,9 +98,12 @@ struct App : Singleton<App> {
 	bool shouldQuit;
 	u32 width, height;
 	u8 multisampleLevel;
-	u8 useFullscreen;
+	u8 fullscreenMode;
 	u8 useVsync;
 	u8 fovDegrees;
+
+	s32 hMouseSensitivity;
+	s32 vMouseSensitivity;
 
 private:
 	GameState gameState = GameState::NONE;

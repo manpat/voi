@@ -64,7 +64,7 @@ void Player::OnInit() {
 	auto portalTriggerEnt = EntityManager::GetSingleton()->CreateEntity("PortalTrigger");
 	portalTrigger = portalTriggerEnt->AddComponent<PortalTrigger>();
 
-	auto portalTriggerCol = portalTriggerEnt->AddComponent<SphereColliderComponent>(vec3{0.5f}, true);
+	auto portalTriggerCol = portalTriggerEnt->AddComponent<SphereColliderComponent>(vec3{0.7f}, true);
 	portalTriggerCol->SetTrigger(true);
 	portalTriggerCol->SetKinematic(true);
 	portalTriggerCol->SetAutosleep(false);
@@ -82,16 +82,21 @@ void Player::OnAwake() {
 }
 
 void Player::OnUpdate() {
-	auto layerRenderingManager = App::GetSingleton()->layerRenderingManager;
 	auto physicsManager = PhysicsManager::GetSingleton();
-	auto camera = App::GetSingleton()->camera;
+	auto app = App::GetSingleton();
+
+	auto layerRenderingManager = app->layerRenderingManager;
+	auto hSens = (f32)app->hMouseSensitivity / app->GetWindowWidth();
+	auto vSens = (f32)app->vMouseSensitivity / app->GetWindowHeight();
+
+	auto camera = app->camera;
 	auto cameraEnt = camera->entity;
 
 	auto md = Input::GetMouseDelta();
 
 	// TODO: the 7.f here is sensitivity. Probably make a setting
-	auto nyaw =  -md.x * 2.0 * PI * AppTime::deltaTime * 7.f;
-	auto npitch = md.y * 2.0 * PI * AppTime::deltaTime * 7.f;
+	auto nyaw =  -md.x * 2.0 * PI * AppTime::deltaTime * hSens;
+	auto npitch = md.y * 2.0 * PI * AppTime::deltaTime * vSens;
 	const f32 limit = (f32)PI/2.f;
 
 	cameraPitch = (f32)clamp(cameraPitch + npitch, -limit, limit);
