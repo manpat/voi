@@ -33,11 +33,13 @@ void Menu::Init(App* app) {
 
 	title = app->uiManager->CreateObject<UiImage>("MenuTitle");
 	title->SetImage("title.png");
-	title->SetPosition(-0.5f, 0.3f);
+	title->SetAlignment(UiObject::Alignment::BottomLeft);
+	title->SetPosition(-0.9f, 0.15f);
 
 	menu = app->uiManager->CreateObject<UiImage>("MenuSubtitles");
 	menu->SetImage("menu.png");
-	menu->SetPosition(-0.74f, 0.03f);
+	menu->SetAlignment(UiObject::Alignment::TopLeft);
+	menu->SetPosition(-0.9f, 0.1f);
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
 	BlenderSceneLoader scnLdr{};
