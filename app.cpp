@@ -350,14 +350,14 @@ void App::Run(){
 		auto dt = duration_cast<duration<f64>>(end - begin).count();
 		begin = end;
 
-		auto newTitle = "Anomalia " + std::to_string(1.0/dt)
-			+ "fps\tTriangles: " + std::to_string(window->getTriangleCount());
+		auto newTitle = "Voi - FPS: " + std::to_string(1.0/dt)
+			+ " - Triangles: " + std::to_string(window->getTriangleCount());
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
 
 		AppTime::Update(dt);
 
 		// Just to free up the cpu a bit
-		SDL_Delay(5);
+		SDL_Delay(1000 / 60);
 
 		if(shouldQuit) {
 			window->destroy();

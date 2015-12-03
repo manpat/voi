@@ -25,11 +25,11 @@ struct BellAudioGenerator : AudioGenerator {
 	void SetParam(u32 p, s64 val) {
 		switch(p){
 			case 0: // Set note
-				note = val;
+				note = (u32)val;
 				break;
 
 			case 1: // Combination
-				correctness = val;
+				correctness = (u8)val;
 				playing = false;
 				break;
 		}
@@ -43,7 +43,7 @@ struct BellAudioGenerator : AudioGenerator {
 
 		if(playing) savedElapsed = elapsed;
 
-		f64 env = 1.0 - Env::Ramp(elapsed-savedElapsed, 3.f);
+		f64 env = 1.0 - Env::Ramp((f32)(elapsed - savedElapsed), 3.f);
 
 		const f64 incorrectRatio = 16.5f / 17.f;
 		f64 f = ntof(note + (correctness == 1 ? 12 : 0)) 
@@ -53,7 +53,7 @@ struct BellAudioGenerator : AudioGenerator {
 
 		f32 o = 0.f; 
 		o += Wave::Sin(ntof(120) * 0.5 * elapsed) * ((correctness == 1) ? 0.f : 0.02f);
-		o += Wave::Triangle(ph) * env * 0.5f;
+		o += (f32)(Wave::Triangle(ph) * env * 0.5f);
 		o += Wave::Sin(ph) * (playing?1.0f:0.0f) * 0.1f;
 
 		return o * Env::Ramp((f32)elapsed, 1.f);

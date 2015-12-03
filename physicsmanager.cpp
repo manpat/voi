@@ -68,7 +68,7 @@ void PhysicsManager::Update(){
 		needsRefilter = false;
 	}
 
-	world->stepSimulation((btScalar)AppTime::deltaTime * AppTime::phystimescale, 10);
+	world->stepSimulation((btScalar)(AppTime::deltaTime * AppTime::phystimescale), 10);
 	currentStamp++;
 
 	// Remove all deleted and null trigger collisions
