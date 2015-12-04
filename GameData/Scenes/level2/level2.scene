@@ -1,4 +1,4 @@
-<scene exported_by="assnt" formatVersion="1.0.1" export_time="1449199834.789175" previous_export_time="1449197974.670404" >
+<scene exported_by="assnt" formatVersion="1.0.1" export_time="1449200888.308892" previous_export_time="1449200310.666485" >
   <nodes >
     <node name="Glyph1E.003" >
       <position z="-91.900002" x="-23.000000" y="14.300000" />
@@ -293,7 +293,7 @@
     </node>
     <node name="Platform2 2.2" >
       <position z="-43.133331" x="47.500000" y="-8.420000" />
-      <rotation qz="-1.000000" qx="-0.000000" qy="-0.000000" qw="0.000000" />
+      <rotation qz="-0.000000" qx="0.000000" qy="0.000000" qw="1.000000" />
       <scale z="1.000000" x="1.000000" y="1.000000" />
       <user_data name="anom_objecttype" value="4" type="int" />
       <user_data name="anom_soundtype" value="2" type="int" />
@@ -302,7 +302,7 @@
       <user_data name="anom_soundmix" value="0.0" type="float" />
       <user_data name="anom_soundsize" value="15.0" type="float" />
       <entity lock_trans_z="False" friction_y="1.0" damping_trans="0.03999999910593033" lock_rot_z="False" lock_rot_x="False" meshFile="Cube.028.mesh" name="Cube.028" inertia_tensor="0.4000000059604645" velocity_max="0.0" lock_rot_y="False" velocity_min="0.0" lock_trans_x="False" mass="1.0" friction_z="1.0" damping_rot="0.10000000149011612" friction_x="1.0" lock_trans_y="False" anisotropic_friction="False" actor="False" collisionPrim="triangle_mesh" mass_radius="1.0" physics_type="STATIC" ghost="False" >
-        <dimensions z="6.0" x="11.0" y="4.0" />
+        <dimensions z="6.000001430511475" x="11.000000953674316" y="4.000000476837158" />
       </entity>
     </node>
     <node name="Bell.012" >
@@ -710,6 +710,7 @@
       <user_data name="anom_soundreverb" value="10.0" type="float" />
       <user_data name="anom_soundmix" value="0.0" type="float" />
       <user_data name="anom_soundsize" value="15.0" type="float" />
+      <user_data name="anom_soundsynth" value="door" type="str" />
       <entity lock_trans_z="False" friction_y="1.0" damping_trans="0.03999999910593033" lock_rot_z="False" lock_rot_x="False" meshFile="Cube.008.mesh" name="Cube.008" inertia_tensor="0.4000000059604645" velocity_max="0.0" lock_rot_y="False" velocity_min="0.0" lock_trans_x="False" mass="1.0" friction_z="1.0" damping_rot="0.10000000149011612" friction_x="1.0" lock_trans_y="False" anisotropic_friction="False" actor="False" collisionPrim="box" mass_radius="1.0" physics_type="STATIC" ghost="False" >
         <dimensions z="10.0" x="5.0" y="5.0" />
       </entity>
