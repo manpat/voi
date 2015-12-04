@@ -1,9 +1,11 @@
 #include <OGRE/OgreSceneNode.h>
+#include <limits>
 
 #include "halflifepointcomponent.h"
 #include "halflifepointmanager.h"
 #include "physicsmanager.h"
 #include "entitymanager.h"
+#include "audiomanager.h"
 #include "hubmanager.h"
 #include "entity.h"
 #include "player.h"
@@ -55,4 +57,26 @@ void HalfLifePointManager::Update() {
 
 		toLevel = "";
 	}
+
+	auto audioMan = AudioManager::GetSingleton();
+
+	const f32 maxDist = 20.0;
+	if(minDistance <= maxDist){
+		auto a = std::max((minDistance-maxDist/3.f)/maxDist*2.f/3.f, 0.f); // (0, 1)
+		auto b = std::max(1.0f-minDistance/maxDist, 0.0f); // (0, 1)
+
+		audioMan->SetLowpass(a*a*a*22000.0f+20.0f);
+		audioMan->SetReverbMix(b);
+		audioMan->SetReverbTime(b*20000.0f);
+	}else{
+		audioMan->SetLowpass(22000.0f);
+		audioMan->SetReverbTime(1000.0f);
+		audioMan->SetReverbMix(5.f);
+	}
+
+	minDistance = std::numeric_limits<f32>::max();
+}
+
+void HalfLifePointManager::ProcessPointDistance(f32 distance) {
+	minDistance = std::min(distance, minDistance);
 }
