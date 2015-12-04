@@ -134,16 +134,28 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
+	static bool canCheat = false;
 	static bool canInfinijump = false;
 
-	// Cheat
-	if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
-		canInfinijump = !canInfinijump;
-		std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
+	if(Input::GetKeyDown(SDLK_DELETE)){
+		canCheat = !canCheat;
+		std::cout << "Cheatmode: " << (canCheat?"enabled":"disabled") << std::endl;
 	}
 
-	if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
-	if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
+	// Cheat
+	if(canCheat){
+		if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
+			canInfinijump = !canInfinijump;
+			std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
+		}
+
+		if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
+		if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
+		
+		if(Input::GetKeyDown('f')){
+			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
+		}
+	}
 
 	if(Input::GetMappedDown(Input::Jump)){
 		auto rayres = physicsManager->Raycast(
@@ -160,10 +172,6 @@ void Player::OnUpdate() {
 	}
 
 	entity->collider->SetVelocity(velocity);
-
-	if(Input::GetKeyDown('f')){
-		entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
-	}
 
 	if(entity->collider->GetPosition().y < -50.f){
 		Respawn();
