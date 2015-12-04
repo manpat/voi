@@ -78,7 +78,7 @@ App::App(const std::string& levelArg) {
 		glEnable(GL_MULTISAMPLE);
 	}
 
-	sdlWindow = SDL_CreateWindow("Anomalia",
+	sdlWindow = SDL_CreateWindow("Voi",
 					SDL_WINDOWPOS_CENTERED,
 					SDL_WINDOWPOS_CENTERED,
 					width, height,
@@ -143,9 +143,6 @@ App::~App(){
 }
 
 void App::LoadConfig() {
-	// TODO: More configuration
-	// - Mouse sensitivity
-
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance(".", false);
 
@@ -161,12 +158,12 @@ void App::LoadConfig() {
 	vMouseSensitivity = 80;
 
 	// Test if config exists
-	if (fs->exists("anomalia.cfg")) {
+	if (fs->exists("voi.cfg")) {
 		// If so, load it and configure
 		Ogre::ConfigFile conf;
-		conf.load("anomalia.cfg");
+		conf.load("voi.cfg");
 		
-		auto sectionStr = "Anomalia";
+		auto sectionStr = "Voi";
 		auto wStr = conf.getSetting("width", sectionStr, std::to_string(width));
 		auto hStr = conf.getSetting("height", sectionStr, std::to_string(height));
 		auto mslStr = conf.getSetting("multisampleLevel", sectionStr, std::to_string(multisampleLevel));
@@ -190,7 +187,7 @@ void App::LoadConfig() {
 		// Otherwise, create one and write default values
 		std::ostringstream sstr;
 
-		sstr << "[Anomalia]\n";
+		sstr << "[Voi]\n";
 		sstr << "width = " << WIDTH << "\n";
 		sstr << "height = " << HEIGHT << "\n";
 		sstr << "multisampleLevel = " << (u32)multisampleLevel << "\n\n";
@@ -203,7 +200,7 @@ void App::LoadConfig() {
 		sstr << "hMouseSensitivity = " << hMouseSensitivity << "\n";
 		sstr << "vMouseSensitivity = " << vMouseSensitivity << "\n";
 
-		auto ncfgFile = fs->create("anomalia.cfg");
+		auto ncfgFile = fs->create("voi.cfg");
 		ncfgFile->write(sstr.str().data(), sstr.tellp());
 	}
 }
