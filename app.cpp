@@ -353,9 +353,6 @@ void App::Run(){
 
 		AppTime::Update(dt);
 
-		// Just to free up the cpu a bit
-		SDL_Delay(1000 / 60);
-
 		if(shouldQuit) {
 			window->destroy();
 			break;
