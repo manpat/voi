@@ -34,10 +34,10 @@ AudioManager::AudioManager() {
 
 	FMOD::DSP* compressor = nullptr;
 	cfmod(system->createDSPByType(FMOD_DSP_TYPE_COMPRESSOR, &compressor));
-	cfmod(compressor->setParameterFloat(FMOD_DSP_COMPRESSOR_THRESHOLD, -13));
-	cfmod(compressor->setParameterFloat(FMOD_DSP_COMPRESSOR_ATTACK, 0.5));
+	cfmod(compressor->setParameterFloat(FMOD_DSP_COMPRESSOR_THRESHOLD, -16));
+	cfmod(compressor->setParameterFloat(FMOD_DSP_COMPRESSOR_ATTACK, 20.0));
+	cfmod(compressor->setParameterFloat(FMOD_DSP_COMPRESSOR_RELEASE, 100.0));
 	cfmod(compressor->setBypass(false));
-	cfmod(mastergroup->addDSP(0, compressor));
 
 	cfmod(system->createDSPByType(FMOD_DSP_TYPE_SFXREVERB, &reverb));
 
@@ -52,13 +52,16 @@ AudioManager::AudioManager() {
 	cfmod(reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HFDECAYRATIO, 100.0));
 	cfmod(reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HIGHCUT, 1000.0));
 	cfmod(reverb->setBypass(false));
-	cfmod(mastergroup->addDSP(1, reverb));
 	SetReverbMix(0.f);
 
 	cfmod(system->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &lowPass));
 	cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, 22000.0));
 	cfmod(lowPass->setBypass(false));
-	cfmod(mastergroup->addDSP(2, lowPass));
+
+	// reverb -> lowPass -> compressor
+	cfmod(mastergroup->addDSP(0, lowPass));
+	cfmod(mastergroup->addDSP(0, reverb));
+	cfmod(mastergroup->addDSP(FMOD_CHANNELCONTROL_DSP_TAIL, compressor));
 }
 
 AudioManager::~AudioManager() {
@@ -79,17 +82,14 @@ void AudioManager::Update() {
 }
 
 void AudioManager::SetLowpass(f32 v){
-	// cfmod(lowPass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, v));
 	targetLowPassAmt = v;
 }
 
 void AudioManager::SetReverbMix(f32 mx){
-	// reverb->setWetDryMix(1.0, 1.0, mx);
 	targetReverbMix = mx;
 }
 
 void AudioManager::SetReverbTime(f32 ms){
-	// reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, ms);
 	targetReverbTime = ms;
 }
 

@@ -5,7 +5,7 @@
 #include <array>
 
 enum { WaveSamples = 44100 };
-f32 noiseTable[WaveSamples];
+f32 noiseTable[WaveSamples * 4];
 f32 sinTable[WaveSamples];
 f32 triTable[WaveSamples];
 f64 freqTable[256];

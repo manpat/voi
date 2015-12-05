@@ -309,8 +309,8 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 
 				case 2: {
-					f32 synthreverb = 10000.f;
-					f32 synthmix = 100.f;
+					f32 synthreverb = 10.f;
+					f32 synthmix = 0.f;
 
 					auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
 					auto reverbStr = findin(ndef.userData,

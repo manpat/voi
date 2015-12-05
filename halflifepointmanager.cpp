@@ -71,10 +71,10 @@ void HalfLifePointManager::Update() {
 	}else{
 		audioMan->SetLowpass(22000.0f);
 		audioMan->SetReverbTime(1000.0f);
-		audioMan->SetReverbMix(5.f);
+		audioMan->SetReverbMix(0.f);
 	}
 
-	minDistance = std::numeric_limits<f32>::max();
+	minDistance = std::numeric_limits<f32>::infinity();
 }
 
 void HalfLifePointManager::ProcessPointDistance(f32 distance) {
