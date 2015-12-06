@@ -12,9 +12,13 @@ struct Player : Component {
 	f32 cameraPitch = 0.f;
 	Movable* heldObject = nullptr;
 	PortalTrigger* portalTrigger = nullptr;
+	bool isGrounded = false;
 	bool isJumping = false;
 	vec3 localCameraPosition = vec3::ZERO;
+	vec3 cameraOffset = vec3::ZERO;
 	f32 maxShake = 0.0f;
+	f32 bobDelta = 0.0f;
+	f32 bobPower = 0.0f;
 
 	Player() : Component{this} {}
 

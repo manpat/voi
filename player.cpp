@@ -113,15 +113,46 @@ void Player::OnUpdate() {
 	f32 interactDistance = 4.f;
 	f32 pickupDistance = 4.f;
 
+	// Move with WASD, based on look direction
+	auto velocity = entity->collider->GetVelocity();
+	auto velocityScalar = velocity.length();
+
+	velocity.x = 0.;
+	velocity.z = 0.;
+
+	// Head bobbing params
+	auto bobSpeed = velocityScalar * 0.5f;
+	auto bobAcceleration = 0.1f;
+	auto bobHoriz = 0.25f; // Horizontal bobbing movement
+	auto bobVert = 0.5f; // Vertical bobbing movement
+
 	if(Input::GetMapped(Input::Boost)){
 		boost *= 1.5f;
 	}
 
-	// Move with WASD, based on look direction
-	auto velocity = entity->collider->GetVelocity();
-	velocity.x = 0.;
-	velocity.z = 0.;
+	// Check if grounded
+	isGrounded = physicsManager->Raycast(
+		entity->GetGlobalPosition(),
+		-entity->GetUp() * 2.2f,
+		entity->layer).hit();
 
+	// Head bobbing logic
+	if (bobDelta >= 2 * M_PI) {
+		bobDelta = 0.0f;
+	}
+
+	bobDelta += AppTime::deltaTime * bobSpeed;
+
+	if (isGrounded && !isJumping && velocityScalar > 0.1f) {
+		bobPower = bobPower < 1 ? bobPower + bobAcceleration : 1.0f;
+	} else {
+		bobPower = bobPower > 0 ? bobPower - bobAcceleration : 0.0f;
+	}
+
+	cameraOffset.x += cos(bobDelta) * bobPower * bobHoriz;
+	cameraOffset.y += cos(bobDelta * 2) * bobPower * bobVert;
+
+	// Movement logic
 	if(Input::GetMapped(Input::Forward)){
 		velocity -= oriYaw.zAxis() * boost;
 	}else if(Input::GetMapped(Input::Backward)){
@@ -134,44 +165,33 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
-	static bool canCheat = false;
 	static bool canInfinijump = false;
 
-	if(Input::GetKeyDown(SDLK_DELETE)){
-		canCheat = !canCheat;
-		std::cout << "Cheatmode: " << (canCheat?"enabled":"disabled") << std::endl;
-	}
-
 	// Cheat
-	if(canCheat){
-		if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
-			canInfinijump = !canInfinijump;
-			std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
-		}
-
-		if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
-		if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
-		
-		if(Input::GetKeyDown('f')){
-			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
-		}
+	if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
+		canInfinijump = !canInfinijump;
+		std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
 	}
 
-	if(Input::GetMappedDown(Input::Jump)){
-		auto rayres = physicsManager->Raycast(
-			entity->GetGlobalPosition(),
-			-entity->GetUp() * 2.2f,
-			entity->layer);
+	if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
+	if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
 
-		if(rayres) isJumping = false;
+	if (isJumping && isGrounded) {
+		isJumping = false;
+	}
 
-		if(!isJumping || canInfinijump) {
-			velocity += vec3::UNIT_Y*jumpImpulse;
+	if (Input::GetMappedDown(Input::Jump)) {
+		if (!isJumping || canInfinijump) {
+			velocity += vec3::UNIT_Y * jumpImpulse;
 			isJumping = true;
 		}
 	}
 
 	entity->collider->SetVelocity(velocity);
+
+	if(Input::GetKeyDown('f')){
+		entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
+	}
 
 	if(entity->collider->GetPosition().y < -50.f){
 		Respawn();
@@ -219,6 +239,9 @@ void Player::OnUpdate() {
 	// 	std::cout << rayres.collider->entity->GetName() << std::endl;
 	// }
 
+	camera->entity->SetPosition(localCameraPosition + cameraOffset);
+
+	cameraOffset = vec3::ZERO;
 	maxShake = 0.0f;
 }
 
@@ -257,7 +280,6 @@ void Player::ShakeCamera(f32 amount) {
 		return;
 	}
 
-	auto camera = App::GetSingleton()->camera->entity;
 	auto shakeAmount = vec3::ZERO;
 
 	if (amount > 0) {
@@ -268,5 +290,5 @@ void Player::ShakeCamera(f32 amount) {
 		maxShake = amount;
 	}
 
-	camera->SetPosition(localCameraPosition + shakeAmount);
+	cameraOffset += shakeAmount;
 }
