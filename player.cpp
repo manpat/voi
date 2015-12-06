@@ -122,7 +122,7 @@ void Player::OnUpdate() {
 	// Head bobbing params
 	f32 bobAcceleration = 0.1f; // Transition rate
 	f32 bobHoriz = 0.04f; // Horizontal bobbing movement
-	f32 bobVert = 0.1f; // Vertical bobbing movement
+	f32 bobVert = 0.15f; // Vertical bobbing movement
 	f32 bobSpeed = velocityScalar * 0.8f;
 
 	if(Input::GetMapped(Input::Boost)){
@@ -149,7 +149,7 @@ void Player::OnUpdate() {
 	}
 
 	cameraOffset.x += cos(bobDelta) * bobPower * bobHoriz;
-	cameraOffset.y += std::abs(cos(bobDelta)) * bobPower * bobVert;
+	cameraOffset.y += (std::abs(cos(bobDelta)) - .5f) * bobPower * bobVert;
 
 	// Movement logic
 	if(Input::GetMapped(Input::Forward)){
