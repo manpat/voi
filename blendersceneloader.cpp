@@ -309,22 +309,26 @@ void BlenderSceneLoader::ConstructScene(App* app){
 				}
 
 				case 2: {
-					f32 synthreverb = 10.f;
-					f32 synthmix = 0.f;
-
 					auto synthname = findin(ndef.userData, std::string{"anom_soundsynth"});
-					auto reverbStr = findin(ndef.userData,
-						std::string{"anom_soundreverb"});
-
-					auto mixStr = findin(ndef.userData,
-						std::string{"anom_soundmix"});
-
-					if(reverbStr.size() > 0) synthreverb = std::stof(reverbStr);
-					if(mixStr.size() > 0) synthmix = std::stof(mixStr);
+					auto hasReverbStr = findin(ndef.userData, std::string{"anom_soundhasreverb"});
 
 					auto synth = ent->AddComponent<SynthComponent>(synthname, soundsize);
-					synth->SetReverbTime(synthreverb);
-					synth->SetReverbMix(synthmix);
+
+					if(hasReverbStr == "1") {
+						f32 synthreverb = 10.f;
+						f32 synthmix = 0.f;
+
+						auto reverbStr = findin(ndef.userData, std::string{"anom_soundreverb"});
+						auto mixStr = findin(ndef.userData, std::string{"anom_soundmix"});
+
+						if(reverbStr.size() > 0) synthreverb = std::stof(reverbStr);
+						if(mixStr.size() > 0) synthmix = std::stof(mixStr);
+
+						synth->SetUpReverb();
+						synth->SetReverbTime(synthreverb);
+						synth->SetReverbMix(synthmix);
+					}
+
 					break;
 				}
 

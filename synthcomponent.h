@@ -27,6 +27,7 @@ struct SynthComponent : Component {
 
 	f32 Generate(f64);
 
+	void SetUpReverb();
 	void SetReverbTime(f32);
 	void SetReverbMix(f32);
 

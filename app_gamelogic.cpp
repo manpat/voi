@@ -224,9 +224,9 @@ void App::Load(const std::string& nLevel){
 	cursor = uiManager->CreateObject<UiImage>("Cursor");
 	cursor->SetImage("cursor.png");
 
-	audioManager->SetReverbTime(5000.f);
-	audioManager->SetReverbMix(10.f);
-	audioManager->SetLowpass(20000.f);
+	// audioManager->SetReverbTime(5000.f);
+	// audioManager->SetReverbMix(10.f);
+	// audioManager->SetLowpass(22000.f);
 
 	if(nLevel == "hub")
 		HubManager::GetSingleton()->NotifyHubLoad();

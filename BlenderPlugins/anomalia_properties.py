@@ -82,15 +82,20 @@ class SpeakerPanel(bpy.types.Panel):
 		layout.row().prop(ob, "anom_soundtype")
 
 		styp = ob.get("anom_soundtype", 0)
+		hasReverb = ob.get("anom_soundhasreverb", False)
 
 		if(styp == 1):
 			layout.row().prop(ob, "anom_soundpath")
 		elif(styp == 2):
 			layout.row().prop(ob, "anom_soundsynth")
-			layout.row().prop(ob, "anom_soundreverb")
-			layout.row().prop(ob, "anom_soundmix")
 
 		layout.row().prop(ob, "anom_soundsize")
+
+		if(styp == 2):
+			layout.row().prop(ob, "anom_soundhasreverb")
+			if(hasReverb):
+				layout.row().prop(ob, "anom_soundreverb")
+				layout.row().prop(ob, "anom_soundmix")
 
 		if(len(context.selected_objects) > 1):
 			layout.row().operator("anomalia.speaker_consistentiser")
@@ -202,6 +207,7 @@ class OBJECT_OT_speakerconsistentiser(bpy.types.Operator):
 			ob.anom_soundsize = ao.anom_soundsize
 			ob.anom_soundsynth = ao.anom_soundsynth
 			ob.anom_soundreverb = ao.anom_soundreverb
+			ob.anom_soundhasreverb = ao.anom_soundhasreverb
 
 		return {'FINISHED'}
 
@@ -309,6 +315,8 @@ def register():
 	obj.anom_soundpath = StringProperty(name="Sound Path")
 	obj.anom_soundsynth = StringProperty(name="Synth Name")
 	obj.anom_soundsize = FloatProperty(name="Sound Size", default=6.0, min=0.1, max=100.0)
+
+	obj.anom_soundhasreverb = BoolProperty(name="Has Reverb", default=False)
 	obj.anom_soundreverb = FloatProperty(name="Reverb Time", default=1000.0, min=10.0, max=20000.0)
 	obj.anom_soundmix = FloatProperty(name="Reverb Mix", default=0.0, min=0.0, max=100.0)
 

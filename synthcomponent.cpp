@@ -24,21 +24,6 @@ void SynthComponent::OnInit() {
 	cfmod(audioMan->system->playDSP(dsp, audioMan->mastergroup, true /*start paused*/, &channel));
 	cfmod(channel->setMode(FMOD_3D));
 	cfmod(channel->set3DMinMaxDistance(size, 10000.0f));
-
-	cfmod(audioMan->system->createDSPByType(FMOD_DSP_TYPE_SFXREVERB, &reverb));
-	cfmod(channel->addDSP(1, reverb));
-
-	// TODO: Try Reverb3D
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DRYLEVEL, -60.0);
-
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, 100.0);
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, 10000.);
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_LATEDELAY, 10.);
-
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DIFFUSION, 100.0);
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DENSITY, 100.0);
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HFDECAYRATIO, 40.0);
-	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HIGHCUT, 1000.0);
 }
 
 void SynthComponent::OnAwake(){
@@ -58,7 +43,7 @@ void SynthComponent::OnUpdate() {
 void SynthComponent::OnDestroy() {
 	channel->stop();
 	dsp->release();
-	reverb->release();
+	if(reverb) reverb->release();
 }
 
 f32 SynthComponent::Generate(f64 dt) {
@@ -68,11 +53,34 @@ f32 SynthComponent::Generate(f64 dt) {
 	return o;
 }
 
+void SynthComponent::SetUpReverb() {
+	auto audioMan = AudioManager::GetSingleton();
+
+	cfmod(audioMan->system->createDSPByType(FMOD_DSP_TYPE_SFXREVERB, &reverb));
+	cfmod(channel->addDSP(0, reverb));
+
+	// TODO: Try Reverb3D
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DRYLEVEL, -60.0);
+
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, 100.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, 10000.);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_LATEDELAY, 10.);
+
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DIFFUSION, 100.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DENSITY, 100.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HFDECAYRATIO, 40.0);
+	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_HIGHCUT, 1000.0);
+}
+
 void SynthComponent::SetReverbTime(f32 ms){
+	if(!reverb) return;
+
 	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_DECAYTIME, ms);
 }
 
 void SynthComponent::SetReverbMix(f32 mx){
+	if(!reverb) return;
+
 	reverb->setBypass(mx == 0.f);
 	reverb->setParameterFloat(FMOD_DSP_SFXREVERB_EARLYLATEMIX, mx);
 	reverb->setWetDryMix(1.f, mx, 0); // (100.f - mx)/100.f
