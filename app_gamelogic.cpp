@@ -236,6 +236,24 @@ void App::Load(const std::string& nLevel){
 }
 
 /*
+	                                                                                            
+	88888888888                      88   ,ad8888ba,                                            
+	88                               88  d8"'    `"8b                                           
+	88                               88 d8'                                                     
+	88aaaaa     8b,dPPYba,   ,adPPYb,88 88            ,adPPYYba, 88,dPYba,,adPYba,   ,adPPYba,  
+	88"""""     88P'   `"8a a8"    `Y88 88      88888 ""     `Y8 88P'   "88"    "8a a8P_____88  
+	88          88       88 8b       88 Y8,        88 ,adPPPPP88 88      88      88 8PP"""""""  
+	88          88       88 "8a,   ,d88  Y8a.    .a88 88,    ,88 88      88      88 "8b,   ,aa  
+	88888888888 88       88  `"8bbdP"Y8   `"Y88888P"  `"8bbdP"Y8 88      88      88  `"Ybbd8"'  
+	                                                                                            
+	                                                                                            
+*/
+void App::NotifyEndGame() {
+	// TODO: END THE GAME
+	std::cout << "END THE GAME PLS" << std::endl;
+}
+
+/*
 
 	88888888ba
 	88      "8b                                  ,d

@@ -384,11 +384,6 @@ void App::RemoveSDLHook(SDLEventHook h){
 	std::cerr << "Hook removal not implemented" << std::endl;
 }
 
-void App::NotifyEndGame() {
-	// TODO: END THE GAME
-	std::cout << "END THE GAME PLS" << std::endl;
-}
-
 /*
 
 	 ad88888ba
