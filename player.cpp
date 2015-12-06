@@ -133,7 +133,7 @@ void Player::OnUpdate() {
 	// Check if grounded
 	isGrounded = physicsManager->Raycast(
 		entity->GetGlobalPosition(),
-		-entity->GetUp() * 2.2f,
+		-entity->GetUp() * 1.505f,
 		entity->layer).hit();
 
 	// Head bobbing logic

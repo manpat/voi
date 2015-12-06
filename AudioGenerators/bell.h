@@ -56,10 +56,10 @@ struct BellAudioGenerator : AudioGenerator {
 		f64 rootPhase = ntof(120 - 12) * elapsed;
 
 		f32 o = 0.f; 
-		o += Wave::Sin(rootPhase) * ((correctness == 1) ? 0.f : 0.02f);
+		o += Wave::Sin(rootPhase) * ((correctness == 1) ? 0.f : 0.05f);
 
-		o += Wave::Sin(ph) * env * 0.5f;
-		o += Wave::Sin(ph * 2.f) * env * 0.25f;
+		o += Wave::Sin(ph) * env * 0.4f;
+		o += Wave::Sin(ph * 2.f) * env * 0.15f;
 
 		f32 harmonic = 0.f;
 		harmonic += Wave::Sin(ph * 0.5f) / 1.f;
@@ -73,7 +73,7 @@ struct BellAudioGenerator : AudioGenerator {
 		o += harmonic * env2 * 0.25f;
 
 		f32 fadeInFromStart = Env::Ramp((f32)elapsed, 1.f);
-		return o * fadeInFromStart * 0.5f;
+		return o * fadeInFromStart * 0.4f;
 	}
 };
 

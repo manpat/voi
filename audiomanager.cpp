@@ -36,7 +36,7 @@ AudioManager::AudioManager() {
 	FMOD::DSP* postcompressor = nullptr;
 
 	cfmod(system->createDSPByType(FMOD_DSP_TYPE_COMPRESSOR, &precompressor));
-	cfmod(precompressor->setParameterFloat(FMOD_DSP_COMPRESSOR_THRESHOLD, -8));
+	cfmod(precompressor->setParameterFloat(FMOD_DSP_COMPRESSOR_THRESHOLD, -12));
 	cfmod(precompressor->setParameterFloat(FMOD_DSP_COMPRESSOR_ATTACK, 100.0));
 	cfmod(precompressor->setParameterFloat(FMOD_DSP_COMPRESSOR_RELEASE, 100.0));
 	cfmod(precompressor->setBypass(false));
