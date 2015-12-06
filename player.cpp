@@ -5,6 +5,7 @@
 #include "movableobject.h"
 #include "interactable.h"
 #include "checkpoint.h"
+#include "hubmanager.h"
 #include "apptime.h"
 #include "player.h"
 #include "camera.h"
@@ -182,6 +183,11 @@ void Player::OnUpdate() {
 
 		if(Input::GetKeyDown('f')){
 			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
+		}
+
+		if(Input::GetKeyDown(SDLK_F5)) {
+			app->hubManager->NotifyReturnToHub();
+			app->hubManager->NotifyHubLoad();
 		}
 	}
 

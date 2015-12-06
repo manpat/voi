@@ -105,11 +105,6 @@ void App::Update(){
 		Input::doCapture = !Input::doCapture;
 	}
 
-	if(Input::GetKeyDown(SDLK_F5)) {
-		hubManager->NotifyReturnToHub();
-		hubManager->NotifyHubLoad();
-	}
-
 	input->EndFrame();
 }
 
