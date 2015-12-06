@@ -49,7 +49,7 @@ PhysicsManager::PhysicsManager(f32 refreshRate)
 	solver = new Solver{};
 
 	world = new World{dispatcher, broadphase, solver, collisionConfig};
-	world->setGravity({0, -20., 0});
+	world->setGravity({0, -30., 0});
 	dispatcher->setNearCallback(LayerNearCollisionFilterCallback);
 }
 

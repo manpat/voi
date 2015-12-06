@@ -17,7 +17,7 @@ struct HubAudioGenerator : AudioGenerator {
 		o += (Wave::Saw(ph)*0.1f + Wave::Noise())
 			* 0.08f * Wave::Sin(std::max((f32)(elapsed - 3.0) * 0.03f, 0.0f));
 
-		return (f32)(o * env * 0.005f);
+		return (f32)(o * env * 0.02f);
 	}
 };
 

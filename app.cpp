@@ -27,6 +27,7 @@
 #include "audiomanager.h"
 #include "entitymanager.h"
 #include "physicsmanager.h"
+#include "endtriggercomponent.h"
 #include "halflifepointmanager.h"
 
 template<> App* Singleton<App>::instance = nullptr;
@@ -381,6 +382,11 @@ void App::RegisterSDLHook(SDLEventHook h){
 void App::RemoveSDLHook(SDLEventHook h){
 	if(!h) return;
 	std::cerr << "Hook removal not implemented" << std::endl;
+}
+
+void App::NotifyEndGame() {
+	// TODO: END THE GAME
+	std::cout << "END THE GAME PLS" << std::endl;
 }
 
 /*

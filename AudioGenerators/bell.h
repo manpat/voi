@@ -70,7 +70,7 @@ struct BellAudioGenerator : AudioGenerator {
 			harmonic += Wave::Sin(ph * 2.0f);
 		}
 
-		o += harmonic * env2 * 0.25f;
+		o += harmonic * env2 * 0.2f;
 
 		f32 fadeInFromStart = Env::Ramp((f32)elapsed, 1.f);
 		return o * fadeInFromStart * 0.4f;

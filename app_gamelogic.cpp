@@ -20,6 +20,7 @@
 #include "synthcomponent.h"
 #include "physicsmanager.h"
 #include "blendersceneloader.h"
+#include "endtriggercomponent.h"
 #include "halflifepointmanager.h"
 #include "layerrenderingmanager.h"
 
@@ -221,6 +222,13 @@ void App::Load(const std::string& nLevel){
 
 	if(nLevel == "hub")
 		HubManager::GetSingleton()->NotifyHubLoad();
+
+	if(nLevel == "end") {
+		auto endTrigger = entityManager->FindEntity("EndTrigger");
+		if(!endTrigger) throw "End missing EndTrigger";
+
+		endTrigger->AddComponent<EndTriggerComponent>();
+	}
 
 	auto lend = ck::now();
 	auto diff = std::chrono::duration_cast<std::chrono::duration<f32>> (lend-lbegin).count();

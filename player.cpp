@@ -22,7 +22,6 @@ struct PortalTrigger : Component {
 
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if(auto portal = o->entity->FindComponent<Portal>()){
-			// std::cout << "[x] OnTriggerEnter " << entity->layer << "\n";
 			if(collidingPortal) return;
 
 			savedLayer = entity->layer;
@@ -37,21 +36,17 @@ struct PortalTrigger : Component {
 	}
 	void OnTriggerLeave(ColliderComponent* o) override {
 		if(auto p2 = o->entity->FindComponent<Portal>()){
-			// std::cout << "[ ] OnTriggerLeave " << entity->layer << "\n";
 			p2->shouldDraw = true;
 
 			if(collidingPortal == p2) {
 				auto endSide = collidingPortal->clip.getSide(entity->collider->GetPosition());
 				if(endSide == startSide) {
-					// std::cout << "Same side!" << std::endl;
 					entity->parent->SetLayer(savedLayer);
 				}
 
 				entity->collider->Refilter();
 				collidingPortal = nullptr;
 			}
-
-			// std::cout << std::endl;
 		}
 	}
 

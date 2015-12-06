@@ -120,6 +120,7 @@ public:
 	// Hooks
 	void RegisterSDLHook(SDLEventHook);
 	void RemoveSDLHook(SDLEventHook);
+	void NotifyEndGame();
 
 	// Setters
 	void SetGameState(GameState);
