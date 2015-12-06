@@ -107,24 +107,23 @@ void Player::OnUpdate() {
 
 	cameraEnt->SetGlobalOrientation(ori);
 
-	// TODO: Move elsewhere
-	f32 boost = 8.f;
-	f32 jumpImpulse = 10.f;
-	f32 interactDistance = 4.f;
-	f32 pickupDistance = 4.f;
-
-	// Move with WASD, based on look direction
 	auto velocity = entity->collider->GetVelocity();
 	auto velocityScalar = velocity.length();
 
 	velocity.x = 0.;
 	velocity.z = 0.;
 
+	// TODO: Move elsewhere
+	f32 boost = 8.f;
+	f32 jumpImpulse = 10.f;
+	f32 interactDistance = 4.f;
+	f32 pickupDistance = 4.f;
+
 	// Head bobbing params
-	auto bobSpeed = velocityScalar * 0.5f;
-	auto bobAcceleration = 0.1f;
-	auto bobHoriz = 0.25f; // Horizontal bobbing movement
-	auto bobVert = 0.5f; // Vertical bobbing movement
+	f32 bobAcceleration = 0.1f; // Transition rate
+	f32 bobHoriz = 0.04f; // Horizontal bobbing movement
+	f32 bobVert = 0.1f; // Vertical bobbing movement
+	f32 bobSpeed = velocityScalar * 0.8f;
 
 	if(Input::GetMapped(Input::Boost)){
 		boost *= 1.5f;
@@ -150,7 +149,7 @@ void Player::OnUpdate() {
 	}
 
 	cameraOffset.x += cos(bobDelta) * bobPower * bobHoriz;
-	cameraOffset.y += cos(bobDelta * 2) * bobPower * bobVert;
+	cameraOffset.y += std::abs(cos(bobDelta)) * bobPower * bobVert;
 
 	// Movement logic
 	if(Input::GetMapped(Input::Forward)){
@@ -165,16 +164,26 @@ void Player::OnUpdate() {
 		velocity += oriYaw.xAxis() * boost;
 	}
 
+	static bool canCheat = false;
 	static bool canInfinijump = false;
 
-	// Cheat
-	if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
-		canInfinijump = !canInfinijump;
-		std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
+	if(Input::GetKeyDown(SDLK_DELETE)) {
+		canCheat = !canCheat;
 	}
 
-	if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
-	if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
+	if(canCheat){
+		if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
+			canInfinijump = !canInfinijump;
+			std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
+		}
+
+		if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
+		if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
+
+		if(Input::GetKeyDown('f')){
+			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
+		}
+	}
 
 	if (isJumping && isGrounded) {
 		isJumping = false;
@@ -188,10 +197,6 @@ void Player::OnUpdate() {
 	}
 
 	entity->collider->SetVelocity(velocity);
-
-	if(Input::GetKeyDown('f')){
-		entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
-	}
 
 	if(entity->collider->GetPosition().y < -50.f){
 		Respawn();
