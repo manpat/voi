@@ -67,7 +67,7 @@ struct BellAudioGenerator : AudioGenerator {
 		harmonic += Wave::Sin(ph * 2.0f) / 3.f;
 
 		if(correctness == 1) {
-			harmonic += Wave::Triangle(ph * 2.0f);
+			harmonic += Wave::Sin(ph * 2.0f);
 		}
 
 		o += harmonic * env2 * 0.25f;

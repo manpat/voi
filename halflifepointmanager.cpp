@@ -71,7 +71,7 @@ void HalfLifePointManager::Update() {
 	}else{
 		audioMan->SetLowpass(22000.0f);
 		audioMan->SetReverbTime(10000.0f);
-		audioMan->SetReverbMix(2.f);
+		audioMan->SetReverbMix(5.f);
 	}
 
 	minDistance = std::numeric_limits<f32>::infinity();
