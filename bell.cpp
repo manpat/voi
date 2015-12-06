@@ -22,12 +22,7 @@ void Bell::OnAwake() {
 			0,
 			4,
 			7,
-			11,
-
 			12,
-			16,
-			19,
-			23,
 		};
 
 		bellGen = synth->generator;
