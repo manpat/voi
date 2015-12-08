@@ -365,11 +365,11 @@ void ColliderComponent::SetTrigger(bool _trigger){
 	body->setCollisionFlags(flags);
 }
 
-void ColliderComponent::SetKinematic(bool _kine){
+void ColliderComponent::SetKinematic(bool _kine, bool readd){
 	kinematic = _kine;
 
 	auto physman = PhysicsManager::GetSingleton();
-	physman->world->removeRigidBody(body);
+	if(readd) physman->world->removeRigidBody(body);
 
 	auto flags = body->getCollisionFlags();
 	if(kinematic){
@@ -379,7 +379,7 @@ void ColliderComponent::SetKinematic(bool _kine){
 	}
 	body->setCollisionFlags(flags);
 
-	physman->world->addRigidBody(body);
+	if(readd) physman->world->addRigidBody(body);
 }
 
 void ColliderComponent::SetAutosleep(bool as){

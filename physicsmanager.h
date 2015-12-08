@@ -108,7 +108,7 @@ struct ColliderComponent : Component {
 	void DisableRotation();
 	void SetContinuous(bool);
 	void SetTrigger(bool);
-	void SetKinematic(bool);
+	void SetKinematic(bool, bool = false);
 	void SetAutosleep(bool);
 	void SetFriction(f32);
 

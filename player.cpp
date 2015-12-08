@@ -105,7 +105,7 @@ void Player::OnUpdate() {
 
 		if(Input::GetKeyDown('n')){
 			canNoClip = !canNoClip;
-			entity->collider->SetKinematic(canNoClip);
+			entity->collider->SetKinematic(canNoClip, true);
 			std::cout << "NoClip: " << (canNoClip?"enabled":"disabled") << std::endl;
 		}
 
