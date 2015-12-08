@@ -36,10 +36,15 @@ void Menu::Init(App* app) {
 	title->SetAlignment(UiObject::Alignment::BottomLeft);
 	title->SetPosition(-0.9f, 0.15f);
 
-	menu = app->uiManager->CreateObject<UiImage>("MenuSubtitles");
-	menu->SetImage("menu.png");
+	menu = app->uiManager->CreateObject<UiImage>("MenuStart");
+	menu->SetImage("enterstart.png");
 	menu->SetAlignment(UiObject::Alignment::TopLeft);
 	menu->SetPosition(-0.9f, 0.1f);
+
+	menu = app->uiManager->CreateObject<UiImage>("MenuQuit");
+	menu->SetImage("escapequit.png");
+	menu->SetAlignment(UiObject::Alignment::TopLeft);
+	menu->SetPosition(-0.9f, 0.0f);
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
 	BlenderSceneLoader scnLdr{};
