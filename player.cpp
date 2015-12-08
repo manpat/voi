@@ -82,6 +82,10 @@ void Player::OnUpdate() {
 	auto app = App::GetSingleton();
 	auto layerRenderingManager = app->layerRenderingManager;
 
+	auto camera = app->camera;
+	auto cameraEnt = camera->entity;
+
+	// Begin cheating
 	static bool canCheat = false;
 	static bool canNoClip = false;
 	static bool canInfinijump = false;
@@ -103,7 +107,7 @@ void Player::OnUpdate() {
 			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
 		}
 
-		if(Input::GetKeyDown('n')){
+		if(Input::GetKeyDown('v')){
 			canNoClip = !canNoClip;
 			entity->collider->SetKinematic(canNoClip, true);
 			std::cout << "NoClip: " << (canNoClip?"enabled":"disabled") << std::endl;
@@ -114,12 +118,11 @@ void Player::OnUpdate() {
 			app->hubManager->NotifyHubLoad();
 		}
 	}
+	// End cheating
 
+	// Processing mouse input
 	auto hSens = (f32)app->hMouseSensitivity * app->GetWindowWidth() / 10000.f;
 	auto vSens = (f32)app->vMouseSensitivity * app->GetWindowHeight() / 10000.f;
-
-	auto camera = app->camera;
-	auto cameraEnt = camera->entity;
 
 	auto md = Input::GetMouseDelta();
 
@@ -205,6 +208,7 @@ void Player::OnUpdate() {
 		}
 	}
 
+	// Applying movement
 	if(canNoClip){
 		auto pos = entity->GetPosition();
 		entity->SetPosition(pos + velocity * AppTime::deltaTime);
@@ -212,6 +216,7 @@ void Player::OnUpdate() {
 		entity->collider->SetVelocity(velocity);
 	}
 
+	// Dodgy respawn check
 	if(entity->collider->GetPosition().y < -50.f){
 		Respawn();
 	}
