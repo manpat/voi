@@ -80,8 +80,41 @@ void Player::OnAwake() {
 void Player::OnUpdate() {
 	auto physicsManager = PhysicsManager::GetSingleton();
 	auto app = App::GetSingleton();
-
 	auto layerRenderingManager = app->layerRenderingManager;
+
+	static bool canCheat = false;
+	static bool canNoClip = false;
+	static bool canInfinijump = false;
+
+	if(Input::GetKeyDown(SDLK_DELETE)) {
+		canCheat = !canCheat;
+	}
+
+	if(canCheat){
+		if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
+			canInfinijump = !canInfinijump;
+			std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
+		}
+
+		if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
+		if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
+
+		if(Input::GetKeyDown('f')){
+			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
+		}
+
+		if(Input::GetKeyDown('n')){
+			canNoClip = !canNoClip;
+			entity->collider->SetKinematic(canNoClip);
+			std::cout << "NoClip: " << (canNoClip?"enabled":"disabled") << std::endl;
+		}
+
+		if(Input::GetKeyDown(SDLK_F5)) {
+			app->hubManager->NotifyReturnToHub();
+			app->hubManager->NotifyHubLoad();
+		}
+	}
+
 	auto hSens = (f32)app->hMouseSensitivity * app->GetWindowWidth() / 10000.f;
 	auto vSens = (f32)app->vMouseSensitivity * app->GetWindowHeight() / 10000.f;
 
@@ -100,10 +133,11 @@ void Player::OnUpdate() {
 
 	auto oriYaw = quat(Ogre::Radian(cameraYaw), vec3::UNIT_Y);
 	auto ori = quat(Ogre::Radian(cameraPitch), oriYaw.xAxis()) * oriYaw;
+	auto moveOri = canNoClip?ori:oriYaw;
 
 	cameraEnt->SetGlobalOrientation(ori);
 
-	auto velocity = entity->collider->GetVelocity();
+	auto velocity = canNoClip?vec3::ZERO:entity->collider->GetVelocity();
 	auto velocityScalar = velocity.length();
 
 	velocity.x = 0.;
@@ -149,41 +183,15 @@ void Player::OnUpdate() {
 
 	// Movement logic
 	if(Input::GetMapped(Input::Forward)){
-		velocity -= oriYaw.zAxis() * boost;
+		velocity -= moveOri.zAxis() * boost;
 	}else if(Input::GetMapped(Input::Backward)){
-		velocity += oriYaw.zAxis() * boost;
+		velocity += moveOri.zAxis() * boost;
 	}
 
 	if(Input::GetMapped(Input::Left)){
-		velocity -= oriYaw.xAxis() * boost;
+		velocity -= moveOri.xAxis() * boost;
 	}else if(Input::GetMapped(Input::Right)){
-		velocity += oriYaw.xAxis() * boost;
-	}
-
-	static bool canCheat = false;
-	static bool canInfinijump = false;
-
-	if(Input::GetKeyDown(SDLK_DELETE)) {
-		canCheat = !canCheat;
-	}
-
-	if(canCheat){
-		if(Input::GetKeyDown(SDLK_F12) || Input::GetKeyDown(SDLK_BACKSPACE)){
-			canInfinijump = !canInfinijump;
-			std::cout << "Infinijump: " << (canInfinijump?"enabled":"disabled") << std::endl;
-		}
-
-		if(Input::GetKeyDown(']')) AppTime::phystimescale += 0.1;
-		if(Input::GetKeyDown('[')) AppTime::phystimescale -= 0.1;
-
-		if(Input::GetKeyDown('f')){
-			entity->SetLayer((entity->layer+1)%layerRenderingManager->GetNumLayers());
-		}
-
-		if(Input::GetKeyDown(SDLK_F5)) {
-			app->hubManager->NotifyReturnToHub();
-			app->hubManager->NotifyHubLoad();
-		}
+		velocity += moveOri.xAxis() * boost;
 	}
 
 	if (isJumping && isGrounded) {
@@ -197,16 +205,21 @@ void Player::OnUpdate() {
 		}
 	}
 
-	entity->collider->SetVelocity(velocity);
+	if(canNoClip){
+		auto pos = entity->GetPosition();
+		entity->SetPosition(pos + velocity * AppTime::deltaTime);
+	}else{
+		entity->collider->SetVelocity(velocity);
+	}
 
 	if(entity->collider->GetPosition().y < -50.f){
 		Respawn();
 	}
 
-	if(heldObject) {
-		heldObject->entity->SetGlobalPosition(
-			cameraEnt->GetGlobalPosition() + cameraEnt->GetForward()*pickupDistance);
-	}
+	// if(heldObject) {
+	// 	heldObject->entity->SetGlobalPosition(
+	// 		cameraEnt->GetGlobalPosition() + cameraEnt->GetForward()*pickupDistance);
+	// }
 
 	// Interact
 	if(Input::GetMappedDown(Input::Interact)){

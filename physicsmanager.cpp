@@ -368,14 +368,18 @@ void ColliderComponent::SetTrigger(bool _trigger){
 void ColliderComponent::SetKinematic(bool _kine){
 	kinematic = _kine;
 
+	auto physman = PhysicsManager::GetSingleton();
+	physman->world->removeRigidBody(body);
+
 	auto flags = body->getCollisionFlags();
 	if(kinematic){
 		flags |= btCollisionObject::CF_KINEMATIC_OBJECT;
 	}else{
 		flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
 	}
-
 	body->setCollisionFlags(flags);
+
+	physman->world->addRigidBody(body);
 }
 
 void ColliderComponent::SetAutosleep(bool as){
