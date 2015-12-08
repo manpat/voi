@@ -1,0 +1,40 @@
+<scene previous_export_time="0" export_time="1446539911.365097" exported_by="jared" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Platform 2" >
+      <position z="-34.000000" y="-7.500000" x="-0.500000" />
+      <rotation qz="-0.000000" qy="0.000000" qx="0.000000" qw="1.000000" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <user_data name="anom_objecttype" type="int" value="4" />
+      <entity name="Cube.002" lock_rot_x="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" velocity_max="0.0" ghost="False" collisionPrim="box" anisotropic_friction="False" lock_trans_x="False" lock_rot_y="False" friction_y="1.0" friction_z="1.0" lock_trans_z="False" physics_type="STATIC" mass_radius="1.0" mass="1.0" inertia_tensor="0.4000000059604645" actor="False" lock_rot_z="False" meshFile="Cube.002.mesh" friction_x="1.0" velocity_min="0.0" lock_trans_y="False" >
+        <dimensions z="10.0" y="5.0" x="5.0" />
+      </entity>
+    </node>
+    <node name="Platform 1" >
+      <position z="-17.000000" y="-7.500000" x="-0.500000" />
+      <rotation qz="-0.000000" qy="0.000000" qx="0.000000" qw="1.000000" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <user_data name="anom_objecttype" type="int" value="4" />
+      <entity name="Cube.001" lock_rot_x="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" velocity_max="0.0" ghost="False" collisionPrim="box" anisotropic_friction="False" lock_trans_x="False" lock_rot_y="False" friction_y="1.0" friction_z="1.0" lock_trans_z="False" physics_type="STATIC" mass_radius="1.0" mass="1.0" inertia_tensor="0.4000000059604645" actor="False" lock_rot_z="False" meshFile="Cube.001.mesh" friction_x="1.0" velocity_min="0.0" lock_trans_y="False" >
+        <dimensions z="10.0" y="5.0" x="5.0" />
+      </entity>
+    </node>
+    <node name="Level" >
+      <position z="-25.500000" y="-51.666664" x="-0.499961" />
+      <rotation qz="-0.000000" qy="0.000000" qx="0.000000" qw="1.000000" />
+      <scale z="1.000000" y="1.000000" x="1.000000" />
+      <entity name="Cube" lock_rot_x="False" damping_trans="0.02539999969303608" damping_rot="0.1589999943971634" velocity_max="0.0" ghost="False" collisionPrim="triangle_mesh" anisotropic_friction="False" lock_trans_x="False" lock_rot_y="False" friction_y="1.0" friction_z="1.0" lock_trans_z="False" physics_type="STATIC" mass_radius="1.0" mass="1.0" inertia_tensor="0.4000000059604645" actor="False" lock_rot_z="False" meshFile="Cube.mesh" friction_x="1.0" velocity_min="0.0" lock_trans_y="False" >
+        <dimensions z="51.000022888183594" y="511.0" x="17.000185012817383" />
+      </entity>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="D:\Projects\Ogre\src\Anomalia\GameData\Scenes\level24\level24.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourAmbient r="0.0" b="0.0" g="0.0" />
+    <colourBackground r="0.05087608844041824" b="0.05087608844041824" g="0.05087608844041824" />
+    <colourDiffuse r="0.05087608844041824" b="0.05087608844041824" g="0.05087608844041824" />
+  </environment>
+</scene>
