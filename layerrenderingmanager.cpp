@@ -1,5 +1,6 @@
 #include <OGRE/OgreRenderQueueInvocation.h>
 #include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreViewport.h>
 #include <OGRE/OgreFrustum.h>
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreRoot.h>
@@ -91,7 +92,8 @@ void LayerRenderingManager::SetupRenderQueueInvocationSequence(s32 l) {
 		rqis->add(RENDER_QUEUE_MIRRORED + m->mirrorId, "Mir");
 	}
 
-	rqis->add(RENDER_QUEUE_PARTICLES, "dummy");
+	if(!transitionMode)
+		rqis->add(RENDER_QUEUE_PARTICLES, "dummy");
 
 	// Prepare for portal/mirror scene drawing by clearing the depth buffer
 	rqis->add(1, "PrepScn");
@@ -283,4 +285,14 @@ void LayerRenderingManager::renderQueueEnded(u8 /*queueId*/, const std::string& 
 		rs->setInvertVertexWinding(false);
 		rs->resetClipPlanes();
 	}
+}
+
+void LayerRenderingManager::SetTransitionMode(bool tm) {
+	transitionMode = tm;
+	// if(transitionMode)
+	// 	camera->viewport->setClearEveryFrame(true, Ogre::FBT_DEPTH);
+	// else
+	// 	camera->viewport->setClearEveryFrame(true);
+
+	SetupRenderQueueInvocationSequence(currentLayer);
 }

@@ -29,6 +29,7 @@ struct PortalTrigger : Component {
 
 			entity->parent->SetLayer(targetLayer);
 			portal->shouldDraw = false;
+			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
 
 			startSide = portal->clip.getSide(entity->collider->GetPosition());
 			collidingPortal = portal;
@@ -45,6 +46,7 @@ struct PortalTrigger : Component {
 				}
 
 				entity->collider->Refilter();
+				LayerRenderingManager::GetSingleton()->SetTransitionMode(false);
 				collidingPortal = nullptr;
 			}
 		}
@@ -150,7 +152,7 @@ void Player::OnUpdate() {
 	f32 boost = 8.f;
 	f32 jumpImpulse = 10.f;
 	f32 interactDistance = 4.f;
-	f32 pickupDistance = 4.f;
+	// f32 pickupDistance = 4.f;
 
 	// Head bobbing params
 	f32 bobAcceleration = 0.1f; // Transition rate
