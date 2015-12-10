@@ -268,6 +268,10 @@ void App::Load(const std::string& nLevel){
 	                                                                                            
 */
 void App::NotifyEndGame() {
+	if (gameOver) {
+		return;
+	}
+
 	std::cout << "endgame" << std::endl;
 	black = uiManager->CreateObject<UiImage>("Black");
 	black->SetImage("black.png");
