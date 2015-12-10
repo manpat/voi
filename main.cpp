@@ -31,11 +31,11 @@ s32 main(int na, char** aa){
 		std::cin.get();
 		return 2;
 	}catch(const std::string& e){
-		std::cout << "FUCK Exception!\n" << e << std::endl;
+		std::cout << "Exception!\n" << e << std::endl;
 		std::cin.get();
 		return 3;
 	}catch(const char* e){
-		std::cout << "FUCK Exception!\n" << e << std::endl;
+		std::cout << "Exception!\n" << e << std::endl;
 		std::cin.get();
 		return 4;
 	}catch(...){
