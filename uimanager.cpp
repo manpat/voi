@@ -24,10 +24,11 @@ UiManager::~UiManager() {
 
 void UiManager::Update() {
 	auto camera = App::GetSingleton()->camera->entity;
-	auto uipos = camera->GetGlobalPosition() + camera->GetForward();
+
 
 	// Move all the UI Objects one unit infront of the camera so they're not culled
 	for (auto &o : uiObjects) {
+		auto uipos = camera->GetGlobalPosition() + (camera->GetForward() * o->GetPriority());
 		o->node->_setDerivedPosition(uipos);
 	}
 }
@@ -48,4 +49,17 @@ void UiManager::DestroyAllObjects() {
 	}
 
 	assert(uiObjects.empty());
+}
+
+s32 UiManager::GetUiWidth() const {
+	return uiFixedWidth;
+}
+
+s32 UiManager::GetUiHeight() const {
+	return uiFixedHeight;
+}
+
+void UiManager::SetUiSize(s32 width, s32 height) {
+	uiFixedWidth = width;
+	uiFixedHeight = height;
 }

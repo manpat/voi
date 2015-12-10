@@ -128,15 +128,19 @@ void Input::Update(){
 	//	is the mouse warping
 
 	if(App::GetSingleton()->IsInFocus() && doCapture){
+		
 		s32 mx, my;
 		SDL_GetMouseState(&mx, &my);
 
 		auto ww = App::GetSingleton()->GetWindowWidth();
 		auto wh = App::GetSingleton()->GetWindowHeight();
 
+		ww &= ~1;
+		wh &= ~1;
+		
 		mouseDelta.x = mx / static_cast<f32>(ww) * 2.f - 1.f;
 		mouseDelta.y =-my / static_cast<f32>(wh) * 2.f + 1.f;
-
+		
 		SDL_WarpMouseInWindow(App::GetSingleton()->sdlWindow, ww/2, wh/2);
 	}
 }

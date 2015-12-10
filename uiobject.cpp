@@ -30,6 +30,10 @@ void UiObject::SetPosition(f32 x, f32 y) {
 	position.y = y;
 }
 
+void UiObject::SetPriority(u32 p) {
+	priority = p;
+}
+
 void UiObject::SetSize(u32 w, u32 h) {
 	size.x = (f32)w;
 	size.y = (f32)h;
@@ -50,6 +54,10 @@ const std::string& UiObject::GetName() const {
 
 vec2 UiObject::GetPosition() const {
 	return position;
+}
+
+u32 UiObject::GetPriority() const {
+	return priority;
 }
 
 vec2 UiObject::GetSize() const {

@@ -52,6 +52,14 @@ struct UiManager : Singleton<UiManager> {
 
 	void DestroyAllObjects();
 
+	s32 GetUiWidth() const;
+	s32 GetUiHeight() const;
+
+	void SetUiSize(s32 w, s32 h);
+
+private:
+	s32 uiFixedWidth = 1920;
+	s32 uiFixedHeight = 1080;
 };
 
 #endif//UNIMANAGER_H

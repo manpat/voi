@@ -26,7 +26,8 @@ private:
 
 	UiManager* m_uiManager = nullptr;
 	UiImage* title = nullptr;
-	UiImage* menu = nullptr;
+	UiImage* start = nullptr;
+	UiImage* quit = nullptr;
 
 	f32 m_delta = 0.f;
 };

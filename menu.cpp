@@ -12,6 +12,7 @@
 #include "camera.h"
 #include "uiimage.h"
 #include "uimanager.h"
+#include "hubmanager.h"
 #include "entitymanager.h"
 #include "portalmanager.h"
 #include "mirrormanager.h"
@@ -35,16 +36,24 @@ void Menu::Init(App* app) {
 	title->SetImage("title.png");
 	title->SetAlignment(UiObject::Alignment::BottomLeft);
 	title->SetPosition(-0.9f, 0.15f);
+	title->FixedSize(false);
 
-	menu = app->uiManager->CreateObject<UiImage>("MenuStart");
-	menu->SetImage("enterstart.png");
-	menu->SetAlignment(UiObject::Alignment::TopLeft);
-	menu->SetPosition(-0.9f, 0.1f);
+	start = app->uiManager->CreateObject<UiImage>("MenuStart");
+	if (app->hubManager->lastLevelCompleted < 0) {
+		start->SetImage("enterstart.png");
+	}
+	else {
+		start->SetImage("entercontinue.png");
+	}
+	start->SetAlignment(UiObject::Alignment::BottomLeft);
+	start->SetPosition(-0.9f, 0.01f);
+	start->FixedSize(false);
 
-	menu = app->uiManager->CreateObject<UiImage>("MenuQuit");
-	menu->SetImage("escapequit.png");
-	menu->SetAlignment(UiObject::Alignment::TopLeft);
-	menu->SetPosition(-0.9f, 0.0f);
+	quit = app->uiManager->CreateObject<UiImage>("MenuQuit");
+	quit->SetImage("escapequit.png");
+	quit->SetAlignment(UiObject::Alignment::TopLeft);
+	quit->SetPosition(-0.9f, 0.0f);
+	quit->FixedSize(false);
 
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("GameData/Scenes/menu", "FileSystem");
 	BlenderSceneLoader scnLdr{};
@@ -60,6 +69,14 @@ void Menu::Init(App* app) {
 
 	auto targetPos = cameraPos + vec3(-0.6f, 0., -1);
 	app->camera->ogreCamera->lookAt(targetPos);
+
+	auto ww = app->GetWindowWidth();
+	auto wh = app->GetWindowHeight();
+
+	// Set FOV based on ratio to maintain xFOV. * 80 equates to 45 degree yFOV at at 16:9 ratio
+	auto fov = ((f32)wh / ww) * 80;
+
+	app->camera->ogreCamera->setFOVy(Ogre::Radian(Ogre::Degree(fov > 45 ? 45 : fov).valueRadians()));
 
 	app->layerRenderingManager->SetupRenderQueueInvocationSequence(0);
 

@@ -29,6 +29,8 @@ struct UiObject {
 	void SetHoverable(bool hoverable = true);
 	// Position in screenspace, -1.0 to 1.0
 	virtual void SetPosition(f32 x, f32 y);
+	// Sets the distance away from the camera, lower number means closer, higher priority
+	void SetPriority(u32 priority);
 	// Size in pixels
 	virtual void SetSize(u32 w, u32 h);
 	// Sets whether the object is visible on screen
@@ -36,10 +38,12 @@ struct UiObject {
 
 	virtual Ogre::AxisAlignedBox GetAABB() const;
 
+	// Returns the name this object's node was created with
 	const std::string& GetName() const;
 	// Returns position in screenspace, -1.0 to 1.0
 	virtual vec2 GetPosition() const;
-
+	// Returns priority, used for setting distance from camera, lower number is higher priority
+	u32 GetPriority() const;
 	// Returns size in pixels
 	virtual vec2 GetSize() const;
 
@@ -56,6 +60,8 @@ protected:
 
 	bool clickable = false;
 	bool hoverable = false;
+
+	u32 priority = 5;
 };
 
 #endif//UIOBJECT_H

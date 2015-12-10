@@ -106,6 +106,25 @@ void App::Update(){
 		Input::doCapture = !Input::doCapture;
 	}
 
+	// TODO: Move this
+	if (gameOver == true) {
+		auto diff = AppTime::appTime - gameOverNotifyTime;
+		auto fadeOutDuration = 5.0f;
+		auto creditsThanksStartTime = 6.0f;
+		auto creditsThanksFadeDuration = 3.0f;
+		auto creditsNamesStartTime = 8.5f;
+		auto creditsNamesFadeDuration = 3.0f;
+		auto endGameTime = 10.0f;
+
+		black->SetColour(1.0f, 1.0f, 1.0f, clamp((diff - fadeOutDuration) / fadeOutDuration, 0.0f, 1.0f));
+		creditsThanks->SetColour(1.0f, 1.0f, 1.0f, clamp(((diff - creditsThanksStartTime) - creditsThanksFadeDuration) / creditsThanksFadeDuration, 0.0f, 1.0f));
+		creditsNames->SetColour(1.0f, 1.0f, 1.0f, clamp(((diff - creditsNamesStartTime) - creditsNamesFadeDuration) / creditsNamesFadeDuration, 0.0f, 1.0f));
+
+		if (diff >= creditsNamesStartTime + creditsNamesFadeDuration + endGameTime) {
+			SetGameState(GameState::MAIN_MENU);
+		}
+	}
+
 	input->EndFrame();
 }
 
@@ -249,8 +268,30 @@ void App::Load(const std::string& nLevel){
 	                                                                                            
 */
 void App::NotifyEndGame() {
-	// TODO: END THE GAME
-	std::cout << "END THE GAME PLS" << std::endl;
+	std::cout << "endgame\n";
+	black = uiManager->CreateObject<UiImage>("Black");
+	black->SetImage("black.png");
+	black->SetAlignment(UiObject::Alignment::Center);
+	black->SetPosition(0.0f, 0.0f);
+	black->SetSize(GetWindowWidth() * 2, GetWindowHeight() * 2);
+	black->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
+
+	creditsThanks = uiManager->CreateObject<UiImage>("CreditsThanks");
+	creditsThanks->SetImage("creditsthanks.png");
+	creditsThanks->SetAlignment(UiObject::Alignment::BottomCenter);
+	creditsThanks->SetPosition(0.0f, 0.3f);
+	creditsThanks->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
+	creditsThanks->FixedSize(false);
+
+	creditsNames = uiManager->CreateObject<UiImage>("CreditsNames");
+	creditsNames->SetImage("creditsnames.png");
+	creditsNames->SetAlignment(UiObject::Alignment::TopCenter);
+	creditsNames->SetPosition(0.0f, 0.0f);
+	creditsNames->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
+	creditsNames->FixedSize(false);
+
+	gameOverNotifyTime = AppTime::appTime;
+	gameOver = true;
 }
 
 /*
@@ -272,6 +313,7 @@ void App::ResetScene() {
 	// Destroy all existing entities
 	entityManager->DestroyAllEntities();
 
+	gameOver = false;
 	// Destroy all existing UI Objects
 	uiManager->DestroyAllObjects();
 

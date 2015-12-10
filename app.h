@@ -105,6 +105,13 @@ struct App : Singleton<App> {
 	s32 hMouseSensitivity;
 	s32 vMouseSensitivity;
 
+	// Endgame stuff. TODO: Move elsewhere.
+	bool gameOver = false;
+	UiImage* black = nullptr;
+	UiImage* creditsThanks = nullptr;
+	UiImage* creditsNames = nullptr;
+	f64 gameOverNotifyTime;
+
 private:
 	GameState gameState = GameState::NONE;
 	std::string customLevelName;

@@ -29,6 +29,10 @@ public:
 	void SetSize(u32 w, u32 h) override;
 	// Sets whether the image is visible on screen
 	void SetVisible(bool visible = true) override;
+	// Sets whether the image is fixed to its pixel size, or scales with the screen resolution
+	void FixedSize(bool fixed = true);
+	// Sets whether the image always keeps it's correct ratio, regardless of screen ratio
+	void MaintainRatio(bool maintainRatio = true);
 
 	Ogre::AxisAlignedBox GetAABB() const override;
 
@@ -37,6 +41,10 @@ private:
 	Ogre::SharedPtr<Ogre::Material> mat;
 	Ogre::Pass* matPass = nullptr;
 	
+	// Is the image always the specified pixel size
+	bool fixedSize = true;
+
+	bool maintainRatio = true;
 	// Recalculates the images dimensions
 	void CalculateTransform();
 };

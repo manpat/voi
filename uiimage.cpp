@@ -1,6 +1,7 @@
 #include "uiimage.h"
 
 #include "app.h"
+#include "uimanager.h"
 #include "layerrenderingmanager.h"
 
 #include <OGRE/OgreSceneNode.h>
@@ -27,10 +28,11 @@ void UiImage::Init() {
 	mat = Ogre::MaterialManager::getSingleton().create(GetName(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	matPass = mat->getTechnique(0)->getPass(0);
 
-	matPass->setDepthWriteEnabled(false);
-	matPass->setDepthCheckEnabled(false);
-	matPass->setLightingEnabled(false);
-	matPass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+	mat->setDepthWriteEnabled(false);
+	mat->setDepthCheckEnabled(false);
+	mat->setLightingEnabled(false);
+	
+	mat->setSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
 
 	rect = new Ogre::Rectangle2D(true);
 
@@ -41,8 +43,23 @@ void UiImage::Init() {
 	node->attachObject(rect);
 }
 
+void UiImage::FixedSize(bool f) {
+	fixedSize = f;
+	CalculateTransform();
+}
+
+void UiImage::MaintainRatio(bool m) {
+	maintainRatio = m;
+	CalculateTransform();
+}
+
 void UiImage::SetColour(f32 r, f32 g, f32 b, f32 a) {
+	matPass->setColourWriteEnabled(true);
 	matPass->setDiffuse(Ogre::ColourValue(r, g, b, a));
+	matPass->setSelfIllumination(Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
+	mat->setReceiveShadows(false);
+	matPass->setLightingEnabled(true);
+	matPass->setSeparateSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA, Ogre::SceneBlendType::SBT_ADD);
 }
 
 void UiImage::SetImage(const std::string& filename, bool resize) {
@@ -79,6 +96,7 @@ Ogre::AxisAlignedBox UiImage::GetAABB() const {
 void UiImage::ResizeObjectToImage() {
 	if (!matPass->getTextureUnitState(0)->_getTexturePtr().isNull()) {
 		size = vec2((f32)matPass->getTextureUnitState(0)->_getTexturePtr()->getWidth(), (f32)matPass->getTextureUnitState(0)->_getTexturePtr()->getHeight());
+		std::cout << GetName() << " : " << size << "\n";
 	}
 	else {
 		std::cout << "Can't get texture pointer to UI object " << GetName() << ", Defaulting to 128x128\n";
@@ -91,56 +109,76 @@ void UiImage::ResizeObjectToImage() {
 void UiImage::CalculateTransform() {
 	vec2 screenOffset, screenSize;
 
+	auto app = App::GetSingleton();
+
+	s32 width, height;
+	
+	if (fixedSize) {
+		width = app->GetWindowWidth();
+		height = app->GetWindowHeight();
+	}
+	else {
+		width = app->uiManager->GetUiWidth();
+		height = app->uiManager->GetUiHeight();
+	}
+
+	if (maintainRatio) {
+		screenSize.y = size.y / height;
+		// Calculate width based on the height, adjusted to screen ratio, then adjusted to texture ratio
+		screenSize.x = (screenSize.y * ((f32)app->GetWindowHeight() / app->GetWindowWidth())) * (size.x / size.y);
+	}
+	else {
+		screenSize.x = size.x / width;
+		screenSize.y = size.y / height;
+	}
+
 	switch (alignment) {
 	case Alignment::TopLeft:
 		screenOffset.x = 0.0f;
-		screenOffset.y = size.y / HEIGHT;
+		screenOffset.y = screenSize.y;
 		break;
 	case Alignment::TopCenter:
-		screenOffset.x = (size.x / WIDTH) / 2;
-		screenOffset.y = size.y / HEIGHT;
+		screenOffset.x = screenSize.x / 2;
+		screenOffset.y = screenSize.y;
 		break;
 	case Alignment::TopRight:
-		screenOffset.x = size.x / WIDTH;
-		screenOffset.y = size.y / HEIGHT;
+		screenOffset.x = screenSize.x;
+		screenOffset.y = screenSize.y;
 		break;
 	case Alignment::CenterLeft:
 		screenOffset.x = 0.0f;
-		screenOffset.y = (size.y / HEIGHT) / 2;
+		screenOffset.y = screenSize.y / 2;
 		break;
 	case Alignment::Center:
-		screenOffset.x = (size.x / WIDTH) / 2;
-		screenOffset.y = (size.y / HEIGHT) / 2;
+		screenOffset.x = screenSize.x / 2;
+		screenOffset.y = screenSize.y / 2;
 		break;
 	case Alignment::CenterRight:
-		screenOffset.x = size.x / WIDTH;
-		screenOffset.y = (size.y / HEIGHT) / 2;
+		screenOffset.x = screenSize.x;
+		screenOffset.y = screenSize.y / 2;
 		break;
 	case Alignment::BottomLeft:
 		screenOffset.x = 0.0f;
 		screenOffset.y = 0.0f;
 		break;
 	case Alignment::BottomCenter:
-		screenOffset.x = (size.x / WIDTH) / 2;
+		screenOffset.x = screenSize.x / 2;
 		screenOffset.y = 0.0f;
 		break;
 	case Alignment::BottomRight:
-		screenOffset.x = size.x / WIDTH;
+		screenOffset.x = screenSize.x;
 		screenOffset.y = 0.0f;
 		break;
 	default:
-		screenOffset.x = (size.x / WIDTH) / 2;
-		screenOffset.y = (size.y / HEIGHT) / 2;
+		screenOffset.x = screenSize.x / 2;
+		screenOffset.y = screenSize.y / 2;
 		break;
 	}
 
-	screenSize.x = size.x / WIDTH;
-	screenSize.y = size.y / HEIGHT;
-
-	auto left = position.x - screenOffset.x;
-	auto bottom = position.y - screenOffset.y;
-	auto top = bottom + screenSize.y;
-	auto right = left + screenSize.x;
+	auto left = position.x - screenOffset.x * 2;
+	auto bottom = position.y - screenOffset.y * 2;
+	auto top = bottom + screenSize.y * 2;
+	auto right = left + screenSize.x * 2;
 
 	rect->setCorners(left, top, right, bottom);
 }
