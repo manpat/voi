@@ -3,12 +3,18 @@
 #include <string>
 
 #ifdef _WIN32
-	#undef main
+#undef main
+#include <Windows.h>
 #endif
 
 s32 main(int na, char** aa){
 	try{
+#ifdef _WIN32
+		FreeConsole();
+#endif
+
 		std::string level;
+
 		if(na > 1) {
 			level = std::string{aa[1]};
 		}
