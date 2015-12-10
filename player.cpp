@@ -18,30 +18,43 @@ struct PortalTrigger : Component {
 	u32 startSide = 0;
 	s32 savedLayer = -1;
 
+	bool switchOnLeave;
+
 	PortalTrigger() : Component(this) {}
 
 	void OnTriggerEnter(ColliderComponent* o) override {
-		if(auto portal = o->entity->FindComponent<Portal>()){
-			if(collidingPortal) return;
+		if (auto portal = o->entity->FindComponent<Portal>()) {
+			if (collidingPortal) return;
 
 			savedLayer = entity->layer;
-			auto targetLayer = (portal->layer[0] == savedLayer) ? portal->layer[1] : portal->layer[0];
-
-			entity->parent->SetLayer(targetLayer);
 			portal->shouldDraw = false;
-			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
 
+			if (Input::GetMapped(Input::Forward)) {
+				auto targetLayer = (portal->layer[0] == savedLayer) ? portal->layer[1] : portal->layer[0];
+
+				entity->parent->SetLayer(targetLayer);
+				LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
+			}
+			else {
+				switchOnLeave = true;
+			}
 			startSide = portal->clip.getSide(entity->collider->GetPosition());
 			collidingPortal = portal;
 		}
 	}
 	void OnTriggerLeave(ColliderComponent* o) override {
-		if(auto p2 = o->entity->FindComponent<Portal>()){
+		if (auto p2 = o->entity->FindComponent<Portal>()) {
 			p2->shouldDraw = true;
 
-			if(collidingPortal == p2) {
+			if (switchOnLeave) {
+				auto targetLayer = (p2->layer[0] == savedLayer) ? p2->layer[1] : p2->layer[0];
+
+				entity->parent->SetLayer(targetLayer);
+				LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
+			}
+			if (collidingPortal == p2) {
 				auto endSide = collidingPortal->clip.getSide(entity->collider->GetPosition());
-				if(endSide == startSide) {
+				if (endSide == startSide) {
 					entity->parent->SetLayer(savedLayer);
 				}
 
@@ -51,6 +64,7 @@ struct PortalTrigger : Component {
 			}
 		}
 	}
+
 
 	void OnLayerChange() override {
 		auto layerRenderingManager = App::GetSingleton()->layerRenderingManager;
