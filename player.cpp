@@ -52,6 +52,7 @@ struct PortalTrigger : Component {
 				entity->parent->SetLayer(targetLayer);
 				LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
 			}
+			
 			if (collidingPortal == p2) {
 				auto endSide = collidingPortal->clip.getSide(entity->collider->GetPosition());
 				if (endSide == startSide) {

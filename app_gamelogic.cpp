@@ -94,8 +94,8 @@ void App::Update(){
 	halflifePointManager->Update();
 
 	input->Update();
-	uiManager->Update();
 	entityManager->Update();
+	uiManager->Update();
 	physicsManager->Update();
 	audioManager->Update();
 	entityManager->LateUpdate();
@@ -107,7 +107,7 @@ void App::Update(){
 	}
 
 	// TODO: Move f
-	if (gameOver == true) {
+	if (gameOver) {
 		auto diff = (f32)(AppTime::appTime - gameOverNotifyTime);
 		auto fadeOutDuration = 5.0f;
 		auto creditsThanksStartTime = 6.0f;
@@ -268,7 +268,7 @@ void App::Load(const std::string& nLevel){
 	                                                                                            
 */
 void App::NotifyEndGame() {
-	std::cout << "endgame\n";
+	std::cout << "endgame" << std::endl;
 	black = uiManager->CreateObject<UiImage>("Black");
 	black->SetImage("black.png");
 	black->SetAlignment(UiObject::Alignment::Center);
