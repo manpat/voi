@@ -1,4 +1,4 @@
-<scene previous_export_time="1449790899.2471297" exported_by="patrick" export_time="1449791139.2998104" formatVersion="1.0.1" >
+<scene previous_export_time="1449791448.0941105" exported_by="patrick" export_time="1449791551.4932156" formatVersion="1.0.1" >
   <nodes >
     <node name="Plane.006" >
       <position x="64.000000" z="-20.000000" y="16.000000" />
@@ -395,7 +395,7 @@
       </entity>
     </node>
     <node name="Reflection" >
-      <position x="36.000000" z="-75.000000" y="4.000000" />
+      <position x="41.500000" z="-71.464996" y="4.000000" />
       <rotation qw="1.000000" qz="-0.000000" qx="0.000000" qy="0.000000" />
       <scale x="1.000000" z="1.000000" y="1.000000" />
       <user_data name="anom_objecttype" value="2" type="int" />
@@ -581,7 +581,7 @@
     </node>
     <node name="Glyph3O.002" >
       <position x="27.800001" z="-73.700005" y="15.700000" />
-      <rotation qw="0.707107" qz="0.707107" qx="0.000000" qy="0.000000" />
+      <rotation qw="-0.000000" qz="-0.000000" qx="0.000000" qy="1.000000" />
       <scale x="0.350000" z="0.500000" y="0.350000" />
       <entity ghost="False" inertia_tensor="0.4000000059604645" mass="1.0" mass_radius="1.0" damping_rot="0.10000000149011612" anisotropic_friction="False" damping_trans="0.03999999910593033" actor="False" lock_trans_z="False" lock_trans_x="False" lock_rot_z="False" friction_z="1.0" velocity_max="0.0" meshFile="Plane.013.mesh" lock_rot_y="False" lock_trans_y="False" lock_rot_x="False" name="Plane.013" friction_x="1.0" friction_y="1.0" physics_type="NO_COLLISION" velocity_min="0.0" >
         <dimensions x="0.5" z="0.09999999403953552" y="0.5" />
