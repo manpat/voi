@@ -106,9 +106,9 @@ void App::Update(){
 		Input::doCapture = !Input::doCapture;
 	}
 
-	// TODO: Move this
+	// TODO: Move f
 	if (gameOver == true) {
-		auto diff = AppTime::appTime - gameOverNotifyTime;
+		auto diff = (f32)(AppTime::appTime - gameOverNotifyTime);
 		auto fadeOutDuration = 5.0f;
 		auto creditsThanksStartTime = 6.0f;
 		auto creditsThanksFadeDuration = 3.0f;

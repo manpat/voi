@@ -96,7 +96,6 @@ Ogre::AxisAlignedBox UiImage::GetAABB() const {
 void UiImage::ResizeObjectToImage() {
 	if (!matPass->getTextureUnitState(0)->_getTexturePtr().isNull()) {
 		size = vec2((f32)matPass->getTextureUnitState(0)->_getTexturePtr()->getWidth(), (f32)matPass->getTextureUnitState(0)->_getTexturePtr()->getHeight());
-		std::cout << GetName() << " : " << size << "\n";
 	}
 	else {
 		std::cout << "Can't get texture pointer to UI object " << GetName() << ", Defaulting to 128x128\n";
