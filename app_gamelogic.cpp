@@ -108,17 +108,17 @@ void App::Update(){
 
 	// TODO: Move f
 	if (gameOver) {
-		auto diff = (f32)(AppTime::appTime - gameOverNotifyTime);
-		auto fadeOutDuration = 5.0f;
-		auto creditsThanksStartTime = 6.0f;
-		auto creditsThanksFadeDuration = 3.0f;
-		auto creditsNamesStartTime = 8.5f;
-		auto creditsNamesFadeDuration = 3.0f;
-		auto endGameTime = 10.0f;
+		f32 diff = (f32)(AppTime::appTime - gameOverNotifyTime);
+		f32 fadeOutDuration = 5.0f;
+		f32 creditsThanksStartTime = 6.0f;
+		f32 creditsThanksFadeDuration = 3.0f;
+		f32 creditsNamesStartTime = 8.5f;
+		f32 creditsNamesFadeDuration = 3.0f;
+		f32 endGameTime = 5.0f;
 
-		black->SetColour(1.0f, 1.0f, 1.0f, clamp((diff - fadeOutDuration) / fadeOutDuration, 0.0f, 1.0f));
-		creditsThanks->SetColour(1.0f, 1.0f, 1.0f, clamp(((diff - creditsThanksStartTime) - creditsThanksFadeDuration) / creditsThanksFadeDuration, 0.0f, 1.0f));
-		creditsNames->SetColour(1.0f, 1.0f, 1.0f, clamp(((diff - creditsNamesStartTime) - creditsNamesFadeDuration) / creditsNamesFadeDuration, 0.0f, 1.0f));
+		black->SetColour(1.0f, 1.0f, 1.0f, clamp(diff / fadeOutDuration, 0.0f, 1.0f));
+		creditsThanks->SetColour(1.0f, 1.0f, 1.0f, clamp((diff - creditsThanksStartTime) / creditsThanksFadeDuration, 0.0f, 1.0f));
+		creditsNames->SetColour(1.0f, 1.0f, 1.0f, clamp((diff - creditsNamesStartTime) / creditsNamesFadeDuration, 0.0f, 1.0f));
 
 		if (diff >= creditsNamesStartTime + creditsNamesFadeDuration + endGameTime) {
 			SetGameState(GameState::MAIN_MENU);
@@ -282,7 +282,7 @@ void App::NotifyEndGame() {
 	black->SetSize(GetWindowWidth() * 2, GetWindowHeight() * 2);
 	black->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
 
-	creditsThanks = uiManager->CreateObject<UiImage>("CreditsThanks");
+	creditsThanks = uiManager->CreateObject<UiImage>("CreditsThanks", "Black");
 	creditsThanks->SetImage("creditsthanks.png");
 	creditsThanks->SetAlignment(UiObject::Alignment::BottomCenter);
 	creditsThanks->SetPosition(0.0f, 0.3f);
@@ -290,7 +290,7 @@ void App::NotifyEndGame() {
 	creditsThanks->FixedSize(false);
 	creditsThanks->SetPriority(1);
 
-	creditsNames = uiManager->CreateObject<UiImage>("CreditsNames");
+	creditsNames = uiManager->CreateObject<UiImage>("CreditsNames", "Black");
 	creditsNames->SetImage("creditsnames.png");
 	creditsNames->SetAlignment(UiObject::Alignment::TopCenter);
 	creditsNames->SetPosition(0.0f, 0.0f);

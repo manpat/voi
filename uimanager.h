@@ -19,10 +19,17 @@ struct UiManager : Singleton<UiManager> {
 	void Update();
 
 	template<typename T>
-	T* CreateObject(const std::string& name) {
+	T* CreateObject(const std::string& name, const std::string& parent = "") {
 		T* o = new T{};
 
-		o->node = App::GetSingleton()->rootNode->createChildSceneNode(name);
+		if (parent.empty())	{
+			o->node = App::GetSingleton()->rootNode->createChildSceneNode(name);
+		}
+		else {
+			auto p = (Ogre::SceneNode*)App::GetSingleton()->rootNode->getChild(parent);
+			o->node = p->createChildSceneNode(name);
+		}
+
 		o->Init();
 
 		uiObjects.push_back(o);
