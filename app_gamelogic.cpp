@@ -238,6 +238,7 @@ void App::Load(const std::string& nLevel){
 
 	cursor = uiManager->CreateObject<UiImage>("Cursor");
 	cursor->SetImage("cursor.png");
+	cursor->FixedSize(false);
 	cursor->SetPriority(10);
 
 	if(nLevel == "hub")
