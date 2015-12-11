@@ -1,4 +1,5 @@
 #include "synthcomponent.h"
+#include "shakecomponent.h"
 #include "entitymanager.h"
 #include "interactable.h"
 #include "bellmanager.h"
@@ -16,7 +17,9 @@ void Bell::OnAwake() {
 			<< " didn't find target " << targetName << std::endl;
 	}
 
+	shake = entity->AddComponent<ShakeComponent>();
 	auto synth = entity->FindComponent<SynthComponent>();
+
 	if(synth && synth->synthName == "bell") {
 		static u32 notes[] = {
 			0,
@@ -39,19 +42,24 @@ void Bell::OnMessage(const std::string& msg, const OpaqueType&) {
 
 	if(msg == "interact"){
 		std::cout << "Bell unlock " << bellNumber << std::endl;
+
 		if(bellGen){
 			bellGen->Start();
 		}
+
 		target->SendMessage("unlock", (Component*)this, /*u32*/bellNumber);
+		shake->SetTimer(1.0, 2.0, 0.01f);
 
 	}else if(msg == "correct") {
 		std::cout << "Bell unlock " << bellNumber << " correct" << std::endl;
 
 	}else if(msg == "incorrect") {
 		std::cout << "Bell unlock " << bellNumber << " incorrect" << std::endl;
+
 		if(bellGen){
 			bellGen->SetParam(1, 2);
 		}
+
 		BellManager::GetSingleton()->StopAllBells(targetName);
 
 	}else if(msg == "dooropen") {
