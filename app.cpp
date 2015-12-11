@@ -57,10 +57,10 @@ App::App(const std::string& levelArg) {
 	if (levelArg.size() > 0) {
 		customLevelName = levelArg;
 	}
-	//else {
-	//	std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
-	//	std::getline(std::cin, customLevelName);
-	//}
+	else {
+		std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
+		std::getline(std::cin, customLevelName);
+	}
 
 	// Find and parse config file
 	LoadConfig();

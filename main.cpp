@@ -10,7 +10,7 @@
 s32 main(int na, char** aa){
 	try{
 #ifdef _WIN32
-		FreeConsole();
+		//FreeConsole();
 #endif
 
 		std::string level;

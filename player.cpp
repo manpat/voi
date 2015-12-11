@@ -17,14 +17,26 @@ struct PortalTrigger : Component {
 	Portal* collidingPortal = nullptr;
 	u32 startSide = 0;
 	s32 savedLayer = -1;
-
 	bool switchOnLeave;
 
 	PortalTrigger() : Component(this) {}
 
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if (auto portal = o->entity->FindComponent<Portal>()) {
-			if (collidingPortal) return;
+			// Hide portal during transition
+			portal->shouldDraw = false;
+
+			auto playerReach = entity->GetGlobalPosition() + App::GetSingleton()->camera->entity->GetForward() * entity->collider->GetVelocity().length();
+			auto portalToPlayer = playerReach - portal->entity->GetGlobalPosition();
+			auto whichSide = portal->clip.normal.dotProduct(portalToPlayer);
+
+			// Assume origin layer, change to target layer if point in front of player (greater than near clip length) passes portal.
+			auto targetLayer = whichSide > 0 ? portal->layer[1] : portal->layer[0];
+			//std::cout << "Trigger Enter. Layer: " << targetLayer << std::endl;
+
+			entity->parent->SetLayer(targetLayer);
+			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
+			/*if (collidingPortal) return;
 
 			savedLayer = entity->layer;
 			portal->shouldDraw = false;
@@ -39,12 +51,25 @@ struct PortalTrigger : Component {
 				switchOnLeave = true;
 			}
 			startSide = portal->clip.getSide(entity->collider->GetPosition());
-			collidingPortal = portal;
+			collidingPortal = portal;*/
 		}
 	}
 	void OnTriggerLeave(ColliderComponent* o) override {
 		if (auto p2 = o->entity->FindComponent<Portal>()) {
+			// Show portal after transition
 			p2->shouldDraw = true;
+
+			auto portalToPlayer = entity->GetGlobalPosition() - p2->entity->GetGlobalPosition();
+			auto whichSide = p2->clip.normal.dotProduct(portalToPlayer);
+
+			// Assume origin layer, change to target layer if player passes portal.
+			auto targetLayer = whichSide > 0 ? p2->layer[1] : p2->layer[0];
+			//std::cout << "Trigger Leave. Layer: " << targetLayer << std::endl;
+
+			entity->collider->Refilter();
+			entity->parent->SetLayer(targetLayer);
+			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
+			/*p2->shouldDraw = true;
 
 			if (switchOnLeave) {
 				auto targetLayer = (p2->layer[0] == savedLayer) ? p2->layer[1] : p2->layer[0];
@@ -62,10 +87,9 @@ struct PortalTrigger : Component {
 				entity->collider->Refilter();
 				LayerRenderingManager::GetSingleton()->SetTransitionMode(false);
 				collidingPortal = nullptr;
-			}
+			}*/
 		}
 	}
-
 
 	void OnLayerChange() override {
 		auto layerRenderingManager = App::GetSingleton()->layerRenderingManager;
