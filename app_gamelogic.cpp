@@ -238,6 +238,8 @@ void App::Load(const std::string& nLevel){
 
 	cursor = uiManager->CreateObject<UiImage>("Cursor");
 	cursor->SetImage("cursor.png");
+	cursor->FixedSize(false);
+	cursor->SetPriority(10);
 
 	if(nLevel == "hub")
 		HubManager::GetSingleton()->NotifyHubLoad();
@@ -286,6 +288,7 @@ void App::NotifyEndGame() {
 	creditsThanks->SetPosition(0.0f, 0.3f);
 	creditsThanks->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
 	creditsThanks->FixedSize(false);
+	creditsThanks->SetPriority(1);
 
 	creditsNames = uiManager->CreateObject<UiImage>("CreditsNames");
 	creditsNames->SetImage("creditsnames.png");
@@ -293,6 +296,7 @@ void App::NotifyEndGame() {
 	creditsNames->SetPosition(0.0f, 0.0f);
 	creditsNames->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
 	creditsNames->FixedSize(false);
+	creditsNames->SetPriority(1);
 
 	gameOverNotifyTime = AppTime::appTime;
 	gameOver = true;
