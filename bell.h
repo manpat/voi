@@ -4,6 +4,7 @@
 #include "component.h"
 
 struct BellAudioGenerator;
+struct ShakeComponent;
 
 struct Bell : Component {
 	Entity* target = nullptr;
