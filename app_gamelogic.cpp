@@ -109,10 +109,11 @@ void App::Update(){
 	// TODO: Move f
 	if (gameOver) {
 		f32 diff = (f32)(AppTime::appTime - gameOverNotifyTime);
-		f32 fadeOutDuration = 5.0f;
-		f32 creditsThanksStartTime = 6.0f;
+
+		f32 fadeOutDuration = 3.0f;
+		f32 creditsThanksStartTime = 4.0f;
 		f32 creditsThanksFadeDuration = 3.0f;
-		f32 creditsNamesStartTime = 8.5f;
+		f32 creditsNamesStartTime = 5.0f;
 		f32 creditsNamesFadeDuration = 3.0f;
 		f32 endGameTime = 5.0f;
 

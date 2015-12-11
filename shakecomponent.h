@@ -15,8 +15,13 @@ struct ShakeComponent : Component {
 	void SetEnabled(bool enabled) { isShaking = enabled; }
 	bool GetEnabled() { return isShaking; }
 
+	void SetTimer(f32 shakeAmount, f64 time, f64 fadeTime = 0);
+
 	Player* player = nullptr;
 	bool isShaking = false;
+	f64 timerSeconds = 0;
+	f64 fadeSeconds = 0;
+	f32 fadeShakeAmount = 0;
 };
 
 #endif // SHAKECOMPONENT_H

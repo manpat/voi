@@ -190,7 +190,7 @@ void Player::OnUpdate() {
 		bobDelta = 0.0f;
 	}
 
-	bobDelta += AppTime::deltaTime * bobSpeed;
+	bobDelta += (f32)AppTime::deltaTime * bobSpeed;
 
 	if (isGrounded && !isJumping && velocityScalar > 0.1f) {
 		bobPower = bobPower < 1 ? bobPower + bobAcceleration : 1.0f;
@@ -228,7 +228,7 @@ void Player::OnUpdate() {
 	// Applying movement
 	if(canNoClip){
 		auto pos = entity->GetPosition();
-		entity->SetPosition(pos + velocity * AppTime::deltaTime);
+		entity->SetPosition(pos + velocity * (f32)AppTime::deltaTime * 3.f);
 	}else{
 		entity->collider->SetVelocity(velocity);
 	}

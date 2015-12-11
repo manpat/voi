@@ -110,7 +110,7 @@ struct App : Singleton<App> {
 	UiImage* black = nullptr;
 	UiImage* creditsThanks = nullptr;
 	UiImage* creditsNames = nullptr;
-	f64 gameOverNotifyTime;
+	f64 gameOverNotifyTime = 0.0;
 
 private:
 	GameState gameState = GameState::NONE;
