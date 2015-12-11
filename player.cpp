@@ -228,7 +228,7 @@ void Player::OnUpdate() {
 	// Applying movement
 	if(canNoClip){
 		auto pos = entity->GetPosition();
-		entity->SetPosition(pos + velocity * AppTime::deltaTime);
+		entity->SetPosition(pos + velocity * AppTime::deltaTime * 3.f);
 	}else{
 		entity->collider->SetVelocity(velocity);
 	}

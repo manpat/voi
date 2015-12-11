@@ -108,13 +108,13 @@ void App::Update(){
 
 	// TODO: Move f
 	if (gameOver) {
-		auto diff = (f32)(AppTime::appTime - gameOverNotifyTime);
-		auto fadeOutDuration = 5.0f;
-		auto creditsThanksStartTime = 6.0f;
-		auto creditsThanksFadeDuration = 3.0f;
-		auto creditsNamesStartTime = 8.5f;
-		auto creditsNamesFadeDuration = 3.0f;
-		auto endGameTime = 10.0f;
+		f32 diff = (f32)(AppTime::appTime - gameOverNotifyTime);
+		f32 fadeOutDuration = 3.0f;
+		f32 creditsThanksStartTime = 4.0f;
+		f32 creditsThanksFadeDuration = 3.0f;
+		f32 creditsNamesStartTime = 5.0f;
+		f32 creditsNamesFadeDuration = 3.0f;
+		f32 endGameTime = 10.0f;
 
 		black->SetColour(1.0f, 1.0f, 1.0f, clamp((diff - fadeOutDuration) / fadeOutDuration, 0.0f, 1.0f));
 		creditsThanks->SetColour(1.0f, 1.0f, 1.0f, clamp(((diff - creditsThanksStartTime) - creditsThanksFadeDuration) / creditsThanksFadeDuration, 0.0f, 1.0f));

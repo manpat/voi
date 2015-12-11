@@ -25,7 +25,7 @@ struct DoorGrindAudioGenerator : AudioGenerator {
 		o = clamp(o, -1.0f, 1.0f);
 
 		lowpass = lowpass + (f32)a * (o - lowpass);
-		return lowpass * Env::ExpRamp((f32)elapsed, 1.f, 3.f);
+		return lowpass * Env::ExpRamp((f32)elapsed, 1.f, 3.f) * 0.6f;
 	}
 };
 
