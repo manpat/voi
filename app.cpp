@@ -131,7 +131,6 @@ App::App(const std::string& levelArg) {
 	window->setAutoUpdated(false);
 
 	ogreRoot->clearEventTimes();
-	shouldRender = true;
 	inFocus = true;
 	shouldQuit = false;
 
