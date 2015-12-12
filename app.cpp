@@ -404,7 +404,7 @@ void App::Run(){
 			+ " - Multisample: " + std::to_string((s32)multisampleLevel);
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
 #else
-		SDL_SetWindowTitle(sdlWindow, "Voi 1.0.3");
+		SDL_SetWindowTitle(sdlWindow, "Voi");
 #endif
 
 		AppTime::Update(dt);
