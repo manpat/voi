@@ -57,10 +57,12 @@ App::App(const std::string& levelArg) {
 	if (levelArg.size() > 0) {
 		customLevelName = levelArg;
 	}
-	//else {
-	//	std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
-	//	std::getline(std::cin, customLevelName);
-	//}
+#ifdef _DEBUG
+	else {
+		std::cout << "Load custom level? Leave blank for default (hub).\nName: ";
+		std::getline(std::cin, customLevelName);
+	}
+#endif
 
 	// Find and parse config file
 	LoadConfig();
@@ -372,9 +374,13 @@ void App::Run(){
 		auto dt = duration_cast<duration<f64>>(end - begin).count();
 		begin = end;
 
+#ifdef _DEBUG
 		auto newTitle = "Voi - FPS: " + std::to_string(1.0/dt)
 			+ " - Triangles: " + std::to_string(window->getTriangleCount());
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
+#else
+		SDL_SetWindowTitle(sdlWindow, "Voi 1.0.3");
+#endif
 
 		AppTime::Update(dt);
 

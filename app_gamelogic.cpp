@@ -282,6 +282,7 @@ void App::NotifyEndGame() {
 	black->SetPosition(0.0f, 0.0f);
 	black->SetSize(GetWindowWidth() * 2, GetWindowHeight() * 2);
 	black->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
+	black->SetPriority(0);
 
 	creditsThanks = uiManager->CreateObject<UiImage>("CreditsThanks", "Black");
 	creditsThanks->SetImage("creditsthanks.png");

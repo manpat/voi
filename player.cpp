@@ -45,6 +45,7 @@ struct PortalTrigger : Component {
 			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortalLength);
 
 			// Trigger layer change
+			entity->collider->Refilter();
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
 

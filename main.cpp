@@ -3,8 +3,7 @@
 #include <string>
 
 #ifdef _WIN32
-#undef main
-#include <Windows.h>
+	#include <Windows.h>
 #endif
 
 s32 main(int na, char** aa){
@@ -16,11 +15,6 @@ s32 main(int na, char** aa){
 		}
 
 		App app(level);
-
-#ifdef _WIN32
-		FreeConsole();
-#endif
-
 		app.Run();
 
 	}catch(const Ogre::Exception& e){
