@@ -42,6 +42,7 @@ struct PortalTrigger : Component {
 			// Get vector from player to portal and nudge player in their current direction by that distance
 			f32 portalPlayerPerpendicular = 1.f - std::abs(portal->clip.normal.dotProduct(App::GetSingleton()->camera->entity->GetGlobalForward()));
 			f32 playerToPortalLength = (portal->entity->GetGlobalPosition() - playerPos).length() * portalPlayerPerpendicular;
+
 			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortalLength);
 
 			// Trigger layer change
