@@ -139,6 +139,11 @@ void LayerRenderingManager::preRenderQueues() {
 
 // TODO: Holy shit, clean this mess up
 void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) {
+	if(!shouldRender) {
+		skipThisInvocation = true;
+		return;
+	}
+
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 
@@ -263,6 +268,10 @@ void LayerRenderingManager::renderQueueStarted(u8 queueId, const std::string& in
 }
 
 void LayerRenderingManager::renderQueueEnded(u8 /*queueId*/, const std::string& invocation, bool& /*repeatThisInvocation*/) {
+	if(!shouldRender) {
+		return;
+	}
+
 	auto invocationType = invocation.substr(0,3);
 	auto rs = Ogre::Root::getSingleton().getRenderSystem();
 
@@ -289,10 +298,15 @@ void LayerRenderingManager::renderQueueEnded(u8 /*queueId*/, const std::string& 
 
 void LayerRenderingManager::SetTransitionMode(bool tm) {
 	transitionMode = tm;
-	// if(transitionMode)
-	// 	camera->viewport->setClearEveryFrame(true, Ogre::FBT_DEPTH);
-	// else
-	// 	camera->viewport->setClearEveryFrame(true);
 
 	SetupRenderQueueInvocationSequence(currentLayer);
+}
+
+void LayerRenderingManager::SetShouldRender(bool sr) {
+	shouldRender = sr;
+
+	if(shouldRender)
+		camera->viewport->setClearEveryFrame(true);
+	else
+		camera->viewport->setClearEveryFrame(false);
 }

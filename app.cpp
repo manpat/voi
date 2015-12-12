@@ -342,10 +342,8 @@ void App::Run(){
 		// Updates systems
 		Update();
 
-		if (shouldRender) {
-			//ogreRoot->renderOneFrame();
-			SDL_GL_SwapWindow(sdlWindow);
-		}
+		//ogreRoot->renderOneFrame();
+		SDL_GL_SwapWindow(sdlWindow);
 
 		auto end = high_resolution_clock::now();
 		auto dt = duration_cast<duration<f64>>(end - begin).count();

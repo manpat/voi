@@ -24,7 +24,7 @@ struct PortalTrigger : Component {
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if (auto portal = o->entity->FindComponent<Portal>()) {
 			// Hide portal during transition
-			App::GetSingleton()->shouldRender = false;
+			LayerRenderingManager::GetSingleton()->SetShouldRender(false);
 			portal->shouldDraw = false;
 
 			// Get reference to player collider and position
@@ -52,7 +52,7 @@ struct PortalTrigger : Component {
 	void OnTriggerLeave(ColliderComponent* o) override {
 		if (auto p2 = o->entity->FindComponent<Portal>()) {
 			// Show portal after transition
-			App::GetSingleton()->shouldRender = true;
+			LayerRenderingManager::GetSingleton()->SetShouldRender(true);
 			p2->shouldDraw = true;
 
 			// Get vector from portal to player and which side of portal is player on.

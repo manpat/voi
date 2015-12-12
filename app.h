@@ -94,7 +94,6 @@ struct App : Singleton<App> {
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;
 
-	bool shouldRender;
 	bool inFocus;
 	bool shouldQuit;
 	u32 width, height;

@@ -32,6 +32,7 @@ struct LayerRenderingManager : Ogre::RenderQueueListener, Singleton<LayerRenderi
 	void SetCamera(Camera*);
 
 	void SetTransitionMode(bool);
+	void SetShouldRender(bool);
 
 	void preRenderQueues() override;
 	void renderQueueStarted(u8 queueId, const std::string& invocation, bool& skipThisInvocation) override;
@@ -42,6 +43,7 @@ struct LayerRenderingManager : Ogre::RenderQueueListener, Singleton<LayerRenderi
 	u32 numLayers = 0;
 	u32 currentLayer;
 	bool transitionMode = false;
+	bool shouldRender = true;
 	std::vector<Mirror*> visibleMirrors;
 };
 
