@@ -24,7 +24,6 @@ struct PortalTrigger : Component {
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if (auto portal = o->entity->FindComponent<Portal>()) {
 			// Hide portal during transition
-			LayerRenderingManager::GetSingleton()->SetShouldRender(false);
 			portal->shouldDraw = false;
 
 			// Get reference to player collider and position
@@ -41,12 +40,17 @@ struct PortalTrigger : Component {
 			//std::cout << "Trigger Enter. Layer: " << targetLayer << std::endl;
 
 			// Get vector from player to portal and nudge player in their current direction by that distance
-			auto playerToPortal = portal->entity->GetGlobalPosition() - playerPos;
-			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortal.length());
+			auto portalDotPlayer = 1 - abs(portal->clip.normal.dotProduct(App::GetSingleton()->camera->entity->GetForward()));
+			auto playerToPortalLength = (portal->entity->GetGlobalPosition() - playerPos).length() * portalDotPlayer;
+			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortalLength);
 
 			// Trigger layer change
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
+
+			if (portalDotPlayer > 0.5) {
+				LayerRenderingManager::GetSingleton()->SetShouldRender(false);
+			}
 		}
 	}
 	void OnTriggerLeave(ColliderComponent* o) override {

@@ -9,10 +9,6 @@
 
 s32 main(int na, char** aa){
 	try{
-#ifdef _WIN32
-		FreeConsole();
-#endif
-
 		std::string level;
 
 		if(na > 1) {
@@ -20,6 +16,11 @@ s32 main(int na, char** aa){
 		}
 
 		App app(level);
+
+#ifdef _WIN32
+		FreeConsole();
+#endif
+
 		app.Run();
 
 	}catch(const Ogre::Exception& e){
