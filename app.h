@@ -94,16 +94,19 @@ struct App : Singleton<App> {
 	std::vector<SDLEventHook> sdlEventHooks;
 	std::vector<SceneFileInfo> scenes;
 
-	bool inFocus;
-	bool shouldQuit;
+	bool inFocus = true;
+	bool shouldQuit = false;
+	bool autoMultisample = false;
 	u32 width, height;
-	u8 multisampleLevel;
+	s8 multisampleLevel;
 	u8 fullscreenMode;
 	u8 useVsync;
 	u8 fovDegrees;
 
 	s32 hMouseSensitivity;
 	s32 vMouseSensitivity;
+
+	f32 smoothedFPS = 60.f;
 
 	// Endgame stuff. TODO: Move elsewhere.
 	bool gameOver = false;
@@ -135,6 +138,7 @@ public:
 	void SetFogColor(const Ogre::ColourValue&);
 	void SetSkyColor(const Ogre::ColourValue&);
 	void SetFogDensity(f32);
+	void SetMultisample(s32);
 
 	// Getters
 	s32 GetWindowWidth() const;

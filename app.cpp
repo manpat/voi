@@ -75,11 +75,7 @@ App::App(const std::string& levelArg) {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-	if (multisampleLevel > 1 && multisampleLevel < 17) {
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisampleLevel);
-		glEnable(GL_MULTISAMPLE);
-	}
+	SetMultisample(multisampleLevel);
 
 	sdlWindow = SDL_CreateWindow("Voi",
 					SDL_WINDOWPOS_CENTERED,
@@ -176,7 +172,7 @@ void App::LoadConfig() {
 	// Specify defaults
 	width = WIDTH;
 	height = HEIGHT;
-	multisampleLevel = 4;
+	multisampleLevel = -1;
 	fullscreenMode = 0;
 	useVsync = 1;
 	fovDegrees = 60;
@@ -217,7 +213,7 @@ void App::LoadConfig() {
 		sstr << "[Voi]\n";
 		sstr << "width = " << WIDTH << "\n";
 		sstr << "height = " << HEIGHT << "\n";
-		sstr << "multisampleLevel = " << (u32)multisampleLevel << "\n\n";
+		sstr << "multisampleLevel = " << (s32)multisampleLevel << " # -1 adjusts based on framerate\n\n";
 
 		sstr << "# 0 -> windowed\n# 1 -> fullscreen\n# 2 -> fake fullscreen\n";
 		sstr << "fullscreen = " << (u32)fullscreenMode << "\n";
@@ -229,6 +225,11 @@ void App::LoadConfig() {
 
 		auto ncfgFile = fs->create("voi.cfg");
 		ncfgFile->write(sstr.str().data(), sstr.tellp());
+	}
+
+	if(multisampleLevel < 0) {
+		autoMultisample = true;
+		multisampleLevel = 4;
 	}
 }
 
@@ -367,16 +368,40 @@ void App::Run(){
 		// Updates systems
 		Update();
 
-		//ogreRoot->renderOneFrame();
+		ogreRoot->renderOneFrame();
 		SDL_GL_SwapWindow(sdlWindow);
 
 		auto end = high_resolution_clock::now();
 		auto dt = duration_cast<duration<f64>>(end - begin).count();
 		begin = end;
 
+		f32 fps = 1.f/(f32)dt;
+		smoothedFPS = (smoothedFPS * 10.f + fps) / 11.f;
+
+		if(autoMultisample) {
+			bool changed = false;
+
+			if(smoothedFPS < 50.f && multisampleLevel > 0) {
+				changed = true;
+				multisampleLevel >>= 1;
+
+			}else if(smoothedFPS >= 59.f && multisampleLevel < 16) {
+				changed = true;
+
+				if(!multisampleLevel)
+					multisampleLevel = 1;
+				else
+					multisampleLevel <<= 1;
+			}
+
+			if(changed)
+				SetMultisample(multisampleLevel);
+		}
+
 #ifdef _DEBUG
-		auto newTitle = "Voi - FPS: " + std::to_string(1.0/dt)
-			+ " - Triangles: " + std::to_string(window->getTriangleCount());
+		auto newTitle = "Voi - FPS: " + std::to_string(smoothedFPS)
+			+ " - Triangles: " + std::to_string(window->getTriangleCount())
+			+ " - Multisample: " + std::to_string((s32)multisampleLevel);
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
 #else
 		SDL_SetWindowTitle(sdlWindow, "Voi 1.0.3");
@@ -466,6 +491,18 @@ void App::SetSkyColor(const Ogre::ColourValue& ncol) {
 
 void App::SetFogDensity(f32 ndens) {
 	targetFogDensity = ndens;
+}
+
+void App::SetMultisample(s32 ms) {
+	ms = std::min(ms, 17);
+
+	if (ms > 1) {
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, ms);
+		glEnable(GL_MULTISAMPLE);
+	}else{
+		glDisable(GL_MULTISAMPLE);
+	}
 }
 
 /*

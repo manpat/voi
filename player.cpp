@@ -72,7 +72,7 @@ struct PortalTrigger : Component {
 			// Reset collider and trigger layer change
 			entity->collider->Refilter();
 			entity->parent->SetLayer(targetLayer);
-			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
+			LayerRenderingManager::GetSingleton()->SetTransitionMode(false);
 		}
 	}
 

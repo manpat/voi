@@ -22,6 +22,7 @@ LayerRenderingManager::LayerRenderingManager() {
 	App::GetSingleton()->sceneManager->addRenderQueueListener(this);
 
 	numLayers = 1;
+	transitionMode = false;
 }
 
 LayerRenderingManager::~LayerRenderingManager() {
