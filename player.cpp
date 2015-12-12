@@ -12,7 +12,6 @@
 #include "entity.h"
 #include "input.h"
 #include "app.h"
-#include <OGRE\OgreViewport.h>
 
 struct PortalTrigger : Component {
 	Portal* collidingPortal = nullptr;
@@ -24,14 +23,15 @@ struct PortalTrigger : Component {
 
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if (auto portal = o->entity->FindComponent<Portal>()) {
-			App::GetSingleton()->shouldRender = false;
-
 			// Hide portal during transition
+			App::GetSingleton()->shouldRender = false;
 			portal->shouldDraw = false;
 
+			// Get reference to player collider and position
 			auto playerCollider = entity->parent->collider;
 			auto playerPos = playerCollider->GetPosition();
 
+			// Get point in front of player, vector from portal to player and which side of portal is point in front of player on.
 			auto playerReach = playerPos + App::GetSingleton()->camera->entity->GetForward() * playerCollider->GetVelocity().length();
 			auto portalToPlayer = playerReach - portal->entity->GetGlobalPosition();
 			auto whichSide = portal->clip.normal.dotProduct(portalToPlayer);
@@ -40,9 +40,11 @@ struct PortalTrigger : Component {
 			auto targetLayer = whichSide > 0 ? portal->layer[1] : portal->layer[0];
 			//std::cout << "Trigger Enter. Layer: " << targetLayer << std::endl;
 
+			// Get vector from player to portal and nudge player in their current direction by that distance
 			auto playerToPortal = portal->entity->GetGlobalPosition() - playerPos;
 			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortal.length());
 
+			// Trigger layer change
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
 		}
@@ -53,6 +55,7 @@ struct PortalTrigger : Component {
 			App::GetSingleton()->shouldRender = true;
 			p2->shouldDraw = true;
 
+			// Get vector from portal to player and which side of portal is player on.
 			auto portalToPlayer = entity->GetGlobalPosition() - p2->entity->GetGlobalPosition();
 			auto whichSide = p2->clip.normal.dotProduct(portalToPlayer);
 
@@ -60,6 +63,7 @@ struct PortalTrigger : Component {
 			auto targetLayer = whichSide > 0 ? p2->layer[1] : p2->layer[0];
 			//std::cout << "Trigger Leave. Layer: " << targetLayer << std::endl;
 
+			// Reset collider and trigger layer change
 			entity->collider->Refilter();
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
