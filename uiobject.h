@@ -30,7 +30,7 @@ struct UiObject {
 	// Position in screenspace, -1.0 to 1.0
 	virtual void SetPosition(f32 x, f32 y);
 	// Sets the distance away from the camera, lower number means closer, higher priority
-	void SetPriority(u32 priority);
+	virtual void SetPriority(u32 priority);
 	// Size in pixels
 	virtual void SetSize(u32 w, u32 h);
 	// Sets whether the object is visible on screen

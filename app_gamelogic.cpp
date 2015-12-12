@@ -240,7 +240,7 @@ void App::Load(const std::string& nLevel){
 	cursor = uiManager->CreateObject<UiImage>("Cursor");
 	cursor->SetImage("cursor.png");
 	cursor->FixedSize(false);
-	cursor->SetPriority(10);
+	cursor->SetPriority(1);
 
 	if(nLevel == "hub")
 		HubManager::GetSingleton()->NotifyHubLoad();
@@ -282,23 +282,23 @@ void App::NotifyEndGame() {
 	black->SetPosition(0.0f, 0.0f);
 	black->SetSize(GetWindowWidth() * 2, GetWindowHeight() * 2);
 	black->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
-	black->SetPriority(0);
+	black->SetPriority(2);
 
-	creditsThanks = uiManager->CreateObject<UiImage>("CreditsThanks", "Black");
+	creditsThanks = uiManager->CreateObject<UiImage>("CreditsThanks");
 	creditsThanks->SetImage("creditsthanks.png");
 	creditsThanks->SetAlignment(UiObject::Alignment::BottomCenter);
 	creditsThanks->SetPosition(0.0f, 0.3f);
 	creditsThanks->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
 	creditsThanks->FixedSize(false);
-	creditsThanks->SetPriority(1);
+	creditsThanks->SetPriority(4);
 
-	creditsNames = uiManager->CreateObject<UiImage>("CreditsNames", "Black");
+	creditsNames = uiManager->CreateObject<UiImage>("CreditsNames");
 	creditsNames->SetImage("creditsnames.png");
 	creditsNames->SetAlignment(UiObject::Alignment::TopCenter);
 	creditsNames->SetPosition(0.0f, 0.0f);
 	creditsNames->SetColour(1.0f, 1.0f, 1.0f, 0.0f);
 	creditsNames->FixedSize(false);
-	creditsNames->SetPriority(1);
+	creditsNames->SetPriority(4);
 
 	gameOverNotifyTime = AppTime::appTime;
 	gameOver = true;

@@ -28,7 +28,7 @@ void UiManager::Update() {
 
 	// Move all the UI Objects one unit infront of the camera so they're not culled
 	for (auto &o : uiObjects) {
-		auto uipos = camera->GetGlobalPosition() + (camera->GetForward() * (f32)o->GetPriority());
+		auto uipos = camera->GetGlobalPosition() + camera->GetGlobalForward();
 		o->node->_setDerivedPosition(uipos);
 	}
 }

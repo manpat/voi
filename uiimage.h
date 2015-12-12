@@ -27,6 +27,8 @@ public:
 	void SetPosition(f32 x, f32 y) override;
 	// Sets the image's size in pixels, consider ResizeObjectToImage() for automatic sizing
 	void SetSize(u32 w, u32 h) override;
+	
+	void SetPriority(u32 priority) override;
 	// Sets whether the image is visible on screen
 	void SetVisible(bool visible = true) override;
 	// Sets whether the image is fixed to its pixel size, or scales with the screen resolution

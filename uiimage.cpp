@@ -36,7 +36,7 @@ void UiImage::Init() {
 
 	rect = new Ogre::Rectangle2D(true);
 
-	rect->setRenderQueueGroup(RENDER_QUEUE_UI);
+	rect->setRenderQueueGroupAndPriority(RENDER_QUEUE_UI, priority);
 	rect->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
 	rect->setCorners(-0.1f, 0.1f, 0.1f, -0.1f);
 
@@ -83,6 +83,11 @@ void UiImage::SetSize(u32 w, u32 h) {
 	size.y = (f32)h;
 
 	CalculateTransform();
+}
+
+void UiImage::SetPriority(u32 p) {
+	priority = p;
+	rect->setRenderQueueGroupAndPriority(RENDER_QUEUE_UI, p);
 }
 
 void UiImage::SetVisible(bool visible) {
