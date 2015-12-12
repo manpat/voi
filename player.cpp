@@ -31,24 +31,25 @@ struct PortalTrigger : Component {
 			auto playerPos = playerCollider->GetPosition();
 
 			// Get point in front of player, vector from portal to player and which side of portal is point in front of player on.
-			auto playerReach = playerPos + App::GetSingleton()->camera->entity->GetForward() * playerCollider->GetVelocity().length();
-			auto portalToPlayer = playerReach - portal->entity->GetGlobalPosition();
-			auto whichSide = portal->clip.normal.dotProduct(portalToPlayer);
+			vec3 playerReach = playerPos + App::GetSingleton()->camera->entity->GetForward() * playerCollider->GetVelocity().length();
+			vec3 portalToPlayer = playerReach - portal->entity->GetGlobalPosition();
+			f32 whichSide = portal->clip.normal.dotProduct(portalToPlayer);
 
 			// Assume origin layer, change to target layer if point in front of player (greater than near clip length) passes portal.
-			auto targetLayer = whichSide > 0 ? portal->layer[1] : portal->layer[0];
+			s32 targetLayer = whichSide > 0 ? portal->layer[1] : portal->layer[0];
 			//std::cout << "Trigger Enter. Layer: " << targetLayer << std::endl;
 
 			// Get vector from player to portal and nudge player in their current direction by that distance
-			auto portalDotPlayer = 1 - abs(portal->clip.normal.dotProduct(App::GetSingleton()->camera->entity->GetForward()));
-			auto playerToPortalLength = (portal->entity->GetGlobalPosition() - playerPos).length() * portalDotPlayer;
+			f32 portalPlayerPerpendicular = 1.f - std::abs(portal->clip.normal.dotProduct(App::GetSingleton()->camera->entity->GetGlobalForward()));
+			f32 playerToPortalLength = (portal->entity->GetGlobalPosition() - playerPos).length() * portalPlayerPerpendicular;
 			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortalLength);
 
 			// Trigger layer change
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
 
-			if (portalDotPlayer > 0.5) {
+			// Only halt rendering if player is walking through portal sideways
+			if (portalPlayerPerpendicular > 0.5f) {
 				LayerRenderingManager::GetSingleton()->SetShouldRender(false);
 			}
 		}
