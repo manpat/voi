@@ -139,8 +139,32 @@ App::App(const std::string& levelArg) {
 }
 
 App::~App(){
-	// This ensures that all entities are destroyed appropriately before ogre shuts down
+	uiManager.reset();
+	hubManager.reset();
+	bellManager.reset();
+	mirrorManager.reset();
+	portalManager.reset();
+	halflifePointManager.reset();
+	layerRenderingManager.reset();
+	
 	entityManager.reset();
+
+	audioManager.reset();
+	physicsManager.reset();
+	input.reset();
+
+	ogreRoot.reset();
+
+	if(sdlGLContext) {
+		SDL_GL_DeleteContext(sdlGLContext);
+		sdlGLContext = nullptr;
+	}
+
+	if(sdlWindow) {
+		SDL_DestroyWindow(sdlWindow);
+		sdlWindow = nullptr;
+	}
+	SDL_Quit();
 }
 
 void App::LoadConfig() {
