@@ -189,12 +189,6 @@ void Player::OnUpdate() {
 		boost *= 1.5f;
 	}
 
-	// Check if grounded
-	isGrounded = physicsManager->Raycast(
-		entity->GetGlobalPosition() + velocity.y,
-		vec3::NEGATIVE_UNIT_Y * 1.505f,
-		entity->layer).hit();
-
 	// Head bobbing logic
 	if (bobDelta >= 2 * M_PI) {
 		bobDelta = 0.0f;
@@ -224,7 +218,13 @@ void Player::OnUpdate() {
 		velocity += moveOri.xAxis() * boost;
 	}
 
-	if (isJumping && isGrounded) {
+	// Check if grounded
+	isNearGround = physicsManager->Raycast(
+		entity->GetGlobalPosition() + velocity.y,
+		vec3::NEGATIVE_UNIT_Y * 1.55f,
+		entity->layer).hit();
+
+	if (isNearGround && isGrounded) {
 		isJumping = false;
 	}
 
@@ -232,6 +232,8 @@ void Player::OnUpdate() {
 		if (!isJumping || canInfinijump) {
 			velocity += vec3::UNIT_Y * jumpImpulse;
 			isJumping = true;
+			isGrounded = false;
+			isNearGround = false;
 		}
 	}
 
@@ -342,4 +344,8 @@ void Player::ShakeCamera(f32 amount) {
 	}
 
 	cameraOffset += shakeAmount;
+}
+
+void Player::OnCollisionEnter(ColliderComponent*) {
+	isGrounded = true;
 }

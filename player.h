@@ -12,7 +12,8 @@ struct Player : Component {
 	f32 cameraPitch = 0.f;
 	Movable* heldObject = nullptr;
 	PortalTrigger* portalTrigger = nullptr;
-	bool isGrounded = false;
+	bool isNearGround = false;
+	bool isGrounded = true;
 	bool isJumping = false;
 	vec3 localCameraPosition = vec3::ZERO;
 	vec3 cameraOffset = vec3::ZERO;
@@ -26,6 +27,7 @@ struct Player : Component {
 	void OnAwake() override;
 	void OnUpdate() override;
 	void OnLayerChange() override;
+	void OnCollisionEnter(ColliderComponent*) override;
 
 	void Respawn();
 	void Respawn(vec3 pos, s32 layer);
