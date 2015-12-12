@@ -29,7 +29,7 @@ private:
 	struct ColliderPair {
 		ColliderComponent* collider0;
 		ColliderComponent* collider1;
-		u8 stamp;
+		u32 stamp;
 	};
 
 public:
@@ -52,7 +52,7 @@ public:
 	//	to test for staleness
 	std::vector<ColliderPair*> activeColliderPairs;
 	bool needsRefilter = false;
-	u8 currentStamp = 0;
+	u32 currentStamp = 0;
 
 	f32 timestep = 1.f/60.f;
 	u32 enabledCollisionGroups = ~0u;
