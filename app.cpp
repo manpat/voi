@@ -131,6 +131,7 @@ App::App(const std::string& levelArg) {
 	window->setAutoUpdated(false);
 
 	ogreRoot->clearEventTimes();
+	shouldRender = true;
 	inFocus = true;
 	shouldQuit = false;
 
@@ -341,8 +342,10 @@ void App::Run(){
 		// Updates systems
 		Update();
 
-		ogreRoot->renderOneFrame();
-		SDL_GL_SwapWindow(sdlWindow);
+		if (shouldRender) {
+			//ogreRoot->renderOneFrame();
+			SDL_GL_SwapWindow(sdlWindow);
+		}
 
 		auto end = high_resolution_clock::now();
 		auto dt = duration_cast<duration<f64>>(end - begin).count();

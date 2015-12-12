@@ -12,6 +12,7 @@
 #include "entity.h"
 #include "input.h"
 #include "app.h"
+#include <OGRE\OgreViewport.h>
 
 struct PortalTrigger : Component {
 	Portal* collidingPortal = nullptr;
@@ -23,10 +24,15 @@ struct PortalTrigger : Component {
 
 	void OnTriggerEnter(ColliderComponent* o) override {
 		if (auto portal = o->entity->FindComponent<Portal>()) {
+			App::GetSingleton()->shouldRender = false;
+
 			// Hide portal during transition
 			portal->shouldDraw = false;
 
-			auto playerReach = entity->GetGlobalPosition() + App::GetSingleton()->camera->entity->GetForward() * entity->collider->GetVelocity().length();
+			auto playerCollider = entity->parent->collider;
+			auto playerPos = playerCollider->GetPosition();
+
+			auto playerReach = playerPos + App::GetSingleton()->camera->entity->GetForward() * playerCollider->GetVelocity().length();
 			auto portalToPlayer = playerReach - portal->entity->GetGlobalPosition();
 			auto whichSide = portal->clip.normal.dotProduct(portalToPlayer);
 
@@ -34,29 +40,17 @@ struct PortalTrigger : Component {
 			auto targetLayer = whichSide > 0 ? portal->layer[1] : portal->layer[0];
 			//std::cout << "Trigger Enter. Layer: " << targetLayer << std::endl;
 
+			auto playerToPortal = portal->entity->GetGlobalPosition() - playerPos;
+			playerCollider->SetPosition(playerPos + playerCollider->GetVelocity().normalisedCopy() * playerToPortal.length());
+
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
-			/*if (collidingPortal) return;
-
-			savedLayer = entity->layer;
-			portal->shouldDraw = false;
-
-			if (Input::GetMapped(Input::Forward)) {
-				auto targetLayer = (portal->layer[0] == savedLayer) ? portal->layer[1] : portal->layer[0];
-
-				entity->parent->SetLayer(targetLayer);
-				LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
-			}
-			else {
-				switchOnLeave = true;
-			}
-			startSide = portal->clip.getSide(entity->collider->GetPosition());
-			collidingPortal = portal;*/
 		}
 	}
 	void OnTriggerLeave(ColliderComponent* o) override {
 		if (auto p2 = o->entity->FindComponent<Portal>()) {
 			// Show portal after transition
+			App::GetSingleton()->shouldRender = true;
 			p2->shouldDraw = true;
 
 			auto portalToPlayer = entity->GetGlobalPosition() - p2->entity->GetGlobalPosition();
@@ -69,25 +63,6 @@ struct PortalTrigger : Component {
 			entity->collider->Refilter();
 			entity->parent->SetLayer(targetLayer);
 			LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
-			/*p2->shouldDraw = true;
-
-			if (switchOnLeave) {
-				auto targetLayer = (p2->layer[0] == savedLayer) ? p2->layer[1] : p2->layer[0];
-
-				entity->parent->SetLayer(targetLayer);
-				LayerRenderingManager::GetSingleton()->SetTransitionMode(true);
-			}
-			
-			if (collidingPortal == p2) {
-				auto endSide = collidingPortal->clip.getSide(entity->collider->GetPosition());
-				if (endSide == startSide) {
-					entity->parent->SetLayer(savedLayer);
-				}
-
-				entity->collider->Refilter();
-				LayerRenderingManager::GetSingleton()->SetTransitionMode(false);
-				collidingPortal = nullptr;
-			}*/
 		}
 	}
 
