@@ -167,11 +167,9 @@ void Player::OnUpdate() {
 
 	cameraEnt->SetGlobalOrientation(ori);
 
-	auto velocity = canNoClip?vec3::ZERO:entity->collider->GetVelocity();
-	auto velocityScalar = velocity.length();
-
-	velocity.x = 0.;
-	velocity.z = 0.;
+	auto oldVelocity = entity->collider->GetVelocity();
+	vec3 velocity = vec3::ZERO;
+	auto velocityScalar = oldVelocity.length();
 
 	// TODO: Move elsewhere
 	f32 boost = 8.f;
@@ -207,15 +205,22 @@ void Player::OnUpdate() {
 
 	// Movement logic
 	if(Input::GetMapped(Input::Forward)){
-		velocity -= moveOri.zAxis() * boost;
+		velocity -= moveOri.zAxis();
 	}else if(Input::GetMapped(Input::Backward)){
-		velocity += moveOri.zAxis() * boost;
+		velocity += moveOri.zAxis();
 	}
 
 	if(Input::GetMapped(Input::Left)){
-		velocity -= moveOri.xAxis() * boost;
+		velocity -= moveOri.xAxis();
 	}else if(Input::GetMapped(Input::Right)){
-		velocity += moveOri.xAxis() * boost;
+		velocity += moveOri.xAxis();
+	}
+
+	velocity.normalise();
+	velocity *= boost;
+
+	if(!canNoClip){
+		velocity.y = oldVelocity.y;
 	}
 
 	// Check if grounded

@@ -88,12 +88,11 @@ App::App(const std::string& levelArg) {
 	}
 
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
-
 	if(!sdlGLContext) {
 		throw "GL Context creation failed";
 	}
 
-	int sdlFullscreen = -1;
+	s32 sdlFullscreen = -1;
 
 	switch (fullscreenMode) {
 		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
@@ -177,9 +176,9 @@ void App::LoadConfig() {
 	Ogre::FileSystemArchiveFactory fsfactory;
 	auto fs = fsfactory.createInstance(".", false);
 
-	// Specify defaults
-	width = WIDTH;
-	height = HEIGHT;
+	// Defaults
+	width = 1366;
+	height = 768;
 	multisampleLevel = -1;
 	fullscreenMode = 2;
 	useVsync = 1;
@@ -219,8 +218,8 @@ void App::LoadConfig() {
 		std::ostringstream sstr;
 
 		sstr << "[Voi]\n";
-		sstr << "width = " << WIDTH << "\n";
-		sstr << "height = " << HEIGHT << "\n";
+		sstr << "width = " << width << "\n";
+		sstr << "height = " << height << "\n";
 		sstr << "multisampleLevel = " << (s32)multisampleLevel << " # -1 adjusts based on framerate\n\n";
 
 		sstr << "# 0 -> windowed\n# 1 -> fullscreen\n# 2 -> fake fullscreen\n";

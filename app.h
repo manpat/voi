@@ -23,12 +23,6 @@ struct PhysicsManager;
 struct HalfLifePointManager;
 struct LayerRenderingManager;
 
-// TODO: Move elsewhere
-enum {
-	WIDTH = 1366,
-	HEIGHT = 768
-};
-
 namespace Ogre {
 	class Root;
 	class SceneNode;
