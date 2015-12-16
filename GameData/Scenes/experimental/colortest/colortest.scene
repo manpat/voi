@@ -1,0 +1,96 @@
+<scene export_time="1450282739.9128647" exported_by="patrick" previous_export_time="1450282734.0362093" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Icosphere" >
+      <position y="0.000000" x="-11.000000" z="-568.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="182.399994" x="182.399994" z="182.399994" />
+      <user_data type="int" value="1" name="anom_ignorefog" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Icosphere.001.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" mass_radius="1.0" damping_trans="0.03999999910593033" physics_type="STATIC" lock_trans_y="False" velocity_max="0.0" name="Icosphere.001" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="364.79998779296875" x="346.9458923339844" z="364.7999572753906" />
+      </entity>
+    </node>
+    <node name="Plane.001" >
+      <position y="-2.200000" x="0.000000" z="-0.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <user_data type="int" value="0" name="anom_objecttype" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Plane.002.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" collisionPrim="box" damping_trans="0.03999999910593033" physics_type="STATIC" mass_radius="1.0" lock_trans_y="False" velocity_max="0.0" name="Plane.002" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="0.0" x="724.800048828125" z="724.800048828125" />
+      </entity>
+    </node>
+    <node name="Circle.003" >
+      <position y="1.000000" x="0.000000" z="1.000000" />
+      <rotation qy="-0.461749" qw="0.887011" qz="-0.000000" qx="0.000000" />
+      <scale y="0.924000" x="0.924000" z="0.924000" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Circle.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" mass_radius="1.0" damping_trans="0.03999999910593033" physics_type="STATIC" lock_trans_y="False" velocity_max="0.0" name="Circle" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="10.592737197875977" x="6.263927459716797" z="6.586273193359375" />
+      </entity>
+    </node>
+    <node name="Circle.002" >
+      <position y="0.000000" x="3.000000" z="-7.000000" />
+      <rotation qy="0.300706" qw="0.953717" qz="-0.000000" qx="0.000000" />
+      <scale y="1.050000" x="1.050000" z="1.050000" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Circle.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" mass_radius="1.0" damping_trans="0.03999999910593033" physics_type="STATIC" lock_trans_y="False" velocity_max="0.0" name="Circle" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="12.037200927734375" x="7.118098258972168" z="7.484400272369385" />
+      </entity>
+    </node>
+    <node name="Circle.001" >
+      <position y="0.000000" x="0.000000" z="-0.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Circle.001.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" collisionPrim="triangle_mesh" damping_trans="0.03999999910593033" physics_type="STATIC" mass_radius="1.0" lock_trans_y="False" velocity_max="0.0" name="Circle.001" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="8.193253517150879" x="80.01512908935547" z="73.21470642089844" />
+      </entity>
+    </node>
+    <node name="Plane" >
+      <position y="-2.000000" x="0.000000" z="-0.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <user_data type="int" value="2" name="anom_objecttype" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Plane.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" collisionPrim="box" damping_trans="0.03999999910593033" physics_type="STATIC" mass_radius="1.0" lock_trans_y="False" velocity_max="0.0" name="Plane" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="0.0" x="724.800048828125" z="724.800048828125" />
+      </entity>
+    </node>
+    <node name="Circle" >
+      <position y="0.000000" x="8.000000" z="-4.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Circle.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" mass_radius="1.0" damping_trans="0.03999999910593033" physics_type="STATIC" lock_trans_y="False" velocity_max="0.0" name="Circle" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="11.46399974822998" x="6.779140949249268" z="7.127999782562256" />
+      </entity>
+    </node>
+    <node name="Player" >
+      <position y="2.000000" x="0.000000" z="17.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <node name="PlayerCam" >
+        <position y="2.400000" x="0.000000" z="-0.000000" />
+        <rotation qy="0.000000" qw="0.707107" qz="-0.000000" qx="0.707107" />
+        <scale y="1.000000" x="1.000000" z="1.000000" />
+        <camera projectionType="perspective" fov="0.5033799435163735" name="PlayerCam" >
+          <clipping farPlaneDist="100.0" nearPlaneDist="0.10000000149011612" near="0.10000000149011612" far="100.0" />
+        </camera>
+      </node>
+    </node>
+    <node name="BezierCircle" >
+      <position y="-26.000000" x="0.000000" z="-0.000000" />
+      <rotation qy="0.000000" qw="1.000000" qz="-0.000000" qx="0.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <entity velocity_min="0.0" friction_x="1.0" meshFile="Mesh.mesh" friction_y="1.0" lock_trans_x="False" lock_trans_z="False" inertia_tensor="0.4000000059604645" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" ghost="False" actor="False" damping_rot="0.10000000149011612" mass_radius="1.0" damping_trans="0.03999999910593033" physics_type="STATIC" lock_trans_y="False" velocity_max="0.0" name="Mesh" anisotropic_friction="False" friction_z="1.0" mass="1.0" >
+        <dimensions y="0.5000038146972656" x="55.45999526977539" z="55.45999526977539" />
+      </entity>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="/home/patrick/Documents/Qantm/TheGoodCIU/anomalia/GameData/Scenes/experimental/colortest/colortest.material" />
+    </item>
+  </externals>
+  <environment >
+    <user_data type="array 3" value="0.6021338105201721 0.9557393789291382 1.0 " name="anom_skycolor" />
+    <user_data type="array 3" value="0.5674098134040833 0.8982014656066895 0.8070031404495239 " name="anom_fogcolor" />
+    <user_data type="int" value="2" name="anom_fogtype" />
+    <user_data type="float" value="0.014999999664723873" name="anom_fogdensity" />
+    <user_data type="array 3" value="0.40128353238105774 0.40128353238105774 0.40128353238105774 " name="anom_ambientcolor" />
+  </environment>
+</scene>

@@ -7,6 +7,7 @@
 #include <OGRE/OgreResourceGroupManager.h>
 #include <OGRE/OgreMaterialManager.h>
 #include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreSubEntity.h>
 #include <OGRE/OgreEntity.h>
 
 #include "halflifepointcomponent.h"
@@ -142,6 +143,7 @@ void BlenderSceneLoader::ConstructScene(App* app){
 			auto layerStr = findin(userdata, std::string{"anom_layer"}, std::string{"0"});
 			auto hiddenStr = findin(userdata, std::string{"anom_hidden"}, std::string{"0"});
 			auto invisibleStr = findin(userdata, std::string{"anom_invisible"}, std::string{"0"});
+			auto ignorefogStr = findin(userdata, std::string{"anom_ignorefog"}, std::string{"0"});
 			if(layerStr.size() == 0){
 				throw entdef.name + " is missing layer property";
 			}
@@ -150,6 +152,13 @@ void BlenderSceneLoader::ConstructScene(App* app){
 
 			ent->SetLayer(layer, hiddenStr == "1");
 			ent->ogreEntity->setVisible(invisibleStr == "0");
+
+			if(ignorefogStr != "0") {
+				auto numSubEnts = ent->ogreEntity->getNumSubEntities();
+				for(u32 i = 0; i < numSubEnts; i++) {
+					ent->ogreEntity->getSubEntity(i)->getMaterial()->setFog(true);
+				}
+			}
 
 			// Set up colliders
 			ColliderComponent* collider = nullptr;

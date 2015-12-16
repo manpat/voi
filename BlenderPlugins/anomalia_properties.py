@@ -22,6 +22,7 @@ class ObjectPanel(bpy.types.Panel):
 
 		row = layout.row()
 		row.prop(context.active_object, "anom_invisible")
+		row.prop(context.active_object, "anom_ignorefog")
 
 		row = layout.row()
 		row.prop(context.active_object, "anom_layer")
@@ -283,6 +284,7 @@ def register():
 		name="Object Type", default='_')
 
 	obj.anom_invisible = BoolProperty(name="Invisible", default=False)
+	obj.anom_ignorefog = BoolProperty(name="Ignore Fog", default=False)
 	obj.anom_hidden = BoolProperty(name="Object Hidden", default=False)
 
 	# Portal / Mirror
@@ -362,6 +364,8 @@ def unregister():
 	del obj.anom_layer
 	del obj.anom_hidden
 	del obj.anom_newarea
+	del obj.anom_ignorefog
+	del obj.anom_invisible
 	del obj.anom_particles
 	del obj.anom_portaldst
 	del obj.anom_doorcount
