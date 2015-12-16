@@ -87,25 +87,32 @@ App::App(const std::string& levelArg) {
 		throw "SDL Window creation failed";
 	}
 
-	switch (fullscreenMode) {
-		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
-			SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			break;
-		case 1: // 1 = Fullscreen (videomode change)
-			SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN);
-			break;
-		default: // 0 = Windowed
-			SDL_SetWindowFullscreen(sdlWindow, 0);
-			break;
-	}
-
 	sdlGLContext = SDL_GL_CreateContext(sdlWindow);
+
 	if(!sdlGLContext) {
 		throw "GL Context creation failed";
 	}
 
+	int sdlFullscreen = -1;
+
+	switch (fullscreenMode) {
+		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
+			sdlFullscreen = SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			break;
+		case 1: // 1 = Fullscreen (videomode change)
+			sdlFullscreen = SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN);
+			break;
+		default: // 0 = Windowed
+			sdlFullscreen = SDL_SetWindowFullscreen(sdlWindow, 0);
+			break;
+	}
+
+	if (sdlFullscreen == -1) {
+		throw "SDL Setting display mode failed";
+	}
+
 	// Fullscreen setting may have changed resolution
-	// 	This assumes that width or height is never > ~4million
+	// This assumes that width or height is never > ~4million
 	SDL_GetWindowSize(sdlWindow, (s32*)&width, (s32*)&height);
 
 	// 0 is disabled, 1 is vsync
@@ -116,6 +123,7 @@ App::App(const std::string& levelArg) {
 	SDL_ShowCursor(false);
 
 	InitOgre();
+	window->setFullscreen(fullscreenMode > 0, width, height);
 
 	input = std::make_shared<Input>();
 	uiManager = std::make_shared<UiManager>();
@@ -173,12 +181,12 @@ void App::LoadConfig() {
 	width = WIDTH;
 	height = HEIGHT;
 	multisampleLevel = -1;
-	fullscreenMode = 0;
+	fullscreenMode = 2;
 	useVsync = 1;
 	fovDegrees = 60;
 
-	hMouseSensitivity = 180;
-	vMouseSensitivity = 80;
+	hMouseSensitivity = 90;
+	vMouseSensitivity = 90;
 
 	// Test if config exists
 	if (fs->exists("voi.cfg")) {
@@ -229,7 +237,7 @@ void App::LoadConfig() {
 
 	if(multisampleLevel < 0) {
 		autoMultisample = true;
-		multisampleLevel = 4;
+		multisampleLevel = 0;
 	}
 }
 
@@ -398,14 +406,14 @@ void App::Run(){
 				SetMultisample(multisampleLevel);
 		}
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 		auto newTitle = "Voi - FPS: " + std::to_string(smoothedFPS)
 			+ " - Triangles: " + std::to_string(window->getTriangleCount())
 			+ " - Multisample: " + std::to_string((s32)multisampleLevel);
 		SDL_SetWindowTitle(sdlWindow, newTitle.data());
-#else
-		SDL_SetWindowTitle(sdlWindow, "Voi");
-#endif
+//#else
+//		SDL_SetWindowTitle(sdlWindow, "Voi");
+//#endif
 
 		AppTime::Update(dt);
 
@@ -501,6 +509,8 @@ void App::SetMultisample(s32 ms) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, ms);
 		glEnable(GL_MULTISAMPLE);
 	}else{
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 		glDisable(GL_MULTISAMPLE);
 	}
 }

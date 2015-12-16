@@ -25,8 +25,8 @@ struct LayerRenderingManager;
 
 // TODO: Move elsewhere
 enum {
-	WIDTH = 1024,
-	HEIGHT = 576
+	WIDTH = 1366,
+	HEIGHT = 768
 };
 
 namespace Ogre {
