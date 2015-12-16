@@ -110,12 +110,15 @@ App::App(const std::string& levelArg) {
 		throw "SDL Setting display mode failed";
 	}
 
+	// 0 is disabled, 1 is vsync
+	SDL_GL_SetSwapInterval(useVsync);
+
+	// Give the video mode a chance to change before continuing
+	SDL_Delay(1000);
+
 	// Fullscreen setting may have changed resolution
 	// This assumes that width or height is never > ~4million
 	SDL_GetWindowSize(sdlWindow, (s32*)&width, (s32*)&height);
-
-	// 0 is disabled, 1 is vsync
-	SDL_GL_SetSwapInterval(useVsync);
 
 	// TODO: refactor into input module
 	SDL_WarpMouseInWindow(sdlWindow, width/2, height/2);
