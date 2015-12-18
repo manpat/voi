@@ -114,7 +114,7 @@ App::App(const std::string& levelArg) {
 	SDL_GL_SetSwapInterval(useVsync);
 
 	// Give the video mode a chance to change before continuing
-	SDL_Delay(1000);
+	SDL_Delay(100);
 
 	// Fullscreen setting may have changed resolution
 	// This assumes that width or height is never > ~4million
