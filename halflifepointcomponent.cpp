@@ -25,6 +25,6 @@ void HalfLifePointComponent::OnTriggerEnter(ColliderComponent* o) {
 		auto prot = camera->entity->GetGlobalOrientation();
 		auto trot = vec3::UNIT_Z.getRotationTo(entity->GetWorldPlaneFromMesh().normal);
 
-		HalfLifePointManager::GetSingleton()->TriggerSceneLoad(this, ppos - tpos, prot * trot.Inverse());
+		HalfLifePointManager::GetSingleton()->TriggerSceneLoad(this, tpos - ppos, trot.Inverse() * prot);
 	}
 }
