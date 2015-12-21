@@ -14,125 +14,20 @@ material _missing_material_
     }
 }
 
-// Sun genrated by blender2ogre 0.6.0
+// Stone genrated by blender2ogre 0.6.0
 
-material Sun 
+material Stone 
 {
     receive_shadows on 
 
     technique
     {
-        pass Sun
+        pass Stone
         {
-            ambient 0.8000000715255737 0.7496869564056396 0.25396159291267395 1.0
-            diffuse 0.640000066757203 0.5997495740614767 0.20316927735759727 1.0
+            ambient 0.6500040292739868 0.6500040292739868 0.6500040292739868 1.0
+            diffuse 0.5200032311678413 0.5200032311678413 0.5200032311678413 1.0
             specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.8000000715255737 0.7496869564056396 0.25396159291267395 1.0
-
-            alpha_to_coverage off
-            colour_write on
-            cull_hardware clockwise
-            depth_check on
-            depth_func less_equal
-            depth_write on
-            illumination_stage 
-            light_clip_planes off
-            light_scissor off
-            lighting on
-            normalise_normals off
-            polygon_mode solid
-            scene_blend one zero
-            scene_blend_op add
-            shading gouraud
-            transparent_sorting on
-
-        }
-    }
-}
-// Water genrated by blender2ogre 0.6.0
-
-material Water 
-{
-    receive_shadows on 
-
-    technique
-    {
-        pass Water
-        {
-            ambient 0.43692952394485474 0.7342007756233215 0.8000000715255737 1.0
-            diffuse 0.3495436243644896 0.5873606292510125 0.640000066757203 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.43692952394485474 0.7342007756233215 0.8000000715255737 1.0
-
-            alpha_to_coverage off
-            colour_write on
-            cull_hardware clockwise
-            depth_check on
-            depth_func less_equal
-            depth_write on
-            illumination_stage 
-            light_clip_planes off
-            light_scissor off
-            lighting on
-            normalise_normals off
-            polygon_mode solid
-            scene_blend one zero
-            scene_blend_op add
-            shading gouraud
-            transparent_sorting on
-
-        }
-    }
-}
-// Wood genrated by blender2ogre 0.6.0
-
-material Wood 
-{
-    receive_shadows on 
-
-    technique
-    {
-        pass Wood
-        {
-            ambient 0.5264021754264832 0.33461058139801025 0.33461058139801025 1.0
-            diffuse 0.42112174661638946 0.26768846910727717 0.26768846910727717 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.5264021754264832 0.33461058139801025 0.33461058139801025 1.0
-
-            alpha_to_coverage off
-            colour_write on
-            cull_hardware clockwise
-            depth_check on
-            depth_func less_equal
-            depth_write on
-            illumination_stage 
-            light_clip_planes off
-            light_scissor off
-            lighting on
-            normalise_normals off
-            polygon_mode solid
-            scene_blend one zero
-            scene_blend_op add
-            shading gouraud
-            transparent_sorting on
-
-        }
-    }
-}
-// Leaves genrated by blender2ogre 0.6.0
-
-material Leaves 
-{
-    receive_shadows on 
-
-    technique
-    {
-        pass Leaves
-        {
-            ambient 0.39423802495002747 0.6412922143936157 0.3701589107513428 1.0
-            diffuse 0.31539042465970546 0.5130337791596915 0.2961271330137123 1.0
-            specular 0.5 0.5 0.5 1.0 12.5
-            emissive 0.39423802495002747 0.6412922143936157 0.3701589107513428 1.0
+            emissive 0.6500040292739868 0.6500040292739868 0.6500040292739868 1.0
 
             alpha_to_coverage off
             colour_write on
@@ -203,6 +98,286 @@ material Sand
             diffuse 0.640000066757203 0.6003825277147072 0.35707336004187695 1.0
             specular 0.5 0.5 0.5 1.0 12.5
             emissive 0.8000000715255737 0.7504781484603882 0.44634169340133667 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// DarkStone genrated by blender2ogre 0.6.0
+
+material DarkStone 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass DarkStone
+        {
+            ambient 0.49692243337631226 0.49692243337631226 0.49692243337631226 1.0
+            diffuse 0.39753795262482683 0.39753795262482683 0.39753795262482683 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.49692243337631226 0.49692243337631226 0.49692243337631226 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Portal genrated by blender2ogre 0.6.0
+
+material Portal 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Portal
+        {
+            ambient 0.0 0.0 0.0 1.0
+            diffuse 0.0 0.0 0.0 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Wood genrated by blender2ogre 0.6.0
+
+material Wood 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Wood
+        {
+            ambient 0.5264021754264832 0.33461058139801025 0.33461058139801025 1.0
+            diffuse 0.42112174661638946 0.26768846910727717 0.26768846910727717 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.5264021754264832 0.33461058139801025 0.33461058139801025 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// DarkWood genrated by blender2ogre 0.6.0
+
+material DarkWood 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass DarkWood
+        {
+            ambient 0.5026522278785706 0.30663490295410156 0.30663490295410156 1.0
+            diffuse 0.40212178829493794 0.24530792601865414 0.24530792601865414 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.5026522278785706 0.30663490295410156 0.30663490295410156 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Sun genrated by blender2ogre 0.6.0
+
+material Sun 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Sun
+        {
+            ambient 0.8000000715255737 0.7496869564056396 0.25396159291267395 1.0
+            diffuse 0.640000066757203 0.5997495740614767 0.20316927735759727 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.8000000715255737 0.7496869564056396 0.25396159291267395 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// WaterFloor genrated by blender2ogre 0.6.0
+
+material WaterFloor 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass WaterFloor
+        {
+            ambient 0.43692952394485474 0.7342007756233215 0.8000000715255737 1.0
+            diffuse 0.3495436243644896 0.5873606292510125 0.640000066757203 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.43692952394485474 0.7342007756233215 0.8000000715255737 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Leaves genrated by blender2ogre 0.6.0
+
+material Leaves 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Leaves
+        {
+            ambient 0.39423802495002747 0.6412922143936157 0.3701589107513428 1.0
+            diffuse 0.31539042465970546 0.5130337791596915 0.2961271330137123 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.39423802495002747 0.6412922143936157 0.3701589107513428 1.0
+
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+
+        }
+    }
+}
+// Water genrated by blender2ogre 0.6.0
+
+material Water 
+{
+    receive_shadows on 
+
+    technique
+    {
+        pass Water
+        {
+            ambient 0.43692952394485474 0.7342007756233215 0.8000000715255737 1.0
+            diffuse 0.3495436243644896 0.5873606292510125 0.640000066757203 1.0
+            specular 0.5 0.5 0.5 1.0 12.5
+            emissive 0.43692952394485474 0.7342007756233215 0.8000000715255737 1.0
 
             alpha_to_coverage off
             colour_write on

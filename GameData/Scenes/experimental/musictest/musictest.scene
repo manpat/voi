@@ -1,0 +1,44 @@
+<scene export_time="1450670944.3230286" exported_by="patrick" previous_export_time="1450670890.8763626" formatVersion="1.0.1" >
+  <nodes >
+    <node name="Cube.001" >
+      <position y="3.000000" z="-58.000000" x="-54.000000" />
+      <rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <entity inertia_tensor="0.4000000059604645" lock_trans_y="False" velocity_max="0.0" physics_type="STATIC" name="Cube.001" velocity_min="0.0" actor="False" ghost="False" meshFile="Cube.001.mesh" lock_rot_z="False" lock_rot_y="False" lock_rot_x="False" lock_trans_z="False" friction_z="1.0" friction_y="1.0" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" mass="1.0" mass_radius="1.0" lock_trans_x="False" friction_x="1.0" anisotropic_friction="False" >
+        <dimensions y="2.0" z="2.0" x="2.0" />
+      </entity>
+    </node>
+    <node name="Player" >
+      <position y="0.000000" z="5.000000" x="0.000000" />
+      <rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <node name="PlayerCam" >
+        <position y="2.400000" z="-0.000000" x="0.000000" />
+        <rotation qy="0.000000" qx="0.707107" qz="-0.000000" qw="0.707107" />
+        <scale y="1.000000" z="1.000000" x="1.000000" />
+        <camera projectionType="perspective" fov="0.5033799435163735" name="PlayerCam" >
+          <clipping nearPlaneDist="0.10000000149011612" farPlaneDist="100.0" near="0.10000000149011612" far="100.0" />
+        </camera>
+      </node>
+    </node>
+    <node name="Cube" >
+      <position y="-0.500000" z="0.000061" x="-0.000015" />
+      <rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale y="1.000000" z="1.000000" x="1.000000" />
+      <entity inertia_tensor="0.4000000059604645" lock_trans_y="False" velocity_max="0.0" physics_type="STATIC" mass="1.0" name="Cube" velocity_min="0.0" actor="False" ghost="False" meshFile="Cube.mesh" lock_rot_z="False" lock_rot_y="False" lock_rot_x="False" lock_trans_z="False" friction_z="1.0" friction_y="1.0" damping_trans="0.02539999969303608" damping_rot="0.1589999943971634" collisionPrim="box" mass_radius="1.0" lock_trans_x="False" friction_x="1.0" anisotropic_friction="False" >
+        <dimensions y="1.0" z="143.19012451171875" x="143.1900634765625" />
+      </entity>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="/home/patrick/Documents/Qantm/TheGoodCIU/anomalia/GameData/Scenes/experimental/musictest/musictest.material" />
+    </item>
+  </externals>
+  <environment >
+    <user_data value="1.0 1.0 1.0 " type="array 3" name="anom_skycolor" />
+    <user_data value="1.0 1.0 1.0 " type="array 3" name="anom_fogcolor" />
+    <user_data value="2" type="int" name="anom_fogtype" />
+    <user_data value="0.019999999552965164" type="float" name="anom_fogdensity" />
+  </environment>
+</scene>

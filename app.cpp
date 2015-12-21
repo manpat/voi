@@ -92,29 +92,27 @@ App::App(const std::string& levelArg) {
 		throw "GL Context creation failed";
 	}
 
-	s32 sdlFullscreen = -1;
-
+	s32 sdlFullscreenResult = -1;
 	switch (fullscreenMode) {
 		case 2: // 2 = Fullscreen ("fake" fullscreen that takes the size of the desktop)
-			sdlFullscreen = SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			sdlFullscreenResult = SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			break;
 		case 1: // 1 = Fullscreen (videomode change)
-			sdlFullscreen = SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN);
+			sdlFullscreenResult = SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN);
 			break;
 		default: // 0 = Windowed
-			sdlFullscreen = SDL_SetWindowFullscreen(sdlWindow, 0);
+			// It is windowed by default
+			sdlFullscreenResult = 0; 
+			// sdlFullscreenResult = SDL_SetWindowFullscreen(sdlWindow, 0);
 			break;
 	}
 
-	if (sdlFullscreen == -1) {
-		throw "SDL Setting display mode failed";
+	if (sdlFullscreenResult < 0) {
+		throw "SDL enable fullscreen failed failed";
 	}
 
 	// 0 is disabled, 1 is vsync
 	SDL_GL_SetSwapInterval(useVsync);
-
-	// Give the video mode a chance to change before continuing
-	SDL_Delay(1000);
 
 	// Fullscreen setting may have changed resolution
 	// This assumes that width or height is never > ~4million
@@ -346,6 +344,10 @@ void App::Run(){
 					inFocus = true;
 				}else if(e.window.event == SDL_WINDOWEVENT_LEAVE){
 					inFocus = false;
+				}else if(e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+					width = e.window.data1;
+					height = e.window.data2;
+					window->resize(width, height);
 				}
 			}
 

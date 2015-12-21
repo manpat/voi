@@ -26,7 +26,7 @@ PortalManager::PortalManager() {
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 		true /* Manual material */);
 
-	portalMaterial->setSelfIllumination(Ogre::ColourValue(0.1f, 0.1f, 0.1f)); // Skycolor
+	portalMaterial->setAmbient(Ogre::ColourValue(0.0f, 0.0f, 0.0f)); // Skycolor
 	portalMaterial->setCullingMode(Ogre::CULL_NONE); // Draw back and front face
 	portalMaterial->setDepthBias(10.f, 0.f);
 }
