@@ -21,11 +21,30 @@ struct LowRumbleAudioGenerator : AudioGenerator {
 	}
 };
 
+static f32 AhFormant(f64 elapsed, f64 freq) {
+	// Formant frequencies: [750.0 940.0]
+	f32 o = 0.f;
+
+	o += Wave::Sin(750.0 * elapsed);
+	o += Wave::Sin(940.0 * elapsed);
+	o += Wave::Noise() * 0.2f;
+
+	return o * 0.5f;
+}
+
 struct ChoirAudioGenerator : AudioGenerator {
 	f32 Generate(f64 elapsed) override {
-		(void) elapsed;
+		f32 o = 0.f;
 
-		return 0.f;
+		o += AhFormant(elapsed, 220.0);
+		// o += Wave::Sin(elapsed * 220.0);
+		// o += Wave::Sin(elapsed * 220.0 * 3.0/2.0) / 2.f;
+		// o += Wave::Triangle(elapsed * 440.0) / 2.f;
+		// o += Wave::Triangle(elapsed * 880.0) / 3.f;
+		// o += Wave::Triangle(elapsed * 1760.0) / 4.f;
+		// o += Wave::Noise() * 0.03f;
+
+		return o * Env::ExpRamp(elapsed, 10.f) * 0.5f;
 	}
 };
 
