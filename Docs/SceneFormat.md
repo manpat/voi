@@ -2,6 +2,10 @@ Voi scene files (.voi) are a packed binary format
 All data is little endian.
 ALL IDs start at 1. ID of zero should be treated as invalid/null
 
+All chunks begin with a 4 byte stamp, and a 4 byte 'chunkSize' which is the 
+amount of chunk specific data (excl. stamp and chunkSize)
+The main chunk's stamp contains its version number
+
 Unless there's a good reason to do otherwise, all information and data related to a level
 should be packed into the scene file.
 
@@ -31,28 +35,39 @@ This includes:
 	- Fog settings (although this could be controlled with regions)
 	- Music/audio
 	- Sky/clear color (this could be specific to layers also)
-	- Player spawn point
+	- Player spawn point (could be an entity)
 
 
 Format
 ======
 	Scene {
 		"VOI"
-		u8 					versionNumber (should be 1)
+		u8 						versionNumber (should be 1)
+		u32						chunkSize
+		// Scene name?
+		// Scene info
 		
-		u32					numMeshes
-		Mesh[numMeshes]		meshes
+		u16						numMeshes
+		Mesh[numMeshes]			meshes
 
-		u32					numEntities
-		Entity[numEntities]	entities
+		u8						numMaterials
+		Material[numMaterials]	materials
+
+		u16						numEntities
+		Entity[numEntities]		entities
+
+		u16						numScripts
+		Scripts[numScripts]		scripts
 	}
 
 	Mesh {
 		"MESH"
 		u32						chunkSize
-		u32						id
+		u16						id
+
 		u32						numVertices
 		f32[numVertices * 3] 	vertices
+
 		u32						numTriangles
 
 		if(numVertices < 256) {
@@ -63,15 +78,49 @@ Format
 			u32[numTriangles*3]	triangles
 		}
 
-		// Material info
+		u8[numTriangles]		triangleMaterialIDs
+	}
+
+	Material {
+		"MATL"
+		u32					chunkSize
+		u8					id
+
+		f32[3]				color
 	}
 
 	Entity {
 		"ENTY"
-		u32				chunkSize
-		u32				id
-		u32				meshID (optional)
-		f32[3]			position
-		f32[3]			rotation
-		u32				entityType
+		u32					chunkSize
+		u16					id
+		// if you give an entity a name longer than 255 characters,
+		//	fuck you
+		u8					nameLength (can be zero)
+		char[nameLength]	name
+		f32[3]				position
+		f32[3]				rotation
+		u16					meshID (can be zero)
+		u16					scriptID (can be zero)
+		u8					entityType
+		u8					colliderType
+
+		if(colliderType > 0) {
+			// Collider specific size stuff
+			bool			isTrigger
+			bool			isKinematic
+		}
+	}
+
+	Script {
+		"CODE"
+		u32					chunkSize
+		u16					id
+
+		u8					nameLength
+		char[nameLength]	name
+
+		u32					scriptLength
+		char[scriptLength]	scriptText
+
+		// Any metadata
 	}
