@@ -2,8 +2,7 @@ Voi scene files (.voi) are a packed binary format
 All data is little endian.
 ALL IDs start at 1. ID of zero should be treated as invalid/null
 
-All chunks begin with a 4 byte stamp, and a 4 byte 'chunkSize' which is the 
-amount of chunk specific data (excl. stamp and chunkSize)
+All chunks begin with a 4 byte stamp
 The main chunk's stamp contains its version number
 
 Unless there's a good reason to do otherwise, all information and data related to a level
@@ -43,7 +42,6 @@ Format
 	Scene {
 		"VOI"
 		u8 						versionNumber (should be 1)
-		u32						chunkSize
 		// Scene name?
 		// Scene info
 		
@@ -60,10 +58,21 @@ Format
 		Scripts[numScripts]		scripts
 	}
 
+	Material {
+		"MATL"
+		// u8				id
+
+		u8					nameLength
+		char[nameLength]	name
+
+		f32[3]				color
+		// Extra material data
+		//	shaded? different shaders?
+	}
+
 	Mesh {
 		"MESH"
-		u32						chunkSize
-		u16						id
+		// u16					id
 
 		u32						numVertices
 		f32[numVertices * 3] 	vertices
@@ -74,31 +83,23 @@ Format
 			u8 [numTriangles*3]	triangles
 		}else if(numVertices < 65536) {
 			u16[numTriangles*3]	triangles
-		}else if(numVertices < INT_MAX) {
+		}else{
 			u32[numTriangles*3]	triangles
 		}
 
 		u8[numTriangles]		triangleMaterialIDs
 	}
 
-	Material {
-		"MATL"
-		u32					chunkSize
-		u8					id
-
-		f32[3]				color
-	}
-
 	Entity {
 		"ENTY"
-		u32					chunkSize
-		u16					id
+		// u16				id
 		// if you give an entity a name longer than 255 characters,
 		//	fuck you
 		u8					nameLength (can be zero)
 		char[nameLength]	name
 		f32[3]				position
 		f32[3]				rotation
+		u16					parentID (can be zero)
 		u16					meshID (can be zero)
 		u16					scriptID (can be zero)
 		u8					entityType
@@ -113,8 +114,7 @@ Format
 
 	Script {
 		"CODE"
-		u32					chunkSize
-		u16					id
+		// u16				id
 
 		u8					nameLength
 		char[nameLength]	name
