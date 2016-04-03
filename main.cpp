@@ -66,7 +66,12 @@ s32 main(s32 ac, const char** av) {
 	SDL_GL_SwapWindow(window);
 
 	SDL_Delay(1000);
+	
+	SDL_GL_DeleteContext(glctx);
+	SDL_DestroyWindow(window);
+
 	SDL_Quit();
+
 	return 0;
 }
 
