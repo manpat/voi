@@ -30,11 +30,32 @@ bool CheckStamp(u8** it, const char* stamp) {
 	return false;
 }
 
+struct Mesh {
+	u32 numVertices;
+	vec3* vertices;
+
+	u32 numTriangles;
+	union {
+		u8*  triangles8;
+		u16* triangles16;
+		u32* triangles32;
+	};
+	u8* materialIDs;
+};
+
+struct Material {
+	u8 nameLength;
+	char* name;
+	vec3 color;
+};
+
 struct Scene {
-	u16 numMeshes;
-	u8  numMaterials;
-	u16 numEntities;
-	u16 numScripts;
+	u16 numMeshes = 0;
+	Mesh* meshes = nullptr;
+
+	u8  numMaterials = 0;
+	u16 numEntities = 0;
+	u16 numScripts = 0;
 };
 
 void LoadScene(const char* fname) {
@@ -51,7 +72,7 @@ void LoadScene(const char* fname) {
 		file.read((char*)data, size);
 	}
 
-	Scene scene;
+	Scene scene{};
 
 	u8* it = data;
 	if(*it++ != 'V'
@@ -65,29 +86,72 @@ void LoadScene(const char* fname) {
 	assert(version == 1, "Unknown scene format version!");
 
 	scene.numMeshes = Read<u16>(&it);
+	scene.meshes = new Mesh[scene.numMeshes];
 	printf("numMeshes: %hi\n", scene.numMeshes);
 
 	for(u16 i = 0; i < scene.numMeshes; i++) {
 		if(!CheckStamp(&it, "MESH")) goto error;
 
-		u32 numVertices = Read<u32>(&it);
-		it += numVertices*sizeof(vec3);
-		u32 numTriangles = Read<u32>(&it);
+		auto mesh = &scene.meshes[i];
+		mesh->numVertices = Read<u32>(&it);
+		mesh->vertices = new vec3[mesh->numVertices];
 
-		// Skip indices
-		if(numVertices < 256) {
-			it += numTriangles*3;
-		}else if(numVertices < 65536) {
-			it += numTriangles*3*2;
+		std::memcpy(mesh->vertices, it, mesh->numVertices*sizeof(vec3));
+		it += mesh->numVertices*sizeof(vec3);
+
+		mesh->numTriangles = Read<u32>(&it);
+
+		if(mesh->numVertices < 256) {
+			mesh->triangles8 = new u8[mesh->numTriangles*3];
+			std::memcpy(mesh->triangles8, it, mesh->numTriangles*3);
+			it += mesh->numTriangles*3;
+
+		}else if(mesh->numVertices < 65536) {
+			mesh->triangles16 = new u16[mesh->numTriangles*3];
+			std::memcpy(mesh->triangles16, it, mesh->numTriangles*6);
+			it += mesh->numTriangles*3*2;
+
 		}else{
-			it += numTriangles*3*4;
+			mesh->triangles32 = new u32[mesh->numTriangles*3];
+			std::memcpy(mesh->triangles32, it, mesh->numTriangles*12);
+			it += mesh->numTriangles*3*4;
 		}
 
-		// Skip materials
-		it += numTriangles;
+		mesh->materialIDs = new u8[mesh->numTriangles];
+		std::memcpy(mesh->materialIDs, it, mesh->numTriangles);
+		it += mesh->numTriangles;
 
-		printf("\tnumVertices: %u\n", numVertices);
-		printf("\tnumTriangles: %u\n\n", numTriangles);
+		printf("\tnumVertices: %u\n", mesh->numVertices);
+		printf("\tnumTriangles: %u\n", mesh->numTriangles);
+
+		for(u32 j = 0; j < mesh->numVertices; j++) {
+			auto v = &mesh->vertices[j];
+			printf("\t\tv: (%.1f, %.1f, %.1f)\n", v->x, v->y, v->z);
+		}
+
+		if(mesh->numVertices < 256) {
+			for(u32 j = 0; j < mesh->numTriangles; j++) {
+				auto v = &mesh->triangles8[j*3];
+				auto m = mesh->materialIDs[j];
+				printf("\t\tf: (%hhu, %hhu, %hhu) %hhu\n", v[0], v[1], v[2], m);
+			}
+
+		}else if(mesh->numVertices < 65536) {
+			for(u32 j = 0; j < mesh->numTriangles; j++) {
+				auto v = &mesh->triangles16[j*3];
+				auto m = mesh->materialIDs[j];
+				printf("\t\tf: (%hu, %hu, %hu) %hhu\n", v[0], v[1], v[2], m);
+			}
+
+		}else{
+			for(u32 j = 0; j < mesh->numTriangles; j++) {
+				auto v = &mesh->triangles32[j*3];
+				auto m = mesh->materialIDs[j];
+				printf("\t\tf: (%u, %u, %u) %hhu\n", v[0], v[1], v[2], m);
+			}
+		}
+
+		puts("");
 	}
 
 	scene.numMaterials = *it++;
