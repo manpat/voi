@@ -16,3 +16,4 @@ Eventually
 Maybe
 -----
 - glew (if we can't get a modern GL context on windows)
+- lua of some description
