@@ -6,18 +6,20 @@
 #include <memory>
 #include <cstdint>
 #include <unordered_map>
+#include <OGRE/OgrePlane.h>
+#include <OGRE/OgreVector2.h>
+#include <OGRE/OgreVector3.h>
+#include <OGRE/OgreVector4.h>
+#include <OGRE/OgreMatrix3.h>
+#include <OGRE/OgreMatrix4.h>
+#include <OGRE/OgreQuaternion.h>
 
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
-
-using glm::vec2;
-using glm::vec3;
-using glm::vec4;
-using glm::mat3;
-using glm::mat4;
-using glm::quat;
+using vec2 = Ogre::Vector2;
+using vec3 = Ogre::Vector3;
+using vec4 = Ogre::Vector4;
+using mat3 = Ogre::Matrix3;
+using mat4 = Ogre::Matrix4;
+using quat = Ogre::Quaternion;
 
 using u8  = uint8_t;
 using u16 = uint16_t;
