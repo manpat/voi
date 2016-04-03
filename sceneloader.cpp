@@ -9,14 +9,10 @@ void assert(bool c, const char* s) {
 	}
 }
 
-u16 ReadU16(u8** it) {
-	u16 v = *(u16*)*it;
-	*it += 2;
-	return v;
-}
-u32 ReadU32(u8** it) {
-	u32 v = *(u32*)*it;
-	*it += 4;
+template<class T>
+T Read(u8** it) {
+	T v = *(T*)*it;
+	*it += sizeof(T);
 	return v;
 }
 
@@ -42,7 +38,7 @@ struct Scene {
 };
 
 void LoadScene(const char* fname) {
-	printf("Loading %s...\n", fname);
+	printf("Loading %s ...\n", fname);
 
 	u8* data = nullptr;
 	u64 size = 0;
@@ -68,15 +64,15 @@ void LoadScene(const char* fname) {
 	u8 version = *it++;
 	assert(version == 1, "Unknown scene format version!");
 
-	scene.numMeshes = ReadU16(&it);
+	scene.numMeshes = Read<u16>(&it);
 	printf("numMeshes: %hi\n", scene.numMeshes);
 
 	for(u16 i = 0; i < scene.numMeshes; i++) {
 		if(!CheckStamp(&it, "MESH")) goto error;
 
-		u32 numVertices = ReadU32(&it);
+		u32 numVertices = Read<u32>(&it);
 		it += numVertices*sizeof(vec3);
-		u32 numTriangles = ReadU32(&it);
+		u32 numTriangles = Read<u32>(&it);
 
 		// Skip indices
 		if(numVertices < 256) {
@@ -91,7 +87,7 @@ void LoadScene(const char* fname) {
 		it += numTriangles;
 
 		printf("\tnumVertices: %u\n", numVertices);
-		printf("\tnumTriangles: %u\n", numTriangles);
+		printf("\tnumTriangles: %u\n\n", numTriangles);
 	}
 
 	scene.numMaterials = *it++;
@@ -103,10 +99,11 @@ void LoadScene(const char* fname) {
 		u8 nameLength = *it++;
 		printf("\tmaterialName: %.*s\n", nameLength, it);
 		it += nameLength;
-		it += 3*4;
+		vec3 color = Read<vec3>(&it);
+		printf("\tmaterialColor: (%.2f, %.2f, %.2f)\n\n", color.r, color.g, color.b);
 	}
 
-	scene.numEntities = ReadU16(&it);
+	scene.numEntities = Read<u16>(&it);
 	printf("numEntities: %hu\n", scene.numEntities);
 	for(u16 i = 0; i < scene.numEntities; i++) {
 		if(!CheckStamp(&it, "ENTY")) goto error;
@@ -114,20 +111,24 @@ void LoadScene(const char* fname) {
 		u8 nameLength = *it++;
 		printf("\tentityName: %.*s\n", nameLength, it);
 		it += nameLength;
-		it += 2*sizeof(vec3);
 
-		u16 parentID = ReadU16(&it);
-		u16 meshID = ReadU16(&it);
-		u16 scriptID = ReadU16(&it);
+		vec3 position = Read<vec3>(&it);
+		vec3 rotation = Read<vec3>(&it);
+
+		u16 parentID = Read<u16>(&it);
+		u16 meshID = Read<u16>(&it);
+		u16 scriptID = Read<u16>(&it);
 		u8  entityType = *it++;
 		u8  colliderType = *it++;
 
+		printf("\tposition: (%.1f, %.1f, %.1f)\n", position.x, position.y, position.z);
+		printf("\trotation: (%.1f, %.1f, %.1f)\n", rotation.x, rotation.y, rotation.z);
 		printf("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);
 		printf("\tscriptID: %hu\n", scriptID);
-		printf("\tentityType: %hhu\n\tcolliderType: %hhu\n", entityType, colliderType);
+		printf("\tentityType: %hhu\n\tcolliderType: %hhu\n\n", entityType, colliderType);
 	}
 
-	scene.numScripts = ReadU16(&it);
+	scene.numScripts = Read<u16>(&it);
 	printf("numScripts: %hu\n", scene.numScripts);
 	for(u16 i = 0; i < scene.numScripts; i++) {
 		if(!CheckStamp(&it, "CODE")) goto error;
@@ -136,8 +137,8 @@ void LoadScene(const char* fname) {
 		printf("\tscriptName: %.*s\n", (u32)nameLength, it);
 		it += nameLength;
 
-		u32 scriptLength = ReadU32(&it);
-		printf("\tscriptText:\n----------------\n%.*s\n-----------------\n", 
+		u32 scriptLength = Read<u32>(&it);
+		printf("\tscriptText:\n----------------\n%.*s\n-----------------\n\n", 
 			scriptLength, it);
 		it += scriptLength;
 	}
