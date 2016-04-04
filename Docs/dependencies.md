@@ -6,6 +6,8 @@ Active
 - glm >= 0.9.8
 	- [https://github.com/g-truc/glm.git]
 - SDL2 latest
+- glew >= 1.10
+	- [http://glew.sourceforge.net/]
 
 Eventually
 ----------

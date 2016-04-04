@@ -1,18 +1,17 @@
 #include "common.h"
 #include "sceneloader.h"
 
-#define GL_GLEXT_PROTOTYPES
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <GL/glew.h>
 
-void APIENTRY DebugCallback(u32, u32 type, u32, u32, s32, const char* msg, void*);
+void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32, const char* msg, void*);
 
 enum {
 	WindowWidth = 800,
 	WindowHeight = 600
 };
 
-s32 main(s32 ac, const char** av) {
+s32 main(s32 /*ac*/, const char**/* av*/) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
 		return 1;
@@ -39,19 +38,22 @@ s32 main(s32 ac, const char** av) {
 		return 1;
 	}
 
-	// Set up some initial GL state
-	glEnable(GL_DEPTH_TEST);
+	glewExperimental = true;
+	auto glewerr = glewInit();
+	if(glewerr != GLEW_OK) {
+		printf("GLEW init failed: %s\n", glewGetErrorString(glewerr));
+		return 1;
+	}
 
 	// Try to enable debug output
-	if(SDL_GL_ExtensionSupported("GL_ARB_debug_output")){
-		auto mglDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC) 
-			SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
-
+	if(GLEW_ARB_debug_output){
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-		mglDebugMessageCallback((GLDEBUGPROCARB) DebugCallback, nullptr);
+		glDebugMessageCallbackARB((GLDEBUGPROCARB) DebugCallback, nullptr);
 	}else{
 		puts("Warning! Debug output not supported");
 	}
+
+	glEnable(GL_DEPTH_TEST);
 
 	LoadScene("cube.voi");
 
@@ -65,7 +67,7 @@ s32 main(s32 ac, const char** av) {
 
 	SDL_GL_SwapWindow(window);
 
-	SDL_Delay(150);
+	SDL_Delay(500);
 
 	SDL_GL_DeleteContext(glctx);
 	SDL_DestroyWindow(window);
@@ -75,8 +77,8 @@ s32 main(s32 ac, const char** av) {
 	return 0;
 }
 
-void APIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
+void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
 	if(type != GL_DEBUG_TYPE_ERROR_ARB && type != GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB) return;
 
-	printf("GLERROR: %.*s\n", length, msg);
+	fprintf(stderr, "GLERROR: %.*s\n", length, msg);
 }
