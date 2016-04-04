@@ -1,10 +1,13 @@
 #include "common.h"
 #include "sceneloader.h"
 
+#include "input.h"
+
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
-void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32, const char* msg, void*);
+bool InitGL(SDL_Window*);
+void DeinitGL();
 
 enum {
 	WindowWidth = 800,
@@ -26,23 +29,78 @@ s32 main(s32 /*ac*/, const char**/* av*/) {
 		return 1;
 	}
 
+	if(!InitGL(window)) return 1;
+	Input::Init();
+	Input::doCapture = false;
+
+	glEnable(GL_DEPTH_TEST);
+
+	LoadScene("cube.voi");
+
+	// *Required* as of like OpenGL 3.something 
+	u32 vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glClearColor(1,0,1, 1);
+
+	SDL_Event e;
+	bool running = true;
+	while(running) {
+		while(SDL_PollEvent(&e)) {
+			Input::InjectSDLEvent(e);
+			if(e.type == SDL_QUIT) {
+				running = false;
+			}
+		}
+		Input::UpdateMouse(window);
+
+		if(Input::GetKeyDown(SDLK_ESCAPE)) {
+			running = false;
+		}
+
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+		SDL_GL_SwapWindow(window);
+		SDL_Delay(1);
+
+		Input::ClearFrameState();
+	}
+
+	Input::Deinit();
+	DeinitGL();
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
+	return 0;
+}
+
+void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
+	if(type != GL_DEBUG_TYPE_ERROR_ARB && type != GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB) return;
+
+	fprintf(stderr, "GLERROR: %.*s\n", length, msg);
+}
+
+SDL_GLContext glctx = nullptr;
+
+bool InitGL(SDL_Window* window) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	
-	auto glctx = SDL_GL_CreateContext(window);
+	glctx = SDL_GL_CreateContext(window);
 	if(!glctx) {
 		puts("OpenGL context creation failed");
-		return 1;
+		return false;
 	}
 
 	glewExperimental = true;
 	auto glewerr = glewInit();
 	if(glewerr != GLEW_OK) {
 		printf("GLEW init failed: %s\n", glewGetErrorString(glewerr));
-		return 1;
+		return false;
 	}
 
 	// Try to enable debug output
@@ -53,32 +111,9 @@ s32 main(s32 /*ac*/, const char**/* av*/) {
 		puts("Warning! Debug output not supported");
 	}
 
-	glEnable(GL_DEPTH_TEST);
-
-	LoadScene("cube.voi");
-
-	// *Required* as of like OpenGL 3.sometihng 
-	u32 vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glClearColor(1,0,1, 1);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-	SDL_GL_SwapWindow(window);
-
-	SDL_Delay(500);
-
-	SDL_GL_DeleteContext(glctx);
-	SDL_DestroyWindow(window);
-
-	SDL_Quit();
-
-	return 0;
+	return true;
 }
 
-void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
-	if(type != GL_DEBUG_TYPE_ERROR_ARB && type != GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB) return;
-
-	fprintf(stderr, "GLERROR: %.*s\n", length, msg);
+void DeinitGL() {
+	SDL_GL_DeleteContext(glctx);
 }

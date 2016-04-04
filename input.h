@@ -69,48 +69,37 @@ public:
 	static bool doCapture;
 
 public:
-	Input();
-	~Input();
+	static void Init();
+	static void Deinit();
+	static void InjectSDLEvent(const SDL_Event&);
+	static void UpdateMouse(SDL_Window*);
+	static void ClearFrameState();
 
 	// Returns mouse delta since last frame
 	static vec2 GetMouseDelta();
+	// TODO: Actual mouse position for menu stuff
 
 	// Returns if a mouse button is pressed
 	static bool GetButton(s32 k);
-
 	// Returns if a mouse button was pressed this frame
 	static bool GetButtonDown(s32 k);
-
 	// Returns if a mouse button was released this frame
 	static bool GetButtonUp(s32 k);
 
-
 	// Returns if a key is pressed
 	static bool GetKey(s32 k);
-
 	// Returns if a key was pressed this frame
 	static bool GetKeyDown(s32 k);
-
 	// Returns if a key was released this frame
 	static bool GetKeyUp(s32 k);
 
 	static bool GetControllerButton(s32 k);
-
 	static bool GetControllerButtonDown(s32 k);
-
 	static bool GetControllerButtonUp(s32 k);
 
 	static bool GetMapped(s32 k);
-
 	static bool GetMappedDown(s32 k);
-
 	static bool GetMappedUp(s32 k);
-
-	static void Update();
-	static void EndFrame();
-
-protected:
-	static void EventHook(const SDL_Event&);
 };
 
 #endif
