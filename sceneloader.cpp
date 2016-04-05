@@ -30,35 +30,7 @@ bool CheckStamp(u8** it, const char* stamp) {
 	return false;
 }
 
-struct Mesh {
-	u32 numVertices;
-	vec3* vertices;
-
-	u32 numTriangles;
-	union {
-		u8*  triangles8;
-		u16* triangles16;
-		u32* triangles32;
-	};
-	u8* materialIDs;
-};
-
-struct Material {
-	u8 nameLength;
-	char* name;
-	vec3 color;
-};
-
-struct Scene {
-	u16 numMeshes = 0;
-	Mesh* meshes = nullptr;
-
-	u8  numMaterials = 0;
-	u16 numEntities = 0;
-	u16 numScripts = 0;
-};
-
-void LoadScene(const char* fname) {
+Scene LoadScene(const char* fname) {
 	printf("Loading %s ...\n", fname);
 
 	u8* data = nullptr;
@@ -79,7 +51,7 @@ void LoadScene(const char* fname) {
 	|| *it++ != 'O'
 	|| *it++ != 'I') {
 		puts("Invalid filestamp!");
-		return;
+		return {};
 	}
 
 	u8 version = *it++;
@@ -210,4 +182,6 @@ void LoadScene(const char* fname) {
 error:
 	delete[] data;
 	puts("Done.");
+
+	return scene;
 }
