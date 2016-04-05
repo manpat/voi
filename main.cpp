@@ -3,8 +3,9 @@
 
 #include "input.h"
 
+#define GLEW_STATIC
+#include "glew.h"
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
 
 bool InitGL(SDL_Window*);
 void DeinitGL();
