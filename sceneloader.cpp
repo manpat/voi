@@ -58,7 +58,7 @@ Scene LoadScene(const char* fname) {
 	assert(version == 1, "Unknown scene format version!");
 
 	scene.numMeshes = Read<u16>(&it);
-	scene.meshes = new Mesh[scene.numMeshes];
+	scene.meshes = new RawMeshData[scene.numMeshes];
 	printf("numMeshes: %hi\n", scene.numMeshes);
 
 	for(u16 i = 0; i < scene.numMeshes; i++) {

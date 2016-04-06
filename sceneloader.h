@@ -4,7 +4,7 @@
 #include "common.h"
 
 // TEMP INTERFACE obviously
-struct Mesh {
+struct RawMeshData {
 	u32 numVertices;
 	vec3* vertices;
 
@@ -25,7 +25,7 @@ struct Material {
 
 struct Scene {
 	u16 numMeshes = 0;
-	Mesh* meshes = nullptr;
+	RawMeshData* meshes = nullptr;
 
 	u8  numMaterials = 0;
 	u16 numEntities = 0;
