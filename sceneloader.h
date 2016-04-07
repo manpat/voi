@@ -17,22 +17,25 @@ struct RawMeshData {
 	u8* materialIDs;
 };
 
-struct Material {
+struct MaterialData {
 	u8 nameLength;
-	char* name;
+	char name[256];
 	vec3 color;
 };
 
-struct Scene {
+struct SceneData {
 	u16 numMeshes = 0;
 	RawMeshData* meshes = nullptr;
 
 	u8  numMaterials = 0;
+	MaterialData* materials = nullptr;
+
 	u16 numEntities = 0;
 	u16 numScripts = 0;
 };
 
 // TEMP INTERFACE obviously
-Scene LoadScene(const char* fname);
+SceneData LoadSceneData(const char* fname);
+void FreeSceneData(SceneData*);
 
 #endif

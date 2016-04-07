@@ -132,7 +132,12 @@ class ExportVoiScene(bpy.types.Operator):
 				numTriangles = 0
 
 				for v in odata.vertices:
-					vs.extend(v.co[:])
+					vswapped = [
+						v.co.x,
+						v.co.z,
+						-v.co.y,
+					]
+					vs.extend(vswapped)
 
 				for p in odata.polygons:
 					midx = p.material_index

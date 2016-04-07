@@ -30,7 +30,10 @@ bool CheckStamp(u8** it, const char* stamp) {
 	return false;
 }
 
-Scene LoadScene(const char* fname) {
+template<class El>
+void SortMeshData(RawMeshData* md);
+
+SceneData LoadSceneData(const char* fname) {
 	printf("Loading %s ...\n", fname);
 
 	u8* data = nullptr;
@@ -44,7 +47,7 @@ Scene LoadScene(const char* fname) {
 		file.read((char*)data, size);
 	}
 
-	Scene scene{};
+	SceneData scene{};
 
 	u8* it = data;
 	if(*it++ != 'V'
@@ -102,6 +105,7 @@ Scene LoadScene(const char* fname) {
 		}
 
 		if(mesh->numVertices < 256) {
+			SortMeshData<u8>(mesh);
 			for(u32 j = 0; j < mesh->numTriangles; j++) {
 				auto v = &mesh->triangles8[j*3];
 				auto m = mesh->materialIDs[j];
@@ -109,6 +113,7 @@ Scene LoadScene(const char* fname) {
 			}
 
 		}else if(mesh->numVertices < 65536) {
+			SortMeshData<u16>(mesh);
 			for(u32 j = 0; j < mesh->numTriangles; j++) {
 				auto v = &mesh->triangles16[j*3];
 				auto m = mesh->materialIDs[j];
@@ -116,6 +121,7 @@ Scene LoadScene(const char* fname) {
 			}
 
 		}else{
+			SortMeshData<u32>(mesh);
 			for(u32 j = 0; j < mesh->numTriangles; j++) {
 				auto v = &mesh->triangles32[j*3];
 				auto m = mesh->materialIDs[j];
@@ -127,15 +133,17 @@ Scene LoadScene(const char* fname) {
 	}
 
 	scene.numMaterials = *it++;
+	scene.materials = new MaterialData[scene.numMaterials];
 	printf("numMaterials: %hhu\n", scene.numMaterials);
 
 	for(u8 i = 0; i < scene.numMaterials; i++) {
 		if(!CheckStamp(&it, "MATL")) goto error;
 
-		u8 nameLength = *it++;
+		u8 nameLength = scene.materials[i].nameLength = *it++;
+		std::memcpy(scene.materials[i].name, it, nameLength);
 		printf("\tmaterialName: %.*s\n", nameLength, it);
 		it += nameLength;
-		vec3 color = Read<vec3>(&it);
+		vec3 color = scene.materials[i].color = Read<vec3>(&it);
 		printf("\tmaterialColor: (%.2f, %.2f, %.2f)\n\n", color.r, color.g, color.b);
 	}
 
@@ -184,4 +192,71 @@ error:
 	puts("Done.");
 
 	return scene;
+}
+
+template<class El>
+void SortMeshData(RawMeshData* md) {
+	auto ms = md->materialIDs;
+	auto ts = (El*) md->triangles8;
+	u32 count = md->numTriangles;
+
+	auto swapElements = [ms,ts] (u32 a, u32 b) {
+		std::swap(ms[a], ms[b]);
+		std::swap(ts[a*3+0], ts[b*3+0]);
+		std::swap(ts[a*3+1], ts[b*3+1]);
+		std::swap(ts[a*3+2], ts[b*3+2]);
+	};
+
+	auto siftdown = [swapElements] (u8* a, u32 start, u32 end) {
+		u32 root = start;
+
+		// While root has a child
+		while((root*2+1) <= end) {
+			u32 left = (root*2+1);
+			u32 right = left+1;
+			u32 swap = root;
+
+			if(a[swap] < a[left])
+				swap = left;
+
+			// If right child exists and is greater
+			if(right <= end && a[swap] < a[right])
+				swap = right;
+
+			if(swap != root) {
+				swapElements(root, swap);
+				root = swap;
+			}else{
+				return;
+			}
+		}
+	};
+	
+	// Make heap
+	u32 end = count-1;
+	s64 start = (end-1)/2;
+	while(start >= 0) {
+		siftdown(ms, start, end);
+		start--;
+	}
+
+	// Sort
+	while(end > 0) {
+		swapElements(end, 0);
+		end--;
+		siftdown(ms, 0, end);
+	}
+}
+
+void FreeSceneData(SceneData* scene) {
+	for(u32 i = 0; i < scene->numMeshes; i++) {
+		auto mesh = &scene->meshes[i];
+		delete[] mesh->vertices;
+		delete[] mesh->triangles8;
+		delete[] mesh->materialIDs;
+	}
+
+	delete[] scene->meshes;
+	delete[] scene->materials;
+	// TODO: The rest when it exists
 }

@@ -2,6 +2,7 @@
 #include "sceneloader.h"
 
 #include "input.h"
+#include "data.h"
 
 #define GLEW_STATIC
 #include "glew.h"
@@ -44,34 +45,100 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	u32 program = InitShaderProgram();
 	glUseProgram(program);
 
-	auto scene = LoadScene("cube.voi");
-	assert(scene.numMeshes > 0);
-	auto mesh = &scene.meshes[0];
+	Scene scene;
+	auto sceneData = LoadSceneData("export.voi");
+	assert(sceneData.numMeshes > 0);
 
-	u32 vbo = 0;
-	u32 ebo = 0;
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh->numVertices*sizeof(vec3), mesh->vertices, GL_STATIC_DRAW);
+	scene.numMeshes = sceneData.numMeshes;
+	scene.meshes = new Mesh[scene.numMeshes];
 
-	u8 elementSize = 4;
-	u32 elementType = GL_UNSIGNED_INT;
+	for(u32 meshID = 0; meshID < scene.numMeshes; meshID++) {
+		auto meshData = &sceneData.meshes[meshID];
+		auto mesh = &scene.meshes[meshID];
+		mesh->numTriangles = meshData->numTriangles;
+		mesh->elementType = GL_UNSIGNED_INT;
+		if(meshData->numVertices < 256) {
+			mesh->elementType = GL_UNSIGNED_BYTE;
+		}else if(meshData->numVertices < 65536) {
+			mesh->elementType = GL_UNSIGNED_SHORT;
+		}
 
-	if(mesh->numVertices < 256) {
-		elementSize = 1;
-		elementType = GL_UNSIGNED_BYTE;
-	}else if(mesh->numVertices < 65536) {
-		elementSize = 2;
-		elementType = GL_UNSIGNED_SHORT;
+		// Figure out submeshes
+		{	mesh->numSubmeshes = 0;
+			u8 prevMatID = 0;
+			for(u32 i = 0; i < mesh->numTriangles; i++) {
+				u8 mat = meshData->materialIDs[i];
+				if(mat > prevMatID) {
+					mesh->numSubmeshes++;
+					prevMatID = mat;
+				}
+			}
+		
+			auto submeshes = &mesh->submeshesInline[0];
+			if(mesh->numSubmeshes > Mesh::MaxInlineSubmeshes) {
+				mesh->submeshes = submeshes = new Mesh::Submesh[mesh->numSubmeshes];
+			}
+		
+			prevMatID = 0;
+			u32 matStart = 0;
+		
+			for(u32 i = 0; i < mesh->numTriangles; i++) {
+				u8 mat = meshData->materialIDs[i];
+				if(mat > prevMatID) {
+					if(prevMatID != 0) {
+						*submeshes++ = {matStart, prevMatID};
+					}
+		
+					matStart = i;
+					prevMatID = mat;
+				}
+			}
+		
+			*submeshes++ = {matStart, prevMatID};
+		}
+
+		auto submeshes = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
+			&mesh->submeshesInline[0] : mesh->submeshes;
+
+		printf("numSubmeshes: %d\n", mesh->numSubmeshes);
+		for(u32 i = 0; i < mesh->numSubmeshes; i++) {
+			printf("\tsm: start: %u\tid: %hhu\n", submeshes[i].startIndex, submeshes[i].materialID);
+		}
+
+		glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
+		glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+		glBufferData(GL_ARRAY_BUFFER, meshData->numVertices*sizeof(vec3), meshData->vertices, GL_STATIC_DRAW);
+
+		u8 elementSize;
+		switch(mesh->elementType) {
+			default:
+			case GL_UNSIGNED_BYTE:  elementSize = mesh->elementSize = 1; break;
+			case GL_UNSIGNED_SHORT: elementSize = mesh->elementSize = 2; break;
+			case GL_UNSIGNED_INT: 	elementSize = mesh->elementSize = 4; break;
+		}
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, meshData->triangles8, GL_STATIC_DRAW);
 	}
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, mesh->triangles8, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+	// Do material stuff
+	{	std::memset(scene.materials, 0, sizeof(scene.materials));
+		for(u16 i = 0; i < sceneData.numMaterials; i++){
+			auto to = &scene.materials[i];
+			auto from = &sceneData.materials[i];
+			std::memcpy(to->name, from->name, from->nameLength);
+			to->color = from->color;
+			// TODO: Shader stuff when added
+		}
+	}
+
+	FreeSceneData(&sceneData);
+
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(1,0,1, 1);
+	glClearColor(.1f, .1f, .1f, 1);
 	glEnableVertexAttribArray(0);
 
 	vec3 cameraPosition {0, 0, 5};
@@ -84,6 +151,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	mat4 viewMatrix = glm::translate<f32>(-cameraPosition);
 	mat4 modelMatrix = mat4(1.f);
 
+	u32 materialColorLoc = glGetUniformLocation(program, "materialColor");
 	u32 viewProjectionLoc = glGetUniformLocation(program, "viewProjection");
 	u32 modelLoc = glGetUniformLocation(program, "model");
 
@@ -105,16 +173,39 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 		static f32 t = 0.f;
-		modelMatrix = glm::rotate<f32>(t += 0.01f, vec3{0,1,0});
+		modelMatrix = glm::rotate<f32>(t += 0.01f, glm::normalize(vec3{0,1,0}));
 
 		glUniformMatrix4fv(viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
 		glUniformMatrix4fv(modelLoc, 1, false, glm::value_ptr(modelMatrix));
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		for(u32 meshID = 0; meshID < scene.numMeshes; meshID++) {
+			auto mesh = &scene.meshes[meshID];
 
-		glDrawElements(GL_TRIANGLES, mesh->numTriangles*3, elementType, nullptr);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+
+			u32 end = mesh->numTriangles;
+			auto sms = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
+				&mesh->submeshesInline[0] : mesh->submeshes;
+			
+			// Draw in reverse order to make getting triangle count easier
+			for(s32 i = mesh->numSubmeshes-1; i >= 0; i--) {
+				if(sms[i].materialID > 0) {
+					auto mat = &scene.materials[sms[i].materialID-1];
+					glUniform3fv(materialColorLoc, 1, glm::value_ptr(mat->color));
+				}else{
+					glUniform3fv(materialColorLoc, 1, glm::value_ptr(vec3{1,0,1}));
+				}
+
+				u32 begin = sms[i].startIndex;
+				u32 count = end - begin;
+				end = begin;
+
+				glDrawElements(GL_TRIANGLES, count*3, mesh->elementType, 
+					(void*) (begin*3ull*mesh->elementSize));
+			}
+		}
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -218,10 +309,12 @@ u32 InitShaderProgram() {
 	);
 
 	const char* fsrc = SHADER(
-		out vec4 color;
+		out vec4 outcolor;
+		
+		uniform vec3 materialColor;
 
 		void main() {
-			color = vec4(1,0,0,1);
+			outcolor = vec4(materialColor, 1);
 		}
 	);
 

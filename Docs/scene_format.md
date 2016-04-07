@@ -112,6 +112,7 @@ Format
 		}
 	}
 
+	// Could reuse for shader definition
 	Script {
 		"CODE"
 		// u16				id
