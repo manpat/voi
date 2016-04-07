@@ -15,6 +15,9 @@ from bpy import context
 
 # https://docs.python.org/2/library/struct.html
 
+def swapCoords(co):
+	return [co.x, co.z, -co.y];
+
 class ExportVoiScene(bpy.types.Operator):
 	"""Voi scene exporter"""
 	bl_idname = "export.voi_scene"
@@ -84,6 +87,7 @@ class ExportVoiScene(bpy.types.Operator):
 
 				out.write(struct.pack('=fff', *e['position']))
 				out.write(struct.pack('=fff', *e['rotation']))
+				out.write(struct.pack('=B', e['layer']))
 				out.write(struct.pack('=H', e['parentID']))
 				out.write(struct.pack('=H', e['meshID']))
 				out.write(struct.pack('=H', e['scriptID']))
@@ -132,12 +136,7 @@ class ExportVoiScene(bpy.types.Operator):
 				numTriangles = 0
 
 				for v in odata.vertices:
-					vswapped = [
-						v.co.x,
-						v.co.z,
-						-v.co.y,
-					]
-					vs.extend(vswapped)
+					vs.extend(swapCoords(v.co))
 
 				for p in odata.polygons:
 					midx = p.material_index
@@ -174,8 +173,8 @@ class ExportVoiScene(bpy.types.Operator):
 		scene = bpy.data.scenes[0]
 		for obj in scene.objects:
 			mid = self.meshIDs.get(obj.data.name, 0)
-			pos = obj.location.xyz[:]
-			rot = obj.rotation_euler[:]
+			pos = swapCoords(obj.location.xyz)
+			rot = swapCoords(obj.rotation_euler)
 
 			self.entities.append({
 				'name': obj.name,
@@ -183,6 +182,7 @@ class ExportVoiScene(bpy.types.Operator):
 				'position': pos,
 				'rotation': rot,
 
+				'layer': 0,
 				'parentID': 0, # TODO
 				'meshID': mid,
 				'scriptID': 0, # TODO

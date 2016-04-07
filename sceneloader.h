@@ -23,6 +23,22 @@ struct MaterialData {
 	vec3 color;
 };
 
+struct EntityData {
+	u8 nameLength;
+	char name[256];
+	vec3 position;
+	vec3 rotation;
+	u8 layer;
+
+	u16 parentID;
+	u16 meshID;
+	u16 scriptID;
+	u8 entityType;
+	u8 colliderType;
+
+	// TODO: MORE
+};
+
 struct SceneData {
 	u16 numMeshes = 0;
 	RawMeshData* meshes = nullptr;
@@ -31,6 +47,8 @@ struct SceneData {
 	MaterialData* materials = nullptr;
 
 	u16 numEntities = 0;
+	EntityData* entities = nullptr;
+
 	u16 numScripts = 0;
 };
 

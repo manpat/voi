@@ -99,6 +99,7 @@ Format
 		char[nameLength]	name
 		f32[3]				position
 		f32[3]				rotation
+		u8					layer
 		u16					parentID (can be zero)
 		u16					meshID (can be zero)
 		u16					scriptID (can be zero)

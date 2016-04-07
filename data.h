@@ -27,16 +27,43 @@ struct Mesh {
 };
 
 struct Material {
-	char name[256];
+	char* name;
 	vec3 color;
 	u32 flags = 0;
 	u32 shaderID = 0;
 };
 
-struct Entity {};
+struct Entity {
+	u16 id;
+	u32 flags;
+
+	u8 layer;
+	vec3 position;
+	quat rotation;
+
+	u16 parentID;
+	u16 meshID;
+
+	u8 nameLength;
+	char* name;
+
+	// u16 scriptID; // TODO
+	u8 entityType;
+	u8 colliderType;
+
+	// TODO: collision stuff
+	// TODO: entity specific data
+};
+
 struct Scene {
 	u16 numMeshes = 0;
+	u16 numEntities = 0;
 
+	u32 nameArenaSize = 0;
+	char* nameArena = nullptr;
+	char* nameArenaFree = nullptr;
+
+	Entity* entities;
 	Mesh* meshes;
 	Material materials[256];
 };

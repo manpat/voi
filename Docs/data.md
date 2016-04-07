@@ -58,17 +58,18 @@ Possible entity types include:
 
 struct Entity {
 	u16 id
-	u8 entityType
 	char[256] name
 	u32 flags
 
 	vec3 position
 	quat rotation
+	u8 layer;
 
 	u16 parentID
 	u16 meshID
 
 	u16 scriptID // Unsure how this will be handled
+	u8 entityType
 
 	// Collider data
 	// Specific entity data

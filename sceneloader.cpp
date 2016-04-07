@@ -148,23 +148,29 @@ SceneData LoadSceneData(const char* fname) {
 	}
 
 	scene.numEntities = Read<u16>(&it);
+	scene.entities = new EntityData[scene.numEntities];
 	printf("numEntities: %hu\n", scene.numEntities);
+
 	for(u16 i = 0; i < scene.numEntities; i++) {
 		if(!CheckStamp(&it, "ENTY")) goto error;
+		auto ent = &scene.entities[i];
 		
-		u8 nameLength = *it++;
-		printf("\tentityName: %.*s\n", nameLength, it);
+		u8 nameLength = ent->nameLength = *it++;
+		std::memcpy(ent->name, it, nameLength);
 		it += nameLength;
 
-		vec3 position = Read<vec3>(&it);
-		vec3 rotation = Read<vec3>(&it);
+		vec3 position = ent->position = Read<vec3>(&it);
+		vec3 rotation = ent->rotation = Read<vec3>(&it);
+		u8 layer = ent->layer = Read<u8>(&it);
 
-		u16 parentID = Read<u16>(&it);
-		u16 meshID = Read<u16>(&it);
-		u16 scriptID = Read<u16>(&it);
-		u8  entityType = *it++;
-		u8  colliderType = *it++;
+		u16 parentID = ent->parentID = Read<u16>(&it);
+		u16 meshID = ent->meshID = Read<u16>(&it);
+		u16 scriptID = ent->scriptID = Read<u16>(&it);
+		u8  entityType = ent->entityType = *it++;
+		u8  colliderType = ent->colliderType = *it++;
 
+		printf("\tentityName: %.*s\n", nameLength, ent->name);
+		printf("\tlayer: %hhu\n", layer);
 		printf("\tposition: (%.1f, %.1f, %.1f)\n", position.x, position.y, position.z);
 		printf("\trotation: (%.1f, %.1f, %.1f)\n", rotation.x, rotation.y, rotation.z);
 		printf("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);

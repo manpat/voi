@@ -49,6 +49,16 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	auto sceneData = LoadSceneData("export.voi");
 	assert(sceneData.numMeshes > 0);
 
+	// THIS IS WAY OVERKILL!!
+	// It would be better to actually figure out how long the names are
+	scene.nameArenaSize = (sceneData.numMaterials + sceneData.numEntities) * 256u;
+	scene.nameArena = new char[scene.nameArenaSize];
+	scene.nameArenaFree = scene.nameArena;
+	std::memset(scene.nameArena, 0, scene.nameArenaSize);
+
+	scene.numEntities = sceneData.numEntities;
+	scene.entities = new Entity[scene.numEntities];
+
 	scene.numMeshes = sceneData.numMeshes;
 	scene.meshes = new Mesh[scene.numMeshes];
 
@@ -125,14 +135,43 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	// Do material stuff
-	{	std::memset(scene.materials, 0, sizeof(scene.materials));
-		for(u16 i = 0; i < sceneData.numMaterials; i++){
-			auto to = &scene.materials[i];
-			auto from = &sceneData.materials[i];
-			std::memcpy(to->name, from->name, from->nameLength);
-			to->color = from->color;
-			// TODO: Shader stuff when added
-		}
+	std::memset(scene.materials, 0, sizeof(scene.materials));
+	for(u16 i = 0; i < sceneData.numMaterials; i++){
+		auto to = &scene.materials[i];
+		auto from = &sceneData.materials[i];
+
+		std::memcpy(scene.nameArenaFree, from->name, from->nameLength);
+		to->name = scene.nameArenaFree;
+		scene.nameArenaFree += from->nameLength;
+		*scene.nameArenaFree++ = '\0';
+
+		to->color = from->color;
+		// TODO: Shader stuff when added
+	}
+
+	// Do entity stuff
+	std::memset(scene.entities, 0, scene.numEntities * sizeof(Entity));
+	for(u32 i = 0; i < sceneData.numEntities; i++) {
+		auto to = &scene.entities[i];
+		auto from = &sceneData.entities[i];
+
+		std::memcpy(scene.nameArenaFree, from->name, from->nameLength);
+		to->nameLength = from->nameLength;
+		to->name = scene.nameArenaFree;
+		scene.nameArenaFree += to->nameLength;
+		*scene.nameArenaFree++ = '\0';
+
+		to->id = i+1;
+		to->flags = 0; // TODO
+
+		to->layer = from->layer;
+		to->position = from->position;
+		to->rotation = quat(from->rotation);
+
+		to->parentID = from->parentID;
+		to->meshID = from->meshID;
+		to->entityType = from->entityType;
+		to->colliderType = from->colliderType;
 	}
 
 	FreeSceneData(&sceneData);
@@ -173,13 +212,19 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 		static f32 t = 0.f;
-		modelMatrix = glm::rotate<f32>(t += 0.01f, glm::normalize(vec3{0,1,0}));
+		viewMatrix 
+			= glm::translate<f32>(-cameraPosition)
+			* glm::rotate<f32>(t += 0.01f, glm::normalize(vec3{0,-1,0}));
 
 		glUniformMatrix4fv(viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
-		glUniformMatrix4fv(modelLoc, 1, false, glm::value_ptr(modelMatrix));
 
-		for(u32 meshID = 0; meshID < scene.numMeshes; meshID++) {
-			auto mesh = &scene.meshes[meshID];
+		for(u32 entID = 0; entID < scene.numEntities; entID++) {
+			auto ent = &scene.entities[entID];
+			if(!ent->meshID) continue;
+			auto mesh = &scene.meshes[ent->meshID-1];
+
+			mat4 modelMatrix = glm::translate<f32>(ent->position) * glm::mat4_cast(ent->rotation);
+			glUniformMatrix4fv(modelLoc, 1, false, glm::value_ptr(modelMatrix));
 
 			glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
@@ -206,6 +251,34 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 					(void*) (begin*3ull*mesh->elementSize));
 			}
 		}
+		// for(u32 meshID = 0; meshID < scene.numMeshes; meshID++) {
+		// 	auto mesh = &scene.meshes[meshID];
+
+		// 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+		// 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+		// 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+
+		// 	u32 end = mesh->numTriangles;
+		// 	auto sms = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
+		// 		&mesh->submeshesInline[0] : mesh->submeshes;
+			
+		// 	// Draw in reverse order to make getting triangle count easier
+		// 	for(s32 i = mesh->numSubmeshes-1; i >= 0; i--) {
+		// 		if(sms[i].materialID > 0) {
+		// 			auto mat = &scene.materials[sms[i].materialID-1];
+		// 			glUniform3fv(materialColorLoc, 1, glm::value_ptr(mat->color));
+		// 		}else{
+		// 			glUniform3fv(materialColorLoc, 1, glm::value_ptr(vec3{1,0,1}));
+		// 		}
+
+		// 		u32 begin = sms[i].startIndex;
+		// 		u32 count = end - begin;
+		// 		end = begin;
+
+		// 		glDrawElements(GL_TRIANGLES, count*3, mesh->elementType, 
+		// 			(void*) (begin*3ull*mesh->elementSize));
+		// 	}
+		// }
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
