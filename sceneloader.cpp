@@ -31,7 +31,7 @@ bool CheckStamp(u8** it, const char* stamp) {
 }
 
 template<class El>
-void SortMeshData(RawMeshData* md);
+void SortMeshData(MeshData* md);
 
 SceneData LoadSceneData(const char* fname) {
 	printf("Loading %s ...\n", fname);
@@ -61,7 +61,7 @@ SceneData LoadSceneData(const char* fname) {
 	assert(version == 1, "Unknown scene format version!");
 
 	scene.numMeshes = Read<u16>(&it);
-	scene.meshes = new RawMeshData[scene.numMeshes];
+	scene.meshes = new MeshData[scene.numMeshes];
 	printf("numMeshes: %hi\n", scene.numMeshes);
 
 	for(u16 i = 0; i < scene.numMeshes; i++) {
@@ -201,7 +201,7 @@ error:
 }
 
 template<class El>
-void SortMeshData(RawMeshData* md) {
+void SortMeshData(MeshData* md) {
 	auto ms = md->materialIDs;
 	auto ts = (El*) md->triangles8;
 	u32 count = md->numTriangles;
@@ -263,6 +263,7 @@ void FreeSceneData(SceneData* scene) {
 	}
 
 	delete[] scene->meshes;
+	delete[] scene->entities;
 	delete[] scene->materials;
 	// TODO: The rest when it exists
 }

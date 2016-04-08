@@ -55,6 +55,10 @@ struct Entity {
 	// TODO: entity specific data
 };
 
+struct ShaderProgram {
+	u32 program;
+};
+
 struct Scene {
 	u16 numMeshes = 0;
 	u16 numEntities = 0;
@@ -66,6 +70,7 @@ struct Scene {
 	Entity* entities;
 	Mesh* meshes;
 	Material materials[256];
+	ShaderProgram shaders[256]; // 0 is default shader
 };
 
 #endif

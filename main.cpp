@@ -1,16 +1,17 @@
 #include "common.h"
-#include "sceneloader.h"
 
+#include "sceneloader.h"
 #include "input.h"
 #include "data.h"
 
-#define GLEW_STATIC
-#include "glew.h"
 #include <SDL2/SDL.h>
 
 bool InitGL(SDL_Window*);
 void DeinitGL();
 u32 InitShaderProgram();
+
+void InitScene(Scene*, const SceneData*);
+void RenderScene(Scene*, u8 = 0);
 
 enum {
 	WindowWidth = 800,
@@ -40,147 +41,26 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glBindVertexArray(vao);
 
 	Input::Init();
-	Input::doCapture = false;
-
-	u32 program = InitShaderProgram();
-	glUseProgram(program);
+	Input::doCapture = true;
 
 	Scene scene;
-	auto sceneData = LoadSceneData("export.voi");
-	assert(sceneData.numMeshes > 0);
+	u32 program = scene.shaders[0].program = InitShaderProgram();
+	glUseProgram(program);
 
-	// THIS IS WAY OVERKILL!!
-	// It would be better to actually figure out how long the names are
-	scene.nameArenaSize = (sceneData.numMaterials + sceneData.numEntities) * 256u;
-	scene.nameArena = new char[scene.nameArenaSize];
-	scene.nameArenaFree = scene.nameArena;
-	std::memset(scene.nameArena, 0, scene.nameArenaSize);
+	{	auto sceneData = LoadSceneData("export.voi");
+		assert(sceneData.numMeshes > 0);
 
-	scene.numEntities = sceneData.numEntities;
-	scene.entities = new Entity[scene.numEntities];
-
-	scene.numMeshes = sceneData.numMeshes;
-	scene.meshes = new Mesh[scene.numMeshes];
-
-	for(u32 meshID = 0; meshID < scene.numMeshes; meshID++) {
-		auto meshData = &sceneData.meshes[meshID];
-		auto mesh = &scene.meshes[meshID];
-		mesh->numTriangles = meshData->numTriangles;
-		mesh->elementType = GL_UNSIGNED_INT;
-		if(meshData->numVertices < 256) {
-			mesh->elementType = GL_UNSIGNED_BYTE;
-		}else if(meshData->numVertices < 65536) {
-			mesh->elementType = GL_UNSIGNED_SHORT;
-		}
-
-		// Figure out submeshes
-		{	mesh->numSubmeshes = 0;
-			u8 prevMatID = 0;
-			for(u32 i = 0; i < mesh->numTriangles; i++) {
-				u8 mat = meshData->materialIDs[i];
-				if(mat > prevMatID) {
-					mesh->numSubmeshes++;
-					prevMatID = mat;
-				}
-			}
-		
-			auto submeshes = &mesh->submeshesInline[0];
-			if(mesh->numSubmeshes > Mesh::MaxInlineSubmeshes) {
-				mesh->submeshes = submeshes = new Mesh::Submesh[mesh->numSubmeshes];
-			}
-		
-			prevMatID = 0;
-			u32 matStart = 0;
-		
-			for(u32 i = 0; i < mesh->numTriangles; i++) {
-				u8 mat = meshData->materialIDs[i];
-				if(mat > prevMatID) {
-					if(prevMatID != 0) {
-						*submeshes++ = {matStart, prevMatID};
-					}
-		
-					matStart = i;
-					prevMatID = mat;
-				}
-			}
-		
-			*submeshes++ = {matStart, prevMatID};
-		}
-
-		auto submeshes = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
-			&mesh->submeshesInline[0] : mesh->submeshes;
-
-		printf("numSubmeshes: %d\n", mesh->numSubmeshes);
-		for(u32 i = 0; i < mesh->numSubmeshes; i++) {
-			printf("\tsm: start: %u\tid: %hhu\n", submeshes[i].startIndex, submeshes[i].materialID);
-		}
-
-		glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-		glBufferData(GL_ARRAY_BUFFER, meshData->numVertices*sizeof(vec3), meshData->vertices, GL_STATIC_DRAW);
-
-		u8 elementSize;
-		switch(mesh->elementType) {
-			default:
-			case GL_UNSIGNED_BYTE:  elementSize = mesh->elementSize = 1; break;
-			case GL_UNSIGNED_SHORT: elementSize = mesh->elementSize = 2; break;
-			case GL_UNSIGNED_INT: 	elementSize = mesh->elementSize = 4; break;
-		}
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, meshData->triangles8, GL_STATIC_DRAW);
+		InitScene(&scene, &sceneData);
+		FreeSceneData(&sceneData);
 	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	// Do material stuff
-	std::memset(scene.materials, 0, sizeof(scene.materials));
-	for(u16 i = 0; i < sceneData.numMaterials; i++){
-		auto to = &scene.materials[i];
-		auto from = &sceneData.materials[i];
-
-		std::memcpy(scene.nameArenaFree, from->name, from->nameLength);
-		to->name = scene.nameArenaFree;
-		scene.nameArenaFree += from->nameLength;
-		*scene.nameArenaFree++ = '\0';
-
-		to->color = from->color;
-		// TODO: Shader stuff when added
-	}
-
-	// Do entity stuff
-	std::memset(scene.entities, 0, scene.numEntities * sizeof(Entity));
-	for(u32 i = 0; i < sceneData.numEntities; i++) {
-		auto to = &scene.entities[i];
-		auto from = &sceneData.entities[i];
-
-		std::memcpy(scene.nameArenaFree, from->name, from->nameLength);
-		to->nameLength = from->nameLength;
-		to->name = scene.nameArenaFree;
-		scene.nameArenaFree += to->nameLength;
-		*scene.nameArenaFree++ = '\0';
-
-		to->id = i+1;
-		to->flags = 0; // TODO
-
-		to->layer = from->layer;
-		to->position = from->position;
-		to->rotation = quat(from->rotation);
-
-		to->parentID = from->parentID;
-		to->meshID = from->meshID;
-		to->entityType = from->entityType;
-		to->colliderType = from->colliderType;
-	}
-
-	FreeSceneData(&sceneData);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(.1f, .1f, .1f, 1);
 	glEnableVertexAttribArray(0);
 
 	vec3 cameraPosition {0, 0, 5};
+	vec2 cameraRot {0,0};
+
 	f32 fov = M_PI/3.f;
 	f32 aspect = (f32) WindowWidth / WindowHeight;
 	f32 nearDist = 0.001f;
@@ -188,11 +68,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	mat4 projectionMatrix = glm::perspective(fov, aspect, nearDist, farDist);
 	mat4 viewMatrix = glm::translate<f32>(-cameraPosition);
-	mat4 modelMatrix = mat4(1.f);
 
-	u32 materialColorLoc = glGetUniformLocation(program, "materialColor");
 	u32 viewProjectionLoc = glGetUniformLocation(program, "viewProjection");
-	u32 modelLoc = glGetUniformLocation(program, "model");
 
 	SDL_Event e;
 	bool running = true;
@@ -209,79 +86,23 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			running = false;
 		}
 
+		cameraRot += Input::GetMouseDelta();
+		cameraRot.y = glm::clamp<f32>(cameraRot.y, -PI/2.f, PI/2.f);
+
+		quat cameraRotQuat{};
+		cameraRotQuat = glm::angleAxis(-cameraRot.x, vec3{0,1,0}) * glm::angleAxis(cameraRot.y, vec3{1,0,0});
+
+		if(Input::GetKey('w')) cameraPosition += cameraRotQuat * vec3{0,0,-1} * 0.1f;
+		if(Input::GetKey('s')) cameraPosition += cameraRotQuat * vec3{0,0, 1} * 0.1f;
+		if(Input::GetKey('a')) cameraPosition += cameraRotQuat * vec3{-1,0,0} * 0.1f;
+		if(Input::GetKey('d')) cameraPosition += cameraRotQuat * vec3{ 1,0,0} * 0.1f;
+
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-		static f32 t = 0.f;
-		viewMatrix 
-			= glm::translate<f32>(-cameraPosition)
-			* glm::rotate<f32>(t += 0.01f, glm::normalize(vec3{0,-1,0}));
-
+		viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
 		glUniformMatrix4fv(viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
 
-		for(u32 entID = 0; entID < scene.numEntities; entID++) {
-			auto ent = &scene.entities[entID];
-			if(!ent->meshID) continue;
-			auto mesh = &scene.meshes[ent->meshID-1];
-
-			mat4 modelMatrix = glm::translate<f32>(ent->position) * glm::mat4_cast(ent->rotation);
-			glUniformMatrix4fv(modelLoc, 1, false, glm::value_ptr(modelMatrix));
-
-			glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-
-			u32 end = mesh->numTriangles;
-			auto sms = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
-				&mesh->submeshesInline[0] : mesh->submeshes;
-			
-			// Draw in reverse order to make getting triangle count easier
-			for(s32 i = mesh->numSubmeshes-1; i >= 0; i--) {
-				if(sms[i].materialID > 0) {
-					auto mat = &scene.materials[sms[i].materialID-1];
-					glUniform3fv(materialColorLoc, 1, glm::value_ptr(mat->color));
-				}else{
-					glUniform3fv(materialColorLoc, 1, glm::value_ptr(vec3{1,0,1}));
-				}
-
-				u32 begin = sms[i].startIndex;
-				u32 count = end - begin;
-				end = begin;
-
-				glDrawElements(GL_TRIANGLES, count*3, mesh->elementType, 
-					(void*) (begin*3ull*mesh->elementSize));
-			}
-		}
-		// for(u32 meshID = 0; meshID < scene.numMeshes; meshID++) {
-		// 	auto mesh = &scene.meshes[meshID];
-
-		// 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-		// 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-		// 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-
-		// 	u32 end = mesh->numTriangles;
-		// 	auto sms = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
-		// 		&mesh->submeshesInline[0] : mesh->submeshes;
-			
-		// 	// Draw in reverse order to make getting triangle count easier
-		// 	for(s32 i = mesh->numSubmeshes-1; i >= 0; i--) {
-		// 		if(sms[i].materialID > 0) {
-		// 			auto mat = &scene.materials[sms[i].materialID-1];
-		// 			glUniform3fv(materialColorLoc, 1, glm::value_ptr(mat->color));
-		// 		}else{
-		// 			glUniform3fv(materialColorLoc, 1, glm::value_ptr(vec3{1,0,1}));
-		// 		}
-
-		// 		u32 begin = sms[i].startIndex;
-		// 		u32 count = end - begin;
-		// 		end = begin;
-
-		// 		glDrawElements(GL_TRIANGLES, count*3, mesh->elementType, 
-		// 			(void*) (begin*3ull*mesh->elementSize));
-		// 	}
-		// }
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RenderScene(&scene, 0);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
