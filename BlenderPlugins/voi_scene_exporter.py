@@ -30,10 +30,11 @@ class ExportVoiScene(bpy.types.Operator):
 	# 	return context.object is not None
 
 	def execute(self, context):
+		debugRun = False
+
 		fname = self.filepath
 		if(fname == ""):
-			self.report({'ERROR'}, "Empty filepath!")
-			return {'FINISHED'}
+			debugRun = True
 
 		if(fname[-4:].lower() != ".voi"):
 			fname += ".voi"
@@ -42,9 +43,15 @@ class ExportVoiScene(bpy.types.Operator):
 		self.compileMeshes()
 		self.compileEntities()
 
+		print(bpy.types.Scene.voi_obtypes)
+
 		# print(self.materials, "\n")
 		# print(self.meshes, "\n")
 		# print(self.entities, "\n")
+		if debugRun:
+			self.report({'ERROR'}, "Empty filepath!")
+			return {'FINISHED'}
+
 
 		with open(fname, 'wb') as out:
 			out.write(b"VOI") # Magic
@@ -88,6 +95,7 @@ class ExportVoiScene(bpy.types.Operator):
 				out.write(struct.pack('=fff', *e['position']))
 				out.write(struct.pack('=fff', *e['rotation']))
 				out.write(struct.pack('=B', e['layer']))
+				out.write(struct.pack('=I', e['flags']))
 				out.write(struct.pack('=H', e['parentID']))
 				out.write(struct.pack('=H', e['meshID']))
 				out.write(struct.pack('=H', e['scriptID']))
@@ -179,6 +187,7 @@ class ExportVoiScene(bpy.types.Operator):
 	def compileEntities(self):
 		self.entities = []
 
+		obtypes = bpy.types.Scene.voi_obtypes
 		scene = bpy.data.scenes[0]
 		for obj in scene.objects:
 			mid = self.meshIDs.get(obj.data.name, 0)
@@ -186,19 +195,28 @@ class ExportVoiScene(bpy.types.Operator):
 			rot = swapCoords(obj.rotation_euler)
 
 			layer = next(i for i,v in enumerate(obj.layers) if v)
+			type = obj.get("voi_entitytype", 0)
+			flags = 0
+
+			if obj.get("voi_entityhidden", False):
+				flags |= 1<<0
+
+			print(type)
 
 			self.entities.append({
 				'name': obj.name,
 
 				'position': pos,
 				'rotation': rot,
-
 				'layer': layer,
+
+				'flags': flags,
+
 				'parentID': 0, # TODO
 				'meshID': mid,
 				'scriptID': 0, # TODO
 
-				'entityType': 0, # TODO
+				'entityType': type,
 				'colliderType': 0, # TODO
 			})
 

@@ -34,6 +34,16 @@ struct Material {
 };
 
 struct Entity {
+	enum : u8 {
+		TypeGeometry,
+		TypePortal,
+		TypeMirror,
+	};
+
+	enum : u8 {
+		FlagHidden = 1<<0,
+	};
+
 	u16 id;
 	u32 flags;
 
@@ -48,11 +58,17 @@ struct Entity {
 	char* name;
 
 	// u16 scriptID; // TODO
-	u8 entityType;
+	u8 entityType; // Type*
 	u8 colliderType;
 
 	// TODO: collision stuff
-	// TODO: entity specific data
+
+	union {
+		// Portal info
+		struct {
+			u8 targetLayer;
+		} portalInfo;
+	};
 };
 
 struct ShaderProgram {

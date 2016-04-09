@@ -30,6 +30,7 @@ struct EntityData {
 	vec3 rotation;
 	u8 layer;
 
+	u32 flags;
 	u16 parentID;
 	u16 meshID;
 	u16 scriptID;

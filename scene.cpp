@@ -119,7 +119,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 		*scene->nameArenaFree++ = '\0';
 
 		to->id = i+1;
-		to->flags = 0; // TODO
+		to->flags = from->flags;
 
 		to->layer = from->layer;
 		to->position = from->position;
@@ -140,6 +140,8 @@ void RenderScene(Scene* scene, u8 layer) {
 	for(u32 entID = 0; entID < scene->numEntities; entID++) {
 		auto ent = &scene->entities[entID];
 		if(!ent->meshID) continue;
+		if(ent->flags & Entity::FlagHidden) continue;
+		if(ent->entityType != Entity::TypeGeometry) continue; // Only render geometry, atm
 		if(ent->layer != layer) continue;
 
 		auto mesh = &scene->meshes[ent->meshID-1];

@@ -9,3 +9,9 @@ Sick TOC
 	* [Coding Standard/Guidelines](Docs/guidelines.md)
 * Tech Shit
 	* [Voi Scene File Format](Docs/scene_format.md)
+	* [Various Data Thinkings](Docs/data.md)
+
+Blendering
+----------
+If you plan on making levels, you need to add both voi_properties.py and voi_scene_exporter.py
+to your blender scripts folder (or just install them, whatever)
