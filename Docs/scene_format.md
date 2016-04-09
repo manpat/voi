@@ -107,6 +107,9 @@ Format
 		u8					entityType
 		u8					colliderType
 
+		u16					entityDataSize
+		EntityData[entityDataSize]
+
 		if(colliderType > 0) {
 			// Collider specific size stuff
 			bool			isTrigger

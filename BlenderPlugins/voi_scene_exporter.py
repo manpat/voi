@@ -103,6 +103,13 @@ class ExportVoiScene(bpy.types.Operator):
 				out.write(struct.pack('=B', e['colliderType']))
 				# TODO: collider data
 
+				type = e['entityType']
+				if type == 1: # Portal
+					out.write(struct.pack('=H', 1)) # Size
+					out.write(struct.pack('=B', e['portalDestination']))
+				else:
+					out.write(struct.pack('=H', 0))
+
 			out.write(struct.pack('=H', len(bpy.data.texts)))
 			for s in bpy.data.texts:
 				out.write(b"CODE")
@@ -201,9 +208,7 @@ class ExportVoiScene(bpy.types.Operator):
 			if obj.get("voi_entityhidden", False):
 				flags |= 1<<0
 
-			print(type)
-
-			self.entities.append({
+			data = {
 				'name': obj.name,
 
 				'position': pos,
@@ -218,7 +223,12 @@ class ExportVoiScene(bpy.types.Operator):
 
 				'entityType': type,
 				'colliderType': 0, # TODO
-			})
+			}
+
+			if type == 1:
+				data['portalDestination'] = obj.get("voi_portaldst", 1)
+
+			self.entities.append(data)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)

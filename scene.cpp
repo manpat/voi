@@ -129,6 +129,17 @@ void InitScene(Scene* scene, const SceneData* data) {
 		to->meshID = from->meshID;
 		to->entityType = from->entityType;
 		to->colliderType = from->colliderType;
+
+		switch(to->entityType) {
+		case Entity::TypePortal:
+			to->portalInfo.targetLayer = from->entitySpecificData[0];
+			break;
+
+		case Entity::TypeGeometry:
+		case Entity::TypeMirror:
+		default:
+			break;
+		}
 	}
 }
 

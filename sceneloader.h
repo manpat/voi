@@ -38,6 +38,9 @@ struct EntityData {
 	u8 colliderType;
 
 	// TODO: MORE
+	
+	static constexpr u32 MaxEntitySpecificData = 1024;
+	u8 entitySpecificData[MaxEntitySpecificData];
 };
 
 struct SceneData {

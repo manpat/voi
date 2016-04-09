@@ -29,6 +29,10 @@ class ObjectPanel(bpy.types.Panel):
 		layout.row().prop(o, "voi_entitytype")
 		layout.row().prop(o, "voi_entityhidden")
 
+		type = o.get("voi_entitytype", 0)
+		if type == 1: # Portal
+			layout.row().prop(o, "voi_portaldst")
+
 def register():
 	bpy.utils.register_class(ObjectPanel)
 
@@ -41,6 +45,8 @@ def register():
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=bpy.types.Scene.voi_obtypes, name="Entity Type", default='g')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
+	
+	obj.voi_portaldst = IntProperty(name="Portal Destination", default=0, min=0, max=10, subtype='UNSIGNED')
 
 
 def unregister():
