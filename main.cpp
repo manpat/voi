@@ -48,6 +48,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glUseProgram(program);
 
 	{	auto sceneData = LoadSceneData("export.voi");
+	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 		assert(sceneData.numMeshes > 0);
 
 		InitScene(&scene, &sceneData);
@@ -55,6 +56,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	}
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glClearColor(.1f, .1f, .1f, 1);
 	glEnableVertexAttribArray(0);
 
@@ -70,6 +72,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	mat4 viewMatrix = glm::translate<f32>(-cameraPosition);
 
 	u32 viewProjectionLoc = glGetUniformLocation(program, "viewProjection");
+	u8 layer = 0;
 
 	SDL_Event e;
 	bool running = true;
@@ -92,17 +95,30 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		quat cameraRotQuat{};
 		cameraRotQuat = glm::angleAxis(-cameraRot.x, vec3{0,1,0}) * glm::angleAxis(cameraRot.y, vec3{1,0,0});
 
-		if(Input::GetKey('w')) cameraPosition += cameraRotQuat * vec3{0,0,-1} * 0.1f;
-		if(Input::GetKey('s')) cameraPosition += cameraRotQuat * vec3{0,0, 1} * 0.1f;
-		if(Input::GetKey('a')) cameraPosition += cameraRotQuat * vec3{-1,0,0} * 0.1f;
-		if(Input::GetKey('d')) cameraPosition += cameraRotQuat * vec3{ 1,0,0} * 0.1f;
+		f32 speed = 0.1f;
+		if(Input::GetKey(SDLK_LSHIFT)) speed *= 4.f;
+
+		if(Input::GetKey('w')) cameraPosition += cameraRotQuat * vec3{0,0,-1} * speed;
+		if(Input::GetKey('s')) cameraPosition += cameraRotQuat * vec3{0,0, 1} * speed;
+		if(Input::GetKey('a')) cameraPosition += cameraRotQuat * vec3{-1,0,0} * speed;
+		if(Input::GetKey('d')) cameraPosition += cameraRotQuat * vec3{ 1,0,0} * speed;
+
+		if(Input::GetKeyDown('1')) layer = 0;
+		if(Input::GetKeyDown('2')) layer = 1;
+		if(Input::GetKeyDown('3')) layer = 2;
+		if(Input::GetKeyDown('4')) layer = 3;
+		if(Input::GetKeyDown('5')) layer = 4;
+		if(Input::GetKeyDown('6')) layer = 5;
+		if(Input::GetKeyDown('7')) layer = 6;
+		if(Input::GetKeyDown('8')) layer = 7;
+		if(Input::GetKeyDown('9')) layer = 8;
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 		viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
 		glUniformMatrix4fv(viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
 
-		RenderScene(&scene, 0);
+		RenderScene(&scene, layer);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);

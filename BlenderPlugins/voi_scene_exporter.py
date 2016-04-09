@@ -42,9 +42,9 @@ class ExportVoiScene(bpy.types.Operator):
 		self.compileMeshes()
 		self.compileEntities()
 
-		print(self.materials, "\n")
-		print(self.meshes, "\n")
-		print(self.entities, "\n")
+		# print(self.materials, "\n")
+		# print(self.meshes, "\n")
+		# print(self.entities, "\n")
 
 		with open(fname, 'wb') as out:
 			out.write(b"VOI") # Magic
@@ -111,6 +111,9 @@ class ExportVoiScene(bpy.types.Operator):
 		self.materials = []
 		self.materialIDs = {}
 
+		defaultMat = {'name': 'DEFAULT', 'color': [1,0,1]}
+		self.materials.append(defaultMat)
+
 		for m in bpy.data.materials:
 			mat = {}
 			mat['name'] = m.name
@@ -140,19 +143,25 @@ class ExportVoiScene(bpy.types.Operator):
 
 				for p in odata.polygons:
 					midx = p.material_index
-					mname = odata.materials[midx].name
-					mid = self.materialIDs.get(mname, 0)
+					mid = 0
+
+					if midx < len(odata.materials):
+						mat = odata.materials[midx]
+						mid = self.materialIDs.get(mat.name, 0)
 
 					if len(p.vertices) == 3:
 						ts.extend(p.vertices[:])
 						ms.append(mid)
 						numTriangles += 1
-					else: # quad
+					elif len(p.vertices) >= 4:
 						tvs = p.vertices
-						ts.extend([tvs[0], tvs[1], tvs[2]])
-						ts.extend([tvs[0], tvs[2], tvs[3]])
-						ms.extend([mid, mid])
-						numTriangles += 2
+						for i in range(1, len(tvs)-1):
+							ts.extend([tvs[0], tvs[i], tvs[i+1]])
+
+						ms.extend([mid] * (len(tvs)-2))
+						numTriangles += len(tvs)-2
+					# else:
+						# ERROR
 
 				mesh = {
 					'numVertices': len(odata.vertices),
@@ -164,8 +173,8 @@ class ExportVoiScene(bpy.types.Operator):
 
 				self.meshes.append(mesh)
 				self.meshIDs[odata.name] = len(self.meshes) # ids start at 1
-			else:
-				print(obj.type)
+			# else:
+			# 	print("Unknown type: " + obj.type)
 
 	def compileEntities(self):
 		self.entities = []
@@ -176,13 +185,15 @@ class ExportVoiScene(bpy.types.Operator):
 			pos = swapCoords(obj.location.xyz)
 			rot = swapCoords(obj.rotation_euler)
 
+			layer = next(i for i,v in enumerate(obj.layers) if v)
+
 			self.entities.append({
 				'name': obj.name,
 
 				'position': pos,
 				'rotation': rot,
 
-				'layer': 0,
+				'layer': layer,
 				'parentID': 0, # TODO
 				'meshID': mid,
 				'scriptID': 0, # TODO

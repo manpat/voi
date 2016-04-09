@@ -34,9 +34,9 @@ void InitScene(Scene* scene, const SceneData* data) {
 
 		// Figure out submeshes
 		{	mesh->numSubmeshes = 0;
-			u8 prevMatID = 0;
+			s16 prevMatID = -1;
 			for(u32 i = 0; i < mesh->numTriangles; i++) {
-				u8 mat = meshData->materialIDs[i];
+				s16 mat = meshData->materialIDs[i];
 				if(mat > prevMatID) {
 					mesh->numSubmeshes++;
 					prevMatID = mat;
@@ -48,14 +48,14 @@ void InitScene(Scene* scene, const SceneData* data) {
 				mesh->submeshes = submeshes = new Mesh::Submesh[mesh->numSubmeshes];
 			}
 		
-			prevMatID = 0;
+			prevMatID = -1;
 			u32 matStart = 0;
 		
 			for(u32 i = 0; i < mesh->numTriangles; i++) {
 				u8 mat = meshData->materialIDs[i];
 				if(mat > prevMatID) {
-					if(prevMatID != 0) {
-						*submeshes++ = {matStart, prevMatID};
+					if(prevMatID != -1) {
+						*submeshes++ = {matStart, (u8)prevMatID};
 					}
 		
 					matStart = i;
@@ -63,7 +63,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 				}
 			}
 		
-			*submeshes++ = {matStart, prevMatID};
+			*submeshes++ = {matStart, (u8)prevMatID};
 		}
 
 		auto submeshes = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
