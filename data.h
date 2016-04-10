@@ -38,6 +38,12 @@ struct Entity {
 		TypeGeometry,
 		TypePortal,
 		TypeMirror,
+		TypeTrigger,
+
+		// Specialised triggers
+		TypeHalflifePoint,
+		TypeAudioRegion,
+		TypeFogRegion,
 	};
 
 	enum : u8 {
@@ -67,6 +73,7 @@ struct Entity {
 		// Portal info
 		struct {
 			u8 targetLayer;
+			vec4 clipPlane;
 		} portalInfo;
 	};
 };

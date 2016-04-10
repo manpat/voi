@@ -45,7 +45,7 @@ def register():
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=bpy.types.Scene.voi_obtypes, name="Entity Type", default='g')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
-	
+
 	obj.voi_portaldst = IntProperty(name="Portal Destination", default=0, min=0, max=10, subtype='UNSIGNED')
 
 

@@ -112,6 +112,8 @@ Format
 
 		if(colliderType > 0) {
 			// Collider specific size stuff
+
+			// NOTE: These can be entity flags
 			bool			isTrigger
 			bool			isKinematic
 		}

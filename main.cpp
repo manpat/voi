@@ -115,9 +115,12 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+		glEnable(GL_CLIP_DISTANCE0);
+
 		viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
 		glUniformMatrix4fv(viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
 
+		glUniform4fv(glGetUniformLocation(program, "clipPlane"), 1, glm::value_ptr(vec4{1,0,0,.5}));
 		RenderScene(&scene, layer);
 
 		SDL_GL_SwapWindow(window);
@@ -209,12 +212,16 @@ u32 CreateShader(const char* src, u32 type) {
 u32 InitShaderProgram() {
 	const char* vsrc = SHADER(
 		in vec3 vertex;
+		out float gl_ClipDistance[1];
 
 		uniform mat4 viewProjection;
 		uniform mat4 model;
 
+		uniform vec4 clipPlane;
+
 		void main() {
 			gl_Position = viewProjection * model * vec4(vertex, 1);
+			gl_ClipDistance[0] = dot(model * vec4(vertex, 1), clipPlane);
 		}
 	);
 
