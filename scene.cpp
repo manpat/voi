@@ -138,13 +138,16 @@ void InitScene(Scene* scene, const SceneData* data) {
 	}
 }
 
-void RenderMesh(Scene* scene, u16 meshID) {
+void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
 	auto program = &scene->shaders[0]; // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+
+	mat4 modelMatrix = glm::translate<f32>(pos) * glm::mat4_cast(rot);
+	glUniformMatrix4fv(program->modelLoc, 1, false, glm::value_ptr(modelMatrix));
 
 	auto sms = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
 		&mesh->submeshesInline[0] : mesh->submeshes;

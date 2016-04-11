@@ -19,7 +19,7 @@ Rendering
 	  \ 2 -- 4
 
 - Render current scene including portals into color and depth
-- For each child node
+- For each child node (portal)
 	- Clear stencil
 	- Render portal mesh to stencil
 	- 'Clear' depth by drawing quad at far plane

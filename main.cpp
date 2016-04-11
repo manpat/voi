@@ -12,7 +12,7 @@ ShaderProgram InitShaderProgram();
 
 void InitScene(Scene*, const SceneData*);
 // void RenderScene(Scene*, u8 = 0);
-void RenderMesh(Scene*, u16 meshID);
+void RenderMesh(Scene*, u16 meshID, vec3, quat);
 
 enum {
 	WindowWidth = 800,
@@ -60,6 +60,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glDepthFunc(GL_LEQUAL);
 	glClearColor(.1f, .1f, .1f, 1);
 	glEnableVertexAttribArray(0);
 
@@ -72,6 +74,24 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	f32 farDist = 100.f;
 
 	mat4 projectionMatrix = glm::perspective(fov, aspect, nearDist, farDist);
+
+	u32 farPlaneBuffer = 0;
+	{	mat4 invProj = glm::inverse(projectionMatrix);
+		vec3 p0 = vec3{invProj * vec4{-1,-1,-1, 1} * (farDist-1.f)};
+		vec3 p1 = vec3{invProj * vec4{ 1,-1,-1, 1} * (farDist-1.f)};
+		vec3 p2 = vec3{invProj * vec4{ 1, 1,-1, 1} * (farDist-1.f)};
+		vec3 p3 = vec3{invProj * vec4{-1, 1,-1, 1} * (farDist-1.f)};
+
+		vec3 points[] = {
+			p0, p1, p2,
+			p0, p2, p3,
+		};
+
+		glGenBuffers(1, &farPlaneBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 
 	u8 layer = 0;
 
@@ -114,24 +134,18 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKeyDown('8')) layer = 7;
 		if(Input::GetKeyDown('9')) layer = 8;
 
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-		glEnable(GL_CLIP_DISTANCE0);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
 		auto sh = &scene.shaders[0];
 
 		mat4 viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
-		glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(vec4{0,0,0,.5}));
 
 		for(u32 entID = 0; entID < scene.numEntities; entID++) {
 			auto ent = &scene.entities[entID];
 			if(!ent->meshID) continue;
 			if(ent->flags & Entity::FlagHidden) continue;
 			if(~ent->layers & 1<<layer) continue;
-
-			mat4 modelMatrix = glm::translate<f32>(ent->position) * glm::mat4_cast(ent->rotation);
-			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(modelMatrix));
 
 			if(ent->entityType == Entity::TypePortal
 			|| ent->entityType == Entity::TypeMirror) {
@@ -140,8 +154,84 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 				glEnable(GL_CULL_FACE);
 			}
 
-			RenderMesh(&scene, ent->meshID);
+			RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
 		}
+
+		glEnable(GL_STENCIL_TEST);
+
+		// TODO: Create portal visibility graph and use that instead
+		for(u32 entID = 0; entID < scene.numEntities; entID++) {
+			auto ent = &scene.entities[entID];
+			if(!ent->meshID) continue;
+			if(ent->entityType != Entity::TypePortal) continue;
+			if(ent->flags & Entity::FlagHidden) continue;
+			if(~ent->layers & 1<<layer) continue;
+			// TODO: Check portal is actually visible (mostly)
+
+			auto targetLayer = ent->layers & ~(1<<layer);
+
+			glDisable(GL_CLIP_DISTANCE0);
+			glDisable(GL_CULL_FACE);
+
+			// Write portal to stencil
+			glStencilFunc(GL_ALWAYS, 1, 0xff);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glStencilMask(0xff);
+			glClear(GL_STENCIL_BUFFER_BIT);
+
+			RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
+
+			// Clear Depth within stencil
+			// 	- Disable color write
+			// 	- Always write to depth
+			// 	- Render quad at far plane
+			// 	- Reset depth write
+			glDepthFunc(GL_ALWAYS);
+			glStencilFunc(GL_EQUAL, 1, 0xFF);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+			glStencilMask(0x0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+			
+			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix));
+			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
+			glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.1f, .1f, .1f})); ////////////// Clear color
+
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			// Reset render state
+			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
+			glDepthFunc(GL_LEQUAL);
+
+			glEnable(GL_CLIP_DISTANCE0);			
+			glEnable(GL_CULL_FACE);
+			vec3 normal = vec3{0,1,0}; // TODO: Get from mesh
+			vec3 dir = glm::normalize(normal * ent->rotation);
+			glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(vec4{dir, -glm::dot(dir, ent->position)}));
+
+			for(u32 entID2 = 0; entID2 < scene.numEntities; entID2++) {
+				if(entID2 == entID) continue;
+
+				auto ent = &scene.entities[entID2];
+				if(!ent->meshID) continue;
+				if(ent->flags & Entity::FlagHidden) continue;
+				if(~ent->layers & targetLayer) continue;
+
+				if(ent->entityType == Entity::TypePortal
+				|| ent->entityType == Entity::TypeMirror) {
+					glDisable(GL_CULL_FACE);
+				}else{
+					glEnable(GL_CULL_FACE);
+				}
+
+				RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
+			}
+		}
+
+		glDisable(GL_STENCIL_TEST);
+		glDisable(GL_CLIP_DISTANCE0);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
