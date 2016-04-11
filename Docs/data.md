@@ -8,13 +8,14 @@ This would mean much more memory usage but could potentially be faster.
 
 // An immutable mesh
 struct Mesh {
-	u32 numElements
-	u32 elementType // GL_UNSIGNED_*
+	u32 numTriangles
 	u32 vbo
 	u32 ebo
+	u8 elementType // 0,1,2
+	// Size is 1 << elementType
 
 	struct Submesh {
-		u32 startIndex
+		u32 triangleCount
 		u8 materialID
 		// 3B free here
 	}

@@ -6,14 +6,15 @@
 struct Mesh {
 	enum { MaxInlineSubmeshes = 4 };
 
+	static constexpr u32 ElementTypeToGL[] = {GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, GL_UNSIGNED_INT};
+
 	u32 numTriangles = 0;
-	u32 elementType = 0; // GL_UNSIGNED_*
 	u32 vbo = 0;
 	u32 ebo = 0;
-	u8 elementSize = 0; // 1,2,4
+	u8 elementType = 0; // 0,1,2
 
 	struct Submesh {
-		u32 startIndex;
+		u32 triangleCount;
 		u8 materialID;
 		// 3B free here
 	};
@@ -73,13 +74,19 @@ struct Entity {
 		// Portal info
 		struct {
 			u8 targetLayer;
-			vec4 clipPlane;
+			// vec4 clipPlane;
 		} portalInfo;
 	};
 };
 
 struct ShaderProgram {
 	u32 program;
+
+	u32 materialColorLoc = 0;
+	u32 clipPlaneLoc = 0;
+
+	u32 viewProjectionLoc = 0;
+	u32 modelLoc = 0;
 };
 
 struct Scene {

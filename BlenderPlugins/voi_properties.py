@@ -14,6 +14,12 @@ bl_info = {
 	"blender": (2, 6, 9),
 }
 
+voi_obtypes = [
+	('g', "Geometry", "Shit that doesn't do much"),
+	('p', "Portal", "Goes places"),
+	('m', "Mirror", "Shiny"),
+]
+
 class ObjectPanel(bpy.types.Panel):
 	bl_label = "Voi Properties"
 	bl_idname = "OBJECT_PT_voi"
@@ -36,14 +42,8 @@ class ObjectPanel(bpy.types.Panel):
 def register():
 	bpy.utils.register_class(ObjectPanel)
 
-	bpy.types.Scene.voi_obtypes = [
-		('g', "Geometry", "Shit that doesn't do much"),
-		('p', "Portal", "Goes places"),
-		('m', "Mirror", "Shiny"),
-	]
-
 	obj = bpy.types.Object
-	obj.voi_entitytype = EnumProperty(items=bpy.types.Scene.voi_obtypes, name="Entity Type", default='g')
+	obj.voi_entitytype = EnumProperty(items=voi_obtypes, name="Entity Type", default='g')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
 
 	obj.voi_portaldst = IntProperty(name="Portal Destination", default=0, min=0, max=10, subtype='UNSIGNED')

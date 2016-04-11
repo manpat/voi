@@ -43,8 +43,6 @@ class ExportVoiScene(bpy.types.Operator):
 		self.compileMeshes()
 		self.compileEntities()
 
-		print(bpy.types.Scene.voi_obtypes)
-
 		# print(self.materials, "\n")
 		# print(self.meshes, "\n")
 		# print(self.entities, "\n")
@@ -194,7 +192,6 @@ class ExportVoiScene(bpy.types.Operator):
 	def compileEntities(self):
 		self.entities = []
 
-		obtypes = bpy.types.Scene.voi_obtypes
 		scene = bpy.data.scenes[0]
 		for obj in scene.objects:
 			mid = self.meshIDs.get(obj.data.name, 0)

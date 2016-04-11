@@ -8,10 +8,11 @@
 
 bool InitGL(SDL_Window*);
 void DeinitGL();
-u32 InitShaderProgram();
+ShaderProgram InitShaderProgram();
 
 void InitScene(Scene*, const SceneData*);
-void RenderScene(Scene*, u8 = 0);
+// void RenderScene(Scene*, u8 = 0);
+void RenderMesh(Scene*, u16 meshID);
 
 enum {
 	WindowWidth = 800,
@@ -43,9 +44,11 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	Input::Init();
 	Input::doCapture = true;
 
+	SDL_WarpMouseInWindow(window, WindowWidth/2, WindowHeight/2);
+
 	Scene scene;
-	u32 program = scene.shaders[0].program = InitShaderProgram();
-	glUseProgram(program);
+	scene.shaders[0] = InitShaderProgram();
+	glUseProgram(scene.shaders[0].program);
 
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 	{	auto sceneData = LoadSceneData("export.voi");
@@ -69,9 +72,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	f32 farDist = 100.f;
 
 	mat4 projectionMatrix = glm::perspective(fov, aspect, nearDist, farDist);
-	mat4 viewMatrix = glm::translate<f32>(-cameraPosition);
 
-	u32 viewProjectionLoc = glGetUniformLocation(program, "viewProjection");
 	u8 layer = 0;
 
 	SDL_Event e;
@@ -117,11 +118,30 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		glEnable(GL_CLIP_DISTANCE0);
 
-		viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
-		glUniformMatrix4fv(viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
+		auto sh = &scene.shaders[0];
 
-		glUniform4fv(glGetUniformLocation(program, "clipPlane"), 1, glm::value_ptr(vec4{1,0,0,.5}));
-		RenderScene(&scene, layer);
+		mat4 viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
+		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
+		glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(vec4{0,0,0,.5}));
+
+		for(u32 entID = 0; entID < scene.numEntities; entID++) {
+			auto ent = &scene.entities[entID];
+			if(!ent->meshID) continue;
+			if(ent->flags & Entity::FlagHidden) continue;
+			if(ent->layer != layer) continue;
+
+			mat4 modelMatrix = glm::translate<f32>(ent->position) * glm::mat4_cast(ent->rotation);
+			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(modelMatrix));
+
+			if(ent->entityType == Entity::TypePortal
+			|| ent->entityType == Entity::TypeMirror) {
+				glDisable(GL_CULL_FACE);
+			}else{
+				glEnable(GL_CULL_FACE);
+			}
+
+			RenderMesh(&scene, ent->meshID);
+		}
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
@@ -209,7 +229,9 @@ u32 CreateShader(const char* src, u32 type) {
 	return id;
 }
 
-u32 InitShaderProgram() {
+ShaderProgram InitShaderProgram() {
+	ShaderProgram ret{};
+
 	const char* vsrc = SHADER(
 		in vec3 vertex;
 		out float gl_ClipDistance[1];
@@ -240,32 +262,38 @@ u32 InitShaderProgram() {
 
 	if(!vsh || !fsh) {
 		fprintf(stderr, "Shader compilation failed\n");
-		return 0;
+		return ret;
 	}
 
-	u32 program = glCreateProgram();
-	glAttachShader(program, vsh);
-	glAttachShader(program, fsh);
-	glLinkProgram(program);
+	ret.program = glCreateProgram();
+	glAttachShader(ret.program, vsh);
+	glAttachShader(ret.program, fsh);
+	glLinkProgram(ret.program);
 
 	s32 linkStatus;
-	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+	glGetProgramiv(ret.program, GL_LINK_STATUS, &linkStatus);
 	if (!linkStatus) {
 		s32 logLength = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+		glGetProgramiv(ret.program, GL_INFO_LOG_LENGTH, &logLength);
 
 		// Get the info log and print it out
 		auto infoLog = new char[logLength];
-		glGetProgramInfoLog(program, logLength, nullptr, infoLog);
+		glGetProgramInfoLog(ret.program, logLength, nullptr, infoLog);
 
 		fprintf(stderr, "%s\n", infoLog);
 		delete[] infoLog;
 
-		glDeleteProgram(program);
-		return 0;
+		glDeleteProgram(ret.program);
+		ret.program = 0;
+	}else{
+		ret.viewProjectionLoc = glGetUniformLocation(ret.program, "viewProjection");
+		ret.modelLoc = glGetUniformLocation(ret.program, "model");
+
+		ret.clipPlaneLoc = glGetUniformLocation(ret.program, "clipPlane");
+		ret.materialColorLoc = glGetUniformLocation(ret.program, "materialColor");
 	}
 
 	glDeleteShader(vsh);
 	glDeleteShader(fsh);
-	return program;
+	return ret;
 }
