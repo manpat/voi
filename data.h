@@ -54,7 +54,7 @@ struct Entity {
 	u16 id;
 	u32 flags;
 
-	u8 layer;
+	u32 layers;
 	vec3 position;
 	quat rotation;
 

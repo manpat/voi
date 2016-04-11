@@ -28,7 +28,7 @@ struct EntityData {
 	char name[256];
 	vec3 position;
 	vec3 rotation;
-	u8 layer;
+	u32 layers;
 
 	u32 flags;
 	u16 parentID;

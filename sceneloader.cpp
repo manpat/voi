@@ -161,7 +161,7 @@ SceneData LoadSceneData(const char* fname) {
 
 		vec3 position = ent->position = Read<vec3>(&it);
 		vec3 rotation = ent->rotation = Read<vec3>(&it);
-		u8 layer = ent->layer = Read<u8>(&it);
+		u32 layers = ent->layers = Read<u32>(&it);
 
 		u32 flags = ent->flags = Read<u32>(&it);
 		u16 parentID = ent->parentID = Read<u16>(&it);
@@ -185,13 +185,13 @@ SceneData LoadSceneData(const char* fname) {
 		};
 
 		printf("\tentityName: %.*s\n", nameLength, ent->name);
-		printf("\tlayer: %hhu\n", layer);
+		printf("\tflags:  o%.2o\n", flags);
+		printf("\tlayers: o%.2o\n", layers);
 		printf("\tposition: (%.1f, %.1f, %.1f)\n", position.x, position.y, position.z);
 		printf("\trotation: (%.1f, %.1f, %.1f)\n", rotation.x, rotation.y, rotation.z);
 		printf("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);
 		printf("\tscriptID: %hu\n", scriptID);
 		printf("\tentityType: %s\n\tcolliderType: %hhu\n\n", entityTypeStrings[entityType], colliderType);
-		printf("\tflags: %u\n", flags);
 	}
 
 	scene.numScripts = Read<u16>(&it);

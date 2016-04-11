@@ -92,7 +92,7 @@ class ExportVoiScene(bpy.types.Operator):
 
 				out.write(struct.pack('=fff', *e['position']))
 				out.write(struct.pack('=fff', *e['rotation']))
-				out.write(struct.pack('=B', e['layer']))
+				out.write(struct.pack('=I', e['layers']))
 				out.write(struct.pack('=I', e['flags']))
 				out.write(struct.pack('=H', e['parentID']))
 				out.write(struct.pack('=H', e['meshID']))
@@ -198,7 +198,7 @@ class ExportVoiScene(bpy.types.Operator):
 			pos = swapCoords(obj.location.xyz)
 			rot = swapCoords(obj.rotation_euler)
 
-			layer = next(i for i,v in enumerate(obj.layers) if v)
+			layers = sum(1<<i for i,v in enumerate(obj.layers) if v)
 			type = obj.get("voi_entitytype", 0)
 			flags = 0
 
@@ -210,7 +210,7 @@ class ExportVoiScene(bpy.types.Operator):
 
 				'position': pos,
 				'rotation': rot,
-				'layer': layer,
+				'layers': layers,
 
 				'flags': flags,
 

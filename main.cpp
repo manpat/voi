@@ -128,7 +128,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			auto ent = &scene.entities[entID];
 			if(!ent->meshID) continue;
 			if(ent->flags & Entity::FlagHidden) continue;
-			if(ent->layer != layer) continue;
+			if(~ent->layers & 1<<layer) continue;
 
 			mat4 modelMatrix = glm::translate<f32>(ent->position) * glm::mat4_cast(ent->rotation);
 			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(modelMatrix));

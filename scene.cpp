@@ -116,7 +116,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 		to->id = i+1;
 		to->flags = from->flags;
 
-		to->layer = from->layer;
+		to->layers = from->layers;
 		to->position = from->position;
 		to->rotation = quat(from->rotation);
 
