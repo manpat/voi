@@ -70,7 +70,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	f32 fov = M_PI/3.f;
 	f32 aspect = (f32) WindowWidth / WindowHeight;
-	f32 nearDist = 0.001f;
+	f32 nearDist = 0.1f;
 	f32 farDist = 100.f;
 
 	mat4 projectionMatrix = glm::perspective(fov, aspect, nearDist, farDist);
@@ -91,6 +91,18 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	// TODO: Put in scene probably
+	static u32 portals[256];
+	static u32 numPortals = 0;
+
+	for(u32 i = 0; i < scene.numEntities; i++){
+		auto e = &scene.entities[i];
+		if(e->entityType != Entity::TypePortal) continue;
+
+		portals[numPortals] = i;
+		numPortals++;
 	}
 
 	u8 layer = 0;
@@ -134,7 +146,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKeyDown('8')) layer = 7;
 		if(Input::GetKeyDown('9')) layer = 8;
 
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 		auto sh = &scene.shaders[0];
 
@@ -157,18 +169,57 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
 		}
 
+		struct Portal {
+			u32 id;
+			u32 layerMask;
+		};
+
+		Portal portalGraph[256];
+		u32 visiblePortals = 0;
+
+		using ConstructGraphFunc = void(Portal*, u32*, Scene*, u32, vec3, vec3);
+		static ConstructGraphFunc* constructGraph = [](Portal* graph, u32* visiblePortals, 
+			Scene* scene, u32 layerMask, vec3 pos, vec3 fwd) {
+
+			u32 processedPortals = *visiblePortals;
+			for(u32 p = 0; p < numPortals; p++) {
+				auto eID = portals[p];
+				auto e = &scene->entities[eID];
+				if(~e->layers & layerMask) continue;
+
+				auto diff = glm::normalize(e->position - pos);
+				if(glm::dot(diff, fwd) > 0.2f) {
+					graph[*visiblePortals].id = eID;
+					graph[*visiblePortals].layerMask = layerMask;
+					++*visiblePortals;
+				}
+			}
+
+			u32 addedPortals = *visiblePortals;
+			for(; processedPortals < addedPortals; processedPortals++) {
+				auto e = &scene->entities[graph[processedPortals].id];
+				constructGraph(graph, visiblePortals, scene, e->layers & ~layerMask, e->position, fwd);
+			}
+		};
+
+		vec3 camFwd = cameraRotQuat * vec3{0,0,-1};
+		constructGraph(portalGraph, &visiblePortals, &scene, 1<<layer, cameraPosition, camFwd);
+
+		// Add all visible portals in this layer
+		// For each portal
+		// 		Add all visible portals from it's position in dest layer
+
 		glEnable(GL_STENCIL_TEST);
 
 		// TODO: Create portal visibility graph and use that instead
-		for(u32 entID = 0; entID < scene.numEntities; entID++) {
-			auto ent = &scene.entities[entID];
+		for(u32 portalID = 0; portalID < visiblePortals; portalID++) {
+			auto portal = &portalGraph[portalID];
+			auto ent = &scene.entities[portal->id];
 			if(!ent->meshID) continue;
 			if(ent->entityType != Entity::TypePortal) continue;
 			if(ent->flags & Entity::FlagHidden) continue;
-			if(~ent->layers & 1<<layer) continue;
-			// TODO: Check portal is actually visible (mostly)
 
-			auto targetLayer = ent->layers & ~(1<<layer);
+			auto targetLayer = ent->layers & ~portal->layerMask;
 
 			glDisable(GL_CLIP_DISTANCE0);
 			glDisable(GL_CULL_FACE);
@@ -179,6 +230,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			glStencilMask(0xff);
 			glClear(GL_STENCIL_BUFFER_BIT);
 
+			// Render portal
+			glDepthFunc(GL_EQUAL); // HACK: Assumes nothing else lines up with portal, can cause artifacts
 			RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
 
 			// Clear Depth within stencil
@@ -187,7 +240,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			// 	- Render quad at far plane
 			// 	- Reset depth write
 			glDepthFunc(GL_ALWAYS);
-			glStencilFunc(GL_EQUAL, 1, 0xFF);
+			glStencilFunc(GL_EQUAL, 1, 0xff);
 			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 			glStencilMask(0x0);
 
@@ -207,14 +260,19 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 			glEnable(GL_CLIP_DISTANCE0);			
 			glEnable(GL_CULL_FACE);
+
 			vec3 normal = vec3{0,1,0}; // TODO: Get from mesh
 			vec3 dir = glm::normalize(normal * ent->rotation);
-			glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(vec4{dir, -glm::dot(dir, ent->position)}));
+			vec4 plane = vec4{dir, -glm::dot(dir, ent->position)};
+			if(glm::dot(dir, ent->position - cameraPosition) < 0.f)
+				plane = -plane;
 
-			for(u32 entID2 = 0; entID2 < scene.numEntities; entID2++) {
-				if(entID2 == entID) continue;
+			glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(plane));
 
-				auto ent = &scene.entities[entID2];
+			for(u32 entID = 0; entID < scene.numEntities; entID++) {
+				if(entID == portal->id) continue;
+
+				auto ent = &scene.entities[entID];
 				if(!ent->meshID) continue;
 				if(ent->flags & Entity::FlagHidden) continue;
 				if(~ent->layers & targetLayer) continue;

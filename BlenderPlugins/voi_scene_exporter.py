@@ -9,6 +9,7 @@ bl_info = {
 	"blender": (2, 6, 9),
 }
 
+import mathutils
 import struct
 import bpy
 from bpy import context
@@ -103,8 +104,8 @@ class ExportVoiScene(bpy.types.Operator):
 
 				type = e['entityType']
 				if type == 1: # Portal
-					out.write(struct.pack('=H', 1)) # Size
-					out.write(struct.pack('=B', e['portalDestination']))
+					out.write(struct.pack('=H', 12)) # Size
+					out.write(struct.pack('=fff', *e['portalNormal']))
 				else:
 					out.write(struct.pack('=H', 0))
 
@@ -195,22 +196,18 @@ class ExportVoiScene(bpy.types.Operator):
 		scene = bpy.data.scenes[0]
 		for obj in scene.objects:
 			mid = self.meshIDs.get(obj.data.name, 0)
-			pos = swapCoords(obj.location.xyz)
-			rot = swapCoords(obj.rotation_euler)
-
-			layers = sum(1<<i for i,v in enumerate(obj.layers) if v)
 			type = obj.get("voi_entitytype", 0)
-			flags = 0
 
+			flags = 0
 			if obj.get("voi_entityhidden", False):
 				flags |= 1<<0
 
 			data = {
 				'name': obj.name,
 
-				'position': pos,
-				'rotation': rot,
-				'layers': layers,
+				'position': swapCoords(obj.location.xyz),
+				'rotation': swapCoords(obj.rotation_euler),
+				'layers': sum(1<<i for i,v in enumerate(obj.layers) if v),
 
 				'flags': flags,
 
@@ -223,7 +220,12 @@ class ExportVoiScene(bpy.types.Operator):
 			}
 
 			if type == 1:
-				data['portalDestination'] = obj.get("voi_portaldst", 1)
+				accum = mathutils.Vector((0,0,0))
+				for p in obj.data.polygons:
+					accum += p.normal
+				accum /= len(obj.data.polygons)
+
+				data['portalNormal'] = swapCoords(accum)
 
 			self.entities.append(data)
 
