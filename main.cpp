@@ -4,6 +4,7 @@
 #include "input.h"
 #include "data.h"
 
+#include <chrono>
 #include <SDL2/SDL.h>
 
 bool InitGL(SDL_Window*);
@@ -11,7 +12,6 @@ void DeinitGL();
 ShaderProgram InitShaderProgram();
 
 void InitScene(Scene*, const SceneData*);
-// void RenderScene(Scene*, u8 = 0);
 void RenderMesh(Scene*, u16 meshID, vec3, quat);
 
 enum {
@@ -25,7 +25,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		return 1;
 	}
 
-	auto window = SDL_CreateWindow("OpenGL", 
+	auto window = SDL_CreateWindow("Voi", 
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		WindowWidth, WindowHeight, SDL_WINDOW_OPENGL);
 
@@ -177,6 +177,10 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		Portal portalGraph[256];
 		u32 visiblePortals = 0;
 
+		// Add all visible portals in this layer
+		// For each portal
+		// 		Add all visible portals from it's position in dest layer
+
 		using ConstructGraphFunc = void(Portal*, u32*, Scene*, u32, vec3, vec3);
 		static ConstructGraphFunc* constructGraph = [](Portal* graph, u32* visiblePortals, 
 			Scene* scene, u32 layerMask, vec3 pos, vec3 fwd) {
@@ -205,15 +209,10 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		vec3 camFwd = cameraRotQuat * vec3{0,0,-1};
 		constructGraph(portalGraph, &visiblePortals, &scene, 1<<layer, cameraPosition, camFwd);
 
-		// Add all visible portals in this layer
-		// For each portal
-		// 		Add all visible portals from it's position in dest layer
-
 		glEnable(GL_STENCIL_TEST);
 
-		// TODO: Create portal visibility graph and use that instead
-		for(u32 portalID = 0; portalID < visiblePortals; portalID++) {
-			auto portal = &portalGraph[portalID];
+		for(u32 graphPos = 0; graphPos < visiblePortals; graphPos++) {
+			auto portal = &portalGraph[graphPos];
 			auto ent = &scene.entities[portal->id];
 			if(!ent->meshID) continue;
 			if(ent->entityType != Entity::TypePortal) continue;
@@ -243,14 +242,13 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			glStencilFunc(GL_EQUAL, 1, 0xff);
 			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 			glStencilMask(0x0);
-
-			glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 			
 			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix));
 			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
 			glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.1f, .1f, .1f})); ////////////// Clear color
 
+			glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -261,8 +259,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			glEnable(GL_CLIP_DISTANCE0);			
 			glEnable(GL_CULL_FACE);
 
-			vec3 normal = vec3{0,1,0}; // TODO: Get from mesh
-			vec3 dir = glm::normalize(normal * ent->rotation);
+			vec3 dir = glm::normalize(ent->planeNormal * ent->rotation);
 			vec4 plane = vec4{dir, -glm::dot(dir, ent->position)};
 			if(glm::dot(dir, ent->position - cameraPosition) < 0.f)
 				plane = -plane;

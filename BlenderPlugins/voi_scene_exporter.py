@@ -103,9 +103,9 @@ class ExportVoiScene(bpy.types.Operator):
 				# TODO: collider data
 
 				type = e['entityType']
-				if type == 1: # Portal
+				if type in [1, 2]: # Portal, Mirror
 					out.write(struct.pack('=H', 12)) # Size
-					out.write(struct.pack('=fff', *e['portalNormal']))
+					out.write(struct.pack('=fff', *e['planeNormal']))
 				else:
 					out.write(struct.pack('=H', 0))
 
@@ -219,13 +219,13 @@ class ExportVoiScene(bpy.types.Operator):
 				'colliderType': 0, # TODO
 			}
 
-			if type == 1:
+			if type in [1, 2]:
 				accum = mathutils.Vector((0,0,0))
 				for p in obj.data.polygons:
 					accum += p.normal
 				accum /= len(obj.data.polygons)
 
-				data['portalNormal'] = swapCoords(accum)
+				data['planeNormal'] = swapCoords(accum)
 
 			self.entities.append(data)
 

@@ -4,7 +4,7 @@
 #include "sceneloader.h"
 
 void InitScene(Scene* scene, const SceneData* data) {
-	// THIS IS WAY OVERKILL!!
+	// NOTE: THIS IS WAY OVERKILL!!
 	// It would be better to actually figure out how long the names are
 	scene->nameArenaSize = (data->numMaterials + data->numEntities) * 256u;
 	scene->nameArena = new char[scene->nameArenaSize];
@@ -127,11 +127,11 @@ void InitScene(Scene* scene, const SceneData* data) {
 
 		switch(to->entityType) {
 		case Entity::TypePortal:
-			to->portalInfo.targetLayer = from->entitySpecificData[0];
+		case Entity::TypeMirror:
+			to->planeNormal = (const vec3&) from->entitySpecificData[0];
 			break;
 
 		case Entity::TypeGeometry:
-		case Entity::TypeMirror:
 		default:
 			break;
 		}

@@ -71,12 +71,11 @@ struct Entity {
 	// TODO: collision stuff
 
 	union {
-		// Portal info
-		struct {
-			u8 targetLayer;
-			// vec4 clipPlane;
-		} portalInfo;
+		vec3 planeNormal;
 	};
+
+	// So I can use the union for things with non-trivial constructors (glm vectors)
+	Entity() {}
 };
 
 struct ShaderProgram {
