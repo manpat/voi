@@ -20,13 +20,24 @@ voi_obtypes = [
 	('m', "Mirror", "Shiny"),
 ]
 
+voi_scrtypes = [
+	('c', "Script", "Shit that does shit"),
+	('s', "Shader", "Looks good"),
+	('d', "Synth Def", "Makes a bleep"),
+]
+
 class ObjectPanel(bpy.types.Panel):
-	bl_label = "Voi Properties"
+	bl_label = "Voi Entity"
 	bl_idname = "OBJECT_PT_voi"
 
 	bl_space_type = "PROPERTIES"
 	bl_region_type = "WINDOW"
 	bl_context = "object"
+
+	def draw_header(self, context):
+		layout = self.layout
+		o = context.object
+		layout.prop(o, "voi_entitydoexport", text="")
 
 	def draw(self, context):
 		layout = self.layout
@@ -37,13 +48,34 @@ class ObjectPanel(bpy.types.Panel):
 
 		type = o.get("voi_entitytype", 0)
 
+class ScriptPanel(bpy.types.Panel):
+	bl_label = "Voi Script"
+	bl_idname = "TEXT_PT_voi"
+
+	bl_space_type = "TEXT_EDITOR"
+	# bl_region_type = "WINDOW"
+	bl_region_type = "UI"
+	bl_context = "object"
+
+	def draw(self, context):
+		layout = self.layout
+		o = context.object
+		layout.row().prop(o, "TODO: This pls")
+
+
 def register():
 	bpy.utils.register_class(ObjectPanel)
+	bpy.utils.register_class(ScriptPanel)
 
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=voi_obtypes, name="Entity Type", default='g')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
+	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
+
+	obj = bpy.types.Text
+	obj.voi_scripttype = EnumProperty(items=voi_scrtypes, name="Script Type", default='c')
 
 def unregister():
 	bpy.utils.unregister_class(ObjectPanel)
+	bpy.utils.unregister_class(ScriptPanel)
 

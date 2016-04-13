@@ -195,6 +195,9 @@ class ExportVoiScene(bpy.types.Operator):
 
 		scene = bpy.data.scenes[0]
 		for obj in scene.objects:
+			if not obj.get("voi_entitydoexport", True):
+				continue
+
 			mid = self.meshIDs.get(obj.data.name, 0)
 			type = obj.get("voi_entitytype", 0)
 
