@@ -15,6 +15,20 @@ void InitScene(Scene*, const SceneData*);
 void RenderMesh(Scene*, u16 meshID, vec3, quat);
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
+enum {
+	TargetColor,
+	TargetDepthStencil,
+	TargetCount
+};
+
+struct Framebuffer {
+	u32 fbo;
+	u32 targets[TargetCount];
+};
+
+Framebuffer InitFramebuffer(u32, u32);
+void DrawFullscreenQuad();
+
 struct ParticleSystem {
 	u32 numParticles;
 	u32 freeIndex;
@@ -91,6 +105,28 @@ const char* particleShaderSrc[] = {
 	)
 };
 
+const char* postShaderSrc[] = {
+	SHADER(
+		in vec2 vertex;
+		out vec2 uv;
+
+		void main() {
+			gl_Position = vec4(vertex, 0, 1);
+			uv = vertex * 0.5f + 0.5f;
+		}
+	),
+	SHADER(
+		uniform sampler2D colorTex;
+		in vec2 uv;
+		out vec4 outcolor;
+
+		void main() {
+			vec3 color = texture2D(colorTex, uv).rgb;
+			outcolor = vec4(color, 1);
+		}
+	)
+};
+
 // NOTE: There are better implementations to be had
 f32 randf() {
 	return (rand()%20000)/10000.f - 1.f;
@@ -126,6 +162,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	Scene scene;
 	scene.shaders[ShaderIDDefault] = InitShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
 	scene.shaders[ShaderIDParticles] = InitShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
+	scene.shaders[ShaderIDPost] = InitShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 	{	auto sceneData = LoadSceneData("export.voi");
@@ -161,12 +198,12 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	camera.rotation = {};
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
-	glPointSize(5);
-
 	ParticleSystem particleSystem;
 	InitParticleSystem(&particleSystem, 1000);
 
 	f32 particleEmitAccum = 0.f;
+
+	Framebuffer fb = InitFramebuffer(WindowWidth, WindowHeight);
 
 	SDL_Event e;
 	bool running = true;
@@ -221,18 +258,30 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		EmitParticles(&particleSystem, numParticlesEmit, 7.f + randf() * 4.f, camera.position);
 		UpdateParticleSystem(&particleSystem, dt);
 
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
 		glUseProgram(scene.shaders[ShaderIDDefault].program);
-		RenderScene(&scene, camera, 1<<layer);
 
-		glUseProgram(scene.shaders[ShaderIDParticles].program);
-		glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));
-		glUniformMatrix4fv(scene.shaders[ShaderIDParticles].viewProjectionLoc, 1, false, 
-			glm::value_ptr(camera.projection * 
-				glm::mat4_cast(glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position)));
+		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-		RenderParticleSystem(&particleSystem);
+			RenderScene(&scene, camera, 1<<layer);
+
+			glUseProgram(scene.shaders[ShaderIDParticles].program);
+			glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));
+			glUniformMatrix4fv(scene.shaders[ShaderIDParticles].viewProjectionLoc, 1, false, 
+				glm::value_ptr(camera.projection * 
+					glm::mat4_cast(glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position)));
+
+			RenderParticleSystem(&particleSystem);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glUseProgram(scene.shaders[ShaderIDPost].program);
+		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetColor]);
+		glUniform1i(scene.shaders[ShaderIDPost].colorTexLoc, 0);
+
+		DrawFullscreenQuad();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
@@ -353,6 +402,7 @@ ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
 		ret.viewProjectionLoc = glGetUniformLocation(ret.program, "viewProjection");
 		ret.modelLoc = glGetUniformLocation(ret.program, "model");
 
+		ret.colorTexLoc = glGetUniformLocation(ret.program, "colorTex");
 		ret.clipPlaneLoc = glGetUniformLocation(ret.program, "clipPlane");
 		ret.materialColorLoc = glGetUniformLocation(ret.program, "materialColor");
 	}
@@ -421,4 +471,57 @@ void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, vec3 position) 
 		}
 	}
 	sys->freeIndex = i;
+}
+
+Framebuffer InitFramebuffer(u32 width, u32 height) {
+	static u32 fbTargetTypes[] {[TargetColor] = GL_RGBA8, [TargetDepthStencil] = GL_DEPTH24_STENCIL8};
+	static u32 fbTargetFormats[] {[TargetColor] = GL_RGBA, [TargetDepthStencil] = GL_DEPTH_STENCIL};
+	static u32 fbTargetAttach[] {GL_COLOR_ATTACHMENT0, GL_DEPTH_STENCIL_ATTACHMENT};
+	static u32 fbTargetIntType[] {GL_UNSIGNED_BYTE, GL_UNSIGNED_INT_24_8};
+
+	Framebuffer fb;
+	glGenFramebuffers(1, &fb.fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+	glDrawBuffers(1, fbTargetAttach);
+
+	glGenTextures(TargetCount, fb.targets);
+	for(u8 i = 0; i < TargetCount; i++) {
+		glBindTexture(GL_TEXTURE_2D, fb.targets[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, fbTargetTypes[i], width, height, 0, fbTargetFormats[i], fbTargetIntType[i], nullptr);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, fbTargetAttach[i], GL_TEXTURE_2D, fb.targets[i], 0);
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		puts("Warning! Framebuffer incomplete!");
+	}
+
+	return fb;
+}
+
+void DrawFullscreenQuad() {
+	static u32 vbo = 0;
+	if(!vbo) {
+		vec2 verts[] = {
+			vec2{-1,-1},
+			vec2{ 1,-1},
+			vec2{ 1, 1},
+			vec2{-1, 1},
+		};
+
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	}
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, nullptr);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

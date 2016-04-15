@@ -81,6 +81,8 @@ struct Entity {
 struct ShaderProgram {
 	u32 program;
 
+	u32 colorTexLoc = 0;
+	
 	u32 materialColorLoc = 0;
 	u32 clipPlaneLoc = 0;
 
@@ -91,6 +93,7 @@ struct ShaderProgram {
 enum {
 	ShaderIDDefault = 0,
 	ShaderIDParticles,
+	ShaderIDPost,
 	ShaderIDCount,
 };
 
