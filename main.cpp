@@ -9,16 +9,92 @@
 
 bool InitGL(SDL_Window*);
 void DeinitGL();
-ShaderProgram InitShaderProgram();
+ShaderProgram InitShaderProgram(const char*, const char*);
 
 void InitScene(Scene*, const SceneData*);
 void RenderMesh(Scene*, u16 meshID, vec3, quat);
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
+struct ParticleSystem {
+	u32 numParticles;
+	u32 freeIndex;
+	vec3* positions;
+	vec3* velocities;
+	vec3* accelerations;
+	f32* lifetimes;
+	f32* lifeRates;
+
+	u32 vertexBuffer;
+};
+
+void InitParticleSystem(ParticleSystem*, u32);
+void UpdateParticleSystem(ParticleSystem*, f32);
+void RenderParticleSystem(ParticleSystem*);
+void EmitParticles(ParticleSystem*, u32, f32, vec3);
+
 enum {
 	WindowWidth = 800,
 	WindowHeight = 600
 };
+
+#define SHADER(x) "#version 130\n" #x
+const char* defaultShaderSrc[] = {
+	SHADER(
+		in vec3 vertex;
+		out float gl_ClipDistance[1];
+
+		uniform mat4 viewProjection;
+		uniform mat4 model;
+
+		uniform vec4 clipPlane;
+
+		void main() {
+			gl_Position = viewProjection * model * vec4(vertex, 1);
+			gl_ClipDistance[0] = dot(model * vec4(vertex, 1), clipPlane);
+		}
+	),
+	SHADER(
+		uniform vec3 materialColor;
+		out vec4 outcolor;
+
+		void main() {
+			outcolor = vec4(materialColor, 1);
+		}
+	)
+};
+
+const char* particleShaderSrc[] = {
+	SHADER(
+		in vec3 vertex;
+		in float lifetime;
+		out float vlifetime;
+
+		uniform mat4 viewProjection;
+
+		void main() {
+			gl_Position = viewProjection * vec4(vertex, 1);
+			gl_PointSize = 60.f/gl_Position.z;
+			vlifetime = lifetime;
+		}
+	),
+	SHADER(
+		uniform vec3 materialColor;
+		in float vlifetime;
+		out vec4 outcolor;
+
+		void main() {
+			if(vlifetime <= 0.f) discard;
+
+			float a = sin(radians(vlifetime*180.f)) * 0.4f;
+			outcolor = vec4(materialColor*a, a);
+		}
+	)
+};
+
+// NOTE: There are better implementations to be had
+f32 randf() {
+	return (rand()%20000)/10000.f - 1.f;
+}
 
 s32 main(s32 /*ac*/, const char** /* av*/) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
@@ -48,8 +124,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	SDL_WarpMouseInWindow(window, WindowWidth/2, WindowHeight/2);
 
 	Scene scene;
-	scene.shaders[0] = InitShaderProgram();
-	glUseProgram(scene.shaders[0].program);
+	scene.shaders[ShaderIDDefault] = InitShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
+	scene.shaders[ShaderIDParticles] = InitShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
 
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 	{	auto sceneData = LoadSceneData("export.voi");
@@ -59,8 +135,13 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		FreeSceneData(&sceneData);
 	}
 
+	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 	glFrontFace(GL_CCW);
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(.1f, .1f, .1f, 1);
@@ -69,15 +150,23 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	f32 fov = M_PI/3.f;
 	f32 aspect = (f32) WindowWidth / WindowHeight;
 	f32 nearDist = 0.1f;
-	f32 farDist = 100.f;
+	f32 farDist = 1000.f;
 
 	vec2 mouseRot {0,0};
+	u8 layer = 0;
+	f32 dt = 1.f/60.f; // TODO: Actual dt
+
 	Camera camera;
 	camera.position = {0,0,5};
 	camera.rotation = {};
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
-	u8 layer = 0;
+	glPointSize(5);
+
+	ParticleSystem particleSystem;
+	InitParticleSystem(&particleSystem, 1000);
+
+	f32 particleEmitAccum = 0.f;
 
 	SDL_Event e;
 	bool running = true;
@@ -99,13 +188,21 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		camera.rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0}) * glm::angleAxis(mouseRot.y, vec3{1,0,0});
 
-		f32 speed = 0.1f;
-		if(Input::GetKey(SDLK_LSHIFT)) speed *= 4.f;
+		vec3 vel {};
+		if(Input::GetKey('w')) vel += camera.rotation * vec3{0,0,-1};
+		if(Input::GetKey('s')) vel += camera.rotation * vec3{0,0, 1};
+		if(Input::GetKey('a')) vel += camera.rotation * vec3{-1,0,0};
+		if(Input::GetKey('d')) vel += camera.rotation * vec3{ 1,0,0};
 
-		if(Input::GetKey('w')) camera.position += camera.rotation * vec3{0,0,-1} * speed;
-		if(Input::GetKey('s')) camera.position += camera.rotation * vec3{0,0, 1} * speed;
-		if(Input::GetKey('a')) camera.position += camera.rotation * vec3{-1,0,0} * speed;
-		if(Input::GetKey('d')) camera.position += camera.rotation * vec3{ 1,0,0} * speed;
+		if(glm::length(vel) > 1.f){
+			vel = glm::normalize(vel);
+		}
+
+		f32 speed = 5.f;
+		if(Input::GetKey(SDLK_LSHIFT)) speed *= 4.f;
+		vel *= speed;
+
+		camera.position += vel * dt;
 
 		if(Input::GetKeyDown('1')) layer = 0;
 		if(Input::GetKeyDown('2')) layer = 1;
@@ -117,9 +214,25 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKeyDown('8')) layer = 7;
 		if(Input::GetKeyDown('9')) layer = 8;
 
+		particleEmitAccum += (glm::length(vel)*0.8f + 20.f) * dt;
+
+		u32 numParticlesEmit = (u32) particleEmitAccum;
+		particleEmitAccum -= numParticlesEmit;
+		EmitParticles(&particleSystem, numParticlesEmit, 7.f + randf() * 4.f, camera.position);
+		UpdateParticleSystem(&particleSystem, dt);
+
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+		glUseProgram(scene.shaders[ShaderIDDefault].program);
 		RenderScene(&scene, camera, 1<<layer);
+
+		glUseProgram(scene.shaders[ShaderIDParticles].program);
+		glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));
+		glUniformMatrix4fv(scene.shaders[ShaderIDParticles].viewProjectionLoc, 1, false, 
+			glm::value_ptr(camera.projection * 
+				glm::mat4_cast(glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position)));
+
+		RenderParticleSystem(&particleSystem);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
@@ -178,8 +291,6 @@ void DeinitGL() {
 	SDL_GL_DeleteContext(glctx);
 }
 
-#define SHADER(x) "#version 130\n" #x
-
 u32 CreateShader(const char* src, u32 type) {
 	u32 id = glCreateShader(type);
 
@@ -207,33 +318,8 @@ u32 CreateShader(const char* src, u32 type) {
 	return id;
 }
 
-ShaderProgram InitShaderProgram() {
+ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
 	ShaderProgram ret{};
-
-	const char* vsrc = SHADER(
-		in vec3 vertex;
-		out float gl_ClipDistance[1];
-
-		uniform mat4 viewProjection;
-		uniform mat4 model;
-
-		uniform vec4 clipPlane;
-
-		void main() {
-			gl_Position = viewProjection * model * vec4(vertex, 1);
-			gl_ClipDistance[0] = dot(model * vec4(vertex, 1), clipPlane);
-		}
-	);
-
-	const char* fsrc = SHADER(
-		out vec4 outcolor;
-		
-		uniform vec3 materialColor;
-
-		void main() {
-			outcolor = vec4(materialColor, 1);
-		}
-	);
 
 	u32 vsh = CreateShader(vsrc, GL_VERTEX_SHADER);
 	u32 fsh = CreateShader(fsrc, GL_FRAGMENT_SHADER);
@@ -274,4 +360,65 @@ ShaderProgram InitShaderProgram() {
 	glDeleteShader(vsh);
 	glDeleteShader(fsh);
 	return ret;
+}
+
+void InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
+	sys->freeIndex = 0;
+	sys->numParticles = numParticles;
+	sys->positions = new vec3[numParticles];
+	sys->velocities = new vec3[numParticles];
+	sys->accelerations = new vec3[numParticles];
+	sys->lifetimes = new f32[numParticles];
+	sys->lifeRates = new f32[numParticles];
+
+	glGenBuffers(1, &sys->vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, numParticles * sizeof(f32) * 4, nullptr, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void UpdateParticleSystem(ParticleSystem* sys, f32 dt) {
+	for(u32 i = 0; i < sys->numParticles; i++) {
+		if(sys->lifetimes[i] < 0.f) continue;
+		sys->lifetimes[i] -= sys->lifeRates[i] * dt;
+
+		sys->positions[i] += sys->velocities[i] * dt;
+		sys->velocities[i] += sys->accelerations[i] * dt;
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sys->numParticles * sizeof(vec3), sys->positions);
+	glBufferSubData(GL_ARRAY_BUFFER, sys->numParticles * sizeof(vec3), sys->numParticles * sizeof(f32), sys->lifetimes);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void RenderParticleSystem(ParticleSystem* sys) {
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+	glVertexAttribPointer(1, 1, GL_FLOAT, false, 0, (void*)((u64)sys->numParticles * sizeof(vec3)));
+
+	glDrawArrays(GL_POINTS, 0, sys->numParticles);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glDisableVertexAttribArray(1);
+}
+
+void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, vec3 position) {
+	u32 i = sys->freeIndex;
+	while(count > 0) {
+		do {
+			sys->positions[sys->freeIndex] = position + vec3{15*randf(), 6*randf(), 15*randf()};
+			sys->velocities[sys->freeIndex] = glm::normalize(vec3{randf(),randf(),randf()})*0.05f;
+			sys->accelerations[sys->freeIndex] = glm::normalize(vec3{randf(),randf(),randf()})*0.03f;
+			sys->lifetimes[sys->freeIndex] = 1.f;
+			sys->lifeRates[sys->freeIndex] = 1.f/lifetime;
+		} while(i++ < sys->numParticles && --count);
+		
+		if(i >= sys->numParticles) {
+			i = 0;
+		}
+	}
+	sys->freeIndex = i;
 }

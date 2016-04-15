@@ -149,7 +149,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 }
 
 void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
-	auto program = &scene->shaders[0]; // TODO: Obvs nope
+	auto program = &scene->shaders[ShaderIDDefault]; // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
@@ -242,7 +242,7 @@ u32 GetFarPlaneQuad(mat4 projection) {
 
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	auto farPlaneBuffer = GetFarPlaneQuad(cam.projection);
-	auto sh = &scene->shaders[0];
+	auto sh = &scene->shaders[ShaderIDDefault];
 
 	mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
 	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
@@ -353,4 +353,5 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_CLIP_DISTANCE0);
+	glEnable(GL_CULL_FACE);
 }

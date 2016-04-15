@@ -88,6 +88,12 @@ struct ShaderProgram {
 	u32 modelLoc = 0;
 };
 
+enum {
+	ShaderIDDefault = 0,
+	ShaderIDParticles,
+	ShaderIDCount,
+};
+
 struct Scene {
 	u16 numMeshes = 0;
 	u16 numEntities = 0;
