@@ -13,6 +13,7 @@ ShaderProgram InitShaderProgram();
 
 void InitScene(Scene*, const SceneData*);
 void RenderMesh(Scene*, u16 meshID, vec3, quat);
+void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
 enum {
 	WindowWidth = 800,
@@ -65,45 +66,16 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glClearColor(.1f, .1f, .1f, 1);
 	glEnableVertexAttribArray(0);
 
-	vec3 cameraPosition {0, 0, 5};
-	vec2 cameraRot {0,0};
-
 	f32 fov = M_PI/3.f;
 	f32 aspect = (f32) WindowWidth / WindowHeight;
 	f32 nearDist = 0.1f;
 	f32 farDist = 100.f;
 
-	mat4 projectionMatrix = glm::perspective(fov, aspect, nearDist, farDist);
-
-	u32 farPlaneBuffer = 0;
-	{	mat4 invProj = glm::inverse(projectionMatrix);
-		vec3 p0 = vec3{invProj * vec4{-1,-1,-1, 1} * (farDist-1.f)};
-		vec3 p1 = vec3{invProj * vec4{ 1,-1,-1, 1} * (farDist-1.f)};
-		vec3 p2 = vec3{invProj * vec4{ 1, 1,-1, 1} * (farDist-1.f)};
-		vec3 p3 = vec3{invProj * vec4{-1, 1,-1, 1} * (farDist-1.f)};
-
-		vec3 points[] = {
-			p0, p1, p2,
-			p0, p2, p3,
-		};
-
-		glGenBuffers(1, &farPlaneBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	// TODO: Put in scene probably
-	static u32 portals[256];
-	static u32 numPortals = 0;
-
-	for(u32 i = 0; i < scene.numEntities; i++){
-		auto e = &scene.entities[i];
-		if(e->entityType != Entity::TypePortal) continue;
-
-		portals[numPortals] = i;
-		numPortals++;
-	}
+	vec2 mouseRot {0,0};
+	Camera camera;
+	camera.position = {0,0,5};
+	camera.rotation = {};
+	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
 	u8 layer = 0;
 
@@ -122,19 +94,18 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			running = false;
 		}
 
-		cameraRot += Input::GetMouseDelta();
-		cameraRot.y = glm::clamp<f32>(cameraRot.y, -PI/2.f, PI/2.f);
+		mouseRot += Input::GetMouseDelta();
+		mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
 
-		quat cameraRotQuat{};
-		cameraRotQuat = glm::angleAxis(-cameraRot.x, vec3{0,1,0}) * glm::angleAxis(cameraRot.y, vec3{1,0,0});
+		camera.rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0}) * glm::angleAxis(mouseRot.y, vec3{1,0,0});
 
 		f32 speed = 0.1f;
 		if(Input::GetKey(SDLK_LSHIFT)) speed *= 4.f;
 
-		if(Input::GetKey('w')) cameraPosition += cameraRotQuat * vec3{0,0,-1} * speed;
-		if(Input::GetKey('s')) cameraPosition += cameraRotQuat * vec3{0,0, 1} * speed;
-		if(Input::GetKey('a')) cameraPosition += cameraRotQuat * vec3{-1,0,0} * speed;
-		if(Input::GetKey('d')) cameraPosition += cameraRotQuat * vec3{ 1,0,0} * speed;
+		if(Input::GetKey('w')) camera.position += camera.rotation * vec3{0,0,-1} * speed;
+		if(Input::GetKey('s')) camera.position += camera.rotation * vec3{0,0, 1} * speed;
+		if(Input::GetKey('a')) camera.position += camera.rotation * vec3{-1,0,0} * speed;
+		if(Input::GetKey('d')) camera.position += camera.rotation * vec3{ 1,0,0} * speed;
 
 		if(Input::GetKeyDown('1')) layer = 0;
 		if(Input::GetKeyDown('2')) layer = 1;
@@ -148,145 +119,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-		auto sh = &scene.shaders[0];
-
-		mat4 viewMatrix = glm::mat4_cast(glm::inverse(cameraRotQuat)) * glm::translate<f32>(-cameraPosition);
-		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
-
-		for(u32 entID = 0; entID < scene.numEntities; entID++) {
-			auto ent = &scene.entities[entID];
-			if(!ent->meshID) continue;
-			if(ent->flags & Entity::FlagHidden) continue;
-			if(~ent->layers & 1<<layer) continue;
-
-			if(ent->entityType == Entity::TypePortal
-			|| ent->entityType == Entity::TypeMirror) {
-				glDisable(GL_CULL_FACE);
-			}else{
-				glEnable(GL_CULL_FACE);
-			}
-
-			RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
-		}
-
-		struct Portal {
-			u32 id;
-			u32 layerMask;
-		};
-
-		Portal portalGraph[256];
-		u32 visiblePortals = 0;
-
-		// Add all visible portals in this layer
-		// For each portal
-		// 		Add all visible portals from it's position in dest layer
-
-		using ConstructGraphFunc = void(Portal*, u32*, Scene*, u32, vec3, vec3);
-		static ConstructGraphFunc* constructGraph = [](Portal* graph, u32* visiblePortals, 
-			Scene* scene, u32 layerMask, vec3 pos, vec3 fwd) {
-
-			u32 processedPortals = *visiblePortals;
-			for(u32 p = 0; p < numPortals; p++) {
-				auto eID = portals[p];
-				auto e = &scene->entities[eID];
-				if(~e->layers & layerMask) continue;
-
-				auto diff = glm::normalize(e->position - pos);
-				if(glm::dot(diff, fwd) > 0.2f) {
-					graph[*visiblePortals].id = eID;
-					graph[*visiblePortals].layerMask = layerMask;
-					++*visiblePortals;
-				}
-			}
-
-			u32 addedPortals = *visiblePortals;
-			for(; processedPortals < addedPortals; processedPortals++) {
-				auto e = &scene->entities[graph[processedPortals].id];
-				constructGraph(graph, visiblePortals, scene, e->layers & ~layerMask, e->position, fwd);
-			}
-		};
-
-		vec3 camFwd = cameraRotQuat * vec3{0,0,-1};
-		constructGraph(portalGraph, &visiblePortals, &scene, 1<<layer, cameraPosition, camFwd);
-
-		glEnable(GL_STENCIL_TEST);
-
-		for(u32 graphPos = 0; graphPos < visiblePortals; graphPos++) {
-			auto portal = &portalGraph[graphPos];
-			auto ent = &scene.entities[portal->id];
-			if(!ent->meshID) continue;
-			if(ent->entityType != Entity::TypePortal) continue;
-			if(ent->flags & Entity::FlagHidden) continue;
-
-			auto targetLayer = ent->layers & ~portal->layerMask;
-
-			glDisable(GL_CLIP_DISTANCE0);
-			glDisable(GL_CULL_FACE);
-
-			// Write portal to stencil
-			glStencilFunc(GL_ALWAYS, 1, 0xff);
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-			glStencilMask(0xff);
-			glClear(GL_STENCIL_BUFFER_BIT);
-
-			// Render portal
-			glDepthFunc(GL_EQUAL); // HACK: Assumes nothing else lines up with portal, can cause artifacts
-			RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
-
-			// Clear Depth within stencil
-			// 	- Disable color write
-			// 	- Always write to depth
-			// 	- Render quad at far plane
-			// 	- Reset depth write
-			glDepthFunc(GL_ALWAYS);
-			glStencilFunc(GL_EQUAL, 1, 0xff);
-			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-			glStencilMask(0x0);
-			
-			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix));
-			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
-			glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.1f, .1f, .1f})); ////////////// Clear color
-
-			glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-			// Reset render state
-			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(projectionMatrix * viewMatrix));
-			glDepthFunc(GL_LEQUAL);
-
-			glEnable(GL_CLIP_DISTANCE0);			
-			glEnable(GL_CULL_FACE);
-
-			vec3 dir = glm::normalize(ent->planeNormal * ent->rotation);
-			vec4 plane = vec4{dir, -glm::dot(dir, ent->position)};
-			if(glm::dot(dir, ent->position - cameraPosition) < 0.f)
-				plane = -plane;
-
-			glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(plane));
-
-			for(u32 entID = 0; entID < scene.numEntities; entID++) {
-				if(entID == portal->id) continue;
-
-				auto ent = &scene.entities[entID];
-				if(!ent->meshID) continue;
-				if(ent->flags & Entity::FlagHidden) continue;
-				if(~ent->layers & targetLayer) continue;
-
-				if(ent->entityType == Entity::TypePortal
-				|| ent->entityType == Entity::TypeMirror) {
-					glDisable(GL_CULL_FACE);
-				}else{
-					glEnable(GL_CULL_FACE);
-				}
-
-				RenderMesh(&scene, ent->meshID, ent->position, ent->rotation);
-			}
-		}
-
-		glDisable(GL_STENCIL_TEST);
-		glDisable(GL_CLIP_DISTANCE0);
+		RenderScene(&scene, camera, 1<<layer);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);

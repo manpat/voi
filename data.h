@@ -100,6 +100,21 @@ struct Scene {
 	Mesh* meshes;
 	Material materials[256];
 	ShaderProgram shaders[256]; // 0 is default shader
+
+	u32 portals[256];
+	u32 numPortals;
+};
+
+struct PortalNode {
+	u32 id;
+	u32 layerMask;
+};
+
+struct Camera {
+	mat4 projection;
+	
+	vec3 position;
+	quat rotation;
 };
 
 #endif
