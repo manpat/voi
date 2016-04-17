@@ -43,4 +43,10 @@ using f64 = double;
 #define GLEW_STATIC
 #include "glew.h"
 
+#if 0
+#define dprintf(...) printf(__VA_ARGS__)
+#else
+#define dprintf(...) [](...){}(__VA_ARGS__) // Get rid of warnings
+#endif
+
 #endif

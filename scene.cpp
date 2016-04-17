@@ -70,9 +70,9 @@ void InitScene(Scene* scene, const SceneData* data) {
 		auto submeshes = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
 			&mesh->submeshesInline[0] : mesh->submeshes;
 
-		printf("numSubmeshes: %d\n", mesh->numSubmeshes);
+		dprintf("numSubmeshes: %d\n", mesh->numSubmeshes);
 		for(u32 i = 0; i < mesh->numSubmeshes; i++) {
-			printf("\tsm: start: %u\tid: %hhu\n", submeshes[i].triangleCount, submeshes[i].materialID);
+			dprintf("\tsm: start: %u\tid: %hhu\n", submeshes[i].triangleCount, submeshes[i].materialID);
 		}
 
 		glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
@@ -185,9 +185,10 @@ void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void ConstructPortalGraph(PortalNode* graph, u32* visiblePortals, Scene* scene, 
+void ConstructPortalGraph(PortalNode* graph, u32* visiblePortals, u32 maxVisiblePortals, Scene* scene, 
 	u32 layerMask, vec3 pos, vec3 fwd) {
 
+	if(*visiblePortals >= maxVisiblePortals) return;
 	u32 processedPortals = *visiblePortals;
 	for(u32 p = 0; p < scene->numPortals; p++) {
 		auto eID = scene->portals[p];
@@ -200,6 +201,7 @@ void ConstructPortalGraph(PortalNode* graph, u32* visiblePortals, Scene* scene,
 		// Sampling multple points could be a solution
 		auto diff = glm::normalize(e->position - pos);
 		if(glm::dot(diff, fwd) > 0.f) {
+			if(*visiblePortals >= maxVisiblePortals) break;
 			graph[*visiblePortals].id = eID;
 			graph[*visiblePortals].layerMask = layerMask;
 			++*visiblePortals;
@@ -209,7 +211,7 @@ void ConstructPortalGraph(PortalNode* graph, u32* visiblePortals, Scene* scene,
 	u32 addedPortals = *visiblePortals;
 	for(; processedPortals < addedPortals; processedPortals++) {
 		auto e = &scene->entities[graph[processedPortals].id];
-		ConstructPortalGraph(graph, visiblePortals, scene, e->layers & ~layerMask, e->position, fwd);
+		ConstructPortalGraph(graph, visiblePortals, maxVisiblePortals, scene, e->layers & ~layerMask, e->position, fwd);
 	}
 }
 
@@ -272,7 +274,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	// 		Add all visible portals from it's position in dest layer
 
 	vec3 camFwd = cam.rotation * vec3{0,0,-1};
-	ConstructPortalGraph(portalGraph, &visiblePortals, scene, layerMask, cam.position, camFwd);
+	ConstructPortalGraph(portalGraph, &visiblePortals, 256, scene, layerMask, cam.position, camFwd);
 
 	glEnable(GL_STENCIL_TEST);
 

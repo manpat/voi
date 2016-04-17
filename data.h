@@ -81,7 +81,10 @@ struct Entity {
 struct ShaderProgram {
 	u32 program;
 
+	u32 depthTexLoc = 0;
 	u32 colorTexLoc = 0;
+	u32 general0TexLoc = 0;
+	u32 general1TexLoc = 0;
 	
 	u32 materialColorLoc = 0;
 	u32 clipPlaneLoc = 0;

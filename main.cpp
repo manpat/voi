@@ -16,8 +16,10 @@ void RenderMesh(Scene*, u16 meshID, vec3, quat);
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
 enum {
-	TargetColor,
 	TargetDepthStencil,
+	TargetColor,
+	TargetGeneral0,
+	TargetGeneral1,
 	TargetCount
 };
 
@@ -70,9 +72,11 @@ const char* defaultShaderSrc[] = {
 	SHADER(
 		uniform vec3 materialColor;
 		out vec4 outcolor;
+		out vec4 outgeneral0;
 
 		void main() {
 			outcolor = vec4(materialColor, 1);
+			outgeneral0 = vec4(0);
 		}
 	)
 };
@@ -87,20 +91,23 @@ const char* particleShaderSrc[] = {
 
 		void main() {
 			gl_Position = viewProjection * vec4(vertex, 1);
-			gl_PointSize = 60.f/gl_Position.z;
+			gl_PointSize = 50.f/gl_Position.z;
 			vlifetime = lifetime;
 		}
 	),
 	SHADER(
 		uniform vec3 materialColor;
 		in float vlifetime;
+
 		out vec4 outcolor;
+		out vec4 outgeneral0;
 
 		void main() {
 			if(vlifetime <= 0.f) discard;
 
-			float a = sin(radians(vlifetime*180.f)) * 0.4f;
-			outcolor = vec4(materialColor*a, a);
+			float a = sin(radians(vlifetime*180.f)) * 0.7f;
+			outgeneral0 = vec4(materialColor*a, a);
+			outcolor = vec4(0);
 		}
 	)
 };
@@ -116,13 +123,27 @@ const char* postShaderSrc[] = {
 		}
 	),
 	SHADER(
+		uniform sampler2D depthTex;
 		uniform sampler2D colorTex;
+		uniform sampler2D general0Tex;
 		in vec2 uv;
+
 		out vec4 outcolor;
 
 		void main() {
-			vec3 color = texture2D(colorTex, uv).rgb;
-			outcolor = vec4(color, 1);
+			vec4 color = texture2D(colorTex, uv);
+			vec4 particle = texture2D(general0Tex, uv);
+			float depth = texture2D(depthTex, uv).r * 2.f - 1.f;
+			float zNear = 0.1f;
+			float zFar = 1000.f;
+
+			depth = 2.0 * zNear * zFar / (zFar + zNear - depth * (zFar - zNear));
+			depth = 1-clamp(pow(depth / 40.f, .5f), 0, 1);
+
+			vec3 fogcolor = vec3(0.1);
+			outcolor.rgb = clamp(color.rgb*depth + fogcolor*(1-depth), 0, 1);
+			outcolor.rgb += particle.rgb * particle.a;
+			outcolor.a = 1;
 		}
 	)
 };
@@ -181,7 +202,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	glFrontFace(GL_CCW);
 	glDepthFunc(GL_LEQUAL);
-	glClearColor(.1f, .1f, .1f, 1);
+	glClearColor(0, 0, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	f32 fov = M_PI/3.f;
@@ -251,11 +272,11 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKeyDown('8')) layer = 7;
 		if(Input::GetKeyDown('9')) layer = 8;
 
-		particleEmitAccum += (glm::length(vel)*0.8f + 20.f) * dt;
+		particleEmitAccum += (glm::length(vel)*0.8f + 50.f) * dt;
 
 		u32 numParticlesEmit = (u32) particleEmitAccum;
 		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, 7.f + randf() * 4.f, camera.position);
+		EmitParticles(&particleSystem, numParticlesEmit, 7.f + randf() * 3.f, camera.position);
 		UpdateParticleSystem(&particleSystem, dt);
 
 		glUseProgram(scene.shaders[ShaderIDDefault].program);
@@ -271,13 +292,24 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 				glm::value_ptr(camera.projection * 
 					glm::mat4_cast(glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position)));
 
+			glDepthMask(false);
 			RenderParticleSystem(&particleSystem);
+			glDepthMask(true);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glUseProgram(scene.shaders[ShaderIDPost].program);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetDepthStencil]);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetColor]);
-		glUniform1i(scene.shaders[ShaderIDPost].colorTexLoc, 0);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetGeneral0]);
+
+		glUniform1i(scene.shaders[ShaderIDPost].depthTexLoc, 0);
+		glUniform1i(scene.shaders[ShaderIDPost].colorTexLoc, 1);
+		glUniform1i(scene.shaders[ShaderIDPost].general0TexLoc, 2);
 
 		DrawFullscreenQuad();
 
@@ -381,6 +413,13 @@ ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
 	ret.program = glCreateProgram();
 	glAttachShader(ret.program, vsh);
 	glAttachShader(ret.program, fsh);
+
+	glBindAttribLocation(ret.program, 0, "vertex");
+
+	glBindFragDataLocation(ret.program, 0, "outcolor");
+	glBindFragDataLocation(ret.program, 1, "outgeneral0");
+	glBindFragDataLocation(ret.program, 2, "outgeneral1");
+
 	glLinkProgram(ret.program);
 
 	s32 linkStatus;
@@ -402,9 +441,13 @@ ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
 		ret.viewProjectionLoc = glGetUniformLocation(ret.program, "viewProjection");
 		ret.modelLoc = glGetUniformLocation(ret.program, "model");
 
-		ret.colorTexLoc = glGetUniformLocation(ret.program, "colorTex");
-		ret.clipPlaneLoc = glGetUniformLocation(ret.program, "clipPlane");
 		ret.materialColorLoc = glGetUniformLocation(ret.program, "materialColor");
+		ret.clipPlaneLoc = glGetUniformLocation(ret.program, "clipPlane");
+
+		ret.depthTexLoc = glGetUniformLocation(ret.program, "depthTex");
+		ret.colorTexLoc = glGetUniformLocation(ret.program, "colorTex");
+		ret.general0TexLoc = glGetUniformLocation(ret.program, "general0Tex");
+		ret.general1TexLoc = glGetUniformLocation(ret.program, "general1Tex");
 	}
 
 	glDeleteShader(vsh);
@@ -461,7 +504,7 @@ void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, vec3 position) 
 		do {
 			sys->positions[sys->freeIndex] = position + vec3{15*randf(), 6*randf(), 15*randf()};
 			sys->velocities[sys->freeIndex] = glm::normalize(vec3{randf(),randf(),randf()})*0.05f;
-			sys->accelerations[sys->freeIndex] = glm::normalize(vec3{randf(),randf(),randf()})*0.03f;
+			sys->accelerations[sys->freeIndex] = glm::normalize(vec3{randf(),randf()-0.5f,randf()})*0.03f;
 			sys->lifetimes[sys->freeIndex] = 1.f;
 			sys->lifeRates[sys->freeIndex] = 1.f/lifetime;
 		} while(i++ < sys->numParticles && --count);
@@ -474,18 +517,18 @@ void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, vec3 position) 
 }
 
 Framebuffer InitFramebuffer(u32 width, u32 height) {
-	static u32 fbTargetTypes[] {[TargetColor] = GL_RGBA8, [TargetDepthStencil] = GL_DEPTH24_STENCIL8};
-	static u32 fbTargetFormats[] {[TargetColor] = GL_RGBA, [TargetDepthStencil] = GL_DEPTH_STENCIL};
-	static u32 fbTargetAttach[] {GL_COLOR_ATTACHMENT0, GL_DEPTH_STENCIL_ATTACHMENT};
-	static u32 fbTargetIntType[] {GL_UNSIGNED_BYTE, GL_UNSIGNED_INT_24_8};
+	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
+	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
+	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+	static u32 fbTargetIntType[] {GL_UNSIGNED_INT_24_8, GL_UNSIGNED_BYTE, GL_UNSIGNED_BYTE};
 
 	Framebuffer fb;
 	glGenFramebuffers(1, &fb.fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-	glDrawBuffers(1, fbTargetAttach);
+	glDrawBuffers(2, &fbTargetAttach[1]);
 
-	glGenTextures(TargetCount, fb.targets);
-	for(u8 i = 0; i < TargetCount; i++) {
+	glGenTextures(3, fb.targets);
+	for(u8 i = 0; i < 3; i++) {
 		glBindTexture(GL_TEXTURE_2D, fb.targets[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, fbTargetTypes[i], width, height, 0, fbTargetFormats[i], fbTargetIntType[i], nullptr);
 
