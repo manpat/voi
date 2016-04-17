@@ -4,6 +4,8 @@
 #include "input.h"
 #include "data.h"
 
+#include "debugdraw.h"
+
 #include <chrono>
 #include <SDL2/SDL.h>
 
@@ -180,6 +182,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	SDL_WarpMouseInWindow(window, WindowWidth/2, WindowHeight/2);
 
+	InitDebugDraw();
+
 	Scene scene;
 	scene.shaders[ShaderIDDefault] = InitShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
 	scene.shaders[ShaderIDParticles] = InitShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
@@ -193,7 +197,6 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		FreeSceneData(&sceneData);
 	}
 
-	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -262,6 +265,9 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		camera.position += vel * dt;
 
+		auto viewProjection = camera.projection * glm::mat4_cast(
+			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
+
 		if(Input::GetKeyDown('1')) layer = 0;
 		if(Input::GetKeyDown('2')) layer = 1;
 		if(Input::GetKeyDown('3')) layer = 2;
@@ -289,12 +295,13 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			glUseProgram(scene.shaders[ShaderIDParticles].program);
 			glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));
 			glUniformMatrix4fv(scene.shaders[ShaderIDParticles].viewProjectionLoc, 1, false, 
-				glm::value_ptr(camera.projection * 
-					glm::mat4_cast(glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position)));
+				glm::value_ptr(viewProjection));
 
+			glEnable(GL_PROGRAM_POINT_SIZE);
 			glDepthMask(false);
 			RenderParticleSystem(&particleSystem);
 			glDepthMask(true);
+			glDisable(GL_PROGRAM_POINT_SIZE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -314,6 +321,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		DrawFullscreenQuad();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		DrawDebug(viewProjection);
 
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);

@@ -3,6 +3,10 @@
 #include "data.h"
 #include "sceneloader.h"
 
+#include "debugdraw.h"
+
+#include <algorithm>
+
 void InitScene(Scene* scene, const SceneData* data) {
 	// NOTE: THIS IS WAY OVERKILL!!
 	// It would be better to actually figure out how long the names are
@@ -142,9 +146,29 @@ void InitScene(Scene* scene, const SceneData* data) {
 	for(u32 i = 0; i < scene->numEntities; i++){
 		auto e = &scene->entities[i];
 		if(e->entityType != Entity::TypePortal) continue;
+		if(!e->meshID) {
+			printf("Warning! Portal '%.*s' doesn't have a mesh. That's kinda useless\n", e->nameLength, e->name);
+			continue;
+		}
+		if(!e->layers || !(e->layers & (e->layers-1))) {
+			printf("Warning! Portal '%.*s' only occupies one or fewer layers\n", e->nameLength, e->name);
+			continue;
+		}
 
 		scene->portals[scene->numPortals] = i;
 		scene->numPortals++;
+		
+		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
+		auto mesh = &data->meshes[e->meshID-1];
+
+		for(u32 vid = 0; vid < mesh->numVertices; vid++) {
+			auto v = mesh->vertices[vid];
+			minPoint = glm::min(minPoint, v);
+			maxPoint = glm::max(maxPoint, v);
+		}
+
+		e->originOffset = (maxPoint + minPoint)/2.f;
+		e->extents = (maxPoint - minPoint)/2.f;
 	}
 }
 
@@ -186,32 +210,65 @@ void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
 }
 
 void ConstructPortalGraph(PortalNode* graph, u32* visiblePortals, u32 maxVisiblePortals, Scene* scene, 
-	u32 layerMask, vec3 pos, vec3 fwd) {
+	u32 layerMask, vec3 pos, vec3 fwd, vec3 pfwd, u32 start = 0) {
 
 	if(*visiblePortals >= maxVisiblePortals) return;
+
 	u32 processedPortals = *visiblePortals;
-	for(u32 p = 0; p < scene->numPortals; p++) {
+	for(u32 p = start; p < scene->numPortals; p++) {
 		auto eID = scene->portals[p];
 		auto e = &scene->entities[eID];
 		if(~e->layers & layerMask) continue;
 
-		// NOTE: This is incorrect
-		// The player can be looking away from the origin of the entity
-		//	but still see the entity
-		// Sampling multple points could be a solution
-		auto diff = glm::normalize(e->position - pos);
-		if(glm::dot(diff, fwd) > 0.f) {
-			if(*visiblePortals >= maxVisiblePortals) break;
-			graph[*visiblePortals].id = eID;
-			graph[*visiblePortals].layerMask = layerMask;
-			++*visiblePortals;
+		auto ecenter = e->position + e->rotation*e->originOffset;
+		auto gextents = e->rotation*e->extents;
+		auto gext2 = glm::cross(e->rotation*e->planeNormal, gextents);
+		auto diff = ecenter - pos;
+
+		auto d0 = glm::normalize(diff);
+		auto d1 = glm::normalize(diff + gextents);
+		auto d2 = glm::normalize(diff - gextents);
+		auto d3 = glm::normalize(diff + gext2);
+		auto d4 = glm::normalize(diff - gext2);
+
+		if(glm::dot(d0, pfwd) < 0.f) continue;
+
+		DebugLine(pos+vec3{0,.1,0}, ecenter+vec3{0,.1,0}, vec3{.3}, vec3{1});
+
+		bool fvis = glm::dot(d0, fwd) < -0.2f
+			&& glm::dot(d1, fwd) < -0.2f
+			&& glm::dot(d2, fwd) < -0.2f
+			&& glm::dot(d3, fwd) < -0.2f
+			&& glm::dot(d4, fwd) < -0.2f;
+		if(fvis) continue; 
+		
+		DebugLine(ecenter, ecenter+fwd, {1,0,1});
+		DebugLine(ecenter, ecenter+pfwd, {1,1,0});
+		DebugLine(pos, ecenter, {1,0,0}, {0,1,0});
+
+		if(*visiblePortals >= maxVisiblePortals) {
+			puts("WAY TOO MANY PORTALS!");
+			break;
 		}
+		graph[*visiblePortals].id = eID;
+		graph[*visiblePortals].layerMask = layerMask;
+		graph[*visiblePortals].order = p;
+		++*visiblePortals;
 	}
 
 	u32 addedPortals = *visiblePortals;
 	for(; processedPortals < addedPortals; processedPortals++) {
-		auto e = &scene->entities[graph[processedPortals].id];
-		ConstructPortalGraph(graph, visiblePortals, maxVisiblePortals, scene, e->layers & ~layerMask, e->position, fwd);
+		auto eid = graph[processedPortals].id;
+		auto e = &scene->entities[eid];
+		auto nfwd = e->rotation*e->planeNormal;
+
+		// Make sure portals are on right side of plane
+		if(glm::dot(e->position + e->rotation*e->originOffset - pos, nfwd) < 0.f)
+			nfwd = -nfwd;
+
+		ConstructPortalGraph(graph, visiblePortals, maxVisiblePortals, scene, 
+			e->layers & ~layerMask, e->position + e->rotation*e->originOffset, 
+			fwd, nfwd, graph[processedPortals].order+1);
 	}
 }
 
@@ -274,7 +331,25 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	// 		Add all visible portals from it's position in dest layer
 
 	vec3 camFwd = cam.rotation * vec3{0,0,-1};
-	ConstructPortalGraph(portalGraph, &visiblePortals, 256, scene, layerMask, cam.position, camFwd);
+	vec3 camPos = cam.position;
+
+	// camFwd = vec3{0,0,-1};
+	// camPos = vec3{0,0,0};
+
+	std::sort(scene->portals, &scene->portals[scene->numPortals], [scene, camFwd, camPos](u32 a, u32 b) {
+		vec3 ad = scene->entities[a].position - camPos;
+		vec3 bd = scene->entities[b].position - camPos;
+		return glm::dot(ad, camFwd) < glm::dot(bd, camFwd);
+	});
+
+	ConstructPortalGraph(portalGraph, &visiblePortals, 256, scene, layerMask, camPos, camFwd, camFwd);
+
+	for(u32 i = 0; i < visiblePortals; i++) {
+		auto eid = portalGraph[i].id;
+		auto e = &scene->entities[eid];
+		printf("| %.*s(%x) ", e->nameLength, e->name, portalGraph[i].layerMask>>1);
+	}
+	printf("|\n");
 
 	glEnable(GL_STENCIL_TEST);
 
@@ -327,9 +402,10 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glEnable(GL_CLIP_DISTANCE0);
 		glEnable(GL_CULL_FACE);
 
+		vec3 ecenter = ent->position + ent->rotation * ent->originOffset;
 		vec3 dir = glm::normalize(ent->planeNormal * ent->rotation);
-		vec4 plane = vec4{dir, -glm::dot(dir, ent->position)};
-		if(glm::dot(dir, ent->position - cam.position) < 0.f)
+		vec4 plane = vec4{dir, -glm::dot(dir, ecenter)};
+		if(glm::dot(dir, ecenter - cam.position) < 0.f)
 			plane = -plane;
 
 		glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(plane));

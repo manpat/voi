@@ -70,8 +70,13 @@ struct Entity {
 
 	// TODO: collision stuff
 
+	vec3 extents;
+	vec3 originOffset;
+
 	union {
 		vec3 planeNormal;
+
+		// NOTE: There will probably be more here
 	};
 
 	// So I can use the union for things with non-trivial constructors (glm vectors)
@@ -120,6 +125,7 @@ struct Scene {
 struct PortalNode {
 	u32 id;
 	u32 layerMask;
+	u32 order;
 };
 
 struct Camera {

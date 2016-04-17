@@ -3,7 +3,6 @@
 
 #include "common.h"
 
-// TEMP INTERFACE obviously
 struct MeshData {
 	u32 numVertices;
 	vec3* vertices;
