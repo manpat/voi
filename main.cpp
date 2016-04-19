@@ -162,7 +162,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	}
 
 	auto window = SDL_CreateWindow("Voi", 
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+		// SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+		SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_UNDEFINED, 
 		WindowWidth, WindowHeight, SDL_WINDOW_OPENGL);
 
 	if(!window) {
@@ -190,7 +191,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	scene.shaders[ShaderIDPost] = InitShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
-	{	auto sceneData = LoadSceneData("export.voi");
+	{	auto sceneData = LoadSceneData("Testing/portals.voi");
+	// {	auto sceneData = LoadSceneData("export.voi");
 		assert(sceneData.numMeshes > 0);
 
 		InitScene(&scene, &sceneData);
@@ -277,6 +279,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKeyDown('7')) layer = 6;
 		if(Input::GetKeyDown('8')) layer = 7;
 		if(Input::GetKeyDown('9')) layer = 8;
+
+		if(Input::GetKeyDown('c')) Input::doCapture ^= true;
 
 		particleEmitAccum += (glm::length(vel)*0.8f + 50.f) * dt;
 
@@ -553,6 +557,7 @@ Framebuffer InitFramebuffer(u32 width, u32 height) {
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		puts("Warning! Framebuffer incomplete!");
 	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return fb;
 }

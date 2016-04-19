@@ -119,13 +119,7 @@ struct Scene {
 	ShaderProgram shaders[256]; // 0 is default shader
 
 	u32 portals[256];
-	u32 numPortals;
-};
-
-struct PortalNode {
-	u32 id;
-	u32 layerMask;
-	u32 order;
+	u16 numPortals;
 };
 
 struct Camera {
