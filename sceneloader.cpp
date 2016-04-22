@@ -222,6 +222,15 @@ void SortMeshData(MeshData* md) {
 	auto ts = (El*) md->triangles8;
 	u32 count = md->numTriangles;
 
+	// Skip sorting if already sorted
+	u32 prevMatID = 0;
+	for(u32 i = 0; i < count; i++) {
+		if(ms[i] < prevMatID) goto unsorted;
+		prevMatID = ms[i];
+	}
+	return;
+	unsorted:
+
 	auto swapElements = [ms,ts] (u32 a, u32 b) {
 		std::swap(ms[a], ms[b]);
 		std::swap(ts[a*3+0], ts[b*3+0]);
