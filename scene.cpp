@@ -458,9 +458,10 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glStencilMask(depthBit);
 
 		// Render portal
+		// NOTE: Polygon offset fixes z-fighting issues on some portals
 		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(0.f, -1.f);
 		glDepthFunc(GL_LEQUAL);
-		glPolygonOffset(-0.01f, 0.f);
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
 		glDisable(GL_POLYGON_OFFSET_FILL);
 
