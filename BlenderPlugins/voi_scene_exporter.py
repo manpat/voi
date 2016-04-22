@@ -17,7 +17,7 @@ from bpy import context
 # https://docs.python.org/2/library/struct.html
 
 def swapCoords(co):
-	return [co.x, co.z, -co.y];
+	return [co.x, co.z, -co.y]
 
 class ExportVoiScene(bpy.types.Operator):
 	"""Voi scene exporter"""

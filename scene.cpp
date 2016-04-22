@@ -123,7 +123,13 @@ void InitScene(Scene* scene, const SceneData* data) {
 
 		to->layers = from->layers;
 		to->position = from->position;
-		to->rotation = quat(from->rotation);
+
+		// NOTE: This is here because blender applies euler rotations in ZYX by default
+		//	and we swap the coord space. So gimbal lock becomes a problem.
+		auto rotX = glm::angleAxis(from->rotation.x, vec3{1,0,0});
+		auto rotY = glm::angleAxis(from->rotation.y, vec3{0,1,0});
+		auto rotZ = glm::angleAxis(from->rotation.z, vec3{0,0,1});
+		to->rotation = rotY * rotZ * rotX;
 
 		to->parentID = from->parentID;
 		to->meshID = from->meshID;
@@ -294,6 +300,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 			vec3{0,1,0},
 			vec3{0},
 			vec3{0,1,1},
+			vec3{0},
 			vec3{0},
 			vec3{0},
 			vec3{0,0,1},
