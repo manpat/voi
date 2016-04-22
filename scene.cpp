@@ -458,8 +458,11 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glStencilMask(depthBit);
 
 		// Render portal
+		glEnable(GL_POLYGON_OFFSET_FILL);
 		glDepthFunc(GL_LEQUAL);
+		glPolygonOffset(-0.01f, 0.f);
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
+		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		// Clear Depth within stencil
 		// 	- Disable color write
