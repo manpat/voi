@@ -210,6 +210,7 @@ void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+// NOTE: This could be useful elsewhere
 u32 GetFarPlaneQuad(mat4 projection) {
 	static u32 farPlaneBuffer = 0;
 	if(!farPlaneBuffer) {
@@ -291,6 +292,9 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 			vec3{1,1,0},
 			vec3{0,1,0},
 			vec3{0},
+			vec3{0,1,1},
+			vec3{0},
+			vec3{0},
 			vec3{0,0,1},
 		};
 
@@ -349,30 +353,16 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	vec3 camFwd = cam.rotation * vec3{0,0,-1};
 	vec3 camPos = cam.position;
 
-	// camFwd = vec3{0,0,-1};
-	// camPos = vec3{0,0,0};
-
 	std::sort(scene->portals, &scene->portals[scene->numPortals], [scene, camFwd, camPos](u32 a, u32 b) {
 		vec3 ad = scene->entities[a].position - camPos;
 		vec3 bd = scene->entities[b].position - camPos;
 		return glm::dot(ad, camFwd) < glm::dot(bd, camFwd);
 	});
 
-	// This node represents the player
+	// The first node represents the player
 	portalGraph.nodes[0] = {0, (u16)layerMask, 1, 0, 0, 0};
 	portalGraph.nodeCount = 1;
 	ConstructPortalGraph(&portalGraph, scene, 0, camPos, camFwd, 0);
-
-	// for(u32 i = 0; i < portalGraph.nodeCount; i++) {
-	// 	auto node = &portalGraph.nodes[i];
-	// 	auto eid = node->entityID;
-	// 	auto e = &scene->entities[eid];
-	// 	if(i > 0)
-	// 		printf("| %.*s (o: %hhu, c: %u) ", e->nameLength, e->name, node->order, node->childrenCount);
-	// 	else
-	// 		printf("| root (c: %u) ", node->childrenCount);
-	// }
-	// printf("|\n");
 
 	static auto farPlaneBuffer = GetFarPlaneQuad(cam.projection);
 	auto sh = &scene->shaders[ShaderIDDefault];
@@ -401,15 +391,39 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	glStencilMask(0xff);
 	glClear(GL_STENCIL_BUFFER_BIT);
 
-	auto RenderPortalNode = [&portalGraph, scene, &cam, sh, &viewMatrix] (u32 graphPos) {
-		auto portalNode = &portalGraph.nodes[graphPos];
+	struct StackSlot {
+		u32 id;
+		u32 remainingChildren;
+	};
+
+	StackSlot portalStack[8] {{0, portalGraph.nodes[0].childrenCount}};
+	u32 stackPos = 1;
+	u32 recurseGuard = 0;
+
+	while(stackPos > 0 && recurseGuard++ < 300) {
+		auto parent = &portalStack[stackPos-1];
+		if(parent->remainingChildren-- == 0) {
+			stackPos--;
+			continue;
+		}
+
+		if(stackPos > 8) {
+			puts("WARNING! Render stack overflow!");
+			continue;
+		}
+
+		u32 id = parent->remainingChildren + portalGraph.nodes[parent->id].childrenStart;
+		auto portalNode = &portalGraph.nodes[id];
+
+		portalStack[stackPos++] = {id, portalNode->childrenCount};
+
 		auto ent = &scene->entities[portalNode->entityID];
-		if(!ent->meshID) return;
-		if(ent->entityType != Entity::TypePortal) return;
-		if(ent->flags & Entity::FlagHidden) return;
+		if(!ent->meshID) continue;
+		if(ent->entityType != Entity::TypePortal) continue;
+		if(ent->flags & Entity::FlagHidden) continue;
 
 		auto targetLayer = ent->layers & portalNode->targetLayerMask;
-		if(!targetLayer) return; // This should never really happen
+		if(!targetLayer) continue; // This should never really happen
 
 		glDisable(GL_CLIP_DISTANCE0);
 		glDisable(GL_CULL_FACE);
@@ -427,7 +441,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glStencilMask(depthBit);
 
 		// Render portal
-		glDepthFunc(GL_LEQUAL); // HACK: Assumes nothing else lines up with portal, can cause artifacts
+		glDepthFunc(GL_LEQUAL);
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
 
 		// Clear Depth within stencil
@@ -444,14 +458,16 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection));
 		glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
-		glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.2f})); ////////////// Clear color
+
+		// NOTE: This does nothing with posteffects on, otherwise it's clear color
+		glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.9f}));
 
 		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
 		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		// Reset render state
+		// Reset render state and prepare to render target scene
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
 		glDepthFunc(GL_LEQUAL);
 		glColorMask(true,true,true,true);
@@ -484,37 +500,9 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 			RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
 		}
-	};
-
-	struct StackSlot {
-		u32 id;
-		u32 remainingChildren;
-	};
-
-	StackSlot portalStack[8] {{0, portalGraph.nodes[0].childrenCount}};
-	u32 stackPos = 1;
-
-	u32 recurseGuard = 0;
-	while(stackPos > 0 && recurseGuard++ < 100) {
-		auto parent = &portalStack[stackPos-1];
-		if(parent->remainingChildren-- == 0) {
-			stackPos--;
-			continue;
-		}
-
-		if(stackPos > 8) {
-			puts("WARNING! Render stack overflow!");
-			continue;
-		}
-
-		u32 id = parent->remainingChildren + portalGraph.nodes[parent->id].childrenStart;
-		auto node = &portalGraph.nodes[id];
-
-		portalStack[stackPos++] = {id, node->childrenCount};
-		RenderPortalNode(id);
 	}
 
-	if(recurseGuard > 90) {
+	if(recurseGuard > 290) {
 		puts("WARNING! Recurse guard hit!");
 	}
 
@@ -522,247 +510,3 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	glDisable(GL_CLIP_DISTANCE0);
 	glEnable(GL_CULL_FACE);
 }
-
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-#if 0
-struct PortalNode {
-	u32 id;
-	u32 layerMask;
-	u8 order;
-};
-
-void ConstructPortalGraph(PortalNode* graph, u32* visiblePortals, u32 maxVisiblePortals, Scene* scene, 
-	u32 layerMask, vec3 pos, vec3 planenormal, u32 start = 0) {
-
-	if(*visiblePortals >= maxVisiblePortals) return;
-
-	// Add all portals on this layer in front of plane
-	u32 processedPortals = *visiblePortals;
-	for(u32 p = start; p < scene->numPortals; p++) {
-		auto eID = scene->portals[p];
-		auto e = &scene->entities[eID];
-		if(~e->layers & layerMask) continue; // Skip if not on this layer
-
-		auto ecenter = e->position + e->rotation*e->originOffset;
-		auto gextents = e->rotation*e->extents;
-		auto gext2 = glm::cross(e->rotation*e->planeNormal, gextents);
-		auto diff = ecenter - pos;
-
-		auto d0 = glm::normalize(diff);
-		auto d1 = glm::normalize(diff + gextents);
-		auto d2 = glm::normalize(diff - gextents);
-		auto d3 = glm::normalize(diff + gext2);
-		auto d4 = glm::normalize(diff - gext2);
-
-		bool fvis = glm::dot(d0, planenormal) < -0.2f
-			&& glm::dot(d1, planenormal) < -0.2f
-			&& glm::dot(d2, planenormal) < -0.2f
-			&& glm::dot(d3, planenormal) < -0.2f
-			&& glm::dot(d4, planenormal) < -0.2f;
-		if(fvis) continue; 
-		
-		static vec3 layerColors[] = {
-			vec3{1,0,0},
-			vec3{1,1,0},
-			vec3{0,1,0},
-			vec3{0},
-			vec3{0,0,1},
-		};
-
-		// DebugLine(ecenter, ecenter+planenormal, {1,1,0});
-		vec3 yoff {0,0.04*p,0};
-		if(start == 0) {
-			yoff.y = -.05f;
-			DebugLine(pos+yoff, ecenter, vec3{1}, vec3{1});
-		}else{
-			DebugLine(pos+yoff, ecenter+yoff, layerColors[layerMask>>1], layerColors[(e->layers & ~layerMask)>>1]);
-		}
-
-		if(*visiblePortals >= maxVisiblePortals) {
-			puts("WAY TOO MANY PORTALS!");
-			break;
-		}
-		graph[*visiblePortals].id = eID;
-		graph[*visiblePortals].layerMask = e->layers & ~layerMask;
-		graph[*visiblePortals].order = p;
-		++*visiblePortals;
-
-		// auto nfwd = e->rotation*e->planeNormal;
-
-		// // Make sure portals are on right side of plane
-		// if(glm::dot(e->position + e->rotation*e->originOffset - pos, nfwd) < 0.f)
-		// 	nfwd = -nfwd;
-
-		// ConstructPortalGraph(graph, visiblePortals, maxVisiblePortals, scene, 
-		// 	e->layers & ~layerMask, ecenter, fwd, nfwd, p+1);
-	}
-	// return;
-
-	u32 addedPortals = *visiblePortals;
-	for(; processedPortals < addedPortals; processedPortals++) {
-		auto eid = graph[processedPortals].id;
-		auto plm = graph[processedPortals].layerMask;
-		auto e = &scene->entities[eid];
-		auto nfwd = e->rotation*e->planeNormal;
-
-		// Make sure portals are on right side of plane
-		if(glm::dot(e->position + e->rotation*e->originOffset - pos, nfwd) < 0.f)
-			nfwd = -nfwd;
-
-		ConstructPortalGraph(graph, visiblePortals, maxVisiblePortals, scene, 
-			e->layers & ~layerMask, e->position + e->rotation*e->originOffset, 
-			nfwd, graph[processedPortals].order+1);	
-	}
-}
-
-void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
-	auto farPlaneBuffer = GetFarPlaneQuad(cam.projection);
-	auto sh = &scene->shaders[ShaderIDDefault];
-
-	mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
-	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
-
-	for(u32 entID = 0; entID < scene->numEntities; entID++) {
-		auto ent = &scene->entities[entID];
-		if(!ent->meshID) continue;
-		if(ent->flags & Entity::FlagHidden) continue;
-		if(~ent->layers & layerMask) continue;
-
-		// Render both sides of portals and mirrors
-		if(ent->entityType == Entity::TypePortal
-		|| ent->entityType == Entity::TypeMirror) {
-			glDisable(GL_CULL_FACE);
-		}else{
-			glEnable(GL_CULL_FACE);
-		}
-
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
-	}
-
-	PortalNode portalGraph[256];
-	u32 visiblePortals = 0;
-
-	// Add all visible portals in this layer
-	// For each portal
-	// 		Add all visible portals from it's position in dest layer
-
-	vec3 camFwd = cam.rotation * vec3{0,0,-1};
-	vec3 camPos = cam.position;
-
-	// camFwd = vec3{0,0,-1};
-	// camPos = vec3{0,0,0};
-
-	std::sort(scene->portals, &scene->portals[scene->numPortals], [scene, camFwd, camPos](u32 a, u32 b) {
-		vec3 ad = scene->entities[a].position - camPos;
-		vec3 bd = scene->entities[b].position - camPos;
-		return glm::dot(ad, camFwd) < glm::dot(bd, camFwd);
-	});
-
-	ConstructPortalGraph(portalGraph, &visiblePortals, 256, scene, layerMask, camPos, camFwd);
-
-	for(u32 i = 0; i < visiblePortals; i++) {
-		auto eid = portalGraph[i].id;
-		auto e = &scene->entities[eid];
-		printf("| %.*s[%d] 0x%x ", e->nameLength, e->name, portalGraph[i].order, portalGraph[i].layerMask);
-	}
-	printf("|\n");
-
-	glEnable(GL_STENCIL_TEST);
-
-	// Construct graph
-	// Render scene
-	// Mask stencil 1<<depth
-	// Clear stencil (masked)
-	//		Remove sibling portals from stencil but keep parents
-	// Render portal in stencil 
-	// 	Render target scene where stencil == (2<<depth -1)
-	//		This will only draw where every parent portal has been drawn
-	//	RECURSE
-
-	for(u32 graphPos = 0; graphPos < visiblePortals; graphPos++) {
-		auto portal = &portalGraph[graphPos];
-		auto ent = &scene->entities[portal->id];
-		if(!ent->meshID) continue;
-		if(ent->entityType != Entity::TypePortal) continue;
-		if(ent->flags & Entity::FlagHidden) continue;
-
-		auto targetLayer = ent->layers & portal->layerMask;
-
-		glDisable(GL_CLIP_DISTANCE0);
-		glDisable(GL_CULL_FACE);
-
-		// Write portal to stencil
-		glStencilFunc(GL_ALWAYS, 1, 0xff);
-		// glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-		glStencilMask(0xff);
-		glClear(GL_STENCIL_BUFFER_BIT);
-
-		// Render portal
-		glDepthFunc(GL_EQUAL); // HACK: Assumes nothing else lines up with portal, can cause artifacts
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
-
-		// Clear Depth within stencil
-		// 	- Disable color write
-		// 	- Always write to depth
-		// 	- Render quad at far plane
-		// 	- Reset depth write
-		glDepthFunc(GL_ALWAYS);
-		glStencilFunc(GL_EQUAL, 1, 0xff);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-		glStencilMask(0x0);
-
-		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection));
-		glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
-		glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.1f})); ////////////// Clear color
-
-		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		// Reset render state
-		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
-		glDepthFunc(GL_LEQUAL);
-
-		glEnable(GL_CLIP_DISTANCE0);
-		glEnable(GL_CULL_FACE);
-
-		vec3 ecenter = ent->position + ent->rotation * ent->originOffset;
-		vec3 dir = glm::normalize(ent->planeNormal * ent->rotation);
-		vec4 plane = vec4{dir, -glm::dot(dir, ecenter)};
-		if(glm::dot(dir, ecenter - cam.position) < 0.f)
-			plane = -plane;
-
-		glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(plane));
-
-		for(u32 entID = 0; entID < scene->numEntities; entID++) {
-			if(entID == portal->id) continue;
-
-			auto ent = &scene->entities[entID];
-			if(!ent->meshID) continue;
-			if(ent->flags & Entity::FlagHidden) continue;
-			if(~ent->layers & targetLayer) continue;
-
-			if(ent->entityType == Entity::TypePortal
-			|| ent->entityType == Entity::TypeMirror) {
-				glDisable(GL_CULL_FACE);
-			}else{
-				glEnable(GL_CULL_FACE);
-			}
-
-			RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
-		}
-	}
-
-	glDisable(GL_STENCIL_TEST);
-	glDisable(GL_CLIP_DISTANCE0);
-	glEnable(GL_CULL_FACE);
-}
-#endif

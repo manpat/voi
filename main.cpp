@@ -191,8 +191,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	scene.shaders[ShaderIDPost] = InitShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
-	{	auto sceneData = LoadSceneData("Testing/portals.voi");
-	// {	auto sceneData = LoadSceneData("export.voi");
+	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
+	{	auto sceneData = LoadSceneData("export.voi");
 		assert(sceneData.numMeshes > 0);
 
 		InitScene(&scene, &sceneData);
