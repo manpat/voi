@@ -155,6 +155,8 @@ f32 randf() {
 	return (rand()%20000)/10000.f - 1.f;
 }
 
+extern bool debugDrawEnabled;
+
 s32 main(s32 /*ac*/, const char** /* av*/) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
@@ -191,8 +193,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	scene.shaders[ShaderIDPost] = InitShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
-	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
-	{	auto sceneData = LoadSceneData("export.voi");
+	{	auto sceneData = LoadSceneData("Testing/portals.voi");
+	// {	auto sceneData = LoadSceneData("export.voi");
 		assert(sceneData.numMeshes > 0);
 
 		InitScene(&scene, &sceneData);
@@ -281,6 +283,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKeyDown('9')) layer = 8;
 
 		if(Input::GetKeyDown('c')) Input::doCapture ^= true;
+		if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
 
 		particleEmitAccum += (glm::length(vel)*0.8f + 50.f) * dt;
 

@@ -38,6 +38,8 @@ namespace {
 	std::vector<vec3> points;
 }
 
+bool debugDrawEnabled = false;
+
 void InitDebugDraw() {
 	debugProgram = InitShaderProgram(debugShaderSrc[0], debugShaderSrc[1]);
 
@@ -45,6 +47,8 @@ void InitDebugDraw() {
 }
 
 void DrawDebug(const mat4& viewProjection) {
+	if(!debugDrawEnabled) return;
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glLineWidth(4);
 	glPointSize(4);
@@ -83,6 +87,8 @@ void DebugLine(vec3 a, vec3 b, vec3 col) {
 }
 
 void DebugLine(vec3 a, vec3 b, vec3 acol, vec3 bcol) {
+	if(!debugDrawEnabled) return;
+
 	lines.push_back(a);
 	lines.push_back(acol);
 	lines.push_back(b);
@@ -90,6 +96,8 @@ void DebugLine(vec3 a, vec3 b, vec3 acol, vec3 bcol) {
 }
 
 void DebugPoint(vec3 a, vec3 col) {
+	if(!debugDrawEnabled) return;
+
 	points.push_back(a);
 	points.push_back(col);
 }

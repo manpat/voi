@@ -248,15 +248,16 @@ struct PortalNode {
 };
 
 struct PortalGraph {
-	enum{ MaxNumPortalNodes = 256 };
+	enum{ MaxNumPortalNodes = 512 };
 	PortalNode nodes[MaxNumPortalNodes];
-	u32 nodeCount;
+	u16 nodeCount;
 };
 
 // Breadth first search of potentially visible portals
 void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, vec3 pos, vec3 fwd, u16 firstPortalID) {
 	if(graph->nodeCount >= PortalGraph::MaxNumPortalNodes) return;
 	if(parentNodeID >= PortalGraph::MaxNumPortalNodes) return;
+	if(firstPortalID >= scene->numPortals) return;
 	
 	auto parentNode = &graph->nodes[parentNodeID];
 	if(parentNode->depth >= 7) return;
@@ -400,19 +401,28 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	u32 stackPos = 1;
 	u32 recurseGuard = 0;
 
-	while(stackPos > 0 && recurseGuard++ < 300) {
+	while(stackPos > 0 && recurseGuard++ < 500) {
 		auto parent = &portalStack[stackPos-1];
 		if(parent->remainingChildren-- == 0) {
 			stackPos--;
 			continue;
 		}
 
-		if(stackPos > 8) {
+		if(stackPos >= 8) {
+			parent->remainingChildren = 0;
+			// stackPos--;
 			puts("WARNING! Render stack overflow!");
 			continue;
 		}
 
 		u32 id = parent->remainingChildren + portalGraph.nodes[parent->id].childrenStart;
+		if(id >= PortalGraph::MaxNumPortalNodes) {
+			parent->remainingChildren = 0;
+			stackPos--;
+			puts("WARNING! Portal graph overflow!");
+			continue;			
+		}
+
 		auto portalNode = &portalGraph.nodes[id];
 
 		portalStack[stackPos++] = {id, portalNode->childrenCount};
@@ -502,7 +512,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		}
 	}
 
-	if(recurseGuard > 290) {
+	if(recurseGuard > 490) {
 		puts("WARNING! Recurse guard hit!");
 	}
 
