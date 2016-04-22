@@ -269,7 +269,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		if(e->entityType != Entity::TypePortal) continue;
 		if(~e->layers & parentNode->targetLayerMask) continue;
 
-		vec3 planeNormal = e->planeNormal * e->rotation;
+		vec3 planeNormal = e->rotation * e->planeNormal;
 		auto ecenter = e->position + e->rotation*e->originOffset;
 		auto gextents = e->rotation*e->extents;
 		auto gext2 = glm::cross(planeNormal, gextents);
@@ -324,7 +324,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		auto e = &scene->entities[node->entityID];
 		node->childrenStart = graph->nodeCount;
 
-		vec3 planeNormal = e->planeNormal * e->rotation;
+		vec3 planeNormal = e->rotation * e->planeNormal;
 		vec3 ecenter = e->position + e->rotation*e->originOffset;
 		auto diff = ecenter - pos;
 		
@@ -401,7 +401,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	u32 stackPos = 1;
 	u32 recurseGuard = 0;
 
-	while(stackPos > 0 && recurseGuard++ < 500) {
+	while(stackPos > 0 && recurseGuard++ < PortalGraph::MaxNumPortalNodes+10) {
 		auto parent = &portalStack[stackPos-1];
 		if(parent->remainingChildren-- == 0) {
 			stackPos--;
@@ -486,7 +486,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glEnable(GL_CULL_FACE);
 
 		vec3 ecenter = ent->position + ent->rotation * ent->originOffset;
-		vec3 dir = glm::normalize(ent->planeNormal * ent->rotation);
+		vec3 dir = glm::normalize(ent->rotation * ent->planeNormal);
 		vec4 plane = vec4{dir, -glm::dot(dir, ecenter)};
 		if(glm::dot(dir, ecenter - cam.position) < 0.f)
 			plane = -plane;
@@ -512,7 +512,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		}
 	}
 
-	if(recurseGuard > 490) {
+	if(recurseGuard > PortalGraph::MaxNumPortalNodes) {
 		puts("WARNING! Recurse guard hit!");
 	}
 
