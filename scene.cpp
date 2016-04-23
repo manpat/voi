@@ -417,7 +417,6 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 		if(stackPos >= 8) {
 			parent->remainingChildren = 0;
-			// stackPos--;
 			puts("WARNING! Render stack overflow!");
 			continue;
 		}
@@ -448,7 +447,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		u32 depthBit = 1<<(portalNode->depth-1);
 		u32 depthMask = depthBit*2-1;
 
-		// Write portal to stencil
+		// Prepare for drawing portal
 		glStencilFunc(GL_ALWAYS, depthBit, 0xff);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilMask(~depthMask | depthBit);
@@ -457,7 +456,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glClear(GL_STENCIL_BUFFER_BIT);
 		glStencilMask(depthBit);
 
-		// Render portal
+		// Write portal to stencil
 		// NOTE: Polygon offset fixes z-fighting issues on some portals
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(0.f, -1.f);

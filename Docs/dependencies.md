@@ -8,7 +8,7 @@ Active
 	- Happy Bunny licence (MIT so long as we aren't selling Voi to the military)
 - SDL2 latest
 	- zlib
-- glew >= 1.10
+- glew >= 1.10 (Included)
 	- [http://glew.sourceforge.net/]
 	- MIT
 

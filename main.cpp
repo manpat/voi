@@ -204,7 +204,6 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
-	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	glFrontFace(GL_CCW);
@@ -219,7 +218,14 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	vec2 mouseRot {0,0};
 	u8 layer = 0;
-	f32 dt = 1.f/60.f; // TODO: Actual dt
+	f32 dt = 1.f/60.f;
+	f32 fpsTimeAccum = 0.f;
+	u32 fpsFrameCount = 0;
+
+	auto beginTime = std::chrono::high_resolution_clock::now();
+
+	u32 primCountQuery;
+	glGenQueries(1, &primCountQuery);
 
 	Camera camera;
 	camera.position = {0,0,5};
@@ -254,10 +260,10 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		camera.rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0}) * glm::angleAxis(mouseRot.y, vec3{1,0,0});
 
 		vec3 vel {};
-		if(Input::GetKey('w')) vel += camera.rotation * vec3{0,0,-1};
-		if(Input::GetKey('s')) vel += camera.rotation * vec3{0,0, 1};
-		if(Input::GetKey('a')) vel += camera.rotation * vec3{-1,0,0};
-		if(Input::GetKey('d')) vel += camera.rotation * vec3{ 1,0,0};
+		if(Input::GetMapped(Input::Forward))	vel += camera.rotation * vec3{0,0,-1};
+		if(Input::GetMapped(Input::Backward))	vel += camera.rotation * vec3{0,0, 1};
+		if(Input::GetMapped(Input::Left))		vel += camera.rotation * vec3{-1,0,0};
+		if(Input::GetMapped(Input::Right))		vel += camera.rotation * vec3{ 1,0,0};
 
 		if(glm::length(vel) > 1.f){
 			vel = glm::normalize(vel);
@@ -292,6 +298,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		EmitParticles(&particleSystem, numParticlesEmit, 7.f + randf() * 3.f, camera.position);
 		UpdateParticleSystem(&particleSystem, dt);
 
+		auto beginRenderTime = std::chrono::high_resolution_clock::now();
+		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
 		glUseProgram(scene.shaders[ShaderIDDefault].program);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
@@ -331,8 +339,30 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		DrawDebug(viewProjection);
 
+		auto endRenderTime = std::chrono::high_resolution_clock::now();
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
+		glEndQuery(GL_PRIMITIVES_GENERATED);
+
+		auto endTime = std::chrono::high_resolution_clock::now();
+		dt = std::chrono::duration_cast<std::chrono::duration<f32>>(endTime-beginTime).count();
+		f32 renderdt = std::chrono::duration_cast<std::chrono::duration<f32>>(endRenderTime-beginRenderTime).count();
+		beginTime = endTime;
+		fpsTimeAccum += dt;
+		fpsFrameCount++;
+
+		if(fpsTimeAccum > 0.3f) {
+			f32 fps = fpsFrameCount/fpsTimeAccum;
+			fpsFrameCount = 0;
+			fpsTimeAccum = 0;
+
+			u32 primCount = 0;
+			glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT, &primCount);
+
+			char titleBuffer[256];
+			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %.4u primitives", fps, renderdt*1000.f, primCount);
+			SDL_SetWindowTitle(window, titleBuffer);
+		}
 
 		Input::ClearFrameState();
 	}
