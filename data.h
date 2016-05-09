@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include "common.h"
+#include <vector>
 
 struct Mesh {
 	enum { MaxInlineSubmeshes = 4 };
@@ -144,6 +145,7 @@ enum {
 struct Framebuffer {
 	u32 fbo;
 	u32 targets[FBTargetCount];
+	bool valid;
 };
 
 struct ParticleSystem {
@@ -156,6 +158,39 @@ struct ParticleSystem {
 	f32* lifeRates;
 
 	u32 vertexBuffer;
+};
+
+class btDbvtBroadphase;
+class btCollisionDispatcher;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+
+struct PhysicsColliderPair {
+	u16 entityID0;
+	u16 entityID1;
+	u32 stamp;
+};
+
+struct PhysicsContext {
+
+	// struct RaycastResult {
+	// 	bool hit() const { return entity != nullptr; }
+	// 	operator bool() const { return hit(); }
+
+	// 	Entity* entity;
+	// 	vec3 hitPosition;
+	// 	vec3 hitNormal;
+	// 	f32 distance;
+	// };
+
+	btDbvtBroadphase* broadphase;
+	btCollisionDispatcher* dispatcher;
+	btSequentialImpulseConstraintSolver* solver;
+	btDiscreteDynamicsWorld* world;
+
+	std::vector<PhysicsColliderPair> activeColliderPairs;
+	bool needsRefilter = false;
+	u32 currentStamp = 0;
 };
 
 #endif

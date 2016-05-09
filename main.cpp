@@ -3,8 +3,6 @@
 #include "sceneloader.h"
 #include "input.h"
 
-#include "debugdraw.h"
-
 #include <chrono>
 #include <SDL2/SDL.h>
 
@@ -130,31 +128,40 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	if(!InitGL(window)) return 1;
 
-	// *Required* as of like OpenGL 3.something 
-	u32 vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	PhysicsContext physContext;
+	if(!InitPhysics(&physContext)) {
+		puts("Error! Physics init failed!");
+		return 1;
+	}
 
 	Input::Init();
 	Input::doCapture = true;
 
 	SDL_WarpMouseInWindow(window, WindowWidth/2, WindowHeight/2);
 
-	InitDebugDraw();
+	if(!InitDebugDraw()) {
+		puts("Warning! Debug draw init failed");
+	}
 
 	Scene scene;
-	scene.shaders[ShaderIDDefault] = InitShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
-	scene.shaders[ShaderIDParticles] = InitShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
-	scene.shaders[ShaderIDPost] = InitShaderProgram(postShaderSrc[0], postShaderSrc[1]);
+	scene.shaders[ShaderIDDefault] = CreateShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
+	scene.shaders[ShaderIDParticles] = CreateShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
+	scene.shaders[ShaderIDPost] = CreateShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
-	{	auto sceneData = LoadSceneData("Testing/temple.voi");
+	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
-	// {	auto sceneData = LoadSceneData("export.voi");
+	{	auto sceneData = LoadSceneData("export.voi");
 	// {	auto sceneData = LoadSceneData("Testing/test.voi");
 	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
-		assert(sceneData.numMeshes > 0);
+		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
+			puts("Error! Empty scene!");
+			return 1;
+		}
 
-		InitScene(&scene, &sceneData);
+		if(!InitScene(&scene, &sceneData)) {
+			puts("Error! Scene init failed!");
+			return 1;
+		}
 		FreeSceneData(&sceneData);
 	}
 
@@ -190,7 +197,9 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
 	ParticleSystem particleSystem;
-	InitParticleSystem(&particleSystem, 1000);
+	if(!InitParticleSystem(&particleSystem, 1000)) {
+		puts("Warning! Particle system init failed");
+	}
 
 	// Simulate 10s of dust
 	for(u32 i = 0; i < 60*10; i++){
@@ -200,7 +209,11 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	f32 particleEmitAccum = 0.f;
 
-	Framebuffer fb = InitFramebuffer(WindowWidth, WindowHeight);
+	Framebuffer fb = CreateFramebuffer(WindowWidth, WindowHeight);
+	if(!fb.valid) {
+		puts("Error! Framebuffer creation failed!");
+		return 1;
+	}
 
 	SDL_Event e;
 	bool running = true;
@@ -260,6 +273,8 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		particleEmitAccum -= numParticlesEmit;
 		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), camera.position);
 		UpdateParticleSystem(&particleSystem, dt);
+
+		UpdatePhysics(&physContext, &scene, dt);
 
 		auto beginRenderTime = std::chrono::high_resolution_clock::now();
 		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
@@ -373,6 +388,11 @@ bool InitGL(SDL_Window* window) {
 	}else{
 		puts("Warning! Debug output not supported");
 	}
+
+	// *Required* as of like OpenGL 3.something 
+	u32 vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	return true;
 }

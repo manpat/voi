@@ -27,7 +27,7 @@ u32 CreateShader(const char* src, u32 type) {
 	return id;
 }
 
-ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
+ShaderProgram CreateShaderProgram(const char* vsrc, const char* fsrc) {
 	ShaderProgram ret{};
 
 	u32 vsh = CreateShader(vsrc, GL_VERTEX_SHADER);

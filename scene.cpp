@@ -1,14 +1,10 @@
-#include "common.h"
-
-#include "data.h"
+#include "voi.h"
 #include "sceneloader.h"
-
-#include "debugdraw.h"
 
 #include <algorithm>
 #include <SDL2/SDL.h>
 
-void InitScene(Scene* scene, const SceneData* data) {
+bool InitScene(Scene* scene, const SceneData* data) {
 	// NOTE: THIS IS WAY OVERKILL!!
 	// It would be better to actually figure out how long the names are
 	scene->nameArenaSize = (data->numMaterials + data->numEntities) * 256u;
@@ -169,6 +165,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 		scene->portals[scene->numPortals] = i;
 		scene->numPortals++;
 		
+		// This could be done on a per mesh basis
 		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
 		auto mesh = &data->meshes[e->meshID-1];
 
@@ -181,9 +178,11 @@ void InitScene(Scene* scene, const SceneData* data) {
 		e->originOffset = (maxPoint + minPoint)/2.f;
 		e->extents = (maxPoint - minPoint)/2.f;
 	}
+
+	return true;
 }
 
-void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot, vec3 scale) {
+void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale) {
 	auto program = &scene->shaders[ShaderIDDefault]; // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
@@ -221,7 +220,7 @@ void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot, vec3 scale) {
 }
 
 // NOTE: This could be useful elsewhere
-u32 GetFarPlaneQuad(mat4 projection) {
+u32 GetFarPlaneQuad(const mat4& projection) {
 	static u32 farPlaneBuffer = 0;
 	if(!farPlaneBuffer) {
 		constexpr f32 epsilon = 1e-6;
@@ -528,7 +527,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	}
 
 	if(recurseGuard > PortalGraph::MaxNumPortalNodes) {
-		puts("WARNING! Portal render recurse guard hit!");
+		puts("Warning! Portal render recurse guard hit!");
 	}
 
 	glDisable(GL_STENCIL_TEST);

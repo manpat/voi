@@ -1,6 +1,6 @@
 #include "voi.h"
 
-Framebuffer InitFramebuffer(u32 width, u32 height) {
+Framebuffer CreateFramebuffer(u32 width, u32 height) {
 	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
 	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
 	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
@@ -25,8 +25,10 @@ Framebuffer InitFramebuffer(u32 width, u32 height) {
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	fb.valid = true;
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		puts("Warning! Framebuffer incomplete!");
+		fb.valid = false;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

@@ -1,9 +1,6 @@
-#include "debugdraw.h"
-#include "data.h"
+#include "voi.h"
 
 #include <vector>
-
-ShaderProgram InitShaderProgram(const char*, const char*);
 
 #define SHADER(x) "#version 130\n" #x
 namespace {
@@ -40,13 +37,21 @@ namespace {
 
 bool debugDrawEnabled = false;
 
-void InitDebugDraw() {
-	debugProgram = InitShaderProgram(debugShaderSrc[0], debugShaderSrc[1]);
+bool InitDebugDraw() {
+	vbo = 0;
+	debugProgram = CreateShaderProgram(debugShaderSrc[0], debugShaderSrc[1]);
+
+	if(!debugProgram.program) {
+		puts("WARNING! Debug draw shader compilation failed!");
+		return false;
+	}
 
 	glGenBuffers(1, &vbo);
+	return true;
 }
 
 void DrawDebug(const mat4& viewProjection) {
+	if(!debugProgram.program || !vbo) debugDrawEnabled = false;
 	if(!debugDrawEnabled) return;
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -82,11 +87,11 @@ void DrawDebug(const mat4& viewProjection) {
 	points.clear();
 }
 
-void DebugLine(vec3 a, vec3 b, vec3 col) {
+void DebugLine(const vec3& a, const vec3& b, const vec3& col) {
 	DebugLine(a, b, col, col);
 }
 
-void DebugLine(vec3 a, vec3 b, vec3 acol, vec3 bcol) {
+void DebugLine(const vec3& a, const vec3& b, const vec3& acol, const vec3& bcol) {
 	if(!debugDrawEnabled) return;
 
 	lines.push_back(a);
@@ -95,7 +100,7 @@ void DebugLine(vec3 a, vec3 b, vec3 acol, vec3 bcol) {
 	lines.push_back(bcol);
 }
 
-void DebugPoint(vec3 a, vec3 col) {
+void DebugPoint(const vec3& a, const vec3& col) {
 	if(!debugDrawEnabled) return;
 
 	points.push_back(a);

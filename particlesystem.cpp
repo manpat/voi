@@ -1,6 +1,6 @@
 #include "voi.h"
 
-void InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
+bool InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
 	sys->freeIndex = 0;
 	sys->numParticles = numParticles;
 	sys->positions = new vec3[numParticles];
@@ -17,6 +17,8 @@ void InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
 	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, numParticles * sizeof(f32) * 4, nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return true;
 }
 
 void UpdateParticleSystem(ParticleSystem* sys, f32 dt) {
@@ -49,7 +51,7 @@ static f32 randf(f32 a = -1, f32 b = 1) {
 	return glm::linearRand<f32>(a,b);
 }
 
-void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, vec3 position) {
+void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, const vec3& position) {
 	u32 i = sys->freeIndex;
 	while(count > 0) {
 		do {
