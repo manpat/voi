@@ -1,14 +1,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <map>
 #include <cmath>
-#include <memory>
 #include <cstdint>
-#include <unordered_map>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -42,11 +40,5 @@ using f64 = double;
 
 #define GLEW_STATIC
 #include "glew.h"
-
-#if 0
-#define dprintf(...) printf(__VA_ARGS__)
-#else
-#define dprintf(...) [](...){}(__VA_ARGS__) // Get rid of warnings
-#endif
 
 #endif

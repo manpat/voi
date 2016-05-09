@@ -49,6 +49,7 @@ struct Entity {
 
 	enum : u8 {
 		FlagHidden = 1<<0,
+		FlagStatic = 1<<1,
 	};
 
 	u16 id;
@@ -57,6 +58,7 @@ struct Entity {
 	u32 layers;
 	vec3 position;
 	quat rotation;
+	vec3 scale;
 
 	u16 parentID;
 	u16 meshID;
@@ -73,6 +75,7 @@ struct Entity {
 	vec3 extents;
 	vec3 originOffset;
 
+	// NOTE: Assume that nothing in this union is initialised
 	union {
 		vec3 planeNormal;
 

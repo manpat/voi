@@ -64,7 +64,7 @@ struct Entity {
 
 	vec3 position
 	quat rotation
-	u8 layer;
+	u32 layers // Bitfield
 
 	u16 parentID
 	u16 meshID

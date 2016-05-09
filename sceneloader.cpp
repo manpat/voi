@@ -1,5 +1,6 @@
 #include "sceneloader.h"
 #include <fstream>
+#include <vector>
 
 #undef assert
 void assert(bool c, const char* s) {
@@ -62,7 +63,7 @@ SceneData LoadSceneData(const char* fname) {
 
 	scene.numMeshes = Read<u16>(&it);
 	scene.meshes = new MeshData[scene.numMeshes];
-	dprintf("numMeshes: %hi\n", scene.numMeshes);
+	SCENEPRINT("numMeshes: %hi\n", scene.numMeshes);
 
 	for(u16 i = 0; i < scene.numMeshes; i++) {
 		if(!CheckStamp(&it, "MESH")) goto error;
@@ -96,12 +97,12 @@ SceneData LoadSceneData(const char* fname) {
 		std::memcpy(mesh->materialIDs, it, mesh->numTriangles);
 		it += mesh->numTriangles;
 
-		dprintf("\tnumVertices: %u\n", mesh->numVertices);
-		dprintf("\tnumTriangles: %u\n", mesh->numTriangles);
+		SCENEPRINT("\tnumVertices: %u\n", mesh->numVertices);
+		SCENEPRINT("\tnumTriangles: %u\n", mesh->numTriangles);
 
 		for(u32 j = 0; j < mesh->numVertices; j++) {
 			auto v = &mesh->vertices[j];
-			dprintf("\t\tv: (%.1f, %.1f, %.1f)\n", v->x, v->y, v->z);
+			SCENEPRINT("\t\tv: (%.1f, %.1f, %.1f)\n", v->x, v->y, v->z);
 		}
 
 		if(mesh->numVertices < 256) {
@@ -109,7 +110,7 @@ SceneData LoadSceneData(const char* fname) {
 			for(u32 j = 0; j < mesh->numTriangles; j++) {
 				auto v = &mesh->triangles8[j*3];
 				auto m = mesh->materialIDs[j];
-				dprintf("\t\tf: (%hhu, %hhu, %hhu) %hhu\n", v[0], v[1], v[2], m);
+				SCENEPRINT("\t\tf: (%hhu, %hhu, %hhu) %hhu\n", v[0], v[1], v[2], m);
 			}
 
 		}else if(mesh->numVertices < 65536) {
@@ -117,7 +118,7 @@ SceneData LoadSceneData(const char* fname) {
 			for(u32 j = 0; j < mesh->numTriangles; j++) {
 				auto v = &mesh->triangles16[j*3];
 				auto m = mesh->materialIDs[j];
-				dprintf("\t\tf: (%hu, %hu, %hu) %hhu\n", v[0], v[1], v[2], m);
+				SCENEPRINT("\t\tf: (%hu, %hu, %hu) %hhu\n", v[0], v[1], v[2], m);
 			}
 
 		}else{
@@ -125,31 +126,31 @@ SceneData LoadSceneData(const char* fname) {
 			for(u32 j = 0; j < mesh->numTriangles; j++) {
 				auto v = &mesh->triangles32[j*3];
 				auto m = mesh->materialIDs[j];
-				dprintf("\t\tf: (%u, %u, %u) %hhu\n", v[0], v[1], v[2], m);
+				SCENEPRINT("\t\tf: (%u, %u, %u) %hhu\n", v[0], v[1], v[2], m);
 			}
 		}
 
-		dprintf("\n");
+		SCENEPRINT("\n");
 	}
 
 	scene.numMaterials = *it++;
 	scene.materials = new MaterialData[scene.numMaterials];
-	dprintf("numMaterials: %hhu\n", scene.numMaterials);
+	SCENEPRINT("numMaterials: %hhu\n", scene.numMaterials);
 
 	for(u8 i = 0; i < scene.numMaterials; i++) {
 		if(!CheckStamp(&it, "MATL")) goto error;
 
 		u8 nameLength = scene.materials[i].nameLength = *it++;
 		std::memcpy(scene.materials[i].name, it, nameLength);
-		dprintf("\tmaterialName: %.*s\n", nameLength, it);
+		SCENEPRINT("\tmaterialName: %.*s\n", nameLength, it);
 		it += nameLength;
 		vec3 color = scene.materials[i].color = Read<vec3>(&it);
-		dprintf("\tmaterialColor: (%.2f, %.2f, %.2f)\n\n", color.r, color.g, color.b);
+		SCENEPRINT("\tmaterialColor: (%.2f, %.2f, %.2f)\n\n", color.r, color.g, color.b);
 	}
 
 	scene.numEntities = Read<u16>(&it);
 	scene.entities = new EntityData[scene.numEntities];
-	dprintf("numEntities: %hu\n", scene.numEntities);
+	SCENEPRINT("numEntities: %hu\n", scene.numEntities);
 
 	for(u16 i = 0; i < scene.numEntities; i++) {
 		if(!CheckStamp(&it, "ENTY")) goto error;
@@ -161,6 +162,7 @@ SceneData LoadSceneData(const char* fname) {
 
 		vec3 position = ent->position = Read<vec3>(&it);
 		vec3 rotation = ent->rotation = Read<vec3>(&it);
+		vec3 scale = ent->scale = Read<vec3>(&it);
 		u32 layers = ent->layers = Read<u32>(&it);
 
 		u32 flags = ent->flags = Read<u32>(&it);
@@ -184,34 +186,35 @@ SceneData LoadSceneData(const char* fname) {
 			"Mirror",
 		};
 
-		dprintf("\tentityName: %.*s\n", nameLength, ent->name);
-		dprintf("\tflags:  o%.2o\n", flags);
-		dprintf("\tlayers: o%.2o\n", layers);
-		dprintf("\tposition: (%.1f, %.1f, %.1f)\n", position.x, position.y, position.z);
-		dprintf("\trotation: (%.1f, %.1f, %.1f)\n", rotation.x, rotation.y, rotation.z);
-		dprintf("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);
-		dprintf("\tscriptID: %hu\n", scriptID);
-		dprintf("\tentityType: %s\n\tcolliderType: %hhu\n\n", entityTypeStrings[entityType], colliderType);
+		SCENEPRINT("\tentityName: %.*s\n", nameLength, ent->name);
+		SCENEPRINT("\tflags:  o%.2o\n", flags);
+		SCENEPRINT("\tlayers: o%.2o\n", layers);
+		SCENEPRINT("\tposition: (%.1f, %.1f, %.1f)\n", position.x, position.y, position.z);
+		SCENEPRINT("\trotation: (%.1f, %.1f, %.1f)\n", rotation.x, rotation.y, rotation.z);
+		SCENEPRINT("\tscale: (%.1f, %.1f, %.1f)\n", scale.x, scale.y, scale.z);
+		SCENEPRINT("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);
+		SCENEPRINT("\tscriptID: %hu\n", scriptID);
+		SCENEPRINT("\tentityType: %s\n\tcolliderType: %hhu\n\n", entityTypeStrings[entityType], colliderType);
 	}
 
 	scene.numScripts = Read<u16>(&it);
-	dprintf("numScripts: %hu\n", scene.numScripts);
+	SCENEPRINT("numScripts: %hu\n", scene.numScripts);
 	for(u16 i = 0; i < scene.numScripts; i++) {
 		if(!CheckStamp(&it, "CODE")) goto error;
 
 		u8 nameLength = *it++;
-		dprintf("\tscriptName: %.*s\n", (u32)nameLength, it);
+		SCENEPRINT("\tscriptName: %.*s\n", (u32)nameLength, it);
 		it += nameLength;
 
 		u32 scriptLength = Read<u32>(&it);
-		dprintf("\tscriptText:\n----------------\n%.*s\n-----------------\n\n", 
+		SCENEPRINT("\tscriptText:\n----------------\n%.*s\n-----------------\n\n", 
 			scriptLength, it);
 		it += scriptLength;
 	}
 
 error:
 	delete[] data;
-	dprintf("Done.");
+	SCENEPRINT("Done.");
 
 	return scene;
 }

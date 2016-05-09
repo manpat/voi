@@ -22,11 +22,20 @@ struct MaterialData {
 	vec3 color;
 };
 
+enum ColliderType {
+	ColliderNone,
+	ColliderCube,
+	ColliderCylinder,
+	ColliderConvex,
+	ColliderMesh,
+};
+
 struct EntityData {
 	u8 nameLength;
 	char name[256];
 	vec3 position;
 	vec3 rotation;
+	vec3 scale;
 	u32 layers;
 
 	u32 flags;
@@ -58,5 +67,11 @@ struct SceneData {
 // TEMP INTERFACE obviously
 SceneData LoadSceneData(const char* fname);
 void FreeSceneData(SceneData*);
+
+#if 0
+#define SCENEPRINT(...) printf(__VA_ARGS__)
+#else
+#define SCENEPRINT(...) [](...){}(__VA_ARGS__) // Get rid of warnings
+#endif
 
 #endif

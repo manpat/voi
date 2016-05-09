@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "particlesystem.h"
 #include "sceneloader.h"
 #include "input.h"
 #include "data.h"
@@ -14,7 +15,7 @@ void DeinitGL();
 ShaderProgram InitShaderProgram(const char*, const char*);
 
 void InitScene(Scene*, const SceneData*);
-void RenderMesh(Scene*, u16 meshID, vec3, quat);
+void RenderMesh(Scene*, u16 meshID, vec3, quat, vec3 = vec3{1,1,1});
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
 enum {
@@ -33,26 +34,11 @@ struct Framebuffer {
 Framebuffer InitFramebuffer(u32, u32);
 void DrawFullscreenQuad();
 
-struct ParticleSystem {
-	u32 numParticles;
-	u32 freeIndex;
-	vec3* positions;
-	vec3* velocities;
-	vec3* accelerations;
-	f32* lifetimes;
-	f32* lifeRates;
-
-	u32 vertexBuffer;
-};
-
-void InitParticleSystem(ParticleSystem*, u32);
-void UpdateParticleSystem(ParticleSystem*, f32);
-void RenderParticleSystem(ParticleSystem*);
-void EmitParticles(ParticleSystem*, u32, f32, vec3);
-
 enum {
 	WindowWidth = 800,
 	WindowHeight = 600
+	// WindowWidth = 1366,
+	// WindowHeight = 768
 };
 
 #define SHADER(x) "#version 130\n" #x
@@ -107,7 +93,7 @@ const char* particleShaderSrc[] = {
 		void main() {
 			if(vlifetime <= 0.f) discard;
 
-			float a = sin(radians(vlifetime*180.f)) * 0.7f;
+			float a = sin(radians(vlifetime*180.f)) * 0.35f;
 			outgeneral0 = vec4(materialColor*a, a);
 			outcolor = vec4(0);
 		}
@@ -140,7 +126,7 @@ const char* postShaderSrc[] = {
 			float zFar = 1000.f;
 
 			depth = 2.0 * zNear * zFar / (zFar + zNear - depth * (zFar - zNear));
-			depth = 1-clamp(pow(depth / 40.f, .5f), 0, 1);
+			depth = 1-clamp(pow(depth / 80.f, .5f), 0, 1);
 
 			vec3 fogcolor = vec3(0.1);
 			outcolor.rgb = clamp(color.rgb*depth + fogcolor*(1-depth), 0, 1);
@@ -149,11 +135,6 @@ const char* postShaderSrc[] = {
 		}
 	)
 };
-
-// NOTE: There are better implementations to be had
-f32 randf() {
-	return (rand()%20000)/10000.f - 1.f;
-}
 
 extern bool debugDrawEnabled;
 
@@ -192,9 +173,11 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	scene.shaders[ShaderIDParticles] = InitShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
 	scene.shaders[ShaderIDPost] = InitShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
-	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
+	{	auto sceneData = LoadSceneData("Testing/temple.voi");
 	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
-	{	auto sceneData = LoadSceneData("export.voi");
+	// {	auto sceneData = LoadSceneData("export.voi");
+	// {	auto sceneData = LoadSceneData("Testing/test.voi");
+	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
 		assert(sceneData.numMeshes > 0);
 
 		InitScene(&scene, &sceneData);
@@ -228,12 +211,18 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glGenQueries(1, &primCountQuery);
 
 	Camera camera;
-	camera.position = {0,0,5};
+	camera.position = {0,1.5,0};
 	camera.rotation = {};
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
 	ParticleSystem particleSystem;
 	InitParticleSystem(&particleSystem, 1000);
+
+	// Simulate 10s of dust
+	for(u32 i = 0; i < 60*10; i++){
+		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), camera.position);
+		UpdateParticleSystem(&particleSystem, 1.f/60.f);
+	}
 
 	f32 particleEmitAccum = 0.f;
 
@@ -295,7 +284,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		u32 numParticlesEmit = (u32) particleEmitAccum;
 		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, 7.f + randf() * 3.f, camera.position);
+		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), camera.position);
 		UpdateParticleSystem(&particleSystem, dt);
 
 		auto beginRenderTime = std::chrono::high_resolution_clock::now();
@@ -360,7 +349,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT, &primCount);
 
 			char titleBuffer[256];
-			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %.4u primitives", fps, renderdt*1000.f, primCount);
+			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %u primitives", fps, renderdt*1000.f, primCount);
 			SDL_SetWindowTitle(window, titleBuffer);
 		}
 
@@ -499,67 +488,6 @@ ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
 	glDeleteShader(vsh);
 	glDeleteShader(fsh);
 	return ret;
-}
-
-void InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
-	sys->freeIndex = 0;
-	sys->numParticles = numParticles;
-	sys->positions = new vec3[numParticles];
-	sys->velocities = new vec3[numParticles];
-	sys->accelerations = new vec3[numParticles];
-	sys->lifetimes = new f32[numParticles];
-	sys->lifeRates = new f32[numParticles];
-
-	glGenBuffers(1, &sys->vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, numParticles * sizeof(f32) * 4, nullptr, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void UpdateParticleSystem(ParticleSystem* sys, f32 dt) {
-	for(u32 i = 0; i < sys->numParticles; i++) {
-		if(sys->lifetimes[i] < 0.f) continue;
-		sys->lifetimes[i] -= sys->lifeRates[i] * dt;
-
-		sys->positions[i] += sys->velocities[i] * dt;
-		sys->velocities[i] += sys->accelerations[i] * dt;
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sys->numParticles * sizeof(vec3), sys->positions);
-	glBufferSubData(GL_ARRAY_BUFFER, sys->numParticles * sizeof(vec3), sys->numParticles * sizeof(f32), sys->lifetimes);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void RenderParticleSystem(ParticleSystem* sys) {
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, sys->vertexBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-	glVertexAttribPointer(1, 1, GL_FLOAT, false, 0, (void*)((u64)sys->numParticles * sizeof(vec3)));
-
-	glDrawArrays(GL_POINTS, 0, sys->numParticles);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glDisableVertexAttribArray(1);
-}
-
-void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, vec3 position) {
-	u32 i = sys->freeIndex;
-	while(count > 0) {
-		do {
-			sys->positions[sys->freeIndex] = position + vec3{15*randf(), 6*randf(), 15*randf()};
-			sys->velocities[sys->freeIndex] = glm::normalize(vec3{randf(),randf(),randf()})*0.05f;
-			sys->accelerations[sys->freeIndex] = glm::normalize(vec3{randf(),randf()-0.5f,randf()})*0.03f;
-			sys->lifetimes[sys->freeIndex] = 1.f;
-			sys->lifeRates[sys->freeIndex] = 1.f/lifetime;
-		} while(i++ < sys->numParticles && --count);
-		
-		if(i >= sys->numParticles) {
-			i = 0;
-		}
-	}
-	sys->freeIndex = i;
 }
 
 Framebuffer InitFramebuffer(u32 width, u32 height) {

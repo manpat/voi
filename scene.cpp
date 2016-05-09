@@ -26,6 +26,9 @@ void InitScene(Scene* scene, const SceneData* data) {
 	std::memset(scene->entities, 0, scene->numEntities * sizeof(Entity));
 	std::memset(scene->meshes, 0, scene->numMeshes * sizeof(Mesh));
 
+	// NOTE: It's possible that not all meshes will be drawn,
+	//	e.g., simplified physics meshes
+	// Also, static geometry should be batched
 	for(u32 meshID = 0; meshID < scene->numMeshes; meshID++) {
 		auto meshData = &data->meshes[meshID];
 		auto mesh = &scene->meshes[meshID];
@@ -75,9 +78,9 @@ void InitScene(Scene* scene, const SceneData* data) {
 		auto submeshes = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
 			&mesh->submeshesInline[0] : mesh->submeshes;
 
-		dprintf("numSubmeshes: %d\n", mesh->numSubmeshes);
+		SCENEPRINT("numSubmeshes: %d\n", mesh->numSubmeshes);
 		for(u32 i = 0; i < mesh->numSubmeshes; i++) {
-			dprintf("\tsm: start: %u\tid: %hhu\n", submeshes[i].triangleCount, submeshes[i].materialID);
+			SCENEPRINT("\tsm: start: %u\tid: %hhu\n", submeshes[i].triangleCount, submeshes[i].materialID);
 		}
 
 		glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
@@ -123,6 +126,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 
 		to->layers = from->layers;
 		to->position = from->position;
+		to->scale = from->scale;
 
 		// NOTE: This is here because blender applies euler rotations in ZYX by default
 		//	and we swap the coord space. So gimbal lock becomes a problem.
@@ -179,7 +183,7 @@ void InitScene(Scene* scene, const SceneData* data) {
 	}
 }
 
-void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
+void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot, vec3 scale) {
 	auto program = &scene->shaders[ShaderIDDefault]; // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
@@ -187,7 +191,7 @@ void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
-	mat4 modelMatrix = glm::translate<f32>(pos) * glm::mat4_cast(rot);
+	mat4 modelMatrix = glm::translate<f32>(pos) * glm::mat4_cast(rot) * glm::scale<f32>(scale);
 	glUniformMatrix4fv(program->modelLoc, 1, false, glm::value_ptr(modelMatrix));
 
 	auto sms = (mesh->numSubmeshes <= Mesh::MaxInlineSubmeshes)? 
@@ -220,11 +224,12 @@ void RenderMesh(Scene* scene, u16 meshID, vec3 pos, quat rot) {
 u32 GetFarPlaneQuad(mat4 projection) {
 	static u32 farPlaneBuffer = 0;
 	if(!farPlaneBuffer) {
+		constexpr f32 epsilon = 1e-6;
 		mat4 invProj = glm::inverse(projection);
-		auto cp0 = invProj * vec4{-1,-1, 1 - 1e-6, 1};
-		auto cp1 = invProj * vec4{ 1,-1, 1 - 1e-6, 1};
-		auto cp2 = invProj * vec4{ 1, 1, 1 - 1e-6, 1};
-		auto cp3 = invProj * vec4{-1, 1, 1 - 1e-6, 1};
+		auto cp0 = invProj * vec4{-1,-1, 1 - epsilon, 1};
+		auto cp1 = invProj * vec4{ 1,-1, 1 - epsilon, 1};
+		auto cp2 = invProj * vec4{ 1, 1, 1 - epsilon, 1};
+		auto cp3 = invProj * vec4{-1, 1, 1 - epsilon, 1};
 		auto p0 = vec3{cp0/cp0.w};
 		auto p1 = vec3{cp1/cp1.w};
 		auto p2 = vec3{cp2/cp2.w};
@@ -392,7 +397,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			glEnable(GL_CULL_FACE);
 		}
 
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
+		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 	}
 
 	glEnable(GL_STENCIL_TEST);
@@ -461,7 +466,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(0.f, -1.f);
 		glDepthFunc(GL_LEQUAL);
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
+		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		// Clear Depth within stencil
@@ -518,12 +523,12 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 				glEnable(GL_CULL_FACE);
 			}
 
-			RenderMesh(scene, ent->meshID, ent->position, ent->rotation);
+			RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 		}
 	}
 
 	if(recurseGuard > PortalGraph::MaxNumPortalNodes) {
-		puts("WARNING! Recurse guard hit!");
+		puts("WARNING! Portal render recurse guard hit!");
 	}
 
 	glDisable(GL_STENCIL_TEST);

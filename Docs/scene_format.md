@@ -99,6 +99,7 @@ Format
 		char[nameLength]	name
 		f32[3]				position
 		f32[3]				rotation
+		f32[3]				scale
 		u32					layer # bitset
 		u32					flags
 		u16					parentID (can be zero)

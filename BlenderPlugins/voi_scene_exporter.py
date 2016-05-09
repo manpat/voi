@@ -91,18 +91,21 @@ class ExportVoiScene(bpy.types.Operator):
 				out.write(struct.pack('=B', len(e['name'])))
 				out.write(bytes(e['name'], 'utf-8'))
 
+				type = e['entityType']
+				col = e['colliderType']
+
 				out.write(struct.pack('=fff', *e['position']))
 				out.write(struct.pack('=fff', *e['rotation']))
+				out.write(struct.pack('=fff', *e['scale']))
 				out.write(struct.pack('=I', e['layers']))
 				out.write(struct.pack('=I', e['flags']))
 				out.write(struct.pack('=H', e['parentID']))
 				out.write(struct.pack('=H', e['meshID']))
 				out.write(struct.pack('=H', e['scriptID']))
-				out.write(struct.pack('=B', e['entityType']))
-				out.write(struct.pack('=B', e['colliderType']))
+				out.write(struct.pack('=B', type))
+				out.write(struct.pack('=B', col))
 				# TODO: collider data
 
-				type = e['entityType']
 				if type in [1, 2]: # Portal, Mirror
 					out.write(struct.pack('=H', 12)) # Size
 					out.write(struct.pack('=fff', *e['planeNormal']))
@@ -198,18 +201,29 @@ class ExportVoiScene(bpy.types.Operator):
 			if not obj.get("voi_entitydoexport", True):
 				continue
 
-			mid = self.meshIDs.get(obj.data.name, 0)
+			mid = 0
+			if obj.data:
+				mid = self.meshIDs.get(obj.data.name, 0)
+			
 			type = obj.get("voi_entitytype", 0)
+			col = obj.get("voi_collidertype", 0)
 
 			flags = 0
 			if obj.get("voi_entityhidden", False):
 				flags |= 1<<0
+
+			if obj.get("voi_entitystatic", True) and type==0:
+				flags |= 1<<1
+
+			scale = obj.scale
+			scale = [scale.x, scale.z, scale.y]
 
 			data = {
 				'name': obj.name,
 
 				'position': swapCoords(obj.location.xyz),
 				'rotation': swapCoords(obj.rotation_euler),
+				'scale': scale,
 				'layers': sum(1<<i for i,v in enumerate(obj.layers) if v),
 
 				'flags': flags,
@@ -219,7 +233,7 @@ class ExportVoiScene(bpy.types.Operator):
 				'scriptID': 0, # TODO
 
 				'entityType': type,
-				'colliderType': 0, # TODO
+				'colliderType': col,
 			}
 
 			if type in [1, 2]:

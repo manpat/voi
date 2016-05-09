@@ -20,6 +20,14 @@ voi_obtypes = [
 	('m', "Mirror", "Shiny"),
 ]
 
+voi_coltypes = [
+	('_', "None", "Itsa ghost"),
+	('c', "Cube", "Itsa cube"),
+	('y', "Cylinder", "Itsa cylinder"),
+	('h', "Convex Hull", "Clingwrap"),
+	('m', "Mesh", "Itsa mesh. Kinda expensive"),
+]
+
 voi_scrtypes = [
 	('c', "Script", "Shit that does shit"),
 	('s', "Shader", "Looks good"),
@@ -42,11 +50,15 @@ class ObjectPanel(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		o = context.object
+		type = o.get("voi_entitytype", 0)
 
 		layout.row().prop(o, "voi_entitytype")
-		layout.row().prop(o, "voi_entityhidden")
+		row = layout.row()
+		if type == 0: # Only geometry can be static for now
+			row.prop(o, "voi_entitystatic")
+		row.prop(o, "voi_entityhidden")
 
-		type = o.get("voi_entitytype", 0)
+		layout.row().prop(o, "voi_collidertype")
 
 class ScriptPanel(bpy.types.Panel):
 	bl_label = "Voi Script"
@@ -60,8 +72,7 @@ class ScriptPanel(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		o = context.object
-		layout.row().prop(o, "TODO: This pls")
-
+		layout.row().prop(o, "voi_scripttype") # TODO This pls
 
 def register():
 	bpy.utils.register_class(ObjectPanel)
@@ -69,7 +80,9 @@ def register():
 
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=voi_obtypes, name="Entity Type", default='g')
+	obj.voi_collidertype = EnumProperty(items=voi_coltypes, name="Collider Type", default='c')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
+	obj.voi_entitystatic = BoolProperty(name="Static", default=True)
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
 
 	obj = bpy.types.Text
