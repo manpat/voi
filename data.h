@@ -102,10 +102,11 @@ struct ShaderProgram {
 };
 
 enum {
-	ShaderIDDefault = 0,
+	ShaderIDDefault,
 	ShaderIDParticles,
 	ShaderIDPost,
 	ShaderIDCount,
+	ShaderIDCustom = ShaderIDCount,
 };
 
 struct Scene {
@@ -119,7 +120,7 @@ struct Scene {
 	Entity* entities;
 	Mesh* meshes;
 	Material materials[256];
-	ShaderProgram shaders[256]; // 0 is default shader
+	ShaderProgram shaders[256];
 
 	u32 portals[256];
 	u16 numPortals;
@@ -130,6 +131,31 @@ struct Camera {
 	
 	vec3 position;
 	quat rotation;
+};
+
+enum {
+	FBTargetDepthStencil,
+	FBTargetColor,
+	FBTargetGeneral0,
+	FBTargetGeneral1,
+	FBTargetCount
+};
+
+struct Framebuffer {
+	u32 fbo;
+	u32 targets[FBTargetCount];
+};
+
+struct ParticleSystem {
+	u32 numParticles;
+	u32 freeIndex;
+	vec3* positions;
+	vec3* velocities;
+	vec3* accelerations;
+	f32* lifetimes;
+	f32* lifeRates;
+
+	u32 vertexBuffer;
 };
 
 #endif

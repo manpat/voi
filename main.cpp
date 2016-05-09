@@ -1,38 +1,12 @@
-#include "common.h"
+#include "voi.h"
 
-#include "particlesystem.h"
 #include "sceneloader.h"
 #include "input.h"
-#include "data.h"
 
 #include "debugdraw.h"
 
 #include <chrono>
 #include <SDL2/SDL.h>
-
-bool InitGL(SDL_Window*);
-void DeinitGL();
-ShaderProgram InitShaderProgram(const char*, const char*);
-
-void InitScene(Scene*, const SceneData*);
-void RenderMesh(Scene*, u16 meshID, vec3, quat, vec3 = vec3{1,1,1});
-void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
-
-enum {
-	TargetDepthStencil,
-	TargetColor,
-	TargetGeneral0,
-	TargetGeneral1,
-	TargetCount
-};
-
-struct Framebuffer {
-	u32 fbo;
-	u32 targets[TargetCount];
-};
-
-Framebuffer InitFramebuffer(u32, u32);
-void DrawFullscreenQuad();
 
 enum {
 	WindowWidth = 800,
@@ -312,11 +286,11 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glUseProgram(scene.shaders[ShaderIDPost].program);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetDepthStencil]);
+		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetDepthStencil]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetColor]);
+		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetColor]);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, fb.targets[TargetGeneral0]);
+		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetGeneral0]);
 
 		glUniform1i(scene.shaders[ShaderIDPost].depthTexLoc, 0);
 		glUniform1i(scene.shaders[ShaderIDPost].colorTexLoc, 1);
@@ -405,141 +379,4 @@ bool InitGL(SDL_Window* window) {
 
 void DeinitGL() {
 	SDL_GL_DeleteContext(glctx);
-}
-
-u32 CreateShader(const char* src, u32 type) {
-	u32 id = glCreateShader(type);
-
-	glShaderSource(id, 1, &src, nullptr);
-	glCompileShader(id);
-
-	s32 status = 0;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &status);
-
-	if(!status) {
-		s32 logLength = 0;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logLength);
-
-		// Get the info log and print it out
-		auto infoLog = new char[logLength];
-		glGetShaderInfoLog(id, logLength, nullptr, infoLog);
-
-		fprintf(stderr, "%s\n", infoLog);
-		delete[] infoLog;
-
-		glDeleteShader(id);
-		return 0;
-	}
-
-	return id;
-}
-
-ShaderProgram InitShaderProgram(const char* vsrc, const char* fsrc) {
-	ShaderProgram ret{};
-
-	u32 vsh = CreateShader(vsrc, GL_VERTEX_SHADER);
-	u32 fsh = CreateShader(fsrc, GL_FRAGMENT_SHADER);
-
-	if(!vsh || !fsh) {
-		fprintf(stderr, "Shader compilation failed\n");
-		return ret;
-	}
-
-	ret.program = glCreateProgram();
-	glAttachShader(ret.program, vsh);
-	glAttachShader(ret.program, fsh);
-
-	glBindAttribLocation(ret.program, 0, "vertex");
-
-	glBindFragDataLocation(ret.program, 0, "outcolor");
-	glBindFragDataLocation(ret.program, 1, "outgeneral0");
-	glBindFragDataLocation(ret.program, 2, "outgeneral1");
-
-	glLinkProgram(ret.program);
-
-	s32 linkStatus;
-	glGetProgramiv(ret.program, GL_LINK_STATUS, &linkStatus);
-	if (!linkStatus) {
-		s32 logLength = 0;
-		glGetProgramiv(ret.program, GL_INFO_LOG_LENGTH, &logLength);
-
-		// Get the info log and print it out
-		auto infoLog = new char[logLength];
-		glGetProgramInfoLog(ret.program, logLength, nullptr, infoLog);
-
-		fprintf(stderr, "%s\n", infoLog);
-		delete[] infoLog;
-
-		glDeleteProgram(ret.program);
-		ret.program = 0;
-	}else{
-		ret.viewProjectionLoc = glGetUniformLocation(ret.program, "viewProjection");
-		ret.modelLoc = glGetUniformLocation(ret.program, "model");
-
-		ret.materialColorLoc = glGetUniformLocation(ret.program, "materialColor");
-		ret.clipPlaneLoc = glGetUniformLocation(ret.program, "clipPlane");
-
-		ret.depthTexLoc = glGetUniformLocation(ret.program, "depthTex");
-		ret.colorTexLoc = glGetUniformLocation(ret.program, "colorTex");
-		ret.general0TexLoc = glGetUniformLocation(ret.program, "general0Tex");
-		ret.general1TexLoc = glGetUniformLocation(ret.program, "general1Tex");
-	}
-
-	glDeleteShader(vsh);
-	glDeleteShader(fsh);
-	return ret;
-}
-
-Framebuffer InitFramebuffer(u32 width, u32 height) {
-	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
-	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
-	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-	static u32 fbTargetIntType[] {GL_UNSIGNED_INT_24_8, GL_UNSIGNED_BYTE, GL_UNSIGNED_BYTE};
-
-	Framebuffer fb;
-	glGenFramebuffers(1, &fb.fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-	glDrawBuffers(2, &fbTargetAttach[1]);
-
-	glGenTextures(3, fb.targets);
-	for(u8 i = 0; i < 3; i++) {
-		glBindTexture(GL_TEXTURE_2D, fb.targets[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, fbTargetTypes[i], width, height, 0, fbTargetFormats[i], fbTargetIntType[i], nullptr);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, fbTargetAttach[i], GL_TEXTURE_2D, fb.targets[i], 0);
-	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		puts("Warning! Framebuffer incomplete!");
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	return fb;
-}
-
-void DrawFullscreenQuad() {
-	static u32 vbo = 0;
-	if(!vbo) {
-		vec2 verts[] = {
-			vec2{-1,-1},
-			vec2{ 1,-1},
-			vec2{ 1, 1},
-			vec2{-1, 1},
-		};
-
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-	}
-	
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, nullptr);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <cmath>
+#include <cstdio>
 #include <cstdint>
 
 #define GLM_FORCE_RADIANS

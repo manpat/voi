@@ -64,7 +64,6 @@ struct SceneData {
 	u16 numScripts = 0;
 };
 
-// TEMP INTERFACE obviously
 SceneData LoadSceneData(const char* fname);
 void FreeSceneData(SceneData*);
 

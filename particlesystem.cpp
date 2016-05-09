@@ -1,4 +1,4 @@
-#include "particlesystem.h"
+#include "voi.h"
 
 void InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
 	sys->freeIndex = 0;
