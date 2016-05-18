@@ -14,7 +14,6 @@ void DrawDebug(const mat4& viewProjection);
 
 void DebugLine(const vec3& a, const vec3& b, const vec3& col = vec3{1});
 void DebugLine(const vec3& a, const vec3& b, const vec3& cola, const vec3& colb);
-
 void DebugPoint(const vec3& pos, const vec3& col = vec3{1});
 
 struct SceneData; // In sceneloader.h
@@ -34,6 +33,24 @@ void RenderParticleSystem(ParticleSystem*);
 void EmitParticles(ParticleSystem*, u32 count, f32 lifetime, const vec3& pos);
 
 bool InitPhysics(PhysicsContext*);
-void UpdatePhysics(PhysicsContext*, Scene*, f32 dt);
+void UpdatePhysics(Scene*, f32 dt);
+
+// NOTE: Using MeshData here is kinda dirty and
+//	ties physics init to scene loading but we
+//	don't keep the data around long enough to 
+//	decouple them
+struct MeshData;
+bool InitEntityPhysics(Scene*, Entity*, const MeshData*);
+void DeinitEntityPhysics(Scene*, Entity*);
+
+void SetEntityVelocity(Entity*, const vec3&);
+vec3 GetEntityVelocity(const Entity*);
+void ConstrainEntityUpright(Entity*);
+
+void UpdateEntity(Entity*, f32 dt);
+void EntityOnCollisionEnter(Entity*, Entity*);
+void EntityOnCollisionLeave(Entity*, Entity*);
+void EntityOnTriggerEnter(Entity*, Entity*);
+void EntityOnTriggerLeave(Entity*, Entity*);
 
 #endif

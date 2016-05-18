@@ -2,6 +2,7 @@
 #define SCENELOADER_H
 
 #include "common.h"
+#include "data.h"
 
 struct MeshData {
 	u32 numVertices;
@@ -20,14 +21,6 @@ struct MaterialData {
 	u8 nameLength;
 	char name[256];
 	vec3 color;
-};
-
-enum ColliderType {
-	ColliderNone,
-	ColliderCube,
-	ColliderCylinder,
-	ColliderConvex,
-	ColliderMesh,
 };
 
 struct EntityData {

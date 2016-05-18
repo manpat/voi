@@ -24,6 +24,7 @@ voi_coltypes = [
 	('_', "None", "Itsa ghost"),
 	('c', "Cube", "Itsa cube"),
 	('y', "Cylinder", "Itsa cylinder"),
+	('p', "Capsule", "Itsa capsule"),
 	('h', "Convex Hull", "Clingwrap"),
 	('m', "Mesh", "Itsa mesh. Kinda expensive"),
 ]

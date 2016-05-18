@@ -110,6 +110,8 @@ const char* postShaderSrc[] = {
 
 extern bool debugDrawEnabled;
 
+Entity playerEntity;
+
 s32 main(s32 /*ac*/, const char** /* av*/) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
@@ -128,12 +130,6 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	if(!InitGL(window)) return 1;
 
-	PhysicsContext physContext;
-	if(!InitPhysics(&physContext)) {
-		puts("Error! Physics init failed!");
-		return 1;
-	}
-
 	Input::Init();
 	Input::doCapture = true;
 
@@ -143,14 +139,29 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		puts("Warning! Debug draw init failed");
 	}
 
+	std::memset(&playerEntity, 0, sizeof(Entity));
+	playerEntity.layers = 1<<0;
+	playerEntity.position = {0,0,0};
+	playerEntity.rotation = {};
+	playerEntity.scale = {1,1,1};
+	playerEntity.name = strdup("Player");
+	playerEntity.nameLength = strlen(playerEntity.name);
+	playerEntity.entityType = Entity::TypePlayer;
+	playerEntity.colliderType = ColliderCube;
+
 	Scene scene;
 	scene.shaders[ShaderIDDefault] = CreateShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
 	scene.shaders[ShaderIDParticles] = CreateShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
 	scene.shaders[ShaderIDPost] = CreateShaderProgram(postShaderSrc[0], postShaderSrc[1]);
 
-	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
+	if(!InitPhysics(&scene.physicsContext)) {
+		puts("Error! Physics init failed!");
+		return 1;
+	}
+
+	{	auto sceneData = LoadSceneData("Testing/temple.voi");
 	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
-	{	auto sceneData = LoadSceneData("export.voi");
+	// {	auto sceneData = LoadSceneData("export.voi");
 	// {	auto sceneData = LoadSceneData("Testing/test.voi");
 	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
 		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
@@ -162,6 +173,13 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			puts("Error! Scene init failed!");
 			return 1;
 		}
+
+		if(!InitEntityPhysics(&scene, &playerEntity, nullptr)) {
+			puts("Error! Entity physics init failed for player!");
+			return 1;
+		}
+		ConstrainEntityUpright(&playerEntity);
+
 		FreeSceneData(&sceneData);
 	}
 
@@ -180,8 +198,12 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	f32 nearDist = 0.1f;
 	f32 farDist = 1000.f;
 
+	Camera camera;
+	camera.position = {0,1.5,0};
+	camera.rotation = {};
+	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
+
 	vec2 mouseRot {0,0};
-	u8 layer = 0;
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
 	u32 fpsFrameCount = 0;
@@ -190,11 +212,6 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	u32 primCountQuery;
 	glGenQueries(1, &primCountQuery);
-
-	Camera camera;
-	camera.position = {0,1.5,0};
-	camera.rotation = {};
-	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
 	ParticleSystem particleSystem;
 	if(!InitParticleSystem(&particleSystem, 1000)) {
@@ -233,13 +250,14 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		mouseRot += Input::GetMouseDelta();
 		mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
 
-		camera.rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0}) * glm::angleAxis(mouseRot.y, vec3{1,0,0});
+		playerEntity.rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0});
+		camera.rotation = playerEntity.rotation * glm::angleAxis(mouseRot.y, vec3{1,0,0});
 
 		vec3 vel {};
-		if(Input::GetMapped(Input::Forward))	vel += camera.rotation * vec3{0,0,-1};
-		if(Input::GetMapped(Input::Backward))	vel += camera.rotation * vec3{0,0, 1};
-		if(Input::GetMapped(Input::Left))		vel += camera.rotation * vec3{-1,0,0};
-		if(Input::GetMapped(Input::Right))		vel += camera.rotation * vec3{ 1,0,0};
+		if(Input::GetMapped(Input::Forward))	vel += playerEntity.rotation * vec3{0,0,-1};
+		if(Input::GetMapped(Input::Backward))	vel += playerEntity.rotation * vec3{0,0, 1};
+		if(Input::GetMapped(Input::Left))		vel += playerEntity.rotation * vec3{-1,0,0};
+		if(Input::GetMapped(Input::Right))		vel += playerEntity.rotation * vec3{ 1,0,0};
 
 		if(glm::length(vel) > 1.f){
 			vel = glm::normalize(vel);
@@ -249,20 +267,18 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(Input::GetKey(SDLK_LSHIFT)) speed *= 4.f;
 		vel *= speed;
 
-		camera.position += vel * dt;
+		vel.y = GetEntityVelocity(&playerEntity).y;
+		SetEntityVelocity(&playerEntity, vel);
 
-		auto viewProjection = camera.projection * glm::mat4_cast(
-			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
-
-		if(Input::GetKeyDown('1')) layer = 0;
-		if(Input::GetKeyDown('2')) layer = 1;
-		if(Input::GetKeyDown('3')) layer = 2;
-		if(Input::GetKeyDown('4')) layer = 3;
-		if(Input::GetKeyDown('5')) layer = 4;
-		if(Input::GetKeyDown('6')) layer = 5;
-		if(Input::GetKeyDown('7')) layer = 6;
-		if(Input::GetKeyDown('8')) layer = 7;
-		if(Input::GetKeyDown('9')) layer = 8;
+		if(Input::GetKeyDown('1')) { playerEntity.layers = 1<<0; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('2')) { playerEntity.layers = 1<<1; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('3')) { playerEntity.layers = 1<<2; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('4')) { playerEntity.layers = 1<<3; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('5')) { playerEntity.layers = 1<<4; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('6')) { playerEntity.layers = 1<<5; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('7')) { playerEntity.layers = 1<<6; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('8')) { playerEntity.layers = 1<<7; scene.physicsContext.needsRefilter = true; }
+		if(Input::GetKeyDown('9')) { playerEntity.layers = 1<<8; scene.physicsContext.needsRefilter = true; }
 
 		if(Input::GetKeyDown('c')) Input::doCapture ^= true;
 		if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
@@ -271,10 +287,20 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		u32 numParticlesEmit = (u32) particleEmitAccum;
 		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), camera.position);
+		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity.position);
 		UpdateParticleSystem(&particleSystem, dt);
 
-		UpdatePhysics(&physContext, &scene, dt);
+		for(u32 i = 0; i < scene.numEntities; i++) {
+			UpdateEntity(&scene.entities[i], dt);
+		}
+
+		UpdatePhysics(&scene, dt);
+
+		// Update camera position *after* physics have been taken into account
+		// Rotation isn't affected
+		camera.position = playerEntity.position + vec3{0,1.5,0};
+		auto viewProjection = camera.projection * glm::mat4_cast(
+			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
 
 		auto beginRenderTime = std::chrono::high_resolution_clock::now();
 		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
@@ -283,7 +309,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-			RenderScene(&scene, camera, 1<<layer);
+			RenderScene(&scene, camera, playerEntity.layers);
 
 			glUseProgram(scene.shaders[ShaderIDParticles].program);
 			glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));

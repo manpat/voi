@@ -29,10 +29,53 @@ struct Mesh {
 };
 
 struct Material {
-	char* name;
+	const char* name;
 	vec3 color;
 	u32 flags = 0;
 	u32 shaderID = 0;
+};
+
+enum ColliderType {
+	ColliderNone,
+	ColliderCube,
+	ColliderCylinder,
+	ColliderCapsule,
+	ColliderConvex,
+	ColliderMesh,
+};
+
+class btRigidBody;
+class btCollisionShape;
+class btDbvtBroadphase;
+class btCollisionDispatcher;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+
+struct PhysicsColliderPair {
+	u16 entityID0;
+	u16 entityID1;
+	u32 stamp;
+};
+
+struct PhysicsContext {
+	// struct RaycastResult {
+	// 	bool hit() const { return entity != nullptr; }
+	// 	operator bool() const { return hit(); }
+
+	// 	Entity* entity;
+	// 	vec3 hitPosition;
+	// 	vec3 hitNormal;
+	// 	f32 distance;
+	// };
+
+	btDbvtBroadphase* broadphase;
+	btCollisionDispatcher* dispatcher;
+	btSequentialImpulseConstraintSolver* solver;
+	btDiscreteDynamicsWorld* world;
+
+	std::vector<PhysicsColliderPair> activeColliderPairs;
+	bool needsRefilter = false;
+	u32 currentStamp = 0;
 };
 
 struct Entity {
@@ -42,10 +85,11 @@ struct Entity {
 		TypeMirror,
 		TypeTrigger,
 
-		// Specialised triggers
-		TypeHalflifePoint,
-		TypeAudioRegion,
-		TypeFogRegion,
+		// NOTE: Nothing from this point onwards
+		//	is exposed in the editor and should
+		//	only be created in code.
+		TypeNonExportable = 128,
+		TypePlayer = TypeNonExportable,
 	};
 
 	enum : u8 {
@@ -65,13 +109,14 @@ struct Entity {
 	u16 meshID;
 
 	u8 nameLength;
-	char* name;
+	const char* name;
 
 	// u16 scriptID; // TODO
 	u8 entityType; // Type*
 	u8 colliderType;
 
-	// TODO: collision stuff
+	btRigidBody* rigidbody;
+	btCollisionShape* collider;
 
 	vec3 extents;
 	vec3 originOffset;
@@ -125,6 +170,8 @@ struct Scene {
 
 	u32 portals[256];
 	u16 numPortals;
+
+	PhysicsContext physicsContext;
 };
 
 struct Camera {
@@ -158,39 +205,6 @@ struct ParticleSystem {
 	f32* lifeRates;
 
 	u32 vertexBuffer;
-};
-
-class btDbvtBroadphase;
-class btCollisionDispatcher;
-class btSequentialImpulseConstraintSolver;
-class btDiscreteDynamicsWorld;
-
-struct PhysicsColliderPair {
-	u16 entityID0;
-	u16 entityID1;
-	u32 stamp;
-};
-
-struct PhysicsContext {
-
-	// struct RaycastResult {
-	// 	bool hit() const { return entity != nullptr; }
-	// 	operator bool() const { return hit(); }
-
-	// 	Entity* entity;
-	// 	vec3 hitPosition;
-	// 	vec3 hitNormal;
-	// 	f32 distance;
-	// };
-
-	btDbvtBroadphase* broadphase;
-	btCollisionDispatcher* dispatcher;
-	btSequentialImpulseConstraintSolver* solver;
-	btDiscreteDynamicsWorld* world;
-
-	std::vector<PhysicsColliderPair> activeColliderPairs;
-	bool needsRefilter = false;
-	u32 currentStamp = 0;
 };
 
 #endif

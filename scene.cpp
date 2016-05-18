@@ -136,6 +136,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		to->entityType = from->entityType;
 		to->colliderType = from->colliderType;
 
+		if(to->entityType >= Entity::TypeNonExportable) {
+			printf("Error: Entity '%.*s' has non exportable type!\n",
+				(u32)to->nameLength, to->name);
+			return false;	
+		}
+
 		switch(to->entityType) {
 		case Entity::TypePortal:
 		case Entity::TypeMirror:
@@ -145,6 +151,13 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		case Entity::TypeGeometry:
 		default:
 			break;
+		}
+
+		auto mesh = (to->meshID>0)? &data->meshes[to->meshID-1] : nullptr;
+		if(!InitEntityPhysics(scene, to, mesh)) {
+			printf("Error! Entity '%.*s' physics init failed!\n",
+				(u32)to->nameLength, to->name);
+			return false;
 		}
 	}
 

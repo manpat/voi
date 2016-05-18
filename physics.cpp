@@ -1,4 +1,5 @@
 #include "voi.h"
+#include "sceneloader.h" // For MeshData
 #include <algorithm>
 
 #include <LinearMath/btVector3.h>
@@ -36,7 +37,31 @@ bool InitPhysics(PhysicsContext* ctx) {
 	return true;
 }
 
-void UpdatePhysics(PhysicsContext* ctx, Scene* scene, f32 dt) {
+void UpdatePhysics(Scene* scene, f32 dt) {
+	auto ctx = &scene->physicsContext;
+
+	if(ctx->needsRefilter) {
+		// Clean the broadphase of AABB data
+		btOverlappingPairCache* pairs = ctx->broadphase->getOverlappingPairCache();
+		s32 numPairs = pairs->getNumOverlappingPairs();
+		btBroadphasePairArray pairArray = pairs->getOverlappingPairArray();
+
+		for(s32 i = 0; i < numPairs; i++) {
+			btBroadphasePair& currPair = pairArray.at(i);
+			pairs->removeOverlappingPair(currPair.m_pProxy0, currPair.m_pProxy1, ctx->dispatcher);
+		}
+
+		// Clean the dispatcher(narrowphase) of shape data
+		s32 numManifolds = ctx->world->getDispatcher()->getNumManifolds();
+		for(s32 i = 0; i < numManifolds; i++) {
+			ctx->dispatcher->releaseManifold(ctx->dispatcher->getManifoldByIndexInternal(i));
+		}
+
+		ctx->broadphase->resetPool(ctx->dispatcher);
+		ctx->solver->reset();
+		ctx->needsRefilter = false;
+	}
+
 	ctx->world->stepSimulation((btScalar)dt, 10);
 	ctx->currentStamp++;
 
@@ -90,13 +115,11 @@ void UpdatePhysics(PhysicsContext* ctx, Scene* scene, f32 dt) {
 			auto ent1 = &scene->entities[cp.entityID1-1];
 			if(ent0->entityType == Entity::TypeTrigger
 			|| ent1->entityType == Entity::TypeTrigger){
-				// TODO
-				// cp.entityID0->entity->OnTriggerLeave(cp.entityID1);
-				// cp.entityID1->entity->OnTriggerLeave(cp.entityID0);
+				EntityOnTriggerLeave(ent0, ent1);
+				EntityOnTriggerLeave(ent1, ent0);
 			}else{
-				// TODO
-				// cp.entityID0->entity->OnCollisionLeave(cp.entityID1);
-				// cp.entityID1->entity->OnCollisionLeave(cp.entityID0);
+				EntityOnCollisionLeave(ent0, ent1);
+				EntityOnCollisionLeave(ent1, ent0);
 			}
 
 			// Setting these to 0 flags them for cleanup
@@ -104,7 +127,6 @@ void UpdatePhysics(PhysicsContext* ctx, Scene* scene, f32 dt) {
 			cp.entityID1 = 0;
 		}
 	}
-
 }
 
 void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo) {
@@ -114,25 +136,11 @@ void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisi
 	auto ud0 = static_cast<btCollisionObject*>(proxy0->m_clientObject)->getUserPointer();
 	auto ud1 = static_cast<btCollisionObject*>(proxy1->m_clientObject)->getUserPointer();
 
-	(void)ud0;
-	(void)ud1;
+	auto ent0 = static_cast<Entity*>(ud0);
+	auto ent1 = static_cast<Entity*>(ud1);
 
-	// TODO
-	// auto comp0 = static_cast<Component*>(ud0);
-	// auto comp1 = static_cast<Component*>(ud1);
-
-	// auto col0 = comp0->As<ColliderComponent>(false);
-	// auto col1 = comp1->As<ColliderComponent>(false);
-
-	// if(!col0 || !col1) {
-	// 	std::cout << "One of the components in LayerNearCollisionFilterCallback isn't a collider" << std::endl;
-	// 	return;
-	// }
-
-	// auto ecg = PhysicsManager::GetSingleton()->enabledCollisionGroups;
-	// auto mask = (col0->collisionGroups & col1->collisionGroups & ecg);
-
-	// if(mask == 0) return;
+	auto mask = (ent0->layers & ent1->layers);
+	if(mask == 0) return;
 
 	// Continue physics stuff as usual
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
@@ -158,10 +166,9 @@ void ProcessCollision(PhysicsContext* ctx, Entity* ent0, Entity* ent1){
 	// Otherwise register new pair
 	ctx->activeColliderPairs.push_back({ent0->id, ent1->id, ctx->currentStamp});
 
-	// TODO
 	// Notify relevant entities
-	// col0->entity->OnCollisionEnter(col1);
-	// col1->entity->OnCollisionEnter(col0);
+	EntityOnCollisionEnter(ent0, ent1);
+	EntityOnCollisionEnter(ent1, ent0);
 }
 
 void ProcessTriggerCollision(PhysicsContext* ctx, Entity* trigger, Entity* entity){
@@ -183,8 +190,207 @@ void ProcessTriggerCollision(PhysicsContext* ctx, Entity* trigger, Entity* entit
 	// Otherwise register new pair
 	ctx->activeColliderPairs.push_back({trigger->id, entity->id, ctx->currentStamp});
 
-	// TODO
 	// Notify relevant entities
-	// trigger->entity->OnTriggerEnter(col);
-	// col->entity->OnTriggerEnter(trigger);
+	EntityOnTriggerEnter(trigger, entity);
+	EntityOnTriggerEnter(entity, trigger);
+}
+
+struct EntityMotionState : public btMotionState {
+	Entity* entity;
+
+	EntityMotionState(Entity* e) : entity{e} {}
+
+	void getWorldTransform(btTransform& worldTrans) const override {
+		// This gets called ONCE for non-kinematic bodies
+		// It gets called every frame for kinematic bodies
+		worldTrans.setIdentity();
+		worldTrans.setOrigin(o2bt(entity->position));
+		worldTrans.setRotation(o2bt(entity->rotation));
+	}
+
+	void setWorldTransform(const btTransform& newTrans) override {
+		auto ori = newTrans.getRotation();
+		auto pos = newTrans.getOrigin();
+		entity->position = bt2o(pos);
+		entity->rotation = bt2o(ori);
+	}
+};
+
+bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
+	// TODO: Proper sizes
+	switch(ent->colliderType) {
+	case ColliderCube:
+		ent->collider = new btBoxShape{o2bt({0.5, 0.5, 0.5})};
+		break;
+	case ColliderCylinder:
+		ent->collider = new btCylinderShape{o2bt({0.5, 0.5, 0.5})};
+		break;
+	case ColliderCapsule:
+		// NOTE: Caps aren't included in height. Total height = height + 2*radius
+		ent->collider = new btCapsuleShape{/*radius*/0.5f, /*height*/1.f};
+		break;
+
+	case ColliderConvex: {
+		if(!ent->meshID || !meshdata) {
+			printf("Error! Entity '%.*s' has Mesh collider type but no mesh!\n",
+				(u32)ent->nameLength, ent->name);
+			return false;
+		}
+
+		if(ent->meshID > scene->numMeshes) {
+			printf("Error! Entity '%.*s' has Mesh collider type but has an invalid mesh ID!\n",
+				(u32)ent->nameLength, ent->name);
+			return false;
+		}
+
+		auto hull = new btConvexHullShape{};
+		auto verts = meshdata->vertices;
+
+		for(u32 i = 0; i < meshdata->numVertices; i++) {
+			hull->addPoint(o2bt(verts[i]));
+		}
+
+		ent->collider = hull;
+	}	break;
+
+	case ColliderMesh:{
+		if(!ent->meshID || !meshdata) {
+			printf("Error! Entity '%.*s' has Mesh collider type but no mesh!\n",
+				(u32)ent->nameLength, ent->name);
+			return false;
+		}
+
+		if(ent->meshID > scene->numMeshes) {
+			printf("Error! Entity '%.*s' has Mesh collider type but has an invalid mesh ID!\n",
+				(u32)ent->nameLength, ent->name);
+			return false;
+		}
+
+		auto btmesh = new btTriangleMesh{};
+		auto mesh = &scene->meshes[ent->meshID-1];
+		auto verts = meshdata->vertices;
+
+		for(u32 i = 0; i < mesh->numTriangles; i++) {
+			u32 idx[3] = {0};
+
+			switch(mesh->elementType) {
+			case 0:
+				idx[0] = meshdata->triangles8[i*3+0];
+				idx[1] = meshdata->triangles8[i*3+1];
+				idx[2] = meshdata->triangles8[i*3+2];
+				break;
+			case 1:
+				idx[0] = meshdata->triangles16[i*3+0];
+				idx[1] = meshdata->triangles16[i*3+1];
+				idx[2] = meshdata->triangles16[i*3+2];
+				break;
+			case 2:
+				idx[0] = meshdata->triangles32[i*3+0];
+				idx[1] = meshdata->triangles32[i*3+1];
+				idx[2] = meshdata->triangles32[i*3+2];
+				break;
+			}
+
+			btmesh->addTriangle(
+				o2bt(verts[idx[0]]), 
+				o2bt(verts[idx[1]]), 
+				o2bt(verts[idx[2]])
+			);
+		}
+
+		// TODO: Look into btGimpactTriangleMeshShape for moving mesh colliders
+		ent->collider = new btBvhTriangleMeshShape{btmesh, ent->flags & Entity::FlagStatic};
+	}	break;
+
+	case ColliderNone:
+		ent->collider = nullptr;
+		return true;
+	default:
+		printf("Error! Entity '%.*s' has unknown collider type!",
+			(u32)ent->nameLength, ent->name);
+		ent->collider = nullptr;
+		return false;
+	}
+
+	btScalar mass = 0.f;
+	btVector3 inertia {0,0,0};
+	if(~ent->flags & Entity::FlagStatic) {
+		mass = 10.; // NOTE: Super arbitrary
+		ent->collider->calculateLocalInertia(mass, inertia);
+	}
+
+	auto motionState = new EntityMotionState{ent};
+
+	btRigidBody::btRigidBodyConstructionInfo bodyInfo{
+		mass, motionState, ent->collider, inertia
+	};
+
+	ent->rigidbody = new btRigidBody{bodyInfo};
+	ent->rigidbody->setUserPointer(ent);
+
+	if(ent->entityType == Entity::TypeTrigger) {
+		auto flags = ent->rigidbody->getCollisionFlags();
+		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
+		ent->rigidbody->setCollisionFlags(flags);
+
+	}else if(ent->entityType == Entity::TypePlayer) {
+		ent->rigidbody->setActivationState(DISABLE_DEACTIVATION);
+	}
+
+	scene->physicsContext.world->addRigidBody(ent->rigidbody);
+
+	return true;
+}
+
+void DeinitEntityPhysics(Scene* scene, Entity* ent) {
+	auto ctx = &scene->physicsContext;
+	
+	for(auto& cp: ctx->activeColliderPairs){
+		if(!cp.entityID0 || !cp.entityID1) continue;
+		if(cp.entityID0 != ent->id && cp.entityID1 != ent->id) continue;
+
+		if(cp.entityID0 > scene->numEntities || cp.entityID0 > scene->numEntities){
+			printf("Warning! An active collider pair was found with an invalid entity ID!\n");
+			cp.entityID0 = 0;
+			cp.entityID1 = 0;
+			continue;
+		}
+
+		auto ent0 = &scene->entities[cp.entityID0-1];
+		auto ent1 = &scene->entities[cp.entityID1-1];
+
+		// Should work fine given unsigned integer underflow
+		if(ent0->entityType == Entity::TypeTrigger
+		|| ent1->entityType == Entity::TypeTrigger){
+			EntityOnTriggerLeave(ent0, ent1);
+			EntityOnTriggerLeave(ent1, ent0);
+		}else{
+			EntityOnCollisionLeave(ent0, ent1);
+			EntityOnCollisionLeave(ent1, ent0);
+		}
+
+		// Setting these to 0 flags them for cleanup
+		cp.entityID0 = 0;
+		cp.entityID1 = 0;
+	}
+
+	ctx->world->removeRigidBody(ent->rigidbody);
+	delete ent->rigidbody->getMotionState();
+	delete ent->rigidbody;
+	delete ent->collider;
+
+	ent->rigidbody = nullptr;
+	ent->collider = nullptr;
+}
+
+void SetEntityVelocity(Entity* e, const vec3& v) {
+	e->rigidbody->setLinearVelocity(o2bt(v));
+}
+
+vec3 GetEntityVelocity(const Entity* e) {
+	return bt2o(e->rigidbody->getLinearVelocity());
+}
+
+void ConstrainEntityUpright(Entity* e) {
+	e->rigidbody->setAngularFactor(0.f);
 }
