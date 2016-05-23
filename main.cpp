@@ -141,13 +141,14 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	std::memset(&playerEntity, 0, sizeof(Entity));
 	playerEntity.layers = 1<<0;
-	playerEntity.position = {0,0,0};
+	playerEntity.position = {0,1,0};
 	playerEntity.rotation = {};
 	playerEntity.scale = {1,1,1};
 	playerEntity.name = strdup("Player");
 	playerEntity.nameLength = strlen(playerEntity.name);
 	playerEntity.entityType = Entity::TypePlayer;
-	playerEntity.colliderType = ColliderCube;
+	playerEntity.colliderType = ColliderCapsule;
+	playerEntity.extents = vec3{0.5f, 2.f, 0};
 
 	Scene scene;
 	scene.shaders[ShaderIDDefault] = CreateShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
@@ -203,7 +204,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	camera.rotation = {};
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
-	vec2 mouseRot {0,0};
+	// vec2 mouseRot {0,0};
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
 	u32 fpsFrameCount = 0;
@@ -247,53 +248,22 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			running = false;
 		}
 
-		mouseRot += Input::GetMouseDelta();
-		mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
-
-		playerEntity.rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0});
-		camera.rotation = playerEntity.rotation * glm::angleAxis(mouseRot.y, vec3{1,0,0});
-
-		vec3 vel {};
-		if(Input::GetMapped(Input::Forward))	vel += playerEntity.rotation * vec3{0,0,-1};
-		if(Input::GetMapped(Input::Backward))	vel += playerEntity.rotation * vec3{0,0, 1};
-		if(Input::GetMapped(Input::Left))		vel += playerEntity.rotation * vec3{-1,0,0};
-		if(Input::GetMapped(Input::Right))		vel += playerEntity.rotation * vec3{ 1,0,0};
-
-		if(glm::length(vel) > 1.f){
-			vel = glm::normalize(vel);
-		}
-
-		f32 speed = 5.f;
-		if(Input::GetKey(SDLK_LSHIFT)) speed *= 4.f;
-		vel *= speed;
-
-		vel.y = GetEntityVelocity(&playerEntity).y;
-		SetEntityVelocity(&playerEntity, vel);
-
-		if(Input::GetKeyDown('1')) { playerEntity.layers = 1<<0; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('2')) { playerEntity.layers = 1<<1; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('3')) { playerEntity.layers = 1<<2; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('4')) { playerEntity.layers = 1<<3; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('5')) { playerEntity.layers = 1<<4; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('6')) { playerEntity.layers = 1<<5; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('7')) { playerEntity.layers = 1<<6; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('8')) { playerEntity.layers = 1<<7; scene.physicsContext.needsRefilter = true; }
-		if(Input::GetKeyDown('9')) { playerEntity.layers = 1<<8; scene.physicsContext.needsRefilter = true; }
-
-		if(Input::GetKeyDown('c')) Input::doCapture ^= true;
-		if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
-
+		vec3 vel = GetEntityVelocity(&playerEntity);
 		particleEmitAccum += (glm::length(vel)*0.8f + 50.f) * dt;
 
 		u32 numParticlesEmit = (u32) particleEmitAccum;
 		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity.position);
+		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity.position + vel*3.f);
 		UpdateParticleSystem(&particleSystem, dt);
 
+		UpdateEntity(&scene, &playerEntity, dt);
 		for(u32 i = 0; i < scene.numEntities; i++) {
-			UpdateEntity(&scene.entities[i], dt);
+			UpdateEntity(&scene, &scene.entities[i], dt);
 		}
 
+		// NOTE: For some reason UpdatePhysics fucks with player rotation
+		//	Probably has something to do with ConstrainEntityUpright
+		camera.rotation = playerEntity.rotation * glm::angleAxis(playerEntity.player.mouseRot.y, vec3{1,0,0});
 		UpdatePhysics(&scene, dt);
 
 		// Update camera position *after* physics have been taken into account

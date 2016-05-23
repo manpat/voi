@@ -45,9 +45,10 @@ void DeinitEntityPhysics(Scene*, Entity*);
 
 void SetEntityVelocity(Entity*, const vec3&);
 vec3 GetEntityVelocity(const Entity*);
+vec3 GetEntityCenterOfMass(const Entity*);
 void ConstrainEntityUpright(Entity*);
 
-void UpdateEntity(Entity*, f32 dt);
+void UpdateEntity(Scene*, Entity*, f32 dt);
 void EntityOnCollisionEnter(Entity*, Entity*);
 void EntityOnCollisionLeave(Entity*, Entity*);
 void EntityOnTriggerEnter(Entity*, Entity*);

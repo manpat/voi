@@ -32,7 +32,7 @@ using f32 = float;
 using f64 = double;
 
 #ifndef M_PI
-#define M_PI 3.14159265359
+#define M_PI glm::pi<f64>()
 #endif
 
 #ifndef PI

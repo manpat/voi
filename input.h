@@ -29,14 +29,14 @@ public:
 		MappedCode(s32 k, s32 m, s32 c) : keyCode{ k }, mouseCode{ m }, controllerCode{ c } {}
 	};
 
-	enum {
+	enum : u8 {
 		Up = 0,
 		Down = 1,
 
 		// This flag is for indicating that a key changed during a frame
 		//	Can be used for triggering things that should only happen once per
 		//	key press.
-		ChangedThisFrameFlag = 1<<8
+		ChangedThisFrameFlag = 1<<2
 	};
 
 	enum {
@@ -59,13 +59,12 @@ public:
 		JoyButtonRB = 6
 	};
 
-	static std::map<s32, s32> keyStates;
-	static std::map<s32, s32> mouseStates;
-	static std::map<s32, s32> controllerStates;
+	static std::map<s32, u8> keyStates;
+	static std::map<s32, u8> mouseStates;
+	static std::map<s32, u8> controllerStates;
 	static vec2 mouseDelta;
 	static MappedCode mappings[MappingName::Count];
 	static SDL_Joystick* controller;
-	static s32 controllerIndex;
 	static f32 LXAxis, LYAxis, RXAxis, RYAxis;
 
 	static bool doCapture;

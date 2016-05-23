@@ -26,6 +26,10 @@ struct Mesh {
 		Submesh submeshesInline[MaxInlineSubmeshes];
 		Submesh* submeshes;
 	};
+
+	// Stuff for physics
+	vec3 extents;
+	vec3 center;
 };
 
 struct Material {
@@ -119,13 +123,15 @@ struct Entity {
 	btCollisionShape* collider;
 
 	vec3 extents;
-	vec3 originOffset;
+	vec3 centerOffset;
 
 	// NOTE: Assume that nothing in this union is initialised
 	union {
 		vec3 planeNormal;
 
-		// NOTE: There will probably be more here
+		struct {
+			vec2 mouseRot;
+		} player;
 	};
 
 	// So I can use the union for things with non-trivial constructors (glm vectors)

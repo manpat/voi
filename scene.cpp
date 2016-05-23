@@ -87,6 +87,18 @@ bool InitScene(Scene* scene, const SceneData* data) {
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, meshData->triangles8, GL_STATIC_DRAW);
+
+		// Calculate stuff for physics/portals
+		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
+
+		for(u32 vid = 0; vid < meshData->numVertices; vid++) {
+			auto v = meshData->vertices[vid];
+			minPoint = glm::min(minPoint, v);
+			maxPoint = glm::max(maxPoint, v);
+		}
+
+		mesh->center = (maxPoint + minPoint)/2.f;
+		mesh->extents = (maxPoint - minPoint)/2.f;
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -136,6 +148,15 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		to->entityType = from->entityType;
 		to->colliderType = from->colliderType;
 
+		if(to->meshID > 0){
+			auto mesh = &scene->meshes[to->meshID-1];
+			to->centerOffset = mesh->center*to->scale;
+			to->extents = mesh->extents*to->scale;
+		}else{
+			to->centerOffset = vec3{};
+			to->extents = vec3{};
+		}
+
 		if(to->entityType >= Entity::TypeNonExportable) {
 			printf("Error: Entity '%.*s' has non exportable type!\n",
 				(u32)to->nameLength, to->name);
@@ -153,8 +174,8 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			break;
 		}
 
-		auto mesh = (to->meshID>0)? &data->meshes[to->meshID-1] : nullptr;
-		if(!InitEntityPhysics(scene, to, mesh)) {
+		auto meshData = (to->meshID>0)? &data->meshes[to->meshID-1] : nullptr;
+		if(!InitEntityPhysics(scene, to, meshData)) {
 			printf("Error! Entity '%.*s' physics init failed!\n",
 				(u32)to->nameLength, to->name);
 			return false;
@@ -171,25 +192,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			continue;
 		}
 		if(!e->layers || !(e->layers & (e->layers-1))) {
-			printf("Warning! Portal '%.*s' only occupies one or fewer layers\n", e->nameLength, e->name);
+			printf("Warning! Portal '%.*s' only occupies zero or one layers\n", e->nameLength, e->name);
 			continue;
 		}
 
 		scene->portals[scene->numPortals] = i;
 		scene->numPortals++;
-		
-		// This could be done on a per mesh basis
-		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
-		auto mesh = &data->meshes[e->meshID-1];
-
-		for(u32 vid = 0; vid < mesh->numVertices; vid++) {
-			auto v = mesh->vertices[vid];
-			minPoint = glm::min(minPoint, v);
-			maxPoint = glm::max(maxPoint, v);
-		}
-
-		e->originOffset = (maxPoint + minPoint)/2.f;
-		e->extents = (maxPoint - minPoint)/2.f;
 	}
 
 	return true;
@@ -293,7 +301,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		if(~e->layers & parentNode->targetLayerMask) continue;
 
 		vec3 planeNormal = e->rotation * e->planeNormal;
-		auto ecenter = e->position + e->rotation*e->originOffset;
+		auto ecenter = e->position + e->rotation*e->centerOffset;
 		auto gextents = e->rotation*e->extents;
 		auto gext2 = glm::cross(planeNormal, gextents);
 		auto diff = ecenter - pos;
@@ -349,7 +357,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		node->childrenStart = graph->nodeCount;
 
 		vec3 planeNormal = e->rotation * e->planeNormal;
-		vec3 ecenter = e->position + e->rotation*e->originOffset;
+		vec3 ecenter = e->position + e->rotation*e->centerOffset;
 		auto diff = ecenter - pos;
 		
 		if(glm::dot(planeNormal, diff) < 0.f)
@@ -512,7 +520,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glEnable(GL_CLIP_DISTANCE0);
 		glEnable(GL_CULL_FACE);
 
-		vec3 ecenter = ent->position + ent->rotation * ent->originOffset;
+		vec3 ecenter = ent->position + ent->rotation * ent->centerOffset;
 		vec3 dir = glm::normalize(ent->rotation * ent->planeNormal);
 		vec4 plane = vec4{dir, -glm::dot(dir, ecenter)};
 		if(glm::dot(dir, ecenter - cam.position) < 0.f)

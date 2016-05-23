@@ -1,25 +1,24 @@
 #include "common.h"
 #include "input.h"
 
-std::map<s32,s32> Input::keyStates;
-std::map<s32,s32> Input::mouseStates;
-std::map<s32, s32> Input::controllerStates;
+std::map<s32, u8> Input::keyStates;
+std::map<s32, u8> Input::mouseStates;
+std::map<s32, u8> Input::controllerStates;
 vec2 Input::mouseDelta = vec2{0,0};
 
 Input::MappedCode Input::mappings[MappingName::Count] = {
 	// Keyboard, Mouse, Controller
-	{SDLK_RETURN, -1, Input::JoyButtonA},			// Select
-	{SDLK_ESCAPE, -1, Input::JoyButtonB},			// Cancel
-	{SDLK_w, -1, -1},								// Forward
-	{SDLK_s, -1, -1},								// Backward
-	{SDLK_a, -1, -1},								// Left
-	{SDLK_d, -1, -1},								// Right
-	{SDLK_LSHIFT, -1, Input::JoyButtonRB},			// Boost
-	{SDLK_SPACE, -1, Input::JoyButtonA},			// Jump
-	{SDLK_e, SDL_BUTTON_LEFT, Input::JoyButtonX}	// Interact
+	[Select]	= {SDLK_RETURN, -1, Input::JoyButtonA},
+	[Cancel]	= {SDLK_ESCAPE, -1, Input::JoyButtonB},
+	[Forward]	= {SDLK_w, -1, -1},
+	[Backward]	= {SDLK_s, -1, -1},
+	[Left]		= {SDLK_a, -1, -1},
+	[Right]		= {SDLK_d, -1, -1},
+	[Boost]		= {SDLK_LSHIFT, -1, Input::JoyButtonRB},
+	[Jump]		= {SDLK_SPACE, -1, Input::JoyButtonA},
+	[Interact]	= {SDLK_e, SDL_BUTTON_LEFT, Input::JoyButtonX}
 };
 SDL_Joystick* Input::controller;
-s32 Input::controllerIndex = -1;
 f32 Input::LXAxis = 0.0f;
 f32 Input::LYAxis = 0.0f;
 f32 Input::RXAxis = 0.0f;
@@ -34,15 +33,13 @@ void Input::Init(){
 
 	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
 		if ((controller = SDL_JoystickOpen(i))) {
-			controllerIndex = i;
+			printf("Joystick %d connect\n", i);
 			break;
 		}
 	}
 
-	if(controller){
-		printf("Joystick %d connect\n", controllerIndex);
-	}else{
-		puts("Joystick unable to connect");
+	if(!controller){
+		puts("Unable to connect joystick");
 	}
 }
 
@@ -137,6 +134,9 @@ void Input::ClearFrameState(){
 		kv.second &= ~Input::ChangedThisFrameFlag;
 	}
 	for(auto& kv: mouseStates){
+		kv.second &= ~Input::ChangedThisFrameFlag;
+	}
+	for(auto& kv: controllerStates){
 		kv.second &= ~Input::ChangedThisFrameFlag;
 	}
 }

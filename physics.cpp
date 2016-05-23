@@ -217,18 +217,21 @@ struct EntityMotionState : public btMotionState {
 };
 
 bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
+	// bool scaled = glm::length(ent->scale-1.f) < 1e-9;
+
 	// TODO: Proper sizes
 	switch(ent->colliderType) {
 	case ColliderCube:
-		ent->collider = new btBoxShape{o2bt({0.5, 0.5, 0.5})};
+		ent->collider = new btBoxShape{o2bt(ent->extents)};
 		break;
 	case ColliderCylinder:
-		ent->collider = new btCylinderShape{o2bt({0.5, 0.5, 0.5})};
+		ent->collider = new btCylinderShape{o2bt(ent->extents)};
 		break;
-	case ColliderCapsule:
+	case ColliderCapsule:{
 		// NOTE: Caps aren't included in height. Total height = height + 2*radius
-		ent->collider = new btCapsuleShape{/*radius*/0.5f, /*height*/1.f};
-		break;
+		auto radius = glm::max(ent->extents.x, ent->extents.z);
+		ent->collider = new btCapsuleShape{radius, ent->extents.y-2*radius};
+	}	break;
 
 	case ColliderConvex: {
 		if(!ent->meshID || !meshdata) {
@@ -315,7 +318,7 @@ bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
 	btScalar mass = 0.f;
 	btVector3 inertia {0,0,0};
 	if(~ent->flags & Entity::FlagStatic) {
-		mass = 10.; // NOTE: Super arbitrary
+		mass = 100.; // NOTE: Super arbitrary
 		ent->collider->calculateLocalInertia(mass, inertia);
 	}
 
@@ -324,6 +327,8 @@ bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
 	btRigidBody::btRigidBodyConstructionInfo bodyInfo{
 		mass, motionState, ent->collider, inertia
 	};
+
+	bodyInfo.m_rollingFriction = 0.f;
 
 	ent->rigidbody = new btRigidBody{bodyInfo};
 	ent->rigidbody->setUserPointer(ent);
@@ -335,7 +340,10 @@ bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
 
 	}else if(ent->entityType == Entity::TypePlayer) {
 		ent->rigidbody->setActivationState(DISABLE_DEACTIVATION);
+		ent->rigidbody->setFriction(0.f);
 	}
+
+	ent->collider->setLocalScaling(o2bt(ent->scale));
 
 	scene->physicsContext.world->addRigidBody(ent->rigidbody);
 
@@ -359,7 +367,6 @@ void DeinitEntityPhysics(Scene* scene, Entity* ent) {
 		auto ent0 = &scene->entities[cp.entityID0-1];
 		auto ent1 = &scene->entities[cp.entityID1-1];
 
-		// Should work fine given unsigned integer underflow
 		if(ent0->entityType == Entity::TypeTrigger
 		|| ent1->entityType == Entity::TypeTrigger){
 			EntityOnTriggerLeave(ent0, ent1);
@@ -389,6 +396,10 @@ void SetEntityVelocity(Entity* e, const vec3& v) {
 
 vec3 GetEntityVelocity(const Entity* e) {
 	return bt2o(e->rigidbody->getLinearVelocity());
+}
+
+vec3 GetEntityCenterOfMass(const Entity* e) {
+	return bt2o(e->rigidbody->getCenterOfMassPosition());
 }
 
 void ConstrainEntityUpright(Entity* e) {
