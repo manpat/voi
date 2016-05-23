@@ -3,6 +3,8 @@
 #include "sceneloader.h"
 #include "input.h"
 
+#include "stb_image.h"
+
 #include <chrono>
 #include <SDL2/SDL.h>
 
@@ -108,9 +110,39 @@ const char* postShaderSrc[] = {
 	)
 };
 
+const char* uiShaderSrc[] = {
+	SHADER(
+		in vec3 vertex;
+		in vec2 uv;
+		out vec2 vuv;
+
+		uniform mat4 viewProjection;
+
+		void main() {
+			gl_Position = viewProjection*vec4(vertex, 1);
+			vuv = uv;
+		}
+	),
+	SHADER(
+		uniform sampler2D colorTex;
+		in vec2 vuv;
+		out vec4 outcolor;
+
+		void main() {
+			vec4 color = texture2D(colorTex, vuv);
+			color.rgb *= color.a;
+			outcolor = color;
+		}
+	)
+};
+
 extern bool debugDrawEnabled;
 
 Entity playerEntity;
+u32 cursorTextures[2];
+u32 cursorVBO;
+u32 cursorUVBO;
+u8 interactiveHover = 0;
 
 s32 main(s32 /*ac*/, const char** /* av*/) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
@@ -134,6 +166,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	Input::doCapture = true;
 
 	SDL_WarpMouseInWindow(window, WindowWidth/2, WindowHeight/2);
+	SDL_ShowCursor(0);
 
 	if(!InitDebugDraw()) {
 		puts("Warning! Debug draw init failed");
@@ -142,18 +175,20 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	std::memset(&playerEntity, 0, sizeof(Entity));
 	playerEntity.layers = 1<<0;
 	playerEntity.position = {0,1,0};
-	playerEntity.rotation = {};
+	playerEntity.rotation = glm::angleAxis(0.f, vec3{0,1,0});
 	playerEntity.scale = {1,1,1};
 	playerEntity.name = strdup("Player");
 	playerEntity.nameLength = strlen(playerEntity.name);
 	playerEntity.entityType = Entity::TypePlayer;
 	playerEntity.colliderType = ColliderCapsule;
-	playerEntity.extents = vec3{0.5f, 2.f, 0};
+	playerEntity.extents = vec3{1.f, 3.f, 0};
+	playerEntity.player.eyeOffset = vec3{0, 1.2f, 0};
 
 	Scene scene;
 	scene.shaders[ShaderIDDefault] = CreateShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
 	scene.shaders[ShaderIDParticles] = CreateShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
 	scene.shaders[ShaderIDPost] = CreateShaderProgram(postShaderSrc[0], postShaderSrc[1]);
+	scene.shaders[ShaderIDUI] = CreateShaderProgram(uiShaderSrc[0], uiShaderSrc[1]);
 
 	if(!InitPhysics(&scene.physicsContext)) {
 		puts("Error! Physics init failed!");
@@ -173,6 +208,15 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		if(!InitScene(&scene, &sceneData)) {
 			puts("Error! Scene init failed!");
 			return 1;
+		}
+
+		// TODO: Fuck this off. I'm just testing
+		for(u32 i = 0; i < scene.numEntities; i++) {
+			if(scene.entities[i].colliderType == ColliderCube){
+				printf("Entity [%u] %.*s was made interactive\n", i, 
+					(u32)scene.entities[i].nameLength, scene.entities[i].name);
+				scene.entities[i].flags |= Entity::FlagInteractive;
+			}	
 		}
 
 		if(!InitEntityPhysics(&scene, &playerEntity, nullptr)) {
@@ -261,14 +305,13 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			UpdateEntity(&scene, &scene.entities[i], dt);
 		}
 
-		// NOTE: For some reason UpdatePhysics fucks with player rotation
-		//	Probably has something to do with ConstrainEntityUpright
 		camera.rotation = playerEntity.rotation * glm::angleAxis(playerEntity.player.mouseRot.y, vec3{1,0,0});
+
+		// NOTE: UpdatePhysics fucks with player rotation because it never gets properly updated
 		UpdatePhysics(&scene, dt);
 
 		// Update camera position *after* physics have been taken into account
-		// Rotation isn't affected
-		camera.position = playerEntity.position + vec3{0,1.5,0};
+		camera.position = playerEntity.position + playerEntity.player.eyeOffset;
 		auto viewProjection = camera.projection * glm::mat4_cast(
 			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
 
@@ -294,8 +337,10 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
 		glUseProgram(scene.shaders[ShaderIDPost].program);
 
+		// Draw scene with post effects
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetDepthStencil]);
 		glActiveTexture(GL_TEXTURE1);
@@ -309,8 +354,38 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		DrawFullscreenQuad();
 
+		// Draw cursor
+		glUseProgram(scene.shaders[ShaderIDUI].program);
+		glEnableVertexAttribArray(1);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, cursorTextures[interactiveHover&1]);
+
+		f32 a = aspect;
+		mat4 uiProj{
+			1,0,0,0,
+			0,a,0,0,
+			0,0,0,0,
+			0,0,0,1,
+		};
+
+		glUniform1i(scene.shaders[ShaderIDUI].colorTexLoc, 0);
+		glUniformMatrix4fv(scene.shaders[ShaderIDUI].viewProjectionLoc, 1,
+			false, glm::value_ptr(uiProj));
+
+		glBindBuffer(GL_ARRAY_BUFFER, cursorVBO);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+
+		glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
+		glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, nullptr);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+		glDisableVertexAttribArray(1);
+		glEnable(GL_DEPTH_TEST);
 		DrawDebug(viewProjection);
 
 		auto endRenderTime = std::chrono::high_resolution_clock::now();
@@ -389,6 +464,61 @@ bool InitGL(SDL_Window* window) {
 	u32 vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+
+	auto genTex = [&](const char* fname) {
+		s32 texWidth, texHeight, numComponents;
+		u8* texData = stbi_load(fname, &texWidth, &texHeight, &numComponents, 4 /*force RGBA*/);
+		if(!texData) {
+			puts("Warning! Unable to load cursor.png");
+		}
+		
+		u32 tex;
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		stbi_image_free(texData);
+		return tex;
+	};
+
+	cursorTextures[0] = genTex("GameData/UI/cursor.png");
+	cursorTextures[1] = genTex("GameData/UI/cursor2.png");
+
+	// NOTE: Arbitrary as shit
+	//	Maybe go down minecraft route and have an option?
+	f32 s = 0.015f;
+	vec3 verts[] = {
+		vec3{-s,-s, 0},
+		vec3{ s,-s, 0},
+		vec3{ s, s, 0},
+
+		vec3{-s,-s, 0},
+		vec3{ s, s, 0},
+		vec3{-s, s, 0},
+	};
+
+	vec2 uvs[] = {
+		vec2{0,1},
+		vec2{1,1},
+		vec2{1,0},
+
+		vec2{0,1},
+		vec2{1,0},
+		vec2{0,0},
+	};
+
+	glGenBuffers(1, &cursorVBO);
+	glGenBuffers(1, &cursorUVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, cursorVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*6, verts, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*6, uvs, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return true;
 }

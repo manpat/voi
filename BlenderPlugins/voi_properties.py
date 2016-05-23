@@ -81,7 +81,7 @@ def register():
 
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=voi_obtypes, name="Entity Type", default='g')
-	obj.voi_collidertype = EnumProperty(items=voi_coltypes, name="Collider Type", default='c')
+	obj.voi_collidertype = EnumProperty(items=voi_coltypes, name="Collider Type", default='_')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
 	obj.voi_entitystatic = BoolProperty(name="Static", default=True)
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)

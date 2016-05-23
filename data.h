@@ -54,6 +54,7 @@ class btDbvtBroadphase;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+struct Entity;
 
 struct PhysicsColliderPair {
 	u16 entityID0;
@@ -61,17 +62,16 @@ struct PhysicsColliderPair {
 	u32 stamp;
 };
 
+struct RaycastResult {
+	Entity* entity;
+	vec3 hitPosition;
+	vec3 hitNormal;
+	f32 distance;
+	
+	bool hit() const { return entity != nullptr; }
+};
+
 struct PhysicsContext {
-	// struct RaycastResult {
-	// 	bool hit() const { return entity != nullptr; }
-	// 	operator bool() const { return hit(); }
-
-	// 	Entity* entity;
-	// 	vec3 hitPosition;
-	// 	vec3 hitNormal;
-	// 	f32 distance;
-	// };
-
 	btDbvtBroadphase* broadphase;
 	btCollisionDispatcher* dispatcher;
 	btSequentialImpulseConstraintSolver* solver;
@@ -97,8 +97,9 @@ struct Entity {
 	};
 
 	enum : u8 {
-		FlagHidden = 1<<0,
-		FlagStatic = 1<<1,
+		FlagHidden		= 1<<0,
+		FlagStatic		= 1<<1,
+		FlagInteractive = 1<<2,
 	};
 
 	u16 id;
@@ -130,6 +131,7 @@ struct Entity {
 		vec3 planeNormal;
 
 		struct {
+			vec3 eyeOffset;
 			vec2 mouseRot;
 		} player;
 	};
@@ -157,6 +159,7 @@ enum {
 	ShaderIDDefault,
 	ShaderIDParticles,
 	ShaderIDPost,
+	ShaderIDUI,
 	ShaderIDCount,
 	ShaderIDCustom = ShaderIDCount,
 };

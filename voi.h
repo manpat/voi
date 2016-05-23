@@ -35,6 +35,9 @@ void EmitParticles(ParticleSystem*, u32 count, f32 lifetime, const vec3& pos);
 bool InitPhysics(PhysicsContext*);
 void UpdatePhysics(Scene*, f32 dt);
 
+RaycastResult Raycast(Scene*, const vec3&, const vec3&, f32 = std::numeric_limits<f32>::infinity(), u32 layermask = ~0u);
+RaycastResult Linecast(Scene*, const vec3&, const vec3&, u32 layermask = ~0u);
+
 // NOTE: Using MeshData here is kinda dirty and
 //	ties physics init to scene loading but we
 //	don't keep the data around long enough to 

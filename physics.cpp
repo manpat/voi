@@ -129,6 +129,47 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 	}
 }
 
+struct RaycastCallback : btCollisionWorld::ClosestRayResultCallback {
+	RaycastCallback(const btVector3& start, const btVector3& end, u32 _layerMask = ~0u)
+		: ClosestRayResultCallback{start, end}, layerMask{_layerMask} {}
+
+	u32 layerMask;
+
+	bool needsCollision(btBroadphaseProxy* proxy0) const override {
+		auto body = (btRigidBody*)proxy0->m_clientObject;
+		auto ent = (Entity*)body->getUserPointer();
+
+		auto mask = (ent->layers & layerMask);
+
+		return mask > 0u;
+	}
+};
+
+RaycastResult Raycast(Scene* scn, const vec3& o, const vec3& d, f32 maxDist, u32 layermask) {
+	return Linecast(scn, o, o + d*maxDist, layermask);
+}
+
+RaycastResult Linecast(Scene* scn, const vec3& s, const vec3& e, u32 layermask) {
+	auto start = o2bt(s);
+	auto end = o2bt(e);
+
+	RaycastCallback rayCallback{start, end, layermask};
+
+	// Perform raycast
+	scn->physicsContext.world->rayTest(start, end, rayCallback);
+
+	if(rayCallback.hasHit()) {
+		end = rayCallback.m_hitPointWorld;
+		auto normal = rayCallback.m_hitNormalWorld;
+		auto col = (Entity*)rayCallback.m_collisionObject->getUserPointer();
+
+		return {col, bt2o(end), bt2o(normal), rayCallback.m_closestHitFraction};
+	}
+
+	return {nullptr, vec3{0.f}, vec3{0.f}, std::numeric_limits<f32>::infinity()};
+}
+
+
 void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo) {
 	auto proxy0 = collisionPair.m_pProxy0;
 	auto proxy1 = collisionPair.m_pProxy1;
@@ -219,7 +260,6 @@ struct EntityMotionState : public btMotionState {
 bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
 	// bool scaled = glm::length(ent->scale-1.f) < 1e-9;
 
-	// TODO: Proper sizes
 	switch(ent->colliderType) {
 	case ColliderCube:
 		ent->collider = new btBoxShape{o2bt(ent->extents)};

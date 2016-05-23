@@ -29,6 +29,7 @@ void EntityOnTriggerLeave(Entity*, Entity*) {
 }
 
 extern bool debugDrawEnabled;
+extern u8 interactiveHover;
 
 void UpdatePlayer(Scene* scn, Entity* pl, f32) {
 	auto& mouseRot = pl->player.mouseRot;
@@ -71,4 +72,10 @@ void UpdatePlayer(Scene* scn, Entity* pl, f32) {
 
 	if(Input::GetKeyDown('c')) Input::doCapture ^= true;
 	if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
+
+	auto eye = pl->position + pl->player.eyeOffset;
+	auto eyeFwd = pl->rotation * glm::angleAxis(mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
+	auto hit = Raycast(scn, eye, eyeFwd, 5.f, pl->layers);
+
+	interactiveHover = (hit.entity && (hit.entity->flags & Entity::FlagInteractive))?1:0;
 }

@@ -43,6 +43,7 @@ ShaderProgram CreateShaderProgram(const char* vsrc, const char* fsrc) {
 	glAttachShader(ret.program, fsh);
 
 	glBindAttribLocation(ret.program, 0, "vertex");
+	glBindAttribLocation(ret.program, 1, "uv");
 
 	glBindFragDataLocation(ret.program, 0, "outcolor");
 	glBindFragDataLocation(ret.program, 1, "outgeneral0");
