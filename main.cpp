@@ -138,7 +138,6 @@ const char* uiShaderSrc[] = {
 
 extern bool debugDrawEnabled;
 
-Entity playerEntity;
 u32 cursorTextures[2];
 u32 cursorVBO;
 u32 cursorUVBO;
@@ -172,17 +171,18 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		puts("Warning! Debug draw init failed");
 	}
 
-	std::memset(&playerEntity, 0, sizeof(Entity));
-	playerEntity.layers = 1<<0;
-	playerEntity.position = {0,1,0};
-	playerEntity.rotation = glm::angleAxis(0.f, vec3{0,1,0});
-	playerEntity.scale = {1,1,1};
-	playerEntity.name = strdup("Player");
-	playerEntity.nameLength = strlen(playerEntity.name);
-	playerEntity.entityType = Entity::TypePlayer;
-	playerEntity.colliderType = ColliderCapsule;
-	playerEntity.extents = vec3{1.f, 3.f, 0};
-	playerEntity.player.eyeOffset = vec3{0, 1.2f, 0};
+	auto playerEntity = AllocateEntity();
+	playerEntity->layers = 1<<0;
+	playerEntity->position = {0,1,0};
+	playerEntity->rotation = glm::angleAxis(0.f, vec3{0,1,0});
+	playerEntity->scale = {1,1,1};
+	playerEntity->name = strdup("Player");
+	playerEntity->nameLength = strlen(playerEntity->name);
+	playerEntity->entityType = Entity::TypePlayer;
+	playerEntity->colliderType = ColliderCapsule;
+	playerEntity->extents = vec3{1.f, 3.f, 0};
+	playerEntity->player.eyeOffset = vec3{0, 1.2f, 0};
+	printf("Player id: %u\n", playerEntity->id);
 
 	Scene scene;
 	scene.shaders[ShaderIDDefault] = CreateShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
@@ -219,11 +219,12 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			}	
 		}
 
-		if(!InitEntityPhysics(&scene, &playerEntity, nullptr)) {
+		playerEntity->scene = &scene;
+		if(!InitEntityPhysics(playerEntity, nullptr)) {
 			puts("Error! Entity physics init failed for player!");
 			return 1;
 		}
-		ConstrainEntityUpright(&playerEntity);
+		ConstrainEntityUpright(playerEntity);
 
 		FreeSceneData(&sceneData);
 	}
@@ -292,26 +293,25 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 			running = false;
 		}
 
-		vec3 vel = GetEntityVelocity(&playerEntity);
+		vec3 vel = GetEntityVelocity(playerEntity);
 		particleEmitAccum += (glm::length(vel)*0.8f + 50.f) * dt;
 
 		u32 numParticlesEmit = (u32) particleEmitAccum;
 		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity.position + vel*3.f);
+		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*3.f);
 		UpdateParticleSystem(&particleSystem, dt);
 
-		UpdateEntity(&scene, &playerEntity, dt);
+		UpdateEntity(playerEntity, dt);
 		for(u32 i = 0; i < scene.numEntities; i++) {
-			UpdateEntity(&scene, &scene.entities[i], dt);
+			UpdateEntity(&scene.entities[i], dt);
 		}
 
-		camera.rotation = playerEntity.rotation * glm::angleAxis(playerEntity.player.mouseRot.y, vec3{1,0,0});
-
-		// NOTE: UpdatePhysics fucks with player rotation because it never gets properly updated
+		camera.rotation = playerEntity->rotation * glm::angleAxis(playerEntity->player.mouseRot.y, vec3{1,0,0});
+		// NOTE: UpdatePhysics fucks with player rotation for some reason
 		UpdatePhysics(&scene, dt);
 
 		// Update camera position *after* physics have been taken into account
-		camera.position = playerEntity.position + playerEntity.player.eyeOffset;
+		camera.position = playerEntity->position + playerEntity->player.eyeOffset;
 		auto viewProjection = camera.projection * glm::mat4_cast(
 			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
 
@@ -322,7 +322,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-			RenderScene(&scene, camera, playerEntity.layers);
+			RenderScene(&scene, camera, playerEntity->layers);
 
 			glUseProgram(scene.shaders[ShaderIDParticles].program);
 			glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));
@@ -415,6 +415,10 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 		Input::ClearFrameState();
 	}
+
+	DeinitEntityPhysics(playerEntity);
+	FreeEntity(playerEntity);
+	FreeSceneEntities(scene.entities);
 
 	Input::Deinit();
 	DeinitGL();

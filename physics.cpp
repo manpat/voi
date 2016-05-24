@@ -14,10 +14,10 @@ inline vec3 bt2o(const btVector3& v){
 }
 
 inline btQuaternion o2bt(const quat& o){
-	return {o.x, o.y, o.z, o.w};
+	return btQuaternion(o.x, o.y, o.z, o.w);
 }
 inline quat bt2o(const btQuaternion& o){
-	return {o.x(), o.y(), o.z(), o.w()};
+	return quat(o.x(), o.y(), o.z(), o.w());
 }
 
 void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo);
@@ -39,6 +39,7 @@ bool InitPhysics(PhysicsContext* ctx) {
 
 void UpdatePhysics(Scene* scene, f32 dt) {
 	auto ctx = &scene->physicsContext;
+	s32 numManifolds = ctx->dispatcher->getNumManifolds();
 
 	if(ctx->needsRefilter) {
 		// Clean the broadphase of AABB data
@@ -52,7 +53,6 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 		}
 
 		// Clean the dispatcher(narrowphase) of shape data
-		s32 numManifolds = ctx->world->getDispatcher()->getNumManifolds();
 		for(s32 i = 0; i < numManifolds; i++) {
 			ctx->dispatcher->releaseManifold(ctx->dispatcher->getManifoldByIndexInternal(i));
 		}
@@ -72,26 +72,17 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 	}), end);
 
 	// Find all collisions between colliders and collider triggers
-	auto dispatcher = ctx->world->getDispatcher();
-	int numManifolds = dispatcher->getNumManifolds();
-	for (int i = 0; i < numManifolds; i++) {
-		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+	for (s32 i = 0; i < numManifolds; i++) {
+		btPersistentManifold* contactManifold = ctx->dispatcher->getManifoldByIndexInternal(i);
 		auto obA = (btCollisionObject*)contactManifold->getBody0();
 		auto obB = (btCollisionObject*)contactManifold->getBody1();
 
-		int numContacts = contactManifold->getNumContacts();
-		for (int j = 0; j < numContacts; j++) {
+		s32 numContacts = contactManifold->getNumContacts();
+		for (s32 j = 0; j < numContacts; j++) {
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() < 0.f) {
-				// NOTE: Relies on unsigned underflow
-				auto entIdx0 = (u16) (size_t) obA->getUserPointer()-1;
-				auto entIdx1 = (u16) (size_t) obB->getUserPointer()-1;
-
-				if(entIdx0 >= scene->numEntities) continue;
-				if(entIdx1 >= scene->numEntities) continue;
-
-				auto ent0 = &scene->entities[entIdx0];
-				auto ent1 = &scene->entities[entIdx1];
+				auto ent0 = (Entity*) obA->getUserPointer();
+				auto ent1 = (Entity*) obB->getUserPointer();
 
 				if(ent0->entityType == Entity::TypeTrigger) {
 					ProcessTriggerCollision(ctx, ent0, ent1);
@@ -111,15 +102,18 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 
 		// Should work fine given unsigned integer underflow
 		if((ctx->currentStamp - cp.stamp) > 1u){
-			auto ent0 = &scene->entities[cp.entityID0-1];
-			auto ent1 = &scene->entities[cp.entityID1-1];
-			if(ent0->entityType == Entity::TypeTrigger
-			|| ent1->entityType == Entity::TypeTrigger){
-				EntityOnTriggerLeave(ent0, ent1);
-				EntityOnTriggerLeave(ent1, ent0);
-			}else{
-				EntityOnCollisionLeave(ent0, ent1);
-				EntityOnCollisionLeave(ent1, ent0);
+			auto ent0 = GetEntity(cp.entityID0);
+			auto ent1 = GetEntity(cp.entityID1);
+
+			if(ent0 && ent1) {
+				if(ent0->entityType == Entity::TypeTrigger
+				|| ent1->entityType == Entity::TypeTrigger){
+					EntityOnTriggerLeave(ent0, ent1);
+					EntityOnTriggerLeave(ent1, ent0);
+				}else{
+					EntityOnCollisionLeave(ent0, ent1);
+					EntityOnCollisionLeave(ent1, ent0);
+				}
 			}
 
 			// Setting these to 0 flags them for cleanup
@@ -257,7 +251,8 @@ struct EntityMotionState : public btMotionState {
 	}
 };
 
-bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
+bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
+	auto scene = ent->scene;
 	// bool scaled = glm::length(ent->scale-1.f) < 1e-9;
 
 	switch(ent->colliderType) {
@@ -390,22 +385,23 @@ bool InitEntityPhysics(Scene* scene, Entity* ent, const MeshData* meshdata) {
 	return true;
 }
 
-void DeinitEntityPhysics(Scene* scene, Entity* ent) {
+void DeinitEntityPhysics(Entity* ent) {
+	auto scene = ent->scene;
 	auto ctx = &scene->physicsContext;
 	
 	for(auto& cp: ctx->activeColliderPairs){
 		if(!cp.entityID0 || !cp.entityID1) continue;
 		if(cp.entityID0 != ent->id && cp.entityID1 != ent->id) continue;
 
-		if(cp.entityID0 > scene->numEntities || cp.entityID0 > scene->numEntities){
+		auto ent0 = GetEntity(cp.entityID0);
+		auto ent1 = GetEntity(cp.entityID1);
+
+		if(!ent0 || !ent1){
 			printf("Warning! An active collider pair was found with an invalid entity ID!\n");
 			cp.entityID0 = 0;
 			cp.entityID1 = 0;
 			continue;
 		}
-
-		auto ent0 = &scene->entities[cp.entityID0-1];
-		auto ent1 = &scene->entities[cp.entityID1-1];
 
 		if(ent0->entityType == Entity::TypeTrigger
 		|| ent1->entityType == Entity::TypeTrigger){
@@ -428,6 +424,12 @@ void DeinitEntityPhysics(Scene* scene, Entity* ent) {
 
 	ent->rigidbody = nullptr;
 	ent->collider = nullptr;
+}
+
+void SetEntityRotation(Entity* e, const quat& q) {
+	auto trans = e->rigidbody->getCenterOfMassTransform();
+	trans.setRotation(o2bt(q));
+	e->rigidbody->setCenterOfMassTransform(trans);
 }
 
 void SetEntityVelocity(Entity* e, const vec3& v) {

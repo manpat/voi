@@ -1,19 +1,21 @@
 #include "voi.h"
 #include "input.h"
 
-void UpdatePlayer(Scene*, Entity*, f32);
+void UpdatePlayer(Entity*, f32);
 
-void UpdateEntity(Scene* scn, Entity* e, f32 dt) {
+void UpdateEntity(Entity* e, f32 dt) {
 	if(!e) return;
 
 	switch(e->entityType) {
-		case Entity::TypePlayer: UpdatePlayer(scn, e, dt); break;
+		case Entity::TypePlayer: UpdatePlayer(e, dt); break;
 		default: break;
 	}
 }
 
-void EntityOnCollisionEnter(Entity*, Entity*) {
-
+void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
+	printf("Entity %.*s collided with %.*s\n", 
+		(u32)e0->nameLength, e0->name,
+		(u32)e1->nameLength, e1->name);
 }
 
 void EntityOnCollisionLeave(Entity*, Entity*) {
@@ -31,12 +33,15 @@ void EntityOnTriggerLeave(Entity*, Entity*) {
 extern bool debugDrawEnabled;
 extern u8 interactiveHover;
 
-void UpdatePlayer(Scene* scn, Entity* pl, f32) {
+void UpdatePlayer(Entity* pl, f32) {
+	auto scn = pl->scene;
+	
 	auto& mouseRot = pl->player.mouseRot;
 	mouseRot += Input::GetMouseDelta();
 	mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
 
 	pl->rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0});
+	SetEntityRotation(pl, pl->rotation);
 
 	vec3 vel {};
 	if(Input::GetMapped(Input::Forward))	vel += pl->rotation * vec3{0,0,-1};
@@ -77,5 +82,10 @@ void UpdatePlayer(Scene* scn, Entity* pl, f32) {
 	auto eyeFwd = pl->rotation * glm::angleAxis(mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
 	auto hit = Raycast(scn, eye, eyeFwd, 5.f, pl->layers);
 
-	interactiveHover = (hit.entity && (hit.entity->flags & Entity::FlagInteractive))?1:0;
+	bool interactive = hit.entity && (hit.entity->flags & Entity::FlagInteractive);
+	interactiveHover = interactive?1:0;
+
+	if(interactive && Input::GetMappedDown(Input::Interact)) {
+		// TODO: Frob thing when frobbing becomes a thing
+	}
 }

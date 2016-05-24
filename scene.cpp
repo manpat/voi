@@ -15,8 +15,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 	scene->numEntities = data->numEntities;
 	scene->numMeshes = data->numMeshes;
 
-	scene->entities = new Entity[scene->numEntities];
+	scene->entities = AllocateSceneEntities(scene->numEntities);
 	scene->meshes = new Mesh[scene->numMeshes];
+
+	if(!scene->entities || !scene->meshes) {
+		return false;
+	}
 
 	std::memset(scene->materials, 0, sizeof(scene->materials));
 	std::memset(scene->entities, 0, scene->numEntities * sizeof(Entity));
@@ -136,6 +140,9 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		to->position = from->position;
 		to->scale = from->scale;
 
+		to->scene = scene;
+		to->ownedByScene = true;
+
 		// NOTE: This is here because blender applies euler rotations in ZYX by default
 		//	and we swap the coord space. So gimbal lock becomes a problem.
 		auto rotX = glm::angleAxis(from->rotation.x, vec3{1,0,0});
@@ -175,7 +182,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		}
 
 		auto meshData = (to->meshID>0)? &data->meshes[to->meshID-1] : nullptr;
-		if(!InitEntityPhysics(scene, to, meshData)) {
+		if(!InitEntityPhysics(to, meshData)) {
 			printf("Error! Entity '%.*s' physics init failed!\n",
 				(u32)to->nameLength, to->name);
 			return false;

@@ -4,6 +4,15 @@
 #include "common.h"
 #include <vector>
 
+class btRigidBody;
+class btCollisionShape;
+class btDbvtBroadphase;
+class btCollisionDispatcher;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+struct Entity;
+struct Scene;
+
 struct Mesh {
 	enum { MaxInlineSubmeshes = 4 };
 
@@ -21,6 +30,7 @@ struct Mesh {
 	};
 
 	u8 numSubmeshes = 0;
+	// TODO: This could be simplified by having a single external submesh pool
 	union {
 		// Save allocations for meshes with few materials
 		Submesh submeshesInline[MaxInlineSubmeshes];
@@ -39,6 +49,23 @@ struct Material {
 	u32 shaderID = 0;
 };
 
+struct EntityManager {
+	enum {
+		FreeEntityBucketSize = 512,
+		FreeEntityIDOffset = 0x8000 // ~32k
+	};
+
+	struct Bucket {
+		Entity* entities;
+		u16 capacity;
+		u16 used;
+		u8 id;
+	};
+
+	std::vector<Bucket> entityBuckets;
+	Bucket sceneEntityBuckets[2];
+};
+
 enum ColliderType {
 	ColliderNone,
 	ColliderCube,
@@ -47,14 +74,6 @@ enum ColliderType {
 	ColliderConvex,
 	ColliderMesh,
 };
-
-class btRigidBody;
-class btCollisionShape;
-class btDbvtBroadphase;
-class btCollisionDispatcher;
-class btSequentialImpulseConstraintSolver;
-class btDiscreteDynamicsWorld;
-struct Entity;
 
 struct PhysicsColliderPair {
 	u16 entityID0;
@@ -123,11 +142,17 @@ struct Entity {
 	btRigidBody* rigidbody;
 	btCollisionShape* collider;
 
+	// When ownedByScene is true, scene points to the owning scene
+	//	otherwise it points to the scene that the entity is currently in
+	Scene* scene;
+	bool ownedByScene; 
+
 	vec3 extents;
 	vec3 centerOffset;
 
 	// NOTE: Assume that nothing in this union is initialised
 	union {
+		// Valid with TypePortal and TypeMirror
 		vec3 planeNormal;
 
 		struct {

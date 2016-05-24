@@ -43,18 +43,25 @@ RaycastResult Linecast(Scene*, const vec3&, const vec3&, u32 layermask = ~0u);
 //	don't keep the data around long enough to 
 //	decouple them
 struct MeshData;
-bool InitEntityPhysics(Scene*, Entity*, const MeshData*);
-void DeinitEntityPhysics(Scene*, Entity*);
+bool InitEntityPhysics(Entity*, const MeshData*);
+void DeinitEntityPhysics(Entity*);
 
+void SetEntityRotation(Entity*, const quat&);
 void SetEntityVelocity(Entity*, const vec3&);
 vec3 GetEntityVelocity(const Entity*);
 vec3 GetEntityCenterOfMass(const Entity*);
 void ConstrainEntityUpright(Entity*);
 
-void UpdateEntity(Scene*, Entity*, f32 dt);
+void UpdateEntity(Entity*, f32 dt);
 void EntityOnCollisionEnter(Entity*, Entity*);
 void EntityOnCollisionLeave(Entity*, Entity*);
 void EntityOnTriggerEnter(Entity*, Entity*);
 void EntityOnTriggerLeave(Entity*, Entity*);
+
+Entity* AllocateSceneEntities(u16 count);
+Entity* AllocateEntity();
+void FreeSceneEntities(Entity* se);
+void FreeEntity(Entity* e);
+Entity* GetEntity(u16 id);
 
 #endif
