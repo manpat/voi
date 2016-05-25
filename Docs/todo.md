@@ -50,6 +50,8 @@ Shit To Do
 - EntityManager
 
 - Optimise
+	- The glDrawElements in RenderMesh takes up most of frame time
+		- The way submeshes are handled should probably change
 	- Single vertex buffer
 	- Bake static geometry into single Mesh/Entity
 	- Vert sorting algorithm seems kinda slow

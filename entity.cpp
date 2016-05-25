@@ -12,6 +12,10 @@ void UpdateEntity(Entity* e, f32 dt) {
 	}
 }
 
+void DeinitEntity(Entity*) {
+	
+}
+
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 	if(e0->entityType == Entity::TypePlayer) {
 		printf("Entity %.*s collided with %.*s\n", 

@@ -7,6 +7,7 @@
 
 struct Option {
 	enum Type {
+		TypeNone,
 		TypeString,
 		TypeBool,
 		TypeInt,
@@ -64,8 +65,12 @@ namespace {
 		"# Modify at your own risk\n";
 		
 	static Option defaultOptions[] = {
-		Option::Int("window.width", 800),
-		Option::Int("window.height", 600),
+		Option::Int  ("window.width", 800),
+		Option::Int  ("window.height", 600),
+		Option::Bool ("window.fullscreen", false),
+		Option       (),
+		Option::Float("graphics.fov", 60.f),
+		Option::Float("crosshair.size", 1.5f),
 	};
 
 	std::vector<Option> options;
@@ -253,14 +258,20 @@ static void WriteAndSetDefaultOptions() {
 	it += written;
 
 	for(auto& opt : defaultOptions) {
-		s32 written = std::snprintf(it, remaining, "%s = %s\n", opt.name, opt.value);
-		remaining -= written;
-		it += written;
-
 		if(remaining <= 0) {
 			puts("Warning! Ran out of space while writing default cfg! Maybe allocate some more space?");
 			break;
 		}
+
+		if(opt.type == Option::TypeNone) {
+			*it++ = '\n'; 
+			remaining--;
+			continue;
+		}
+
+		s32 written = std::snprintf(it, remaining, "%-20s = %s\n", opt.name, opt.value);
+		remaining -= written;
+		it += written;
 	}
 
 	if(!stb_filewritestr(cfgName, buffer)) {

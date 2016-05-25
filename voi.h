@@ -27,6 +27,7 @@ void DebugPoint(const vec3& pos, const vec3& col = vec3{1});
 struct SceneData; // In sceneloader.h
 
 bool InitScene(Scene*, const SceneData*);
+void DeinitScene(Scene*);
 void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1});
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
@@ -36,11 +37,13 @@ Framebuffer CreateFramebuffer(u32 width, u32 height);
 void DrawFullscreenQuad();
 
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
+void DeinitParticleSystem(ParticleSystem*);
 void UpdateParticleSystem(ParticleSystem*, f32 dt);
 void RenderParticleSystem(ParticleSystem*);
 void EmitParticles(ParticleSystem*, u32 count, f32 lifetime, const vec3& pos);
 
 bool InitPhysics(PhysicsContext*);
+void DeinitPhysics(PhysicsContext*);
 void UpdatePhysics(Scene*, f32 dt);
 void RefilterEntity(Entity*);
 
@@ -61,6 +64,7 @@ vec3 GetEntityVelocity(const Entity*);
 vec3 GetEntityCenterOfMass(const Entity*);
 void ConstrainEntityUpright(Entity*);
 
+void DeinitEntity(Entity*);
 void UpdateEntity(Entity*, f32 dt);
 void EntityOnCollisionEnter(Entity*, Entity*);
 void EntityOnCollisionLeave(Entity*, Entity*);

@@ -210,6 +210,22 @@ bool InitScene(Scene* scene, const SceneData* data) {
 	return true;
 }
 
+void DeinitScene(Scene* scene) {
+	for(u32 i = 0; i < scene->numEntities; i++)
+		DeinitEntity(&scene->entities[i]);
+
+	for(u32 i = 0; i < scene->numEntities; i++)
+		DeinitEntityPhysics(&scene->entities[i]);
+
+	FreeSceneEntities(scene->entities);
+	DeinitPhysics(&scene->physicsContext);
+
+	delete[] scene->nameArena;
+	delete[] scene->meshes;
+
+	std::memset(scene, 0, sizeof(Scene));
+}
+
 void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale) {
 	auto program = &scene->shaders[ShaderIDDefault]; // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];

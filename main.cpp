@@ -123,7 +123,7 @@ const char* uiShaderSrc[] = {
 
 		void main() {
 			vec4 color = texture2D(colorTex, vuv);
-			color.rgb *= color.a;
+			color.rgb *= color.a; // We premultiply our alphas in these parts
 			outcolor = color;
 		}
 	)
@@ -147,9 +147,10 @@ s32 main(s32 ac, const char** av) {
 
 	u32 windowWidth = GetIntOption("window.width");
 	u32 windowHeight = GetIntOption("window.height");
+	bool fullscreen = GetBoolOption("window.fullscreen");
+	(void) fullscreen; // TODO
 
 	auto window = SDL_CreateWindow("Voi", 
-		// SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_UNDEFINED, 
 		windowWidth, windowHeight, SDL_WINDOW_OPENGL);
 
@@ -238,7 +239,7 @@ s32 main(s32 ac, const char** av) {
 	glClearColor(0, 0, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	f32 fov = M_PI/3.f;
+	f32 fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
 	f32 aspect = (f32) windowWidth / windowHeight;
 	f32 nearDist = 0.1f;
 	f32 farDist = 1000.f;
@@ -248,7 +249,6 @@ s32 main(s32 ac, const char** av) {
 	camera.rotation = {};
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
-	// vec2 mouseRot {0,0};
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
 	u32 fpsFrameCount = 0;
@@ -263,8 +263,8 @@ s32 main(s32 ac, const char** av) {
 		puts("Warning! Particle system init failed");
 	}
 
-	// Simulate 10s of dust
-	for(u32 i = 0; i < 60*10; i++){
+	// Simulate 3s of dust
+	for(u32 i = 0; i < 60*3; i++){
 		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), camera.position);
 		UpdateParticleSystem(&particleSystem, 1.f/60.f);
 	}
@@ -280,6 +280,7 @@ s32 main(s32 ac, const char** av) {
 	SDL_Event e;
 	bool running = true;
 	while(running) {
+		auto beginFrameTime = std::chrono::high_resolution_clock::now();
 		while(SDL_PollEvent(&e)) {
 			Input::InjectSDLEvent(e);
 			if(e.type == SDL_QUIT) {
@@ -293,11 +294,11 @@ s32 main(s32 ac, const char** av) {
 		}
 
 		vec3 vel = GetEntityVelocity(playerEntity);
-		particleEmitAccum += (glm::length(vel)*0.8f + 50.f) * dt;
+		particleEmitAccum += (glm::length(vel)*10.f + 30.f) * dt;
 
 		u32 numParticlesEmit = (u32) particleEmitAccum;
 		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*3.f);
+		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*2.f);
 		UpdateParticleSystem(&particleSystem, dt);
 
 		UpdateEntity(playerEntity, dt);
@@ -314,7 +315,6 @@ s32 main(s32 ac, const char** av) {
 		auto viewProjection = camera.projection * glm::mat4_cast(
 			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
 
-		auto beginRenderTime = std::chrono::high_resolution_clock::now();
 		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
 		glUseProgram(scene.shaders[ShaderIDDefault].program);
 
@@ -364,7 +364,7 @@ s32 main(s32 ac, const char** av) {
 		mat4 uiProj{
 			1,0,0,0,
 			0,a,0,0,
-			0,0,0,0,
+			0,0,1,0,
 			0,0,0,1,
 		};
 
@@ -387,14 +387,14 @@ s32 main(s32 ac, const char** av) {
 		glEnable(GL_DEPTH_TEST);
 		DrawDebug(viewProjection);
 
-		auto endRenderTime = std::chrono::high_resolution_clock::now();
+		auto endFrameTime = std::chrono::high_resolution_clock::now();
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
 		glEndQuery(GL_PRIMITIVES_GENERATED);
 
 		auto endTime = std::chrono::high_resolution_clock::now();
 		dt = std::chrono::duration_cast<std::chrono::duration<f32>>(endTime-beginTime).count();
-		f32 renderdt = std::chrono::duration_cast<std::chrono::duration<f32>>(endRenderTime-beginRenderTime).count();
+		f32 renderdt = std::chrono::duration_cast<std::chrono::duration<f32>>(endFrameTime-beginFrameTime).count();
 		beginTime = endTime;
 		fpsTimeAccum += dt;
 		fpsFrameCount++;
@@ -415,9 +415,12 @@ s32 main(s32 ac, const char** av) {
 		Input::ClearFrameState();
 	}
 
+	DeinitParticleSystem(&particleSystem);
+
 	DeinitEntityPhysics(playerEntity);
 	FreeEntity(playerEntity);
-	FreeSceneEntities(scene.entities);
+
+	DeinitScene(&scene);
 
 	Input::Deinit();
 	DeinitGL();
@@ -436,8 +439,8 @@ void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* m
 SDL_GLContext glctx = nullptr;
 
 bool InitGL(SDL_Window* window) {
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
@@ -493,9 +496,7 @@ bool InitGL(SDL_Window* window) {
 	cursorTextures[0] = genTex("GameData/UI/cursor.png");
 	cursorTextures[1] = genTex("GameData/UI/cursor2.png");
 
-	// NOTE: Arbitrary as shit
-	//	Maybe go down minecraft route and have an option?
-	f32 s = 0.015f;
+	f32 s = GetFloatOption("crosshair.size")/100.f;
 	vec3 verts[] = {
 		vec3{-s,-s, 0},
 		vec3{ s,-s, 0},

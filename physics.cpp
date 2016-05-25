@@ -110,6 +110,19 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 	}
 }
 
+void DeinitPhysics(PhysicsContext* ctx) {
+	delete ctx->world;
+	delete ctx->solver;
+	delete ctx->dispatcher->getCollisionConfiguration();
+	delete ctx->dispatcher;
+	delete ctx->broadphase;
+
+	ctx->world = nullptr;
+	ctx->solver = nullptr;
+	ctx->dispatcher = nullptr;
+	ctx->broadphase = nullptr;
+}
+
 void RefilterEntity(Entity* e) {
 	if(!e->rigidbody) return;
 	if(!e->scene) {
@@ -415,9 +428,11 @@ void DeinitEntityPhysics(Entity* ent) {
 		cp.entityID1 = 0;
 	}
 
-	ctx->world->removeRigidBody(ent->rigidbody);
-	delete ent->rigidbody->getMotionState();
-	delete ent->rigidbody;
+	if(ent->rigidbody) {
+		ctx->world->removeRigidBody(ent->rigidbody);
+		delete ent->rigidbody->getMotionState();
+		delete ent->rigidbody;
+	}
 	delete ent->collider;
 
 	ent->rigidbody = nullptr;

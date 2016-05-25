@@ -21,6 +21,17 @@ bool InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
 	return true;
 }
 
+void DeinitParticleSystem(ParticleSystem* sys) {
+	glDeleteBuffers(1, &sys->vertexBuffer);
+
+	delete[] sys->positions;
+	delete[] sys->velocities;
+	delete[] sys->accelerations;
+	delete[] sys->lifetimes;
+	delete[] sys->lifeRates;
+	std::memset(sys, 0, sizeof(ParticleSystem));
+}
+
 void UpdateParticleSystem(ParticleSystem* sys, f32 dt) {
 	for(u32 i = 0; i < sys->numParticles; i++) {
 		if(sys->lifetimes[i] < 0.f) continue;
@@ -48,14 +59,21 @@ void RenderParticleSystem(ParticleSystem* sys) {
 }
 
 static f32 randf(f32 a = -1, f32 b = 1) {
-	return glm::linearRand<f32>(a,b);
+	// return glm::linearRand<f32>(a,b);
+
+	// Gaussian rand seems nicer
+	return glm::gaussRand<f32>((a+b)/2.f, glm::sqrt(glm::abs(b-a)/2.f));
 }
 
 void EmitParticles(ParticleSystem* sys, u32 count, f32 lifetime, const vec3& position) {
+	if(count > sys->numParticles) count = sys->numParticles;
 	u32 i = sys->freeIndex;
+
 	while(count > 0) {
 		do {
-			sys->positions[sys->freeIndex] = position + vec3{randf(-15, 15), randf(-6, 6), randf(-15, 15)};
+			// TODO: Make these options
+			// sys->positions[sys->freeIndex] = position + vec3{randf(-15, 15), randf(-6, 6), randf(-15, 15)};
+			sys->positions[sys->freeIndex] = position + vec3{randf(-8, 8), randf(-4, 4), randf(-8, 8)};
 			sys->velocities[sys->freeIndex] = glm::ballRand(0.05f);
 			sys->accelerations[sys->freeIndex] = glm::normalize(vec3{randf(),randf()-0.5f,randf()})*0.03f;
 			sys->lifetimes[sys->freeIndex] = 1.f;
