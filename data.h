@@ -97,7 +97,6 @@ struct PhysicsContext {
 	btDiscreteDynamicsWorld* world;
 
 	std::vector<PhysicsColliderPair> activeColliderPairs;
-	bool needsRefilter = false;
 	u32 currentStamp = 0;
 };
 

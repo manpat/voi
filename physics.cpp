@@ -39,28 +39,6 @@ bool InitPhysics(PhysicsContext* ctx) {
 
 void UpdatePhysics(Scene* scene, f32 dt) {
 	auto ctx = &scene->physicsContext;
-	s32 numManifolds = ctx->dispatcher->getNumManifolds();
-
-	// if(ctx->needsRefilter) {
-	// 	// Clean the broadphase of AABB data
-	// 	btOverlappingPairCache* pairs = ctx->broadphase->getOverlappingPairCache();
-	// 	s32 numPairs = pairs->getNumOverlappingPairs();
-	// 	btBroadphasePairArray pairArray = pairs->getOverlappingPairArray();
-
-	// 	for(s32 i = 0; i < numPairs; i++) {
-	// 		btBroadphasePair& currPair = pairArray.at(i);
-	// 		pairs->removeOverlappingPair(currPair.m_pProxy0, currPair.m_pProxy1, ctx->dispatcher);
-	// 	}
-
-	// 	// Clean the dispatcher(narrowphase) of shape data
-	// 	for(s32 i = 0; i < numManifolds; i++) {
-	// 		ctx->dispatcher->releaseManifold(ctx->dispatcher->getManifoldByIndexInternal(i));
-	// 	}
-
-	// 	ctx->broadphase->resetPool(ctx->dispatcher);
-	// 	ctx->solver->reset();
-	// 	ctx->needsRefilter = false;
-	// }
 
 	ctx->world->stepSimulation((btScalar)dt, 10);
 	ctx->currentStamp++;
@@ -72,25 +50,27 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 	}), end);
 
 	// Find all collisions between colliders and collider triggers
+	s32 numManifolds = ctx->dispatcher->getNumManifolds();
 	for (s32 i = 0; i < numManifolds; i++) {
 		btPersistentManifold* contactManifold = ctx->dispatcher->getManifoldByIndexInternal(i);
 		auto obA = (btCollisionObject*)contactManifold->getBody0();
 		auto obB = (btCollisionObject*)contactManifold->getBody1();
+		if(!obA || !obB) {
+			puts("Warning! Contact manifold found with invalid rigidbody!");
+			continue;
+		}
 
-		if(!obA || !obB) continue;
-
+		auto ent0 = (Entity*) obA->getUserPointer();
+		auto ent1 = (Entity*) obB->getUserPointer();
+		if(!ent0 || !ent1) {
+			puts("Warning! Rigidbody found without user pointer set!");
+			continue;
+		}
+		
 		s32 numContacts = contactManifold->getNumContacts();
 		for (s32 j = 0; j < numContacts; j++) {
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
-			if (pt.getDistance() < 0.f) {
-				auto ent0 = (Entity*) obA->getUserPointer();
-				auto ent1 = (Entity*) obB->getUserPointer();
-
-				if(!ent0 || !ent1) {
-					puts("Warning! Rigidbody found without user pointer set!");
-					continue;
-				}
-
+			if(pt.getDistance() < 0.5f) {
 				if(ent0->entityType == Entity::TypeTrigger) {
 					ProcessTriggerCollision(ctx, ent0, ent1);
 				}else if(ent1->entityType == Entity::TypeTrigger) {
@@ -98,6 +78,7 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 				}else{
 					ProcessCollision(ctx, ent0, ent1);
 				}
+				break;
 			}
 		}
 	}
@@ -107,8 +88,7 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 	for(auto& cp: ctx->activeColliderPairs){
 		if(!cp.entityID0 || !cp.entityID1) continue;
 
-		// Should work fine given unsigned integer underflow
-		if((ctx->currentStamp - cp.stamp) > 1u){
+		if((u32)(ctx->currentStamp - cp.stamp) > 1u){
 			auto ent0 = GetEntity(cp.entityID0);
 			auto ent1 = GetEntity(cp.entityID1);
 
@@ -151,11 +131,9 @@ struct RaycastCallback : btCollisionWorld::ClosestRayResultCallback {
 
 	bool needsCollision(btBroadphaseProxy* proxy0) const override {
 		auto body = (btRigidBody*)proxy0->m_clientObject;
-		auto ent = (Entity*)body->getUserPointer();
+		auto ent = (Entity*)(body?body->getUserPointer():nullptr);
 
-		auto mask = (ent->layers & layerMask);
-
-		return mask > 0u;
+		return ent && (ent->layers & layerMask);
 	}
 };
 
@@ -195,7 +173,7 @@ void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisi
 	auto ent1 = static_cast<Entity*>(ud1);
 
 	auto mask = (ent0->layers & ent1->layers);
-	if(mask == 0) return;
+	if(!mask) return;
 
 	// Continue physics stuff as usual
 	dispatcher.defaultNearCallback(collisionPair, dispatcher, dispatchInfo);
@@ -285,7 +263,7 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 	case ColliderCapsule:{
 		// NOTE: Caps aren't included in height. Total height = height + 2*radius
 		auto radius = glm::max(ent->extents.x, ent->extents.z);
-		ent->collider = new btCapsuleShape{radius, ent->extents.y-2*radius};
+		ent->collider = new btCapsuleShape{radius, (ent->extents.y-radius)*2.f};
 	}	break;
 
 	case ColliderConvex: {

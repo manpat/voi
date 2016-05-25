@@ -13,13 +13,21 @@ void UpdateEntity(Entity* e, f32 dt) {
 }
 
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
-	printf("Entity %.*s collided with %.*s\n", 
-		(u32)e0->nameLength, e0->name,
-		(u32)e1->nameLength, e1->name);
+	if(e0->entityType == Entity::TypePlayer) {
+		printf("Entity %.*s collided with %.*s\n", 
+			(u32)e0->nameLength, e0->name,
+			(u32)e1->nameLength, e1->name);
+		fflush(stdout);
+	}
 }
 
-void EntityOnCollisionLeave(Entity*, Entity*) {
-
+void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
+	if(e0->entityType == Entity::TypePlayer) {
+		printf("Entity %.*s stopped colliding with %.*s\n", 
+			(u32)e0->nameLength, e0->name,
+			(u32)e1->nameLength, e1->name);
+		fflush(stdout);
+	}
 }
 
 void EntityOnTriggerEnter(Entity*, Entity*) {
@@ -39,7 +47,6 @@ void UpdatePlayer(Entity* pl, f32) {
 	mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
 
 	pl->rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0});
-	SetEntityRotation(pl, pl->rotation);
 
 	vec3 vel {};
 	if(Input::GetMapped(Input::Forward))	vel += pl->rotation * vec3{0,0,-1};

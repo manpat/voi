@@ -179,7 +179,7 @@ s32 main(s32 ac, const char** av) {
 	playerEntity->nameLength = strlen(playerEntity->name);
 	playerEntity->entityType = Entity::TypePlayer;
 	playerEntity->colliderType = ColliderCapsule;
-	playerEntity->extents = vec3{1.f, 3.f, 0};
+	playerEntity->extents = vec3{2.f, 3.f, 2.f}/2.f;
 	playerEntity->player.eyeOffset = vec3{0, 1.2f, 0};
 	printf("Player id: %u\n", playerEntity->id);
 
