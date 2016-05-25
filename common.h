@@ -40,6 +40,6 @@ using f64 = double;
 #endif
 
 #define GLEW_STATIC
-#include "glew.h"
+#include "ext/glew.h"
 
 #endif

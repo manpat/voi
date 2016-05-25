@@ -3,17 +3,10 @@
 #include "sceneloader.h"
 #include "input.h"
 
-#include "stb_image.h"
+#include "ext/stb_image.h"
 
 #include <chrono>
 #include <SDL2/SDL.h>
-
-enum {
-	WindowWidth = 800,
-	WindowHeight = 600
-	// WindowWidth = 1366,
-	// WindowHeight = 768
-};
 
 #define SHADER(x) "#version 130\n" #x
 const char* defaultShaderSrc[] = {
@@ -143,16 +136,22 @@ u32 cursorVBO;
 u32 cursorUVBO;
 u8 interactiveHover = 0;
 
-s32 main(s32 /*ac*/, const char** /* av*/) {
+s32 main(s32 ac, const char** av) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
 		return 1;
 	}
 
+	ParseCLOptions(ac, av);
+	LoadOptions();
+
+	u32 windowWidth = GetIntOption("window.width");
+	u32 windowHeight = GetIntOption("window.height");
+
 	auto window = SDL_CreateWindow("Voi", 
 		// SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
 		SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_UNDEFINED, 
-		WindowWidth, WindowHeight, SDL_WINDOW_OPENGL);
+		windowWidth, windowHeight, SDL_WINDOW_OPENGL);
 
 	if(!window) {
 		puts("Window creation failed");
@@ -164,7 +163,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	Input::Init();
 	Input::doCapture = true;
 
-	SDL_WarpMouseInWindow(window, WindowWidth/2, WindowHeight/2);
+	SDL_WarpMouseInWindow(window, windowWidth/2, windowHeight/2);
 	SDL_ShowCursor(0);
 
 	if(!InitDebugDraw()) {
@@ -240,7 +239,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 	glEnableVertexAttribArray(0);
 
 	f32 fov = M_PI/3.f;
-	f32 aspect = (f32) WindowWidth / WindowHeight;
+	f32 aspect = (f32) windowWidth / windowHeight;
 	f32 nearDist = 0.1f;
 	f32 farDist = 1000.f;
 
@@ -272,7 +271,7 @@ s32 main(s32 /*ac*/, const char** /* av*/) {
 
 	f32 particleEmitAccum = 0.f;
 
-	Framebuffer fb = CreateFramebuffer(WindowWidth, WindowHeight);
+	Framebuffer fb = CreateFramebuffer(windowWidth, windowHeight);
 	if(!fb.valid) {
 		puts("Error! Framebuffer creation failed!");
 		return 1;
@@ -473,7 +472,8 @@ bool InitGL(SDL_Window* window) {
 		s32 texWidth, texHeight, numComponents;
 		u8* texData = stbi_load(fname, &texWidth, &texHeight, &numComponents, 4 /*force RGBA*/);
 		if(!texData) {
-			puts("Warning! Unable to load cursor.png");
+			printf("Warning! Unable to load texture \"%s\"\n", fname);
+			return 0u;
 		}
 		
 		u32 tex;

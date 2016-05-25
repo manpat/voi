@@ -6,6 +6,14 @@
 
 struct SDL_Window;
 
+void ParseCLOptions(s32, const char**);
+void LoadOptions();
+
+bool GetBoolOption(const char*);
+s64 GetIntOption(const char*);
+f64 GetFloatOption(const char*);
+const char* GetStringOption(const char*);
+
 bool InitGL(SDL_Window*);
 void DeinitGL();
 
@@ -34,6 +42,7 @@ void EmitParticles(ParticleSystem*, u32 count, f32 lifetime, const vec3& pos);
 
 bool InitPhysics(PhysicsContext*);
 void UpdatePhysics(Scene*, f32 dt);
+void RefilterEntity(Entity*);
 
 RaycastResult Raycast(Scene*, const vec3&, const vec3&, f32 = std::numeric_limits<f32>::infinity(), u32 layermask = ~0u);
 RaycastResult Linecast(Scene*, const vec3&, const vec3&, u32 layermask = ~0u);

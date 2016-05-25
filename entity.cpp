@@ -34,8 +34,6 @@ extern bool debugDrawEnabled;
 extern u8 interactiveHover;
 
 void UpdatePlayer(Entity* pl, f32) {
-	auto scn = pl->scene;
-	
 	auto& mouseRot = pl->player.mouseRot;
 	mouseRot += Input::GetMouseDelta();
 	mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
@@ -65,19 +63,20 @@ void UpdatePlayer(Entity* pl, f32) {
 
 	SetEntityVelocity(pl, vel);
 
-	if(Input::GetKeyDown('1')) { pl->layers = 1<<0; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('2')) { pl->layers = 1<<1; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('3')) { pl->layers = 1<<2; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('4')) { pl->layers = 1<<3; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('5')) { pl->layers = 1<<4; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('6')) { pl->layers = 1<<5; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('7')) { pl->layers = 1<<6; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('8')) { pl->layers = 1<<7; scn->physicsContext.needsRefilter = true; }
-	if(Input::GetKeyDown('9')) { pl->layers = 1<<8; scn->physicsContext.needsRefilter = true; }
+	if(Input::GetKeyDown('1')) { pl->layers = 1<<0; RefilterEntity(pl); }
+	if(Input::GetKeyDown('2')) { pl->layers = 1<<1; RefilterEntity(pl); }
+	if(Input::GetKeyDown('3')) { pl->layers = 1<<2; RefilterEntity(pl); }
+	if(Input::GetKeyDown('4')) { pl->layers = 1<<3; RefilterEntity(pl); }
+	if(Input::GetKeyDown('5')) { pl->layers = 1<<4; RefilterEntity(pl); }
+	if(Input::GetKeyDown('6')) { pl->layers = 1<<5; RefilterEntity(pl); }
+	if(Input::GetKeyDown('7')) { pl->layers = 1<<6; RefilterEntity(pl); }
+	if(Input::GetKeyDown('8')) { pl->layers = 1<<7; RefilterEntity(pl); }
+	if(Input::GetKeyDown('9')) { pl->layers = 1<<8; RefilterEntity(pl); }
 
 	if(Input::GetKeyDown('c')) Input::doCapture ^= true;
 	if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
 
+	auto scn = pl->scene;
 	auto eye = pl->position + pl->player.eyeOffset;
 	auto eyeFwd = pl->rotation * glm::angleAxis(mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
 	auto hit = Raycast(scn, eye, eyeFwd, 5.f, pl->layers);

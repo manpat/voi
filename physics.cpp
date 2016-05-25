@@ -41,26 +41,26 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 	auto ctx = &scene->physicsContext;
 	s32 numManifolds = ctx->dispatcher->getNumManifolds();
 
-	if(ctx->needsRefilter) {
-		// Clean the broadphase of AABB data
-		btOverlappingPairCache* pairs = ctx->broadphase->getOverlappingPairCache();
-		s32 numPairs = pairs->getNumOverlappingPairs();
-		btBroadphasePairArray pairArray = pairs->getOverlappingPairArray();
+	// if(ctx->needsRefilter) {
+	// 	// Clean the broadphase of AABB data
+	// 	btOverlappingPairCache* pairs = ctx->broadphase->getOverlappingPairCache();
+	// 	s32 numPairs = pairs->getNumOverlappingPairs();
+	// 	btBroadphasePairArray pairArray = pairs->getOverlappingPairArray();
 
-		for(s32 i = 0; i < numPairs; i++) {
-			btBroadphasePair& currPair = pairArray.at(i);
-			pairs->removeOverlappingPair(currPair.m_pProxy0, currPair.m_pProxy1, ctx->dispatcher);
-		}
+	// 	for(s32 i = 0; i < numPairs; i++) {
+	// 		btBroadphasePair& currPair = pairArray.at(i);
+	// 		pairs->removeOverlappingPair(currPair.m_pProxy0, currPair.m_pProxy1, ctx->dispatcher);
+	// 	}
 
-		// Clean the dispatcher(narrowphase) of shape data
-		for(s32 i = 0; i < numManifolds; i++) {
-			ctx->dispatcher->releaseManifold(ctx->dispatcher->getManifoldByIndexInternal(i));
-		}
+	// 	// Clean the dispatcher(narrowphase) of shape data
+	// 	for(s32 i = 0; i < numManifolds; i++) {
+	// 		ctx->dispatcher->releaseManifold(ctx->dispatcher->getManifoldByIndexInternal(i));
+	// 	}
 
-		ctx->broadphase->resetPool(ctx->dispatcher);
-		ctx->solver->reset();
-		ctx->needsRefilter = false;
-	}
+	// 	ctx->broadphase->resetPool(ctx->dispatcher);
+	// 	ctx->solver->reset();
+	// 	ctx->needsRefilter = false;
+	// }
 
 	ctx->world->stepSimulation((btScalar)dt, 10);
 	ctx->currentStamp++;
@@ -77,12 +77,19 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 		auto obA = (btCollisionObject*)contactManifold->getBody0();
 		auto obB = (btCollisionObject*)contactManifold->getBody1();
 
+		if(!obA || !obB) continue;
+
 		s32 numContacts = contactManifold->getNumContacts();
 		for (s32 j = 0; j < numContacts; j++) {
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() < 0.f) {
 				auto ent0 = (Entity*) obA->getUserPointer();
 				auto ent1 = (Entity*) obB->getUserPointer();
+
+				if(!ent0 || !ent1) {
+					puts("Warning! Rigidbody found without user pointer set!");
+					continue;
+				}
 
 				if(ent0->entityType == Entity::TypeTrigger) {
 					ProcessTriggerCollision(ctx, ent0, ent1);
@@ -121,6 +128,19 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 			cp.entityID1 = 0;
 		}
 	}
+}
+
+void RefilterEntity(Entity* e) {
+	if(!e->rigidbody) return;
+	if(!e->scene) {
+		printf("Warning! Tried to refilter entity \"%.*s\" that doesn't belong to a scene\n",
+			(u32)e->nameLength, e->name);
+		return;
+	}
+
+	auto ctx = &e->scene->physicsContext;
+	ctx->world->removeRigidBody(e->rigidbody);
+	ctx->world->addRigidBody(e->rigidbody);
 }
 
 struct RaycastCallback : btCollisionWorld::ClosestRayResultCallback {
