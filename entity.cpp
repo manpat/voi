@@ -13,7 +13,7 @@ void UpdateEntity(Entity* e, f32 dt) {
 }
 
 void DeinitEntity(Entity*) {
-	
+
 }
 
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
@@ -47,7 +47,10 @@ extern u8 interactiveHover;
 
 void UpdatePlayer(Entity* pl, f32) {
 	auto& mouseRot = pl->player.mouseRot;
-	mouseRot += Input::GetMouseDelta();
+
+	f32 mspd = GetFloatOption("input.mousespeed");
+
+	mouseRot += Input::GetMouseDelta() * mspd;
 	mouseRot.y = glm::clamp<f32>(mouseRot.y, -PI/2.f, PI/2.f);
 
 	pl->rotation = glm::angleAxis(-mouseRot.x, vec3{0,1,0});
@@ -97,5 +100,6 @@ void UpdatePlayer(Entity* pl, f32) {
 
 	if(interactive && Input::GetMappedDown(Input::Interact)) {
 		// TODO: Frob thing when frobbing becomes a thing
+		fprintf(stderr, "Frob\n");
 	}
 }

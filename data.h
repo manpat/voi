@@ -64,6 +64,7 @@ struct EntityManager {
 
 	std::vector<Bucket> entityBuckets;
 	Bucket sceneEntityBuckets[2];
+	// NOTE: sceneEntityBuckets[1] is for temp storage and won't be updated
 };
 
 enum ColliderType {

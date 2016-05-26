@@ -76,5 +76,6 @@ Entity* AllocateEntity();
 void FreeSceneEntities(Entity* se);
 void FreeEntity(Entity* e);
 Entity* GetEntity(u16 id);
+void UpdateAllEntities(f32 dt);
 
 #endif

@@ -301,10 +301,7 @@ s32 main(s32 ac, const char** av) {
 		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*2.f);
 		UpdateParticleSystem(&particleSystem, dt);
 
-		UpdateEntity(playerEntity, dt);
-		for(u32 i = 0; i < scene.numEntities; i++) {
-			UpdateEntity(&scene.entities[i], dt);
-		}
+		UpdateAllEntities(dt);
 
 		camera.rotation = playerEntity->rotation * glm::angleAxis(playerEntity->player.mouseRot.y, vec3{1,0,0});
 		// NOTE: UpdatePhysics fucks with player rotation for some reason
@@ -444,7 +441,8 @@ bool InitGL(SDL_Window* window) {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
 	glctx = SDL_GL_CreateContext(window);
 	if(!glctx) {
 		puts("OpenGL context creation failed");
@@ -458,6 +456,8 @@ bool InitGL(SDL_Window* window) {
 		return false;
 	}
 
+	// TODO: Check to make sure that we can use all the things we are using
+	// TODO: Possibly fuck glew off and get fptrs ourselves, or at least cut down glew
 	// Try to enable debug output
 	if(GLEW_ARB_debug_output){
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
@@ -496,7 +496,7 @@ bool InitGL(SDL_Window* window) {
 	cursorTextures[0] = genTex("GameData/UI/cursor.png");
 	cursorTextures[1] = genTex("GameData/UI/cursor2.png");
 
-	f32 s = GetFloatOption("crosshair.size")/100.f;
+	f32 s = GetFloatOption("graphics.cursorsize")/100.f;
 	vec3 verts[] = {
 		vec3{-s,-s, 0},
 		vec3{ s,-s, 0},

@@ -120,9 +120,13 @@ void Input::UpdateMouse(SDL_Window* window){
 
 		ww &= ~1;
 		wh &= ~1;
-		
-		mouseDelta.x = mx / static_cast<f32>(ww) * 2.f - 1.f;
-		mouseDelta.y =-my / static_cast<f32>(wh) * 2.f + 1.f;
+
+		f32 xmod = static_cast<f32>(ww);
+		f32 ymod = static_cast<f32>(wh);
+
+		mouseDelta.x = mx / xmod * 2.f - 1.f;
+		mouseDelta.y =-my / ymod * 2.f + 1.f;
+		mouseDelta.x *= xmod / ymod; // Correct for aspect?
 		
 		SDL_WarpMouseInWindow(window, ww/2, wh/2);
 	}

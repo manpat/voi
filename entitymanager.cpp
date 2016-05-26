@@ -102,6 +102,9 @@ void FreeEntity(Entity* e) {
 
 	assert(e == bEnt);
 	// TODO: Free entity stuff
+	// Not too sure what to do here.
+	// We could just do nothing and this wouldn't become a problem until we start
+	//	reusing massive numbers of free entities
 }
 
 Entity* GetEntity(u16 id) {
@@ -134,4 +137,24 @@ Entity* GetEntity(u16 id) {
 		return nullptr;
 	}
 	return ent;
+}
+
+void UpdateAllEntities(f32 dt) {
+	auto& buckets = entityManager.entityBuckets;
+	auto sbucket = &entityManager.sceneEntityBuckets[0];
+
+	// Update free entities
+	for(u32 i = 0; i < buckets.size(); i++) {
+		auto bucket = &buckets[i];
+		if(!bucket->entities || !bucket->capacity) continue;
+		for(u32 e = 0; e < bucket->used; e++) {
+			UpdateEntity(&bucket->entities[e], dt);
+		}
+	}
+
+	// Update scene entities
+	if(!sbucket->entities || !sbucket->capacity) return;
+	for(u32 e = 0; e < sbucket->used; e++) {
+		UpdateEntity(&sbucket->entities[e], dt);
+	}
 }
