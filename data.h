@@ -158,6 +158,11 @@ struct Entity {
 		struct {
 			vec3 eyeOffset;
 			vec2 mouseRot;
+
+			f32 slopeSpeedAdjustSmooth;
+			f32 slopeJumpAdjustSmooth;
+			f32 jumpTimeout;
+			bool canJump;
 		} player;
 	};
 

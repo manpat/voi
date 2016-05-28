@@ -174,7 +174,7 @@ s32 main(s32 ac, const char** av) {
 	auto playerEntity = AllocateEntity();
 	playerEntity->layers = 1<<0;
 	playerEntity->position = {0,1,0};
-	playerEntity->rotation = glm::angleAxis(0.f, vec3{0,1,0});
+	playerEntity->rotation = quat{};
 	playerEntity->scale = {1,1,1};
 	playerEntity->name = strdup("Player");
 	playerEntity->nameLength = strlen(playerEntity->name);

@@ -167,8 +167,10 @@ RaycastResult Linecast(Scene* scn, const vec3& s, const vec3& e, u32 layermask) 
 		end = rayCallback.m_hitPointWorld;
 		auto normal = rayCallback.m_hitNormalWorld;
 		auto col = (Entity*)rayCallback.m_collisionObject->getUserPointer();
+		f32 frac = rayCallback.m_closestHitFraction;
+		f32 dist = glm::length(e-s);
 
-		return {col, bt2o(end), bt2o(normal), rayCallback.m_closestHitFraction};
+		return {col, bt2o(end), bt2o(normal), frac*dist};
 	}
 
 	return {nullptr, vec3{0.f}, vec3{0.f}, std::numeric_limits<f32>::infinity()};

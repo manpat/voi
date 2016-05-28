@@ -64,6 +64,7 @@ vec3 GetEntityVelocity(const Entity*);
 vec3 GetEntityCenterOfMass(const Entity*);
 void ConstrainEntityUpright(Entity*);
 
+void InitEntity(Entity*);
 void DeinitEntity(Entity*);
 void UpdateEntity(Entity*, f32 dt);
 void EntityOnCollisionEnter(Entity*, Entity*);

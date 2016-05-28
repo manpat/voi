@@ -70,7 +70,7 @@ namespace {
 		Option::Bool ("window.fullscreen", false),
 		Option       (),
 		Option::Float("graphics.fov", 60.f),
-		Option::Float("graphics.cursorsize", 1.5f),
+		Option::Float("graphics.cursorsize", 1.5f), // Percentage of screen vertically
 		Option       (),
 		Option::Float("input.mousespeed", 1.f),
 	};
