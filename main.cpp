@@ -3,8 +3,6 @@
 #include "sceneloader.h"
 #include "input.h"
 
-#include "ext/stb_image.h"
-
 #include <chrono>
 #include <SDL2/SDL.h>
 
@@ -375,7 +373,7 @@ s32 main(s32 ac, const char** av) {
 		glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
 		glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, nullptr);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -471,38 +469,13 @@ bool InitGL(SDL_Window* window) {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	auto genTex = [&](const char* fname) {
-		s32 texWidth, texHeight, numComponents;
-		u8* texData = stbi_load(fname, &texWidth, &texHeight, &numComponents, 4 /*force RGBA*/);
-		if(!texData) {
-			printf("Warning! Unable to load texture \"%s\"\n", fname);
-			return 0u;
-		}
-		
-		u32 tex;
-		glGenTextures(1, &tex);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		stbi_image_free(texData);
-		return tex;
-	};
-
-	cursorTextures[0] = genTex("GameData/UI/cursor.png");
-	cursorTextures[1] = genTex("GameData/UI/cursor2.png");
+	cursorTextures[0] = LoadTexture("GameData/UI/cursor.png");
+	cursorTextures[1] = LoadTexture("GameData/UI/cursor2.png");
 
 	f32 s = GetFloatOption("graphics.cursorsize")/100.f;
 	vec3 verts[] = {
 		vec3{-s,-s, 0},
 		vec3{ s,-s, 0},
-		vec3{ s, s, 0},
-
-		vec3{-s,-s, 0},
 		vec3{ s, s, 0},
 		vec3{-s, s, 0},
 	};
@@ -511,18 +484,15 @@ bool InitGL(SDL_Window* window) {
 		vec2{0,1},
 		vec2{1,1},
 		vec2{1,0},
-
-		vec2{0,1},
-		vec2{1,0},
 		vec2{0,0},
 	};
 
 	glGenBuffers(1, &cursorVBO);
 	glGenBuffers(1, &cursorUVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, cursorVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*6, verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*6, uvs, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return true;

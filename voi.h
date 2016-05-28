@@ -32,9 +32,10 @@ void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
 ShaderProgram CreateShaderProgram(const char* vs, const char* fs);
-
 Framebuffer CreateFramebuffer(u32 width, u32 height);
+u32 LoadTexture(const char* fname);
 void DrawFullscreenQuad();
+void DrawFullscreenQuadProjection(const mat4& projection);
 
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
 void DeinitParticleSystem(ParticleSystem*);

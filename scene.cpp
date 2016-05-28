@@ -263,35 +263,6 @@ void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, cons
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-// NOTE: This could be useful elsewhere
-u32 GetFarPlaneQuad(const mat4& projection) {
-	static u32 farPlaneBuffer = 0;
-	if(!farPlaneBuffer) {
-		constexpr f32 epsilon = 1e-6;
-		mat4 invProj = glm::inverse(projection);
-		auto cp0 = invProj * vec4{-1,-1, 1 - epsilon, 1};
-		auto cp1 = invProj * vec4{ 1,-1, 1 - epsilon, 1};
-		auto cp2 = invProj * vec4{ 1, 1, 1 - epsilon, 1};
-		auto cp3 = invProj * vec4{-1, 1, 1 - epsilon, 1};
-		auto p0 = vec3{cp0/cp0.w};
-		auto p1 = vec3{cp1/cp1.w};
-		auto p2 = vec3{cp2/cp2.w};
-		auto p3 = vec3{cp3/cp3.w};
-
-		vec3 points[] = {
-			p0, p1, p2,
-			p0, p2, p3,
-		};
-
-		glGenBuffers(1, &farPlaneBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	
-	return farPlaneBuffer;
-}
-
 struct PortalNode {
 	u16 entityID; // 0 is root
 	u16 targetLayerMask; // if root, this is layer player is in
@@ -420,7 +391,6 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	portalGraph.nodeCount = 1;
 	ConstructPortalGraph(&portalGraph, scene, 0, camPos, camFwd, 0);
 
-	static auto farPlaneBuffer = GetFarPlaneQuad(cam.projection);
 	auto sh = &scene->shaders[ShaderIDDefault];
 
 	mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
@@ -530,10 +500,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		// NOTE: This does nothing with posteffects on, otherwise it's clear color
 		glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.9f}));
 
-		glBindBuffer(GL_ARRAY_BUFFER, farPlaneBuffer);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		DrawFullscreenQuadProjection(cam.projection);
 
 		// Reset render state and prepare to render target scene
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
