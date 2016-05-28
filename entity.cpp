@@ -10,6 +10,8 @@ void InitEntity(Entity* e) {
 		auto pl = &e->player;
 		pl->slopeSpeedAdjustSmooth = 1.f;
 		pl->slopeJumpAdjustSmooth = 1.f;
+
+		ConstrainEntityUpright(e);
 	} 
 }
 

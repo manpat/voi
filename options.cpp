@@ -71,6 +71,7 @@ namespace {
 		Option       (),
 		Option::Float("graphics.fov", 60.f),
 		Option::Float("graphics.cursorsize", 1.5f), // Percentage of screen vertically
+		Option::Bool ("graphics.multisample", true),
 		Option       (),
 		Option::Float("input.mousespeed", 1.f),
 	};

@@ -1,13 +1,15 @@
 #include "voi.h"
 #include "ext/stb_image.h"
 
-Framebuffer CreateFramebuffer(u32 width, u32 height) {
+Framebuffer CreateFramebuffer(u32 width, u32 height, bool filter) {
 	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
 	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
 	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
 	static u32 fbTargetIntType[] {GL_UNSIGNED_INT_24_8, GL_UNSIGNED_BYTE, GL_UNSIGNED_BYTE};
 
 	Framebuffer fb;
+	fb.width = width;
+	fb.height = height;
 	glGenFramebuffers(1, &fb.fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 	glDrawBuffers(2, &fbTargetAttach[1]);
@@ -18,8 +20,8 @@ Framebuffer CreateFramebuffer(u32 width, u32 height) {
 		glTexImage2D(GL_TEXTURE_2D, 0, fbTargetTypes[i], width, height, 0, 
 			fbTargetFormats[i], fbTargetIntType[i], nullptr);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter?GL_LINEAR:GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter?GL_LINEAR:GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -35,6 +37,12 @@ Framebuffer CreateFramebuffer(u32 width, u32 height) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return fb;
+}
+
+void DestroyFramebuffer(Framebuffer* fb) {
+	glDeleteTextures(FBTargetCount, fb->targets);
+	glDeleteFramebuffers(1, &fb->fbo);
+	fb->fbo = 0u;
 }
 
 static u32 CreateShader(const char* src, u32 type) {
@@ -131,7 +139,7 @@ u32 LoadTexture(const char* fname) {
 		return 0u;
 	}
 	
-	static struct { u32 i, e; } formatMap[] = {
+	struct { u32 i, e; } formatMap[] = {
 		[STBI_default]		= {0,0}, // Invalid
 		[STBI_grey] 		= {GL_R8, GL_RED},
 		[STBI_grey_alpha] 	= {GL_RG8, GL_RG}, // NOTE: This isn't quite right, but it's unlikely we'll ever use this
@@ -176,13 +184,13 @@ void DrawFullscreenQuad() {
 }
 
 
-void DrawFullscreenQuadProjection(const mat4& projection) {
+void DrawQuadAtFarPlane(const mat4& projection) {
 	static u32 vbo = 0;
 	if(!vbo) {
 		glGenBuffers(1, &vbo);
 	}
 
-	constexpr f32 epsilon = 1e-6;
+	constexpr f32 epsilon = 1e-9;
 	mat4 invProj = glm::inverse(projection);
 	auto cp0 = invProj * vec4{-1,-1, 1 - epsilon, 1};
 	auto cp1 = invProj * vec4{ 1,-1, 1 - epsilon, 1};

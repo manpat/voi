@@ -187,6 +187,8 @@ bool InitScene(Scene* scene, const SceneData* data) {
 				(u32)to->nameLength, to->name);
 			return false;
 		}
+
+		InitEntity(to);
 	}
 
 	// Do portal stuff
@@ -500,7 +502,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		// NOTE: This does nothing with posteffects on, otherwise it's clear color
 		glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.9f}));
 
-		DrawFullscreenQuadProjection(cam.projection);
+		DrawQuadAtFarPlane(cam.projection);
 
 		// Reset render state and prepare to render target scene
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));

@@ -224,13 +224,14 @@ enum {
 	FBTargetDepthStencil,
 	FBTargetColor,
 	FBTargetGeneral0,
-	FBTargetGeneral1,
+	FBTargetGeneral1, // NOTE: This is never initialised, probably do that before using it
 	FBTargetCount
 };
 
 struct Framebuffer {
 	u32 fbo;
 	u32 targets[FBTargetCount];
+	u32 width, height;
 	bool valid;
 };
 

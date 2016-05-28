@@ -40,11 +40,12 @@ const char* particleShaderSrc[] = {
 		in float lifetime;
 		out float vlifetime;
 
+		uniform float pixelSize;
 		uniform mat4 viewProjection;
 
 		void main() {
 			gl_Position = viewProjection * vec4(vertex, 1);
-			gl_PointSize = 50.f/gl_Position.z;
+			gl_PointSize = pixelSize/gl_Position.z;
 			vlifetime = lifetime;
 		}
 	),
@@ -79,6 +80,7 @@ const char* postShaderSrc[] = {
 		uniform sampler2D depthTex;
 		uniform sampler2D colorTex;
 		uniform sampler2D general0Tex;
+		uniform mat4 viewProjection;
 		in vec2 uv;
 
 		out vec4 outcolor;
@@ -90,13 +92,21 @@ const char* postShaderSrc[] = {
 			float zNear = 0.1f;
 			float zFar = 1000.f;
 
-			depth = 2.0 * zNear * zFar / (zFar + zNear - depth * (zFar - zNear));
-			depth = 1-clamp(pow(depth / 80.f, .5f), 0, 1);
+			// depth = 2.0 * zNear * zFar / (zFar + zNear - depth * (zFar - zNear));
+			vec4 wp = inverse(viewProjection) * vec4(uv*2 - 1, depth*0.5 + 0.5, 1);
+			depth = length(wp/wp.w); // Distance from eye
 
-			vec3 fogcolor = vec3(0.1);
-			outcolor.rgb = clamp(color.rgb*depth + fogcolor*(1-depth), 0, 1);
+			float fogmix = 1-clamp(pow(depth / 150.f, .5f), 0, 1);
+
+			// vec3 fogcolor = vec3(0.1);
+			// vec3 fogcolor = vec3(1, .6, .2) * 0.1;
+			vec3 fogcolor = vec3(0.25, 0.0, 0.1)*0.1;
+			outcolor.rgb = clamp(color.rgb*fogmix + fogcolor*(1-fogmix), 0, 1);
 			outcolor.rgb += particle.rgb * particle.a;
 			outcolor.a = 1;
+
+			// float step = 32.f;
+			// outcolor.rgb = floor(outcolor.rgb*step)/step;
 		}
 	)
 };
@@ -208,7 +218,7 @@ s32 main(s32 ac, const char** av) {
 			return 1;
 		}
 
-		// TODO: Fuck this off. I'm just testing
+		// TODO: Fuck this off. I'm just testing the crosshair
 		for(u32 i = 0; i < scene.numEntities; i++) {
 			if(scene.entities[i].colliderType == ColliderCube){
 				printf("Entity [%u] %.*s was made interactive\n", i, 
@@ -222,7 +232,8 @@ s32 main(s32 ac, const char** av) {
 			puts("Error! Entity physics init failed for player!");
 			return 1;
 		}
-		ConstrainEntityUpright(playerEntity);
+
+		InitEntity(playerEntity);
 
 		FreeSceneData(&sceneData);
 	}
@@ -243,8 +254,6 @@ s32 main(s32 ac, const char** av) {
 	f32 farDist = 1000.f;
 
 	Camera camera;
-	camera.position = {0,1.5,0};
-	camera.rotation = {};
 	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
 	f32 dt = 1.f/60.f;
@@ -257,19 +266,29 @@ s32 main(s32 ac, const char** av) {
 	glGenQueries(1, &primCountQuery);
 
 	ParticleSystem particleSystem;
-	if(!InitParticleSystem(&particleSystem, 1000)) {
+	if(!InitParticleSystem(&particleSystem, 10000)) {
 		puts("Warning! Particle system init failed");
 	}
 
 	// Simulate 3s of dust
 	for(u32 i = 0; i < 60*3; i++){
-		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), camera.position);
+		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), playerEntity->position);
 		UpdateParticleSystem(&particleSystem, 1.f/60.f);
 	}
 
 	f32 particleEmitAccum = 0.f;
 
-	Framebuffer fb = CreateFramebuffer(windowWidth, windowHeight);
+	f32 multisampleLevel = 1.;
+	bool filter = true;
+	if(!strcmp(GetStringOption("graphics.multisample"), "indiepls")) { // NOTE: Sshhhh...
+		multisampleLevel = 0.08;
+		filter = false;
+
+	}else if(GetBoolOption("graphics.multisample")){
+		multisampleLevel = 2.;
+	}
+
+	Framebuffer fb = CreateFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 	if(!fb.valid) {
 		puts("Error! Framebuffer creation failed!");
 		return 1;
@@ -314,6 +333,7 @@ s32 main(s32 ac, const char** av) {
 		glUseProgram(scene.shaders[ShaderIDDefault].program);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+			glViewport(0,0, fb.width, fb.height);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 			RenderScene(&scene, camera, playerEntity->layers);
@@ -323,6 +343,11 @@ s32 main(s32 ac, const char** av) {
 			glUniformMatrix4fv(scene.shaders[ShaderIDParticles].viewProjectionLoc, 1, false, 
 				glm::value_ptr(viewProjection));
 
+			// HACK: Because we're using point primitives for particles and they use pixels,
+			// 	we have to adjust particle size between resolutions
+			glUniform1f(glGetUniformLocation(scene.shaders[ShaderIDParticles].program, "pixelSize"), 
+				fb.height*50.f/600.f);
+
 			glEnable(GL_PROGRAM_POINT_SIZE);
 			glDepthMask(false);
 			RenderParticleSystem(&particleSystem);
@@ -330,6 +355,7 @@ s32 main(s32 ac, const char** av) {
 			glDisable(GL_PROGRAM_POINT_SIZE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		glViewport(0,0, windowWidth, windowHeight);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 		glUseProgram(scene.shaders[ShaderIDPost].program);
@@ -345,6 +371,8 @@ s32 main(s32 ac, const char** av) {
 		glUniform1i(scene.shaders[ShaderIDPost].depthTexLoc, 0);
 		glUniform1i(scene.shaders[ShaderIDPost].colorTexLoc, 1);
 		glUniform1i(scene.shaders[ShaderIDPost].general0TexLoc, 2);
+		glUniformMatrix4fv(scene.shaders[ShaderIDPost].viewProjectionLoc, 1, false,
+			glm::value_ptr(camera.projection));
 
 		DrawFullscreenQuad();
 
@@ -416,6 +444,7 @@ s32 main(s32 ac, const char** av) {
 	FreeEntity(playerEntity);
 
 	DeinitScene(&scene);
+	DestroyFramebuffer(&fb);
 
 	Input::Deinit();
 	DeinitGL();
@@ -499,5 +528,7 @@ bool InitGL(SDL_Window* window) {
 }
 
 void DeinitGL() {
+	glDeleteTextures(2, cursorTextures);
+
 	SDL_GL_DeleteContext(glctx);
 }
