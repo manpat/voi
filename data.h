@@ -152,7 +152,6 @@ struct Entity {
 
 	// NOTE: Assume that nothing in this union is initialised
 	union {
-		// Valid with TypePortal and TypeMirror
 		vec3 planeNormal;
 
 		struct {
@@ -163,6 +162,10 @@ struct Entity {
 			f32 slopeJumpAdjustSmooth;
 			f32 jumpTimeout;
 			bool canJump;
+
+			u32 originalLayers;
+			u16 collidingPortalID;
+			s8 portalSide;
 		} player;
 	};
 

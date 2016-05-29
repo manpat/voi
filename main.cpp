@@ -220,7 +220,8 @@ s32 main(s32 ac, const char** av) {
 
 		// TODO: Fuck this off. I'm just testing the crosshair
 		for(u32 i = 0; i < scene.numEntities; i++) {
-			if(scene.entities[i].colliderType == ColliderCube){
+			if(scene.entities[i].colliderType == ColliderCube
+				&& scene.entities[i].entityType == Entity::TypeGeometry){
 				printf("Entity [%u] %.*s was made interactive\n", i, 
 					(u32)scene.entities[i].nameLength, scene.entities[i].name);
 				scene.entities[i].flags |= Entity::FlagInteractive;
@@ -280,10 +281,10 @@ s32 main(s32 ac, const char** av) {
 
 	f32 multisampleLevel = 1.;
 	bool filter = true;
+
 	if(!strcmp(GetStringOption("graphics.multisample"), "indiepls")) { // NOTE: Sshhhh...
 		multisampleLevel = 0.08;
 		filter = false;
-
 	}else if(GetBoolOption("graphics.multisample")){
 		multisampleLevel = 2.;
 	}
@@ -330,12 +331,13 @@ s32 main(s32 ac, const char** av) {
 			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
 
 		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
-		glUseProgram(scene.shaders[ShaderIDDefault].program);
 
+		// Draw scene into framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 			glViewport(0,0, fb.width, fb.height);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+			glUseProgram(scene.shaders[ShaderIDDefault].program);
 			RenderScene(&scene, camera, playerEntity->layers);
 
 			glUseProgram(scene.shaders[ShaderIDParticles].program);

@@ -386,6 +386,11 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
 		ent->rigidbody->setCollisionFlags(flags);
 
+	}else if(ent->entityType == Entity::TypePortal) {
+		auto flags = ent->rigidbody->getCollisionFlags();
+		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
+		ent->rigidbody->setCollisionFlags(flags);
+
 	}else if(ent->entityType == Entity::TypePlayer) {
 		ent->rigidbody->setActivationState(DISABLE_DEACTIVATION);
 		ent->rigidbody->setFriction(0.f);

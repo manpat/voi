@@ -36,3 +36,4 @@ purposes. It might be worth looking into a method of rendering to a texture firs
 So long as depth information is kept properly this should work fine.
 
 It may also be worth figuring out how to extend this method to rendering mirrors also
+

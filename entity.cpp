@@ -10,6 +10,7 @@ void InitEntity(Entity* e) {
 		auto pl = &e->player;
 		pl->slopeSpeedAdjustSmooth = 1.f;
 		pl->slopeJumpAdjustSmooth = 1.f;
+		pl->collidingPortalID = 0;
 
 		ConstrainEntityUpright(e);
 	} 
@@ -35,6 +36,18 @@ void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 			(u32)e1->nameLength, e1->name);
 		fflush(stdout);
 	}
+
+	if(e0->entityType == Entity::TypePortal && e1->entityType == Entity::TypePlayer) {
+		assert(!(e1->layers & (e1->layers-1)) && "Player is on more than one layer!");
+		assert(!e1->player.collidingPortalID);
+
+		e1->player.collidingPortalID = e0->id;
+		e1->player.originalLayers = e1->layers;
+
+		auto diff = e1->position - e0->position;
+		auto sidef = glm::dot(diff, e0->rotation * e0->planeNormal);
+		e1->player.portalSide = (s8)(sidef/glm::abs(sidef));
+	}
 }
 
 void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
@@ -43,6 +56,12 @@ void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
 			(u32)e0->nameLength, e0->name,
 			(u32)e1->nameLength, e1->name);
 		fflush(stdout);
+	}
+
+	if(e0->entityType == Entity::TypePortal && e1->entityType == Entity::TypePlayer) {
+		if(e1->player.collidingPortalID == e0->id) {
+			e1->player.collidingPortalID = 0;
+		}
 	}
 }
 
@@ -62,6 +81,18 @@ constexpr f32 playerJumpTimeout = 250.f/1000.f;
 
 void UpdatePlayer(Entity* ent, f32 dt) {
 	auto pl = &ent->player;
+
+	if(auto ptl = GetEntity(pl->collidingPortalID)) {
+		auto diff = ptl->position - ent->position;
+		auto sidef = glm::dot(diff, ptl->rotation * ptl->planeNormal)*pl->portalSide;
+
+		if(sidef > 0.f) {
+			ent->layers = pl->originalLayers ^ ptl->layers;
+		}else{
+			ent->layers = pl->originalLayers;
+		}
+		RefilterEntity(ent);
+	}
 
 	auto scn = ent->scene;
 	auto feetPos = ent->position - vec3{0, ent->extents.y-0.02f, 0};

@@ -173,12 +173,18 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		switch(to->entityType) {
 		case Entity::TypePortal:
 		case Entity::TypeMirror:
-			to->planeNormal = (const vec3&) from->entitySpecificData[0];
+			to->planeNormal = glm::normalize((const vec3&) from->entitySpecificData[0]);
 			break;
 
 		case Entity::TypeGeometry:
 		default:
 			break;
+		}
+
+		if(to->entityType == Entity::TypePortal) {
+			to->colliderType = ColliderCube;
+			to->flags |= Entity::FlagStatic; // TODO: Make kinematic instead, just in case we want to move 'em
+			to->extents += to->planeNormal * 0.05f;
 		}
 
 		auto meshData = (to->meshID>0)? &data->meshes[to->meshID-1] : nullptr;
