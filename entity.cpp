@@ -30,13 +30,6 @@ void UpdateEntity(Entity* e, f32 dt) {
 }
 
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
-	if(e0->entityType == Entity::TypePlayer) {
-		printf("Entity %.*s collided with %.*s\n", 
-			(u32)e0->nameLength, e0->name,
-			(u32)e1->nameLength, e1->name);
-		fflush(stdout);
-	}
-
 	if(e0->entityType == Entity::TypePortal && e1->entityType == Entity::TypePlayer) {
 		assert(!(e1->layers & (e1->layers-1)) && "Player is on more than one layer!");
 		assert(!e1->player.collidingPortalID);
@@ -51,13 +44,6 @@ void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 }
 
 void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
-	if(e0->entityType == Entity::TypePlayer) {
-		printf("Entity %.*s stopped colliding with %.*s\n", 
-			(u32)e0->nameLength, e0->name,
-			(u32)e1->nameLength, e1->name);
-		fflush(stdout);
-	}
-
 	if(e0->entityType == Entity::TypePortal && e1->entityType == Entity::TypePlayer) {
 		if(e1->player.collidingPortalID == e0->id) {
 			e1->player.collidingPortalID = 0;
@@ -92,6 +78,10 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 			ent->layers = pl->originalLayers;
 		}
 		RefilterEntity(ent);
+
+		pl->camera->intersectingPortalId = pl->collidingPortalID;
+	}else{
+		pl->camera->intersectingPortalId = 0;
 	}
 
 	auto scn = ent->scene;

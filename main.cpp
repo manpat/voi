@@ -96,16 +96,17 @@ const char* postShaderSrc[] = {
 			vec4 wp = inverse(viewProjection) * vec4(uv*2 - 1, depth*0.5 + 0.5, 1);
 			depth = length(wp/wp.w); // Distance from eye
 
-			float fogmix = 1-clamp(pow(depth / 150.f, .5f), 0, 1);
+
+			float fogmix = 1-clamp(pow(depth / 150.f, 0.4f), 0, 1);
 
 			// vec3 fogcolor = vec3(0.1);
 			// vec3 fogcolor = vec3(1, .6, .2) * 0.1;
-			vec3 fogcolor = vec3(0.25, 0.0, 0.1)*0.1;
+			vec3 fogcolor = vec3(0.25, 0.0, 0.1)*0.2;
 			outcolor.rgb = clamp(color.rgb*fogmix + fogcolor*(1-fogmix), 0, 1);
 			outcolor.rgb += particle.rgb * particle.a;
 			outcolor.a = 1;
 
-			// float step = 32.f;
+			// float step = 8.f;
 			// outcolor.rgb = floor(outcolor.rgb*step)/step;
 		}
 	)
@@ -179,6 +180,14 @@ s32 main(s32 ac, const char** av) {
 		puts("Warning! Debug draw init failed");
 	}
 
+	f32 fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
+	f32 aspect = (f32) windowWidth / windowHeight;
+	f32 nearDist = 0.1f;
+	f32 farDist = 1000.f;
+
+	Camera camera;
+	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
+
 	auto playerEntity = AllocateEntity();
 	playerEntity->layers = 1<<0;
 	playerEntity->position = {0,1,0};
@@ -190,6 +199,7 @@ s32 main(s32 ac, const char** av) {
 	playerEntity->colliderType = ColliderCapsule;
 	playerEntity->extents = vec3{2.f, 3.f, 2.f}/2.f;
 	playerEntity->player.eyeOffset = vec3{0, 1.2f, 0};
+	playerEntity->player.camera = &camera;
 	printf("Player id: %u\n", playerEntity->id);
 
 	Scene scene;
@@ -203,10 +213,10 @@ s32 main(s32 ac, const char** av) {
 		return 1;
 	}
 
-	{	auto sceneData = LoadSceneData("Testing/temple.voi");
+	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
 	// {	auto sceneData = LoadSceneData("export.voi");
-	// {	auto sceneData = LoadSceneData("Testing/test.voi");
+	{	auto sceneData = LoadSceneData("Testing/test.voi");
 	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
 		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
 			puts("Error! Empty scene!");
@@ -248,14 +258,6 @@ s32 main(s32 ac, const char** av) {
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0, 0, 0, 0);
 	glEnableVertexAttribArray(0);
-
-	f32 fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
-	f32 aspect = (f32) windowWidth / windowHeight;
-	f32 nearDist = 0.1f;
-	f32 farDist = 1000.f;
-
-	Camera camera;
-	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
 
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;

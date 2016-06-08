@@ -10,6 +10,7 @@ class btDbvtBroadphase;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+struct Camera;
 struct Entity;
 struct Scene;
 
@@ -166,6 +167,8 @@ struct Entity {
 			u32 originalLayers;
 			u16 collidingPortalID;
 			s8 portalSide;
+
+			Camera* camera;
 		} player;
 	};
 
@@ -221,6 +224,8 @@ struct Camera {
 	
 	vec3 position;
 	quat rotation;
+
+	u32 intersectingPortalId;
 };
 
 enum {

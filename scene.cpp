@@ -387,6 +387,12 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 	vec3 camFwd = cam.rotation * vec3{0,0,-1};
 	vec3 camPos = cam.position;
+	auto intPtl = GetEntity(cam.intersectingPortalId);
+
+	static u32 portalClipPlaneBuffer = 0;
+	if(!portalClipPlaneBuffer) {
+		glGenBuffers(1, &portalClipPlaneBuffer);
+	}
 
 	std::sort(scene->portals, &scene->portals[scene->numPortals], [scene, camFwd, camPos](u32 a, u32 b) {
 		vec3 ad = scene->entities[a].position - camPos;
@@ -402,7 +408,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	auto sh = &scene->shaders[ShaderIDDefault];
 
 	mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
-	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
+	mat4 viewProjection = cam.projection * viewMatrix;
+	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(viewProjection));
 
 	for(u32 entID = 0; entID < scene->numEntities; entID++) {
 		auto ent = &scene->entities[entID];
@@ -419,6 +426,66 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		}
 
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
+	}
+
+	vec4 intersectPlaneClip {0};
+	if(intPtl) {
+		constexpr f32 epsilon = 1e-9;
+
+		// http://stackoverflow.com/questions/6408670/line-of-intersection-between-two-planes
+		auto ptlNorm = intPtl->rotation*intPtl->planeNormal;
+		auto intersectDir = glm::cross(camFwd, ptlNorm);
+		f32 det = glm::length2(intersectDir);
+		
+		// If det == 0, no intersect, bail
+		// NOTE: This epsilon could be made larger perhaps as an optimisation
+		if(glm::abs(det) > epsilon) {
+			f32 nearDist = 0.1f;
+			auto near = camPos + camFwd*nearDist;
+
+			f32 ptld = -glm::dot(intPtl->position, ptlNorm);
+			f32 camd = -glm::dot(near, camFwd);
+
+			auto point = (glm::cross(intersectDir, ptlNorm) * camd +
+				glm::cross(camFwd, intersectDir) * ptld) / det;
+
+			intersectDir = glm::normalize(intersectDir);
+
+			DebugLine(near, point);
+			DebugLine(point-intersectDir*100.f, point+intersectDir*100.f, vec3{1, vec2{glm::length(intersectDir)}});
+
+			auto projpoint = vec3{viewProjection * vec4{point, 1}};
+			auto projdir = vec3{glm::normalize(viewProjection * vec4{intersectDir, 0})};
+			auto perp = glm::normalize(glm::cross(projdir, vec3{0, 0, -1}));
+			auto perpDist = -glm::dot(projpoint, perp);
+
+			fprintf(stderr, "%.2f %.2f (%.2f %.2f) (%.2f %.2f)\n", projpoint.x, projpoint.y, projdir.x, projdir.y, perp.x, perp.y);
+
+			auto ent = &scene->entities[cam.intersectingPortalId-1];
+			vec3 ecenter = ent->position + ent->rotation * ent->centerOffset;
+			intersectPlaneClip = vec4{perp, perpDist};
+			if(glm::dot(ptlNorm, ecenter - cam.position) < 0.f)
+				intersectPlaneClip = -intersectPlaneClip;
+
+			mat4 invProj = glm::inverse(cam.projection);
+			auto cp0 = invProj * vec4{-1,-1, epsilon, 1};
+			auto cp1 = invProj * vec4{ 1,-1, epsilon, 1};
+			auto cp2 = invProj * vec4{ 1, 1, epsilon, 1};
+			auto cp3 = invProj * vec4{-1, 1, epsilon, 1};
+
+			vec3 points[] = {
+				vec3{cp0/cp0.w},
+				vec3{cp1/cp1.w},
+				vec3{cp2/cp2.w},
+				vec3{cp3/cp3.w},
+			};
+
+			glBindBuffer(GL_ARRAY_BUFFER, portalClipPlaneBuffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STREAM_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}else{
+			intPtl = nullptr;
+		}
 	}
 
 	glEnable(GL_STENCIL_TEST);
@@ -488,6 +555,20 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glPolygonOffset(0.f, -1.f);
 		glDepthFunc(GL_LEQUAL);
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
+
+		if(intPtl && (u32(portalNode->entityID+1u) == cam.intersectingPortalId)) {
+			glEnable(GL_CLIP_DISTANCE0);
+			glDepthFunc(GL_ALWAYS);
+			glBindBuffer(GL_ARRAY_BUFFER, portalClipPlaneBuffer);
+			glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(intersectPlaneClip));
+			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection));
+			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDisable(GL_CLIP_DISTANCE0);
+		}
+
 		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		// Clear Depth within stencil
