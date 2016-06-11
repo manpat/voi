@@ -68,6 +68,7 @@ public:
 	static f32 LXAxis, LYAxis, RXAxis, RYAxis;
 
 	static bool doCapture;
+	static bool isFocussed;
 
 public:
 	static void Init();

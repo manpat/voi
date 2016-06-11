@@ -25,6 +25,7 @@ f32 Input::RXAxis = 0.0f;
 f32 Input::RYAxis = 0.0f;
 
 bool Input::doCapture = true;
+bool Input::isFocussed = true;
 
 void Input::Init(){
 	SDL_Init(SDL_INIT_JOYSTICK);
@@ -66,11 +67,13 @@ void Input::InjectSDLEvent(const SDL_Event& e){
 	case SDL_MOUSEBUTTONUP:
 		// Save state and inform of change
 		mouseStates[e.button.button] = Input::Up | Input::ChangedThisFrameFlag;
+		isFocussed = true;
 		break;
 
 	case SDL_MOUSEBUTTONDOWN:
 		// Save state and inform of change
 		mouseStates[e.button.button] = Input::Down | Input::ChangedThisFrameFlag;
+		isFocussed = true;
 		break;
 
 	case SDL_JOYAXISMOTION:
@@ -101,6 +104,14 @@ void Input::InjectSDLEvent(const SDL_Event& e){
 	case SDL_JOYBUTTONDOWN:
 		controllerStates[e.jbutton.button] = Input::Down | Input::ChangedThisFrameFlag;
 		break;
+
+	case SDL_WINDOWEVENT: {
+		switch(e.window.event) {
+			case SDL_WINDOWEVENT_FOCUS_GAINED: isFocussed = true; break;
+			case SDL_WINDOWEVENT_FOCUS_LOST: isFocussed = false; break;
+			default: break;
+		}
+	}	break;
 	}
 }
 
@@ -111,7 +122,7 @@ void Input::UpdateMouse(SDL_Window* window){
 	// The reason that this isn't being handled with SDLs event queue
 	//	is the mouse warping
 
-	if(doCapture){
+	if(doCapture && isFocussed){
 		s32 mx, my;
 		s32 ww, wh;
 

@@ -161,6 +161,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 
 	if(interactive && Input::GetMappedDown(Input::Interact)) {
 		// TODO: Frob thing when frobbing becomes a thing
-		fprintf(stderr, "Frob\n");
+		auto e = eyeHit.entity;
+		fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 	}
 }

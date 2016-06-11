@@ -17,7 +17,7 @@ const char* GetStringOption(const char*);
 bool InitGL(SDL_Window*);
 void DeinitGL();
 
-bool InitDebugDraw();
+bool InitDebug();
 void DrawDebug(const mat4& viewProjection);
 
 void DebugLine(const vec3& a, const vec3& b, const vec3& col = vec3{1});
@@ -32,11 +32,16 @@ void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
 ShaderProgram CreateShaderProgram(const char* vs, const char* fs);
+ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs);
+ShaderProgram* GetNamedShaderProgram(u32 shId);
 Framebuffer CreateFramebuffer(u32 width, u32 height, bool=true);
 void DestroyFramebuffer(Framebuffer*);
 u32 LoadTexture(const char* fname);
 void DrawFullscreenQuad();
 void DrawQuadAtFarPlane(const mat4& projection);
+
+bool InitEffects();
+void ApplyEffects(Framebuffer*, const Camera*, f32 dt);
 
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
 void DeinitParticleSystem(ParticleSystem*);

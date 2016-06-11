@@ -66,52 +66,6 @@ const char* particleShaderSrc[] = {
 	)
 };
 
-const char* postShaderSrc[] = {
-	SHADER(
-		in vec2 vertex;
-		out vec2 uv;
-
-		void main() {
-			gl_Position = vec4(vertex, 0, 1);
-			uv = vertex * 0.5f + 0.5f;
-		}
-	),
-	SHADER(
-		uniform sampler2D depthTex;
-		uniform sampler2D colorTex;
-		uniform sampler2D general0Tex;
-		uniform mat4 viewProjection;
-		in vec2 uv;
-
-		out vec4 outcolor;
-
-		void main() {
-			vec4 color = texture2D(colorTex, uv);
-			vec4 particle = texture2D(general0Tex, uv);
-			float depth = texture2D(depthTex, uv).r * 2.f - 1.f;
-			float zNear = 0.1f;
-			float zFar = 1000.f;
-
-			// depth = 2.0 * zNear * zFar / (zFar + zNear - depth * (zFar - zNear));
-			vec4 wp = inverse(viewProjection) * vec4(uv*2 - 1, depth*0.5 + 0.5, 1);
-			depth = length(wp/wp.w); // Distance from eye
-
-
-			float fogmix = 1-clamp(pow(depth / 150.f, 0.4f), 0, 1);
-
-			// vec3 fogcolor = vec3(0.1);
-			// vec3 fogcolor = vec3(1, .6, .2) * 0.1;
-			vec3 fogcolor = vec3(0.25, 0.0, 0.1)*0.2;
-			outcolor.rgb = clamp(color.rgb*fogmix + fogcolor*(1-fogmix), 0, 1);
-			outcolor.rgb += particle.rgb * particle.a;
-			outcolor.a = 1;
-
-			// float step = 8.f;
-			// outcolor.rgb = floor(outcolor.rgb*step)/step;
-		}
-	)
-};
-
 const char* uiShaderSrc[] = {
 	SHADER(
 		in vec3 vertex;
@@ -178,7 +132,7 @@ s32 main(s32 ac, const char** av) {
 	SDL_WarpMouseInWindow(window, windowWidth/2, windowHeight/2);
 	SDL_ShowCursor(0);
 
-	if(!InitDebugDraw()) {
+	if(!InitDebug()) {
 		puts("Warning! Debug draw init failed");
 	}
 
@@ -205,11 +159,6 @@ s32 main(s32 ac, const char** av) {
 	printf("Player id: %u\n", playerEntity->id);
 
 	Scene scene;
-	scene.shaders[ShaderIDDefault] = CreateShaderProgram(defaultShaderSrc[0], defaultShaderSrc[1]);
-	scene.shaders[ShaderIDParticles] = CreateShaderProgram(particleShaderSrc[0], particleShaderSrc[1]);
-	scene.shaders[ShaderIDPost] = CreateShaderProgram(postShaderSrc[0], postShaderSrc[1]);
-	scene.shaders[ShaderIDUI] = CreateShaderProgram(uiShaderSrc[0], uiShaderSrc[1]);
-
 	if(!InitPhysics(&scene.physicsContext)) {
 		puts("Error! Physics init failed!");
 		return 1;
@@ -260,6 +209,16 @@ s32 main(s32 ac, const char** av) {
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0, 0, 0, 0);
 	glEnableVertexAttribArray(0);
+
+	if(!InitEffects()) {
+		puts("Error! Effects init failed!");
+		return 1;
+	}
+
+	auto forwardShader	= CreateNamedShaderProgram(ShaderIDDefault,		defaultShaderSrc[0], defaultShaderSrc[1]);
+	auto particleShader	= CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], particleShaderSrc[1]);
+	auto uiShader		= CreateNamedShaderProgram(ShaderIDUI,			uiShaderSrc[0], uiShaderSrc[1]);
+	// auto postShader		= GetNamedShaderProgram(ShaderIDPost);
 
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
@@ -319,7 +278,7 @@ s32 main(s32 ac, const char** av) {
 			SDL_WarpMouseInWindow(window, windowWidth/2, windowHeight/2);
 		}
 
-		if(fb.valid) DestroyFramebuffer(&fb);
+		if(fb.fbo) DestroyFramebuffer(&fb);
 
 		fb = CreateFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 		if(!fb.valid) {
@@ -382,17 +341,17 @@ s32 main(s32 ac, const char** av) {
 			glViewport(0,0, fb.width, fb.height);
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-			glUseProgram(scene.shaders[ShaderIDDefault].program);
+			glUseProgram(forwardShader->program);
 			RenderScene(&scene, camera, playerEntity->layers);
 
-			glUseProgram(scene.shaders[ShaderIDParticles].program);
-			glUniform3fv(scene.shaders[ShaderIDParticles].materialColorLoc, 1, glm::value_ptr(vec3{.5}));
-			glUniformMatrix4fv(scene.shaders[ShaderIDParticles].viewProjectionLoc, 1, false, 
+			glUseProgram(particleShader->program);
+			glUniform3fv(particleShader->materialColorLoc, 1, glm::value_ptr(vec3{.5}));
+			glUniformMatrix4fv(particleShader->viewProjectionLoc, 1, false, 
 				glm::value_ptr(viewProjection));
 
 			// HACK: Because we're using point primitives for particles and they use pixels,
 			// 	we have to adjust particle size between resolutions
-			glUniform1f(glGetUniformLocation(scene.shaders[ShaderIDParticles].program, "pixelSize"), 
+			glUniform1f(glGetUniformLocation(particleShader->program, "pixelSize"), 
 				fb.height*50.f/600.f);
 
 			glEnable(GL_PROGRAM_POINT_SIZE);
@@ -405,26 +364,11 @@ s32 main(s32 ac, const char** av) {
 		glViewport(0,0, windowWidth, windowHeight);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
-		glUseProgram(scene.shaders[ShaderIDPost].program);
 
-		// Draw scene with post effects
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetDepthStencil]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetColor]);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetGeneral0]);
-
-		glUniform1i(scene.shaders[ShaderIDPost].depthTexLoc, 0);
-		glUniform1i(scene.shaders[ShaderIDPost].colorTexLoc, 1);
-		glUniform1i(scene.shaders[ShaderIDPost].general0TexLoc, 2);
-		glUniformMatrix4fv(scene.shaders[ShaderIDPost].viewProjectionLoc, 1, false,
-			glm::value_ptr(camera.projection));
-
-		DrawFullscreenQuad();
+		ApplyEffects(&fb, &camera, dt);
 
 		// Draw cursor
-		glUseProgram(scene.shaders[ShaderIDUI].program);
+		glUseProgram(uiShader->program);
 		glEnableVertexAttribArray(1);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -438,8 +382,8 @@ s32 main(s32 ac, const char** av) {
 			0,0,0,1,
 		};
 
-		glUniform1i(scene.shaders[ShaderIDUI].colorTexLoc, 0);
-		glUniformMatrix4fv(scene.shaders[ShaderIDUI].viewProjectionLoc, 1,
+		glUniform1i(uiShader->colorTexLoc, 0);
+		glUniformMatrix4fv(uiShader->viewProjectionLoc, 1,
 			false, glm::value_ptr(uiProj));
 
 		glBindBuffer(GL_ARRAY_BUFFER, cursorVBO);

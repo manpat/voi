@@ -1,6 +1,10 @@
 #include "voi.h"
 #include "ext/stb_image.h"
 
+namespace {
+	ShaderProgram shaderPrograms[256];
+}
+
 Framebuffer CreateFramebuffer(u32 width, u32 height, bool filter) {
 	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
 	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
@@ -130,6 +134,29 @@ error:
 	return ret;
 }
 
+ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs) {
+	assert(shId < 255);
+	
+	auto prog = &shaderPrograms[shId];
+	if(prog->program) {
+		fprintf(stderr, "Warning! Overriding already initialised shader program (%u)!\n", shId);
+	}
+
+	*prog = CreateShaderProgram(vs, fs);
+	return prog;
+}
+
+ShaderProgram* GetNamedShaderProgram(u32 shId) {
+	assert(shId < 255);
+	
+	auto prog = &shaderPrograms[shId];
+	if(!prog->program) {
+		fprintf(stderr, "Warning! Tried to get uninitialised named shader program (%u)!\n", shId);
+		return nullptr;
+	}
+	
+	return prog;
+}
 
 u32 LoadTexture(const char* fname) {
 	s32 texWidth, texHeight, numComponents;

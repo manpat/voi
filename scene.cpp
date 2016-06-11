@@ -235,7 +235,7 @@ void DeinitScene(Scene* scene) {
 }
 
 void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale) {
-	auto program = &scene->shaders[ShaderIDDefault]; // TODO: Obvs nope
+	auto program = GetNamedShaderProgram(ShaderIDDefault); // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
@@ -405,7 +405,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	portalGraph.nodeCount = 1;
 	ConstructPortalGraph(&portalGraph, scene, 0, camPos, camFwd, 0);
 
-	auto sh = &scene->shaders[ShaderIDDefault];
+	auto sh = GetNamedShaderProgram(ShaderIDDefault);
 
 	mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
 	mat4 viewProjection = cam.projection * viewMatrix;

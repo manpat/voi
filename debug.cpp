@@ -37,7 +37,7 @@ namespace {
 
 bool debugDrawEnabled = false;
 
-bool InitDebugDraw() {
+bool InitDebug() {
 	vbo = 0;
 	debugProgram = CreateShaderProgram(debugShaderSrc[0], debugShaderSrc[1]);
 
