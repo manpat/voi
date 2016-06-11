@@ -145,6 +145,9 @@ u32 cursorVBO;
 u32 cursorUVBO;
 u8 interactiveHover = 0;
 
+u32 windowWidth;
+u32 windowHeight;
+
 s32 main(s32 ac, const char** av) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
@@ -154,10 +157,9 @@ s32 main(s32 ac, const char** av) {
 	ParseCLOptions(ac, av);
 	LoadOptions();
 
-	u32 windowWidth = GetIntOption("window.width");
-	u32 windowHeight = GetIntOption("window.height");
+	windowWidth = GetIntOption("window.width");
+	windowHeight = GetIntOption("window.height");
 	bool fullscreen = GetBoolOption("window.fullscreen");
-	(void) fullscreen; // TODO
 
 	auto window = SDL_CreateWindow("Voi", 
 		SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_UNDEFINED, 
@@ -182,7 +184,7 @@ s32 main(s32 ac, const char** av) {
 
 	f32 fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
 	f32 aspect = (f32) windowWidth / windowHeight;
-	f32 nearDist = 0.1f;
+	f32 nearDist = 0.01f;
 	f32 farDist = 1000.f;
 
 	Camera camera;
@@ -291,11 +293,47 @@ s32 main(s32 ac, const char** av) {
 		multisampleLevel = 2.;
 	}
 
+	// TODO: Better antialiasing method
 	Framebuffer fb = CreateFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 	if(!fb.valid) {
 		puts("Error! Framebuffer creation failed!");
 		return 1;
 	}
+
+	auto SetFullscreen = [window, &fb, multisampleLevel, filter, &camera, fov, nearDist, farDist, &aspect] (bool fullscreen) {
+		// TODO: Choose between native and fake fullscreen based on resolution?
+		//	or have an option?
+		if(SDL_SetWindowFullscreen(window, fullscreen? SDL_WINDOW_FULLSCREEN_DESKTOP: 0) < 0) 
+			return false;
+
+		if(fullscreen) {
+			SDL_GetWindowSize(window, (s32*)&windowWidth, (s32*)&windowHeight);
+		}else{
+			windowWidth = GetIntOption("window.width");
+			windowHeight = GetIntOption("window.height");
+			// NOTE: Should be fine given that we start windowed
+			// SDL_SetWindowSize(window, windowWidth, windowHeight);
+		}
+
+		if(Input::doCapture) {
+			SDL_WarpMouseInWindow(window, windowWidth/2, windowHeight/2);
+		}
+
+		if(fb.valid) DestroyFramebuffer(&fb);
+
+		fb = CreateFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
+		if(!fb.valid) {
+			puts("Error! Framebuffer creation failed!");
+			return false;
+		}
+
+		aspect = (f32) windowWidth / windowHeight;
+		camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
+
+		return true;
+	};
+
+	if(!SetFullscreen(fullscreen)) return 1;
 
 	SDL_Event e;
 	bool running = true;
@@ -307,10 +345,15 @@ s32 main(s32 ac, const char** av) {
 				running = false;
 			}
 		}
+		
 		Input::UpdateMouse(window);
 
 		if(Input::GetKeyDown(SDLK_ESCAPE)) {
 			running = false;
+		}
+
+		if(Input::GetKeyDown(SDLK_F11)) {
+			SetFullscreen(fullscreen ^= true);
 		}
 
 		vec3 vel = GetEntityVelocity(playerEntity);

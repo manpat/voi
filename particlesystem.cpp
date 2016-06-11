@@ -1,5 +1,6 @@
 #include "voi.h"
 
+// TODO: Particle init/update callbacks
 bool InitParticleSystem(ParticleSystem* sys, u32 numParticles) {
 	sys->freeIndex = 0;
 	sys->numParticles = numParticles;

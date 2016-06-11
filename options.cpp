@@ -17,6 +17,7 @@ struct Option {
 	char name[64];
 	char value[64];
 	u8 type;
+	// TODO: Add description field
 
 	union {
 		bool boolValue;

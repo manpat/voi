@@ -411,26 +411,9 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	mat4 viewProjection = cam.projection * viewMatrix;
 	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(viewProjection));
 
-	for(u32 entID = 0; entID < scene->numEntities; entID++) {
-		auto ent = &scene->entities[entID];
-		if(!ent->meshID) continue;
-		if(ent->flags & Entity::FlagHidden) continue;
-		if(~ent->layers & layerMask) continue;
-
-		// Render both sides of portals and mirrors
-		if(ent->entityType == Entity::TypePortal
-		|| ent->entityType == Entity::TypeMirror) {
-			glDisable(GL_CULL_FACE);
-		}else{
-			glEnable(GL_CULL_FACE);
-		}
-
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
-	}
-
 	vec4 intersectPlaneClip {0};
 	if(intPtl) {
-		constexpr f32 epsilon = 1e-9;
+		constexpr f32 epsilon = 1e-6;
 
 		// http://stackoverflow.com/questions/6408670/line-of-intersection-between-two-planes
 		auto ptlNorm = intPtl->rotation*intPtl->planeNormal;
@@ -440,7 +423,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		// If det == 0, no intersect, bail
 		// NOTE: This epsilon could be made larger perhaps as an optimisation
 		if(glm::abs(det) > epsilon) {
-			f32 nearDist = 0.1f;
+			f32 nearDist = 0.01f;
 			auto near = camPos + camFwd*nearDist;
 
 			f32 ptld = -glm::dot(intPtl->position, ptlNorm);
@@ -459,7 +442,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			auto perp = glm::normalize(glm::cross(projdir, vec3{0, 0, -1}));
 			auto perpDist = -glm::dot(projpoint, perp);
 
-			fprintf(stderr, "%.2f %.2f (%.2f %.2f) (%.2f %.2f)\n", projpoint.x, projpoint.y, projdir.x, projdir.y, perp.x, perp.y);
+			// fprintf(stderr, "%.2f %.2f (%.2f %.2f) (%.2f %.2f)\n", projpoint.x, projpoint.y, projdir.x, projdir.y, perp.x, perp.y);
 
 			auto ent = &scene->entities[cam.intersectingPortalId-1];
 			vec3 ecenter = ent->position + ent->rotation * ent->centerOffset;
@@ -486,6 +469,23 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		}else{
 			intPtl = nullptr;
 		}
+	}
+
+	for(u32 entID = 0; entID < scene->numEntities; entID++) {
+		auto ent = &scene->entities[entID];
+		if(!ent->meshID) continue;
+		if(ent->flags & Entity::FlagHidden) continue;
+		if(~ent->layers & layerMask) continue;
+
+		// Render both sides of portals and mirrors
+		if(ent->entityType == Entity::TypePortal
+		|| ent->entityType == Entity::TypeMirror) {
+			glDisable(GL_CULL_FACE);
+		}else{
+			glEnable(GL_CULL_FACE);
+		}
+
+		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 	}
 
 	glEnable(GL_STENCIL_TEST);
