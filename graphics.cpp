@@ -5,7 +5,7 @@ namespace {
 	ShaderProgram shaderPrograms[256];
 }
 
-Framebuffer CreateFramebuffer(u32 width, u32 height, bool filter) {
+Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
 	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
 	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
 	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
@@ -31,6 +31,41 @@ Framebuffer CreateFramebuffer(u32 width, u32 height, bool filter) {
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, fbTargetAttach[i], GL_TEXTURE_2D, fb.targets[i], 0);
 	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	fb.valid = true;
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		puts("Warning! Framebuffer incomplete!");
+		fb.valid = false;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return fb;
+}
+
+Framebuffer CreateColorFramebuffer(u32 width, u32 height, bool filter) {
+	Framebuffer fb;
+	fb.width = width;
+	fb.height = height;
+	for(u8 i = 0; i < FBTargetCount; i++) fb.targets[i] = 0;
+
+	glGenFramebuffers(1, &fb.fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+
+	u32 fbTargetAttach[] {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, fbTargetAttach);
+
+	glGenTextures(1, &fb.targets[FBTargetColor]);
+	glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetColor]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, 
+		GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter?GL_LINEAR:GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter?GL_LINEAR:GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb.targets[FBTargetColor], 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	fb.valid = true;

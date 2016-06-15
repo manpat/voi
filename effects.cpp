@@ -40,7 +40,7 @@ namespace {
 				outcolor.rgb += particle.rgb * particle.a;
 				outcolor.a = 1;
 
-				// float step = 8.f;
+				// float step = 16.f;
 				// outcolor.rgb = floor(outcolor.rgb*step)/step;
 			}
 		)
@@ -48,27 +48,43 @@ namespace {
 
 	ShaderProgram* shaderProgram;
 
-	vec3 fogColor;
-	f32 fogDistance;
-	f32 fogDensity;
+	struct EffectState {
+		vec3 fogColor;
+		f32 fogDistance;
+		f32 fogDensity;
+	};
+
+	EffectState initialState;
+	EffectState targetState;
+	EffectState actualState;
+	f32 effectLerp;
+
+	Framebuffer antialiasFbo;
 }
 
 bool InitEffects() {
 	shaderProgram = CreateNamedShaderProgram(ShaderIDPost, postShaderSrc[0], postShaderSrc[1]);
-	fogColor = vec3{0.25, 0.0, 0.1}*0.2f;
-	fogDistance = 150.f;
-	fogDensity = 0.4f;
+	initialState.fogColor = vec3{0.4, 0.0, 0.2}*0.2f;
+	initialState.fogDistance = 30.f;
+	initialState.fogDensity = 0.2f;
+
+	initialState.fogColor = vec3{0.1};
+	initialState.fogDistance = 200.f;
+	initialState.fogDensity = 0.5f;
+
+	targetState = actualState = initialState;
+	effectLerp = 0.f;
 
 	return true;
 }
 
-void ApplyEffects(Framebuffer* fb, const Camera* camera, f32 dt) {
-	static f32 t = 0.f;
-	t += dt/4.f;
+void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
+	// TODO: Adjustable lerp time would be nice
+	effectLerp = glm::clamp(effectLerp+dt/8.f, 0.f, 1.f);
 
-	fogDistance = 150.f + sin(t)*120.f;
-	fogDensity = 0.5f + sin(t)*0.3f;
-	fogColor = glm::mix(vec3{0.25, 0.0, 0.1}, vec3{0.f, 0.1f, 0.2f}, sin(t)*0.5f + 0.5f) * 0.2f;
+	actualState.fogColor = glm::mix(initialState.fogColor, targetState.fogColor, effectLerp);
+	actualState.fogDensity = glm::mix(initialState.fogDensity, targetState.fogDensity, effectLerp);
+	actualState.fogDistance = glm::mix(initialState.fogDistance, targetState.fogDistance, effectLerp);
 
 	glUseProgram(shaderProgram->program);
 
@@ -87,8 +103,19 @@ void ApplyEffects(Framebuffer* fb, const Camera* camera, f32 dt) {
 
 	u32 fogColorLoc = glGetUniformLocation(shaderProgram->program, "fogColor");
 	u32 fogDistanceLoc = glGetUniformLocation(shaderProgram->program, "fogDistance");
-	glUniform4fv(fogColorLoc, 1, glm::value_ptr(vec4{fogColor, fogDensity}));
-	glUniform1f(fogDistanceLoc, fogDistance);
+	glUniform4fv(fogColorLoc, 1, glm::value_ptr(vec4{actualState.fogColor, actualState.fogDensity}));
+	glUniform1f(fogDistanceLoc, actualState.fogDistance);
 
 	DrawFullscreenQuad();
+
+	// TODO: Make new framebuffer and use if for antialiasing
+	//http://www.gamedev.net/topic/580517-nfaa---a-post-process-anti-aliasing-filter-results-implementation-details/
+}
+
+void SetTargetFogParameters(const vec3& color, f32 distance, f32 density) {
+	initialState = actualState;
+	targetState.fogColor = color;
+	targetState.fogDistance = distance;
+	targetState.fogDensity = density;
+	effectLerp = 0.f;
 }

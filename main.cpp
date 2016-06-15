@@ -136,13 +136,13 @@ s32 main(s32 ac, const char** av) {
 		puts("Warning! Debug draw init failed");
 	}
 
-	f32 fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
-	f32 aspect = (f32) windowWidth / windowHeight;
-	f32 nearDist = 0.01f;
-	f32 farDist = 1000.f;
-
 	Camera camera;
-	camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
+	camera.fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
+	camera.aspect = (f32) windowWidth / windowHeight;
+	camera.nearDist = 0.1f;
+	camera.farDist = 1000.f;
+
+	camera.projection = glm::perspective(camera.fov, camera.aspect, camera.nearDist, camera.farDist);
 
 	auto playerEntity = AllocateEntity();
 	playerEntity->layers = 1<<0;
@@ -218,7 +218,6 @@ s32 main(s32 ac, const char** av) {
 	auto forwardShader	= CreateNamedShaderProgram(ShaderIDDefault,		defaultShaderSrc[0], defaultShaderSrc[1]);
 	auto particleShader	= CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], particleShaderSrc[1]);
 	auto uiShader		= CreateNamedShaderProgram(ShaderIDUI,			uiShaderSrc[0], uiShaderSrc[1]);
-	// auto postShader		= GetNamedShaderProgram(ShaderIDPost);
 
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
@@ -253,13 +252,13 @@ s32 main(s32 ac, const char** av) {
 	}
 
 	// TODO: Better antialiasing method
-	Framebuffer fb = CreateFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
+	Framebuffer fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 	if(!fb.valid) {
 		puts("Error! Framebuffer creation failed!");
 		return 1;
 	}
 
-	auto SetFullscreen = [window, &fb, multisampleLevel, filter, &camera, fov, nearDist, farDist, &aspect] (bool fullscreen) {
+	auto SetFullscreen = [window, &fb, multisampleLevel, filter, &camera] (bool fullscreen) {
 		// TODO: Choose between native and fake fullscreen based on resolution?
 		//	or have an option?
 		if(SDL_SetWindowFullscreen(window, fullscreen? SDL_WINDOW_FULLSCREEN_DESKTOP: 0) < 0) 
@@ -280,14 +279,14 @@ s32 main(s32 ac, const char** av) {
 
 		if(fb.fbo) DestroyFramebuffer(&fb);
 
-		fb = CreateFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
+		fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 		if(!fb.valid) {
 			puts("Error! Framebuffer creation failed!");
 			return false;
 		}
 
-		aspect = (f32) windowWidth / windowHeight;
-		camera.projection = glm::perspective(fov, aspect, nearDist, farDist);
+		camera.aspect = (f32) windowWidth / windowHeight;
+		camera.projection = glm::perspective(camera.fov, camera.aspect, camera.nearDist, camera.farDist);
 
 		return true;
 	};
@@ -325,14 +324,18 @@ s32 main(s32 ac, const char** av) {
 
 		UpdateAllEntities(dt);
 
-		camera.rotation = playerEntity->rotation * glm::angleAxis(playerEntity->player.mouseRot.y, vec3{1,0,0});
-		// NOTE: UpdatePhysics fucks with player rotation for some reason
-		UpdatePhysics(&scene, dt);
-
-		// Update camera position *after* physics have been taken into account
+		// Update camera position BEFORE updating physics!
+		//	Player determines what layer to render based on position. 
+		//	The physics update can change player position AFTER this has been calculated.
+		// NOTE: A post-physics update step would also fix this
 		camera.position = playerEntity->position + playerEntity->player.eyeOffset;
+		camera.rotation = playerEntity->rotation * glm::angleAxis(playerEntity->player.mouseRot.y, vec3{1,0,0});
+
 		auto viewProjection = camera.projection * glm::mat4_cast(
 			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
+
+		// NOTE: UpdatePhysics fucks with player rotation for some reason
+		UpdatePhysics(&scene, dt);
 
 		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
 
@@ -365,7 +368,7 @@ s32 main(s32 ac, const char** av) {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
-		ApplyEffects(&fb, &camera, dt);
+		ApplyEffectsAndDraw(&fb, &camera, dt);
 
 		// Draw cursor
 		glUseProgram(uiShader->program);
@@ -374,8 +377,8 @@ s32 main(s32 ac, const char** av) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, cursorTextures[interactiveHover&1]);
 
-		f32 a = aspect;
-		mat4 uiProj{
+		f32 a = camera.aspect;
+		mat4 uiProj {
 			1,0,0,0,
 			0,a,0,0,
 			0,0,1,0,

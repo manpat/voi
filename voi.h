@@ -34,14 +34,17 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 ShaderProgram CreateShaderProgram(const char* vs, const char* fs);
 ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs);
 ShaderProgram* GetNamedShaderProgram(u32 shId);
-Framebuffer CreateFramebuffer(u32 width, u32 height, bool=true);
+Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool=true);
+Framebuffer CreateColorFramebuffer(u32 width, u32 height, bool=true);
+
 void DestroyFramebuffer(Framebuffer*);
 u32 LoadTexture(const char* fname);
 void DrawFullscreenQuad();
 void DrawQuadAtFarPlane(const mat4& projection);
 
 bool InitEffects();
-void ApplyEffects(Framebuffer*, const Camera*, f32 dt);
+void ApplyEffectsAndDraw(Framebuffer*, const Camera*, f32 dt);
+void SetTargetFogParameters(const vec3&, f32 distance = 100.f, f32 density = 0.3f);
 
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
 void DeinitParticleSystem(ParticleSystem*);

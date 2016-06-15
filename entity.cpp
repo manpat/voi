@@ -69,7 +69,8 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	auto pl = &ent->player;
 
 	if(auto ptl = GetEntity(pl->collidingPortalID)) {
-		auto diff = ptl->position - ent->position;
+		vec3 ptlPos = ptl->position + ptl->rotation * ptl->centerOffset;
+		auto diff = ptlPos - ent->position;
 		auto sidef = glm::dot(diff, ptl->rotation * ptl->planeNormal)*pl->portalSide;
 
 		if(sidef > 0.f) {
@@ -119,6 +120,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 
 	f32 speed = 8.f;
 	if(Input::GetMapped(Input::Boost)) speed *= 2.f;
+	if(Input::GetKey(SDLK_LCTRL)) speed *= 0.1f;
 	vel *= speed * pl->slopeSpeedAdjustSmooth;
 
 	vel.y = GetEntityVelocity(ent).y;
@@ -163,5 +165,23 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		// TODO: Frob thing when frobbing becomes a thing
 		auto e = eyeHit.entity;
 		fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
+
+		if(!strcmp(e->name, "Cube.002")) {
+			// SetTargetFogParameters(vec3{.5, .75, .9}*0.3f, 220.f, 0.4f);
+			// SetTargetFogParameters(vec3{0.2, 0.4, 0.6}*0.2f, 220.f, 0.4f);
+			SetTargetFogParameters(
+				glm::gaussRand(vec3{0.1f}, vec3{glm::sqrt(0.1f)}),
+				glm::linearRand(50.f, 240.f), 
+				glm::linearRand(0.1f, 0.7f));
+
+			// static u32 it = 0;
+			// if(it == 0) {
+			// 	SetTargetFogParameters(vec3{0., .05, .1}, 240.f, 0.5f);
+			// }else{
+			// 	SetTargetFogParameters(vec3{0.05}, 50.f, 0.15f);
+			// }
+
+			// it = (it+1)%2;
+		}
 	}
 }

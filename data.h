@@ -225,6 +225,11 @@ struct Camera {
 	vec3 position;
 	quat rotation;
 
+	f32 nearDist;
+	f32 farDist;
+	f32 aspect;
+	f32 fov;
+
 	u32 intersectingPortalId;
 };
 

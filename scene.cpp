@@ -411,22 +411,19 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	mat4 viewProjection = cam.projection * viewMatrix;
 	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(viewProjection));
 
-	vec4 intersectPlaneClip {0};
 	if(intPtl) {
-		constexpr f32 epsilon = 1e-6;
-
 		// http://stackoverflow.com/questions/6408670/line-of-intersection-between-two-planes
 		auto ptlNorm = intPtl->rotation*intPtl->planeNormal;
+		vec3 ptlPos = intPtl->position + intPtl->rotation * intPtl->centerOffset;
 		auto intersectDir = glm::cross(camFwd, ptlNorm);
 		f32 det = glm::length2(intersectDir);
 		
 		// If det == 0, no intersect, bail
 		// NOTE: This epsilon could be made larger perhaps as an optimisation
-		if(glm::abs(det) > epsilon) {
-			f32 nearDist = 0.01f;
-			auto near = camPos + camFwd*nearDist;
+		if(glm::abs(det) > 1e-4) {
+			auto near = camPos + camFwd*cam.nearDist;
 
-			f32 ptld = -glm::dot(intPtl->position, ptlNorm);
+			f32 ptld = -glm::dot(ptlPos, ptlNorm);
 			f32 camd = -glm::dot(near, camFwd);
 
 			auto point = (glm::cross(intersectDir, ptlNorm) * camd +
@@ -437,37 +434,74 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			DebugLine(near, point);
 			DebugLine(point-intersectDir*100.f, point+intersectDir*100.f, vec3{1, vec2{glm::length(intersectDir)}});
 
-			auto projpoint = vec3{viewProjection * vec4{point, 1}};
-			auto projdir = vec3{glm::normalize(viewProjection * vec4{intersectDir, 0})};
-			auto perp = glm::normalize(glm::cross(projdir, vec3{0, 0, -1}));
-			auto perpDist = -glm::dot(projpoint, perp);
+			auto projpoint = vec3{viewMatrix * vec4{point, 1}};
+			auto projdir = vec3{viewMatrix * vec4{intersectDir, 0}};
+			auto perpdir = glm::normalize(glm::cross(projdir, vec3{0, 0, -1}));
+			if(glm::dot(ptlNorm, ptlPos - cam.position) < 0.f)
+				perpdir = -perpdir;
 
-			// fprintf(stderr, "%.2f %.2f (%.2f %.2f) (%.2f %.2f)\n", projpoint.x, projpoint.y, projdir.x, projdir.y, perp.x, perp.y);
+			vec3 intPoint{projpoint};
+			if(glm::abs(projdir.x) < glm::abs(projdir.y)) {
+				// f(x) = mx + c 
+				// m = dy/dx
+				// c = f(x) - mx
+				// 0 = mx + c 
+				// -c/m = x
+				f32 m = projdir.y/projdir.x;
+				f32 c = intPoint.y - m*intPoint.x;
 
-			auto ent = &scene->entities[cam.intersectingPortalId-1];
-			vec3 ecenter = ent->position + ent->rotation * ent->centerOffset;
-			intersectPlaneClip = vec4{perp, perpDist};
-			if(glm::dot(ptlNorm, ecenter - cam.position) < 0.f)
-				intersectPlaneClip = -intersectPlaneClip;
+				intPoint.x = -c/m;
+				intPoint.y = 0.f;
 
-			mat4 invProj = glm::inverse(cam.projection);
-			auto cp0 = invProj * vec4{-1,-1, epsilon, 1};
-			auto cp1 = invProj * vec4{ 1,-1, epsilon, 1};
-			auto cp2 = invProj * vec4{ 1, 1, epsilon, 1};
-			auto cp3 = invProj * vec4{-1, 1, epsilon, 1};
+			}else{
+				f32 m = projdir.x/projdir.y;
+				f32 c = intPoint.x - m*intPoint.y;
+
+				intPoint.y = -c/m;
+				intPoint.x = 0.f;
+			}
+
+			// fprintf(stderr, "(%7.2f %7.2f) -> (%7.2f %7.2f) (%3.2f %3.2f)\n", projpoint.x, projpoint.y, intPoint.x, intPoint.y, projdir.x, projdir.y);
+
+			intPoint.z = -cam.nearDist - 1e-5;
+			projdir.z = 0.f;
+			perpdir.z = 0.f;
 
 			vec3 points[] = {
-				vec3{cp0/cp0.w},
-				vec3{cp1/cp1.w},
-				vec3{cp2/cp2.w},
-				vec3{cp3/cp3.w},
+				intPoint + projdir*10.f,
+				intPoint + projdir*10.f + perpdir*10.f,
+				intPoint - projdir*10.f + perpdir*10.f,
+				intPoint - projdir*10.f,
 			};
 
 			glBindBuffer(GL_ARRAY_BUFFER, portalClipPlaneBuffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STREAM_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}else{
-			intPtl = nullptr;
+			// fprintf(stderr, "NO INTERSECT\n");
+			// NOTE: None of this has been tested.
+			// 	This is very much a corner case
+
+			if(glm::dot(camFwd, ptlPos - cam.position) < 0.f){
+				intPtl = nullptr;
+			}else{
+				mat4 invProj = glm::inverse(cam.projection);
+				auto cp0 = invProj * vec4{-1,-1, 1e-6, 1};
+				auto cp1 = invProj * vec4{ 1,-1, 1e-6, 1};
+				auto cp2 = invProj * vec4{ 1, 1, 1e-6, 1};
+				auto cp3 = invProj * vec4{-1, 1, 1e-6, 1};
+
+				vec3 points[] = {
+					vec3{cp0/cp0.w},
+					vec3{cp1/cp1.w},
+					vec3{cp2/cp2.w},
+					vec3{cp3/cp3.w},
+				};
+
+				glBindBuffer(GL_ARRAY_BUFFER, portalClipPlaneBuffer);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STREAM_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
 		}
 	}
 
@@ -557,10 +591,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 
 		if(intPtl && (u32(portalNode->entityID+1u) == cam.intersectingPortalId)) {
-			glEnable(GL_CLIP_DISTANCE0);
 			glDepthFunc(GL_ALWAYS);
 			glBindBuffer(GL_ARRAY_BUFFER, portalClipPlaneBuffer);
-			glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(intersectPlaneClip));
 			glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection));
 			glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
 			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
