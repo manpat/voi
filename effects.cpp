@@ -28,7 +28,8 @@ namespace {
 				vec4 particle = texture2D(general0Tex, uv);
 				float depth = texture2D(depthTex, uv).r * 2.f - 1.f;
 
-				vec4 wp = inverse(viewProjection) * vec4(uv*2 - 1, depth*0.5 + 0.5, 1);
+				// NOTE: viewProjection is actually inverse(projection)
+				vec4 wp = viewProjection * vec4(uv*2 - 1, depth*0.5 + 0.5, 1);
 				depth = length(wp/wp.w); // Distance from eye
 
 				float fogmix = 1-clamp(pow(depth / fogDistance, fogColor.a), 0, 1);
@@ -68,9 +69,9 @@ bool InitEffects() {
 	initialState.fogDistance = 30.f;
 	initialState.fogDensity = 0.2f;
 
-	initialState.fogColor = vec3{0.1};
-	initialState.fogDistance = 200.f;
-	initialState.fogDensity = 0.5f;
+	// initialState.fogColor = vec3{0.1};
+	// initialState.fogDistance = 200.f;
+	// initialState.fogDensity = 0.5f;
 
 	targetState = actualState = initialState;
 	effectLerp = 0.f;
@@ -99,7 +100,7 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	glUniform1i(shaderProgram->depthTexLoc, 0);
 	glUniform1i(shaderProgram->colorTexLoc, 1);
 	glUniform1i(shaderProgram->general0TexLoc, 2);
-	glUniformMatrix4fv(shaderProgram->viewProjectionLoc, 1, false, glm::value_ptr(camera->projection));
+	glUniformMatrix4fv(shaderProgram->viewProjectionLoc, 1, false, glm::value_ptr(glm::inverse(camera->projection)));
 
 	u32 fogColorLoc = glGetUniformLocation(shaderProgram->program, "fogColor");
 	u32 fogDistanceLoc = glGetUniformLocation(shaderProgram->program, "fogDistance");

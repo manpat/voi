@@ -225,6 +225,8 @@ s32 main(s32 ac, const char** av) {
 
 	auto beginTime = std::chrono::high_resolution_clock::now();
 
+	bool queryingPrimitives = true;
+	u32 primitiveCount = 0;
 	u32 primCountQuery;
 	glGenQueries(1, &primCountQuery);
 
@@ -273,10 +275,6 @@ s32 main(s32 ac, const char** av) {
 			// SDL_SetWindowSize(window, windowWidth, windowHeight);
 		}
 
-		if(Input::doCapture) {
-			SDL_WarpMouseInWindow(window, windowWidth/2, windowHeight/2);
-		}
-
 		if(fb.fbo) DestroyFramebuffer(&fb);
 
 		fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
@@ -287,6 +285,10 @@ s32 main(s32 ac, const char** av) {
 
 		camera.aspect = (f32) windowWidth / windowHeight;
 		camera.projection = glm::perspective(camera.fov, camera.aspect, camera.nearDist, camera.farDist);
+
+		if(Input::doCapture && !fullscreen) {
+			Input::UpdateMouse(window);
+		}
 
 		return true;
 	};
@@ -337,7 +339,7 @@ s32 main(s32 ac, const char** av) {
 		// NOTE: UpdatePhysics fucks with player rotation for some reason
 		UpdatePhysics(&scene, dt);
 
-		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
+		if(queryingPrimitives) glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
 
 		// Draw scene into framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
@@ -404,28 +406,46 @@ s32 main(s32 ac, const char** av) {
 		glEnable(GL_DEPTH_TEST);
 		DrawDebug(viewProjection);
 
+		if(queryingPrimitives) {
+			glEndQuery(GL_PRIMITIVES_GENERATED);
+			queryingPrimitives = false;
+		}else{
+			u32 available = 0;
+			glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT_AVAILABLE, &available);
+
+			if(available) {
+				glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT, &primitiveCount);
+				queryingPrimitives = true;
+			}
+		}
+
 		auto endFrameTime = std::chrono::high_resolution_clock::now();
+
 		SDL_GL_SwapWindow(window);
-		SDL_Delay(1);
-		glEndQuery(GL_PRIMITIVES_GENERATED);
+
+		// Defined in SDL_platform.h
+		#ifdef __LINUX__
+			// HACK: Appears to fix framerate fluctuations on my machine
+			//	with intel card. May cause perf issues on other systems
+			glFinish();
+		#endif
 
 		auto endTime = std::chrono::high_resolution_clock::now();
 		dt = std::chrono::duration_cast<std::chrono::duration<f32>>(endTime-beginTime).count();
+
 		f32 renderdt = std::chrono::duration_cast<std::chrono::duration<f32>>(endFrameTime-beginFrameTime).count();
 		beginTime = endTime;
 		fpsTimeAccum += dt;
 		fpsFrameCount++;
 
-		if(fpsTimeAccum > 0.3f) {
+		if(fpsTimeAccum > 0.1f) {
 			f32 fps = fpsFrameCount/fpsTimeAccum;
 			fpsFrameCount = 0;
 			fpsTimeAccum = 0;
 
-			u32 primCount = 0;
-			glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT, &primCount);
-
 			char titleBuffer[256];
-			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %u primitives", fps, renderdt*1000.f, primCount);
+			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %u primitives", fps, renderdt*1000.f, primitiveCount);
+			std::fprintf(stderr, "%.ffps   |   %.2fms\n", fps, dt*1000.f);
 			SDL_SetWindowTitle(window, titleBuffer);
 		}
 
@@ -463,6 +483,7 @@ bool InitGL(SDL_Window* window) {
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	glctx = SDL_GL_CreateContext(window);
 	if(!glctx) {
@@ -517,6 +538,8 @@ bool InitGL(SDL_Window* window) {
 	glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	SDL_GL_SetSwapInterval(1);
 
 	return true;
 }

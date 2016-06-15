@@ -127,10 +127,10 @@ void Input::UpdateMouse(SDL_Window* window){
 		s32 ww, wh;
 
 		SDL_GetMouseState(&mx, &my);
-		SDL_GetWindowSize(window, &ww, &wh);
 
-		ww &= ~1;
-		wh &= ~1;
+		extern u32 windowWidth, windowHeight;
+		ww = windowWidth  & ~1;
+		wh = windowHeight & ~1;
 
 		f32 xmod = static_cast<f32>(ww);
 		f32 ymod = static_cast<f32>(wh);

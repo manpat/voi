@@ -166,7 +166,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		auto e = eyeHit.entity;
 		fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 
-		if(!strcmp(e->name, "Cube.002")) {
+		// if(!strcmp(e->name, "Cube.002")) {
 			// SetTargetFogParameters(vec3{.5, .75, .9}*0.3f, 220.f, 0.4f);
 			// SetTargetFogParameters(vec3{0.2, 0.4, 0.6}*0.2f, 220.f, 0.4f);
 			SetTargetFogParameters(
@@ -182,6 +182,6 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 			// }
 
 			// it = (it+1)%2;
-		}
+		// }
 	}
 }
