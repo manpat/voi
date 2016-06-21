@@ -94,13 +94,23 @@ const char* uiShaderSrc[] = {
 
 extern bool debugDrawEnabled;
 
-u32 cursorTextures[2];
-u32 cursorVBO;
-u32 cursorUVBO;
-u8 interactiveHover = 0;
-
 u32 windowWidth;
 u32 windowHeight;
+
+Entity* playerEntity;
+
+namespace {
+	u32 cursorTextures[2];
+	u32 cursorVBO;
+	u32 cursorUVBO;
+	
+	ParticleSystem particleSystem;
+	f32 particleEmitAccum = 0.f;
+}
+
+void GameInit();
+void GameDeinit();
+void GameUpdate(Scene*, Camera*, Framebuffer*, f32);
 
 s32 main(s32 ac, const char** av) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
@@ -144,7 +154,7 @@ s32 main(s32 ac, const char** av) {
 
 	camera.projection = glm::perspective(camera.fov, camera.aspect, camera.nearDist, camera.farDist);
 
-	auto playerEntity = AllocateEntity();
+	playerEntity = AllocateEntity();
 	playerEntity->layers = 1<<0;
 	playerEntity->position = {0,1,0};
 	playerEntity->rotation = quat{};
@@ -167,7 +177,8 @@ s32 main(s32 ac, const char** av) {
 	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
 	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
 	// {	auto sceneData = LoadSceneData("export.voi");
-	{	auto sceneData = LoadSceneData("Testing/test.voi");
+	// {	auto sceneData = LoadSceneData("Testing/test.voi");
+	{	auto sceneData = LoadSceneData("Testing/test2.voi");
 	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
 		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
 			puts("Error! Empty scene!");
@@ -215,9 +226,9 @@ s32 main(s32 ac, const char** av) {
 		return 1;
 	}
 
-	auto forwardShader	= CreateNamedShaderProgram(ShaderIDDefault,		defaultShaderSrc[0], defaultShaderSrc[1]);
-	auto particleShader	= CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], particleShaderSrc[1]);
-	auto uiShader		= CreateNamedShaderProgram(ShaderIDUI,			uiShaderSrc[0], uiShaderSrc[1]);
+	CreateNamedShaderProgram(ShaderIDDefault,		defaultShaderSrc[0], defaultShaderSrc[1]);
+	CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], particleShaderSrc[1]);
+	CreateNamedShaderProgram(ShaderIDUI,			uiShaderSrc[0], uiShaderSrc[1]);
 
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
@@ -229,19 +240,6 @@ s32 main(s32 ac, const char** av) {
 	u32 primitiveCount = 0;
 	u32 primCountQuery;
 	glGenQueries(1, &primCountQuery);
-
-	ParticleSystem particleSystem;
-	if(!InitParticleSystem(&particleSystem, 10000)) {
-		puts("Warning! Particle system init failed");
-	}
-
-	// Simulate 3s of dust
-	for(u32 i = 0; i < 60*3; i++){
-		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), playerEntity->position);
-		UpdateParticleSystem(&particleSystem, 1.f/60.f);
-	}
-
-	f32 particleEmitAccum = 0.f;
 
 	f32 multisampleLevel = 1.;
 	bool filter = true;
@@ -279,7 +277,7 @@ s32 main(s32 ac, const char** av) {
 
 		fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 		if(!fb.valid) {
-			puts("Error! Framebuffer creation failed!");
+			puts("Error! Framebuffer recreation failed!");
 			return false;
 		}
 
@@ -294,6 +292,8 @@ s32 main(s32 ac, const char** av) {
 	};
 
 	if(!SetFullscreen(fullscreen)) return 1;
+
+	GameInit();
 
 	SDL_Event e;
 	bool running = true;
@@ -316,95 +316,9 @@ s32 main(s32 ac, const char** av) {
 			SetFullscreen(fullscreen ^= true);
 		}
 
-		vec3 vel = GetEntityVelocity(playerEntity);
-		particleEmitAccum += (glm::length(vel)*10.f + 30.f) * dt;
-
-		u32 numParticlesEmit = (u32) particleEmitAccum;
-		particleEmitAccum -= numParticlesEmit;
-		EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*2.f);
-		UpdateParticleSystem(&particleSystem, dt);
-
-		UpdateAllEntities(dt);
-
-		// Update camera position BEFORE updating physics!
-		//	Player determines what layer to render based on position. 
-		//	The physics update can change player position AFTER this has been calculated.
-		// NOTE: A post-physics update step would also fix this
-		camera.position = playerEntity->position + playerEntity->player.eyeOffset;
-		camera.rotation = playerEntity->rotation * glm::angleAxis(playerEntity->player.mouseRot.y, vec3{1,0,0});
-
-		auto viewProjection = camera.projection * glm::mat4_cast(
-			glm::inverse(camera.rotation)) * glm::translate<f32>(-camera.position);
-
-		// NOTE: UpdatePhysics fucks with player rotation for some reason
-		UpdatePhysics(&scene, dt);
-
 		if(queryingPrimitives) glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
 
-		// Draw scene into framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-			glViewport(0,0, fb.width, fb.height);
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-			glUseProgram(forwardShader->program);
-			RenderScene(&scene, camera, playerEntity->layers);
-
-			glUseProgram(particleShader->program);
-			glUniform3fv(particleShader->materialColorLoc, 1, glm::value_ptr(vec3{.5}));
-			glUniformMatrix4fv(particleShader->viewProjectionLoc, 1, false, 
-				glm::value_ptr(viewProjection));
-
-			// HACK: Because we're using point primitives for particles and they use pixels,
-			// 	we have to adjust particle size between resolutions
-			glUniform1f(glGetUniformLocation(particleShader->program, "pixelSize"), 
-				fb.height*50.f/600.f);
-
-			glEnable(GL_PROGRAM_POINT_SIZE);
-			glDepthMask(false);
-			RenderParticleSystem(&particleSystem);
-			glDepthMask(true);
-			glDisable(GL_PROGRAM_POINT_SIZE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glViewport(0,0, windowWidth, windowHeight);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-
-		ApplyEffectsAndDraw(&fb, &camera, dt);
-
-		// Draw cursor
-		glUseProgram(uiShader->program);
-		glEnableVertexAttribArray(1);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, cursorTextures[interactiveHover&1]);
-
-		f32 a = camera.aspect;
-		mat4 uiProj {
-			1,0,0,0,
-			0,a,0,0,
-			0,0,1,0,
-			0,0,0,1,
-		};
-
-		glUniform1i(uiShader->colorTexLoc, 0);
-		glUniformMatrix4fv(uiShader->viewProjectionLoc, 1,
-			false, glm::value_ptr(uiProj));
-
-		glBindBuffer(GL_ARRAY_BUFFER, cursorVBO);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-
-		glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
-		glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, nullptr);
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glDisableVertexAttribArray(1);
-		glEnable(GL_DEPTH_TEST);
-		DrawDebug(viewProjection);
+		GameUpdate(&scene, &camera, &fb, dt);
 
 		if(queryingPrimitives) {
 			glEndQuery(GL_PRIMITIVES_GENERATED);
@@ -422,13 +336,6 @@ s32 main(s32 ac, const char** av) {
 		auto endFrameTime = std::chrono::high_resolution_clock::now();
 
 		SDL_GL_SwapWindow(window);
-
-		// Defined in SDL_platform.h
-		#ifdef __LINUX__
-			// HACK: Appears to fix framerate fluctuations on my machine
-			//	with intel card. May cause perf issues on other systems
-			glFinish();
-		#endif
 
 		auto endTime = std::chrono::high_resolution_clock::now();
 		dt = std::chrono::duration_cast<std::chrono::duration<f32>>(endTime-beginTime).count();
@@ -452,7 +359,7 @@ s32 main(s32 ac, const char** av) {
 		Input::ClearFrameState();
 	}
 
-	DeinitParticleSystem(&particleSystem);
+	GameDeinit();
 
 	DeinitEntityPhysics(playerEntity);
 	FreeEntity(playerEntity);
@@ -477,12 +384,12 @@ void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* m
 SDL_GLContext glctx = nullptr;
 
 bool InitGL(SDL_Window* window) {
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	glctx = SDL_GL_CreateContext(window);
@@ -548,4 +455,114 @@ void DeinitGL() {
 	glDeleteTextures(2, cursorTextures);
 
 	SDL_GL_DeleteContext(glctx);
+}
+
+void GameInit() {
+	if(!InitParticleSystem(&particleSystem, 10000)) {
+		puts("Warning! Particle system init failed");
+	}
+
+	// Simulate 3s of dust
+	for(u32 i = 0; i < 60*3; i++){
+		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), playerEntity->position);
+		UpdateParticleSystem(&particleSystem, 1.f/60.f);
+	}
+}
+
+void GameDeinit() {
+	DeinitParticleSystem(&particleSystem);
+}
+
+void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
+	auto forwardShader	= GetNamedShaderProgram(ShaderIDDefault);
+	auto particleShader	= GetNamedShaderProgram(ShaderIDParticles);
+	auto uiShader		= GetNamedShaderProgram(ShaderIDUI);
+
+	vec3 vel = GetEntityVelocity(playerEntity);
+	particleEmitAccum += (glm::length(vel)*10.f + 30.f) * dt;
+
+	u32 numParticlesEmit = (u32) particleEmitAccum;
+	particleEmitAccum -= numParticlesEmit;
+	EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*2.f);
+	UpdateParticleSystem(&particleSystem, dt);
+
+	UpdateAllEntities(dt);
+
+	// Update camera position BEFORE updating physics!
+	//	Player determines what layer to render based on position. 
+	//	The physics update can change player position AFTER this has been calculated.
+	// NOTE: A post-physics update step would also fix this
+	camera->position = playerEntity->position + playerEntity->player.eyeOffset;
+	camera->rotation = playerEntity->rotation * glm::angleAxis(playerEntity->player.mouseRot.y, vec3{1,0,0});
+	camera->view = glm::mat4_cast(glm::inverse(camera->rotation)) * glm::translate<f32>(-camera->position);
+
+	auto viewProjection = camera->projection * camera->view;
+
+	// NOTE: UpdatePhysics fucks with player rotation for some reason
+	UpdatePhysics(scene, dt);
+
+	// Draw scene into framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, fb->fbo);
+		glViewport(0,0, fb->width, fb->height);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(forwardShader->program);
+		RenderScene(scene, *camera, playerEntity->layers);
+
+		glUseProgram(particleShader->program);
+		glUniform3fv(particleShader->materialColorLoc, 1, glm::value_ptr(vec3{.5}));
+		glUniformMatrix4fv(particleShader->viewProjectionLoc, 1, false, 
+			glm::value_ptr(viewProjection));
+
+		// HACK: Because we're using point primitives for particles and they use pixels,
+		// 	we have to adjust particle size between resolutions
+		glUniform1f(glGetUniformLocation(particleShader->program, "pixelSize"), 
+			fb->height*50.f/600.f);
+
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glDepthMask(false);
+		RenderParticleSystem(&particleSystem);
+		glDepthMask(true);
+		glDisable(GL_PROGRAM_POINT_SIZE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0,0, windowWidth, windowHeight);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+
+	ApplyEffectsAndDraw(fb, camera, dt);
+
+	// Draw cursor
+	glUseProgram(uiShader->program);
+	glEnableVertexAttribArray(1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cursorTextures[playerEntity->player.lookingAtInteractive?1:0]);
+
+	f32 a = camera->aspect;
+	mat4 uiProj {
+		1,0,0,0,
+		0,a,0,0,
+		0,0,1,0,
+		0,0,0,1,
+	};
+
+	glUniform1i(uiShader->colorTexLoc, 0);
+	glUniformMatrix4fv(uiShader->viewProjectionLoc, 1,
+		false, glm::value_ptr(uiProj));
+
+	glBindBuffer(GL_ARRAY_BUFFER, cursorVBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+
+	glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, nullptr);
+
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDisableVertexAttribArray(1);
+	glEnable(GL_DEPTH_TEST);
+	DrawDebug(viewProjection);
 }

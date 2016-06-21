@@ -151,7 +151,7 @@ struct Entity {
 	vec3 extents;
 	vec3 centerOffset;
 
-	// NOTE: Assume that nothing in this union is initialised
+	// NOTE: By default, everything here is initialised to zero
 	union {
 		vec3 planeNormal;
 
@@ -168,6 +168,9 @@ struct Entity {
 			u16 collidingPortalID;
 			s8 portalSide;
 
+			bool lookingAtInteractive;
+
+			// TODO: Change this, I don't like it
 			Camera* camera;
 		} player;
 	};
@@ -188,6 +191,8 @@ struct ShaderProgram {
 	u32 clipPlaneLoc = 0;
 
 	u32 viewProjectionLoc = 0;
+	u32 projectionLoc = 0;
+	u32 viewLoc = 0;
 	u32 modelLoc = 0;
 };
 
@@ -221,6 +226,7 @@ struct Scene {
 
 struct Camera {
 	mat4 projection;
+	mat4 view;
 	
 	vec3 position;
 	quat rotation;
@@ -233,6 +239,7 @@ struct Camera {
 	u32 intersectingPortalId;
 };
 
+// NOTE: In OpenGL 3.x+ the minimum available number of color attachments and draw buffers is 8
 enum {
 	FBTargetDepthStencil,
 	FBTargetColor,

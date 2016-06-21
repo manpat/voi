@@ -37,3 +37,8 @@ So long as depth information is kept properly this should work fine.
 
 It may also be worth figuring out how to extend this method to rendering mirrors also
 
+On rendering mirrors: it would be good to be able to bind a separate render target when descending
+into a mirror render step, then rebind the main RT once done and render back into it with effects.
+
+Note: At the moment, portal screen slicing ONLY works for upright portals. It might be possible to
+resolve this but it isn't high priority.

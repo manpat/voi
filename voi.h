@@ -28,7 +28,7 @@ struct SceneData; // In sceneloader.h
 
 bool InitScene(Scene*, const SceneData*);
 void DeinitScene(Scene*);
-void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1});
+// void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1});
 void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 
 ShaderProgram CreateShaderProgram(const char* vs, const char* fs);

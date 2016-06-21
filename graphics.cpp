@@ -28,6 +28,8 @@ Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter?GL_LINEAR:GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, fbTargetAttach[i], GL_TEXTURE_2D, fb.targets[i], 0);
 	}
@@ -152,6 +154,8 @@ ShaderProgram CreateShaderProgram(const char* vsrc, const char* fsrc) {
 		ret.program = 0;
 	}else{
 		ret.viewProjectionLoc = glGetUniformLocation(ret.program, "viewProjection");
+		ret.projectionLoc = glGetUniformLocation(ret.program, "projection");
+		ret.viewLoc = glGetUniformLocation(ret.program, "view");
 		ret.modelLoc = glGetUniformLocation(ret.program, "model");
 
 		ret.materialColorLoc = glGetUniformLocation(ret.program, "materialColor");

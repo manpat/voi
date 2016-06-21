@@ -32,7 +32,16 @@ void UpdateEntity(Entity* e, f32 dt) {
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 	if(e0->entityType == Entity::TypePortal && e1->entityType == Entity::TypePlayer) {
 		assert(!(e1->layers & (e1->layers-1)) && "Player is on more than one layer!");
-		assert(!e1->player.collidingPortalID);
+
+		if(e1->player.collidingPortalID) {
+			auto ptl = GetEntity(e1->player.collidingPortalID);
+
+			fprintf(stderr, "Warning! Ignoring portal collision because a portal is already being tracked!\n"
+				"Portals %.*s and %.*s are probably too close together!\n", 
+				ptl->nameLength, ptl->name,
+				e0->nameLength, e0->name);
+			return;
+		}
 
 		e1->player.collidingPortalID = e0->id;
 		e1->player.originalLayers = e1->layers;
@@ -60,7 +69,6 @@ void EntityOnTriggerLeave(Entity*, Entity*) {
 }
 
 extern bool debugDrawEnabled;
-extern u8 interactiveHover;
 
 constexpr f32 groundDistTolerance = 0.75f;
 constexpr f32 playerJumpTimeout = 250.f/1000.f;
@@ -158,30 +166,28 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	auto eyeFwd = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
 	auto eyeHit = Raycast(scn, eye, eyeFwd, 5.f, ent->layers);
 
-	bool interactive = eyeHit.entity && (eyeHit.entity->flags & Entity::FlagInteractive);
-	interactiveHover = interactive?1:0;
-
-	if(interactive && Input::GetMappedDown(Input::Interact)) {
+	pl->lookingAtInteractive = eyeHit.entity && (eyeHit.entity->flags & Entity::FlagInteractive);
+	if(pl->lookingAtInteractive && Input::GetMappedDown(Input::Interact)) {
 		// TODO: Frob thing when frobbing becomes a thing
 		auto e = eyeHit.entity;
 		fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 
-		// if(!strcmp(e->name, "Cube.002")) {
+		if(!strcmp(e->name, "Cube.002")) {
 			// SetTargetFogParameters(vec3{.5, .75, .9}*0.3f, 220.f, 0.4f);
 			// SetTargetFogParameters(vec3{0.2, 0.4, 0.6}*0.2f, 220.f, 0.4f);
-			SetTargetFogParameters(
-				glm::gaussRand(vec3{0.1f}, vec3{glm::sqrt(0.1f)}),
-				glm::linearRand(50.f, 240.f), 
-				glm::linearRand(0.1f, 0.7f));
+			// SetTargetFogParameters(
+			// 	glm::gaussRand(vec3{0.1f}, vec3{glm::sqrt(0.1f)}),
+			// 	glm::linearRand(50.f, 240.f), 
+			// 	glm::linearRand(0.1f, 0.7f));
 
-			// static u32 it = 0;
-			// if(it == 0) {
-			// 	SetTargetFogParameters(vec3{0., .05, .1}, 240.f, 0.5f);
-			// }else{
-			// 	SetTargetFogParameters(vec3{0.05}, 50.f, 0.15f);
-			// }
+			static u32 it = 0;
+			if(it == 0) {
+				SetTargetFogParameters(vec3{.06, .08, .1}, 240.f, 0.5f);
+			}else{
+				SetTargetFogParameters(vec3{0.05}, 50.f, 0.15f);
+			}
 
-			// it = (it+1)%2;
-		// }
+			it = (it+1)%2;
+		}
 	}
 }

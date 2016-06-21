@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <SDL2/SDL.h>
 
+void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1});
+
 bool InitScene(Scene* scene, const SceneData* data) {
 	// NOTE: THIS IS WAY OVERKILL!!
 	// It would be better to actually figure out how long the names are
@@ -170,10 +172,15 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			return false;	
 		}
 
+		// NOTE: Gets around strict aliasing rule (actually probably not but stops the warning)
+		// 	Would be better to either figure out exactly why this breaks the strict aliasing rule
+		//	and fix it, or disable optimisations based on the strict aliasing rule (-fno-strict-alias)
+		char* entitySpecificData = (char*)from->entitySpecificData;
+
 		switch(to->entityType) {
 		case Entity::TypePortal:
 		case Entity::TypeMirror:
-			to->planeNormal = glm::normalize((const vec3&) from->entitySpecificData[0]);
+			to->planeNormal = glm::normalize((const vec3&) entitySpecificData[0]);
 			break;
 
 		case Entity::TypeGeometry:
@@ -201,12 +208,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 	scene->numPortals = 0;
 	for(u32 i = 0; i < scene->numEntities; i++){
 		auto e = &scene->entities[i];
-		if(e->entityType != Entity::TypePortal) continue;
+		if(e->entityType != Entity::TypePortal && e->entityType != Entity::TypeMirror) continue;
 		if(!e->meshID) {
-			printf("Warning! Portal '%.*s' doesn't have a mesh. That's kinda useless\n", e->nameLength, e->name);
+			printf("Warning! Portal/Mirror '%.*s' doesn't have a mesh. That's kinda useless\n", e->nameLength, e->name);
 			continue;
 		}
-		if(!e->layers || !(e->layers & (e->layers-1))) {
+		if(e->entityType == Entity::TypePortal && (!e->layers || !(e->layers & (e->layers-1)))) {
 			printf("Warning! Portal '%.*s' only occupies zero or one layers\n", e->nameLength, e->name);
 			continue;
 		}
@@ -299,27 +306,10 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 	for(u16 pid = firstPortalID; pid < scene->numPortals; pid++) {
 		u32 entID = scene->portals[pid];
 		auto e = &scene->entities[entID];
-		if(e->entityType != Entity::TypePortal) continue;
-		if(~e->layers & parentNode->targetLayerMask) continue;
+		bool isPortal = e->entityType == Entity::TypePortal;
+		bool isMirror = e->entityType == Entity::TypeMirror;
 
-		vec3 planeNormal = e->rotation * e->planeNormal;
-		auto ecenter = e->position + e->rotation*e->centerOffset;
-		auto gextents = e->rotation*e->extents;
-		auto gext2 = glm::cross(planeNormal, gextents);
-		auto diff = ecenter - pos;
-
-		auto d0 = glm::normalize(diff);
-		auto d1 = glm::normalize(diff + gextents);
-		auto d2 = glm::normalize(diff - gextents);
-		auto d3 = glm::normalize(diff + gext2);
-		auto d4 = glm::normalize(diff - gext2);
-
-		bool fvis = glm::dot(d0, fwd) < 0.f
-			&& glm::dot(d1, fwd) < 0.f
-			&& glm::dot(d2, fwd) < 0.f
-			&& glm::dot(d3, fwd) < 0.f
-			&& glm::dot(d4, fwd) < 0.f;
-		if(fvis) continue;
+		if(!isPortal && !isMirror) continue;
 
 		static vec3 layerColors[] = {
 			vec3{1,0,0},
@@ -334,6 +324,51 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		};
 
 		vec3 yoff {0, 0.04*pid, 0};
+		vec3 planeNormal = e->rotation * e->planeNormal;
+		auto ecenter = e->position + e->rotation*e->centerOffset;
+
+		if(isPortal) {
+			if(~e->layers & parentNode->targetLayerMask) continue;
+
+			auto gextents = e->rotation*e->extents;
+			auto gext2 = glm::cross(planeNormal, gextents);
+			auto diff = ecenter - pos;
+
+			auto d0 = diff;
+			auto d1 = diff + gextents;
+			auto d2 = diff - gextents;
+			auto d3 = diff + gext2;
+			auto d4 = diff - gext2;
+
+			bool fvis = glm::dot(d0, fwd) < 0.f
+				&& glm::dot(d1, fwd) < 0.f
+				&& glm::dot(d2, fwd) < 0.f
+				&& glm::dot(d3, fwd) < 0.f
+				&& glm::dot(d4, fwd) < 0.f;
+			if(fvis) continue;
+
+			auto nodeID = graph->nodeCount++;
+			auto node = &graph->nodes[nodeID];
+			node->entityID = entID;
+			node->targetLayerMask = e->layers & ~parentNode->targetLayerMask;
+			node->childrenCount = 0;
+			node->depth = parentNode->depth+1;
+			node->order = pid+1;
+			parentNode->childrenCount++;
+
+		}else if(isMirror) {
+			if(!(e->layers & parentNode->targetLayerMask)) continue;
+
+			auto nodeID = graph->nodeCount++;
+			auto node = &graph->nodes[nodeID];
+			node->entityID = entID; 
+			node->targetLayerMask = e->layers & parentNode->targetLayerMask;
+			node->childrenCount = 0;
+			node->depth = parentNode->depth+1;
+			node->order = pid+1;
+			parentNode->childrenCount++;
+		}
+
 		if(parentNode->depth == 0) {
 			yoff.y = -.05f;
 			DebugLine(pos+yoff, ecenter, vec3{0}, layerColors[(e->layers & ~parentNode->targetLayerMask)>>1]);
@@ -341,15 +376,6 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 			DebugLine(pos+yoff, ecenter+yoff, layerColors[parentNode->targetLayerMask>>1], 
 				layerColors[(e->layers & ~parentNode->targetLayerMask)>>1]);
 		}
-
-		auto nodeID = graph->nodeCount++;
-		auto node = &graph->nodes[nodeID];
-		node->entityID = entID; 
-		node->targetLayerMask = e->layers & ~parentNode->targetLayerMask;
-		node->childrenCount = 0;
-		node->depth = parentNode->depth+1;
-		node->order = pid+1;
-		parentNode->childrenCount++;
 	}
 
 	u32 endCount = graph->nodeCount;
@@ -362,7 +388,9 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		vec3 ecenter = e->position + e->rotation*e->centerOffset;
 		auto diff = ecenter - pos;
 		
-		if(glm::dot(planeNormal, diff) < 0.f)
+		if(e->entityType == Entity::TypeMirror)
+			planeNormal.y *= 1.f;
+		else if(glm::dot(planeNormal, diff) < 0.f)
 			planeNormal = -planeNormal;
 
 		ConstructPortalGraph(graph, scene, startCount, ecenter, planeNormal, node->order);
@@ -395,10 +423,18 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	}
 
 	std::sort(scene->portals, &scene->portals[scene->numPortals], [scene, camFwd, camPos](u32 a, u32 b) {
-		vec3 ad = scene->entities[a].position - camPos;
-		vec3 bd = scene->entities[b].position - camPos;
-		return glm::dot(ad, camFwd) < glm::dot(bd, camFwd);
+		auto ea = &scene->entities[a];
+		auto eb = &scene->entities[b];
+		vec3 ad = ea->position - camPos;
+		vec3 bd = eb->position - camPos;
+		return glm::dot(ad, camFwd)	< glm::dot(bd, camFwd);
 	});
+
+	// std::sort(scene->portals, &scene->portals[scene->numPortals], [scene](u32 a, u32 b) {
+	// 	auto ea = &scene->entities[a];
+	// 	auto eb = &scene->entities[b];
+	// 	return (ea->entityType == Entity::TypeMirror) > (eb->entityType == Entity::TypeMirror);
+	// });
 
 	// The first node represents the player
 	portalGraph.nodes[0] = {0, (u16)layerMask, 1, 0, 0, 0};
@@ -407,8 +443,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 	auto sh = GetNamedShaderProgram(ShaderIDDefault);
 
-	mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
-	mat4 viewProjection = cam.projection * viewMatrix;
+	// mat4 viewMatrix = glm::mat4_cast(glm::inverse(cam.rotation)) * glm::translate<f32>(-cam.position);
+	mat4 viewProjection = cam.projection * cam.view;
 	glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(viewProjection));
 
 	if(intPtl) {
@@ -434,8 +470,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			DebugLine(near, point);
 			DebugLine(point-intersectDir*100.f, point+intersectDir*100.f, vec3{1, vec2{glm::length(intersectDir)}});
 
-			auto projpoint = vec3{viewMatrix * vec4{point, 1}};
-			auto projdir = vec3{viewMatrix * vec4{intersectDir, 0}};
+			auto projpoint = vec3{cam.view * vec4{point, 1}};
+			auto projdir = vec3{cam.view * vec4{intersectDir, 0}};
 			auto perpdir = glm::normalize(glm::cross(projdir, vec3{0, 0, -1}));
 			if(glm::dot(ptlNorm, ptlPos - cam.position) < 0.f)
 				perpdir = -perpdir;
@@ -527,17 +563,25 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	glClear(GL_STENCIL_BUFFER_BIT);
 
 	struct StackSlot {
-		u32 id;
+		mat4 viewProjection;
+		u32 graphIdx;
 		u32 remainingChildren;
+		bool isMirror;
 	};
 
-	StackSlot portalStack[8] {{0, portalGraph.nodes[0].childrenCount}};
+	StackSlot portalStack[8] {{viewProjection, 0, portalGraph.nodes[0].childrenCount, false}};
 	u32 stackPos = 1;
 	u32 recurseGuard = 0;
+	bool isInMirror = false;
 
+	// NOTE: This limiting condition is a shot in the dark but seems to work mostly
 	while(stackPos > 0 && recurseGuard++ < PortalGraph::MaxNumPortalNodes+10) {
 		auto parent = &portalStack[stackPos-1];
 		if(parent->remainingChildren-- == 0) {
+			// Pop stack frame
+			if(parent->isMirror) {
+				isInMirror = false;
+			}
 			stackPos--;
 			continue;
 		}
@@ -548,25 +592,49 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			continue;
 		}
 
-		u32 id = parent->remainingChildren + portalGraph.nodes[parent->id].childrenStart;
-		if(id >= PortalGraph::MaxNumPortalNodes) {
+		u32 graphIdx = parent->remainingChildren + portalGraph.nodes[parent->graphIdx].childrenStart;
+		if(graphIdx >= PortalGraph::MaxNumPortalNodes) {
 			parent->remainingChildren = 0;
+			if(parent->isMirror) {
+				isInMirror = false;
+			}
 			stackPos--;
 			puts("WARNING! Portal graph overflow!");
 			continue;			
 		}
 
-		auto portalNode = &portalGraph.nodes[id];
+		auto portalNode = &portalGraph.nodes[graphIdx];
 
-		portalStack[stackPos++] = {id, portalNode->childrenCount};
+		// New stack frame
+		auto stackSlot = &portalStack[stackPos++];
+		*stackSlot = {
+			parent->viewProjection, graphIdx, 
+			portalNode->childrenCount, false
+		};
 
 		auto ent = &scene->entities[portalNode->entityID];
 		if(!ent->meshID) continue;
-		if(ent->entityType != Entity::TypePortal) continue;
 		if(ent->flags & Entity::FlagHidden) continue;
+		if(ent->entityType != Entity::TypePortal && ent->entityType != Entity::TypeMirror) continue;
 
 		auto targetLayer = ent->layers & portalNode->targetLayerMask;
 		if(!targetLayer) continue; // This should never really happen
+
+		vec3 ecenter = ent->position + ent->rotation * ent->centerOffset;
+		vec3 dir = glm::normalize(ent->rotation * ent->planeNormal);
+		vec4 plane = vec4{dir, -glm::dot(dir, ecenter)};
+
+		stackSlot->isMirror = ent->entityType == Entity::TypeMirror;
+		if(stackSlot->isMirror) {
+			stackSlot->viewProjection = stackSlot->viewProjection 
+				* glm::translate<f32>(-dir*plane.w*2.f)
+				* glm::scale<f32>(vec3{1,-1,1})
+				;
+
+			// Limit to one reflection
+			if(isInMirror) continue;
+			isInMirror = true;
+		}
 
 		glDisable(GL_CLIP_DISTANCE0);
 		glDisable(GL_CULL_FACE);
@@ -588,6 +656,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(0.f, -1.f);
 		glDepthFunc(GL_LEQUAL);
+		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(parent->viewProjection));
 		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 
 		if(intPtl && (u32(portalNode->entityID+1u) == cam.intersectingPortalId)) {
@@ -607,6 +676,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		// 	- Disable color write
 		// 	- Always write to depth
 		// 	- Render quad at far plane
+		//	- Don't write to stencil
 		// 	- Reset depth write
 		glDepthFunc(GL_ALWAYS);
 		glDepthMask(true);
@@ -624,18 +694,17 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		DrawQuadAtFarPlane(cam.projection);
 
 		// Reset render state and prepare to render target scene
-		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection * viewMatrix));
+		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(stackSlot->viewProjection));
 		glDepthFunc(GL_LEQUAL);
 		glColorMask(true,true,true,true);
+		glFrontFace(isInMirror?GL_CW:GL_CCW);
 
 		glEnable(GL_CLIP_DISTANCE0);
 		glEnable(GL_CULL_FACE);
 
-		vec3 ecenter = ent->position + ent->rotation * ent->centerOffset;
-		vec3 dir = glm::normalize(ent->rotation * ent->planeNormal);
-		vec4 plane = vec4{dir, -glm::dot(dir, ecenter)};
-		if(glm::dot(dir, ecenter - cam.position) < 0.f)
+		if(ent->entityType == Entity::TypePortal && glm::dot(dir, ecenter - cam.position) < 0.f) {
 			plane = -plane;
+		}
 
 		glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(plane));
 
@@ -656,6 +725,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 			RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 		}
+
+		glFrontFace(GL_CCW);
 	}
 
 	if(recurseGuard > PortalGraph::MaxNumPortalNodes) {

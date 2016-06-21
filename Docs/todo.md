@@ -3,13 +3,11 @@ Shit To Do
 
 - Rendering
 	- Mirrors
-	- Portal clipping
 - Physics
 	- Colliders
 	- Collider info
 		- Kinematic
 		- Configurable sizes in blender
-	- Portal interaction
 - Lua
 	- Enumerate entities
 	- Control entities
@@ -19,8 +17,6 @@ Shit To Do
 	- Change fog settings, etc.
 
 - Config
-	- Window stuff
-		- Size, fullscreen
 	- Render stuff
 		- UI size? á la minecraft
 		- AA
@@ -28,9 +24,7 @@ Shit To Do
 		- Volume
 		- Quality?
 			- This can control sample rate and wave table granularity
-	- Save/load config
-		- Would be easy to do manually and would make catching errors easier
-		- Using lua means less code potentially but is overkill
+	- Save config after modification in game
 - Sound
 	- Lua synth def
 	- Sound through portals
@@ -47,7 +41,6 @@ Shit To Do
 		- Animations?
 		- Text rendering!
 - Save/Load
-- EntityManager
 
 - Optimise
 	- The glDrawElements in RenderMesh takes up most of frame time
@@ -56,3 +49,6 @@ Shit To Do
 	- Bake static geometry into single Mesh/Entity
 	- Vert sorting algorithm seems kinda slow
 		- Simple solution: Move it into voi_scene_exporter.py
+
+	- Optional flag for portals that bails from recursion
+	- Improve portal visibility algorithm 
