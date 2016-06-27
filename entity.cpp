@@ -193,27 +193,10 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	pl->lookingAtInteractive = eyeHit.entity && (eyeHit.entity->entityType == Entity::TypeInteractive);
 	if(pl->lookingAtInteractive && Input::GetMappedDown(Input::Interact)) {
 		auto e = eyeHit.entity;
-		fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
+		// fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 
 		if(e->interact.frobAction) {
-			RunCallback(e->interact.frobAction);
+			RunCallback(ent->id, e->interact.frobAction);
 		}
-
-		// if(!strcmp(e->name, "Cube.002")) {
-			// SetTargetFogParameters(vec3{.5, .75, .9}*0.3f, 220.f, 0.4f);
-			// SetTargetFogParameters(vec3{0.2, 0.4, 0.6}*0.2f, 220.f, 0.4f);
-			SetTargetFogParameters(
-				glm::gaussRand(vec3{0.1f}, vec3{glm::sqrt(0.1f)}),
-				glm::linearRand(50.f, 240.f), 
-				glm::linearRand(0.1f, 0.7f));
-
-			// static u32 it = 0;
-			// if(it == 0) {
-			// 	SetTargetFogParameters(vec3{.06, .08, .1}, 240.f, 0.5f);
-			// }else{
-			// 	SetTargetFogParameters(vec3{0.05}, 50.f, 0.15f);
-			// }
-			// it = (it+1)%2;
-		// }
 	}
 }

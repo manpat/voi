@@ -121,7 +121,8 @@ namespace {
 	EffectState initialState;
 	EffectState targetState;
 	EffectState actualState;
-	f32 effectLerp;
+	f32 fogLerp;
+	f32 fogLerpTime;
 
 	// Framebuffer antialiasFbo;
 }
@@ -137,18 +138,20 @@ bool InitEffects() {
 	initialState.fogDensity = 0.5f;
 
 	targetState = actualState = initialState;
-	effectLerp = 0.f;
+	fogLerp = 0.f;
+	fogLerpTime = 4.f;
 
 	return true;
 }
 
 void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
-	// TODO: Adjustable lerp time would be nice
-	effectLerp = glm::clamp(effectLerp+dt/4.f, 0.f, 1.f);
+	fogLerp = glm::clamp(fogLerp+dt/fogLerpTime, 0.f, 1.f);
 
-	actualState.fogColor = glm::mix(initialState.fogColor, targetState.fogColor, effectLerp);
-	actualState.fogDensity = glm::mix(initialState.fogDensity, targetState.fogDensity, effectLerp);
-	actualState.fogDistance = glm::mix(initialState.fogDistance, targetState.fogDistance, effectLerp);
+	// Smoothstep
+	f32 term = fogLerp*fogLerp*(3.f - 2.f*fogLerp);
+	actualState.fogColor = glm::mix(initialState.fogColor, targetState.fogColor, term);
+	actualState.fogDensity = glm::mix(initialState.fogDensity, targetState.fogDensity, term);
+	actualState.fogDistance = glm::mix(initialState.fogDistance, targetState.fogDistance, term);
 
 	glUseProgram(shaderProgram->program);
 
@@ -191,5 +194,9 @@ void SetTargetFogParameters(const vec3& color, f32 distance, f32 density) {
 	targetState.fogColor = color;
 	targetState.fogDistance = distance;
 	targetState.fogDensity = density;
-	effectLerp = 0.f;
+	fogLerp = 0.f;
+}
+
+void SetFogInterpolateTime(f32 t) {
+	fogLerpTime = glm::max(t, 0.01f);
 }

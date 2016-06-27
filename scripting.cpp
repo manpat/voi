@@ -9,12 +9,18 @@ namespace {
 }
 
 static void InitVecLib();
+static void InitRandLib();
+static void InitEntLib();
+static void InitEffectLib();
+static void InitDebugLib();
 
 bool InitScripting() {
 	l = luaL_newstate();
 	luaL_openlibs(l);
 
 	InitVecLib();
+	InitRandLib();
+	InitEffectLib();
 
 	return true;
 }
@@ -74,7 +80,7 @@ s32 GetCallbackFromScript(s32 script, const char* funcName) {
 	return func;
 }
 
-void RunCallback(s32 func) {
+void RunCallback(u32 entId, s32 func) {
 	if(!func) {
 		fprintf(stderr, "Warning! Tried to run invalid script callback\n");
 		return;
@@ -88,7 +94,8 @@ void RunCallback(s32 func) {
 		return;
 	}
 
-	if(lua_pcall(l, 0, 0, 0)) {
+	lua_pushinteger(l, entId);
+	if(lua_pcall(l, 1, 0, 0)) {
 		fprintf(stderr, "Error running script callback: %s\n", luaL_checkstring(l, -1));
 		lua_pop(l, 1);
 	}
@@ -165,27 +172,49 @@ static void InitVecLib() {
 		OP(div, /),
 		#undef OP
 
+		{"__unm", [](lua_State*){
+			*lNewVecUD() = -*lCheckVecRef(1);
+			return 1;
+		}},
+
 		{nullptr, nullptr}
 	};
 
 	static const luaL_Reg veclib[] = {
 		{"normalize", [](lua_State*) {
-			auto v = lCheckVecRef(1);
-			*lNewVecUD() = glm::normalize(*v);
+			*lNewVecUD() = glm::normalize(*lCheckVecRef(1));
 			return 1;
 		}},
 		{"dot", [](lua_State* l) {
-			auto v1 = lCheckVecRef(1);
-			auto v2 = lCheckVecRef(2);
-			lua_pushnumber(l, glm::dot(*v1, *v2));
+			lua_pushnumber(l, glm::dot(*lCheckVecRef(1), *lCheckVecRef(2)));
 			return 1;
 		}},
 		{"cross", [](lua_State*) {
-			auto v1 = lCheckVecRef(1);
-			auto v2 = lCheckVecRef(2);
-			*lNewVecUD() = glm::cross(*v1, *v2);
+			*lNewVecUD() = glm::cross(*lCheckVecRef(1), *lCheckVecRef(2));
 			return 1;
 		}},
+		{"length", [](lua_State*) {
+			lua_pushnumber(l, glm::length(*lCheckVecRef(1)));
+			return 1;
+		}},
+
+		#define ACCESSOR(x) \
+		{#x, [](lua_State*){ \
+			s32 args = lua_gettop(l); \
+			auto v = lCheckVecRef(1); \
+			if(args == 1) { \
+				lua_pushnumber(l, v->x); \
+			}else if(args == 2) { \
+				v->x = luaL_checknumber(l, 2); \
+				lua_pushvalue(l, 1); \
+			} \
+			return 1; \
+		}}
+
+		ACCESSOR(x),
+		ACCESSOR(y),
+		ACCESSOR(z),
+		#undef ACCESSOR
 
 		{nullptr, nullptr}
 	};
@@ -226,6 +255,67 @@ static void InitVecLib() {
 	lua_setfield(l, -2, "__call");
 	lua_setmetatable(l, -2);
 
+	lua_pushvalue(l, -1);
 	lua_setglobal(l, "vec");
+	lua_setfield(l, -2, "__index");
 }
 
+static void InitRandLib() {
+	static const luaL_Reg randlib[] = {
+		{"ball", [](lua_State* l) {
+			*lNewVecUD() = glm::ballRand(luaL_checknumber(l, 1));
+			return 1;
+		}},
+		{"gauss", [](lua_State* l) {
+			if(auto mean = (vec3*)luaL_testudata(l, 1, "vecmt")) {
+				*lNewVecUD() = glm::gaussRand(*mean, *lCheckVecRef(2));
+			}else if(lua_isnumber(l, 1)) {
+				lua_pushnumber(l, glm::gaussRand(lua_tonumber(l, 1), luaL_checknumber(l, 2)));
+			}else return 0;
+			return 1;
+		}},
+		{"linear", [](lua_State* l) {
+			if(auto min = (vec3*)luaL_testudata(l, 1, "vecmt")) {
+				*lNewVecUD() = glm::linearRand(*min, *lCheckVecRef(2));
+			}else if(lua_isnumber(l, 1)) {
+				lua_pushnumber(l, glm::linearRand(lua_tonumber(l, 1), luaL_checknumber(l, 2)));
+			}else return 0;
+			return 1;
+		}},
+		{"spherical", [](lua_State* l) {
+			*lNewVecUD() = glm::sphericalRand(luaL_checknumber(l, 1));
+			return 1;
+		}},
+
+		{nullptr, nullptr}
+	};
+
+	lua_newtable(l); // randlib
+	luaL_setfuncs(l, randlib, 0);
+
+	lua_setglobal(l, "rand");
+}
+
+static void InitEffectLib() {
+	static const luaL_Reg fxlib[] = {
+		{"fog", [](lua_State* l) {
+			auto col = lCheckVecRef(1);
+			f32 dist = luaL_checknumber(l, 2);
+			f32 dens = luaL_checknumber(l, 3);
+			SetTargetFogParameters(*col, dist, dens);
+			return 0;
+		}},
+
+		{"fog_interpolation", [](lua_State* l) {
+			SetFogInterpolateTime(luaL_checknumber(l, 1));
+			return 0;
+		}},
+
+		{nullptr, nullptr}
+	};
+
+	lua_newtable(l); // fxlib
+	luaL_setfuncs(l, fxlib, 0);
+
+	lua_setglobal(l, "effects");
+}

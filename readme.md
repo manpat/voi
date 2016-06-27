@@ -10,6 +10,7 @@ Sick TOC
 * Tech Shit
 	* [Voi Scene File Format](Docs/scene_format.md)
 	* [Various Data Thinkings](Docs/data.md)
+	* [Scripting Reference](Docs/scripting.md)
 
 Blendering
 ----------

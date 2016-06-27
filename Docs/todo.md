@@ -12,9 +12,12 @@ Shit To Do
 	- Enumerate entities
 	- Control entities
 		- Movement
-		- Recieve frob events
 	- Trigger audio events
 	- Change fog settings, etc.
+
+	- Trigger enter/leave/stay? callbacks
+	- Update callbacks
+	- Event scheduling?
 
 - Config
 	- Render stuff

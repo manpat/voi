@@ -201,33 +201,6 @@ s32 main(s32 ac, char** av) {
 		return 1;
 	}
 
-	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
-	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
-	// {	auto sceneData = LoadSceneData("export.voi");
-	// {	auto sceneData = LoadSceneData("Testing/test.voi");
-	{	auto sceneData = LoadSceneData("Testing/test2.voi");
-	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
-		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
-			puts("Error! Empty scene!");
-			return 1;
-		}
-
-		if(!InitScene(&scene, &sceneData)) {
-			puts("Error! Scene init failed!");
-			return 1;
-		}
-
-		playerEntity->scene = &scene;
-		if(!InitEntityPhysics(playerEntity, nullptr)) {
-			puts("Error! Entity physics init failed for player!");
-			return 1;
-		}
-
-		InitEntity(playerEntity);
-
-		FreeSceneData(&sceneData);
-	}
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -309,6 +282,33 @@ s32 main(s32 ac, char** av) {
 	};
 
 	if(!SetFullscreen(fullscreen)) return 1;
+	
+	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
+	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
+	// {	auto sceneData = LoadSceneData("export.voi");
+	// {	auto sceneData = LoadSceneData("Testing/test.voi");
+	{	auto sceneData = LoadSceneData("Testing/test2.voi");
+	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
+		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
+			puts("Error! Empty scene!");
+			return 1;
+		}
+
+		if(!InitScene(&scene, &sceneData)) {
+			puts("Error! Scene init failed!");
+			return 1;
+		}
+
+		playerEntity->scene = &scene;
+		if(!InitEntityPhysics(playerEntity, nullptr)) {
+			puts("Error! Entity physics init failed for player!");
+			return 1;
+		}
+
+		InitEntity(playerEntity);
+
+		FreeSceneData(&sceneData);
+	}
 
 	GameInit();
 

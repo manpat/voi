@@ -45,12 +45,13 @@ void DrawQuadAtFarPlane(const mat4& projection);
 
 bool InitEffects();
 void ApplyEffectsAndDraw(Framebuffer*, const Camera*, f32 dt);
-void SetTargetFogParameters(const vec3&, f32 distance = 100.f, f32 density = 0.3f);
+void SetTargetFogParameters(const vec3& color, f32 distance = 100.f, f32 density = 0.3f);
+void SetFogInterpolateTime(f32);
 
 bool InitScripting();
 s32 LoadScript(const char* fname);
 s32 GetCallbackFromScript(s32 script, const char* funcName);
-void RunCallback(s32 func);
+void RunCallback(u32 entId, s32 func);
 void UnloadScript(s32 script);
 
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
