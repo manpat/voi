@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "data.h"
+#include "voigl.h"
 
 struct SDL_Window;
 
@@ -46,6 +47,12 @@ bool InitEffects();
 void ApplyEffectsAndDraw(Framebuffer*, const Camera*, f32 dt);
 void SetTargetFogParameters(const vec3&, f32 distance = 100.f, f32 density = 0.3f);
 
+bool InitScripting();
+s32 LoadScript(const char* fname);
+s32 GetCallbackFromScript(s32 script, const char* funcName);
+void RunCallback(s32 func);
+void UnloadScript(s32 script);
+
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
 void DeinitParticleSystem(ParticleSystem*);
 void UpdateParticleSystem(ParticleSystem*, f32 dt);
@@ -73,6 +80,7 @@ void SetEntityVelocity(Entity*, const vec3&);
 vec3 GetEntityVelocity(const Entity*);
 vec3 GetEntityCenterOfMass(const Entity*);
 void ConstrainEntityUpright(Entity*);
+void SetEntityKinematic(Entity*, bool, bool = true);
 
 void InitEntity(Entity*);
 void DeinitEntity(Entity*);

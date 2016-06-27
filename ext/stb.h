@@ -2846,7 +2846,7 @@ void stb__arr_deleten_(void **pp, int size, int i, int n  STB__PARAMS)
 //      very large tables.
 
 
-STB_EXTERN unsigned int stb_hash(char *str);
+STB_EXTERN unsigned int stb_hash(const char *str);
 STB_EXTERN unsigned int stb_hashptr(void *p);
 STB_EXTERN unsigned int stb_hashlen(char *str, int len);
 STB_EXTERN unsigned int stb_rehash_improved(unsigned int v);
@@ -2857,7 +2857,7 @@ STB_EXTERN unsigned int stb_hash_number(unsigned int hash);
 #define stb_rehash(x)  ((x) + ((x) >> 6) + ((x) >> 19))
 
 #ifdef STB_DEFINE
-unsigned int stb_hash(char *str)
+unsigned int stb_hash(const char *str)
 {
    unsigned int hash = 0;
    while (*str)

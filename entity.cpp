@@ -69,6 +69,7 @@ void EntityOnTriggerLeave(Entity*, Entity*) {
 }
 
 extern bool debugDrawEnabled;
+bool flyMode = false;
 
 constexpr f32 groundDistTolerance = 0.75f;
 constexpr f32 playerJumpTimeout = 250.f/1000.f;
@@ -93,61 +94,12 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		pl->camera->intersectingPortalId = 0;
 	}
 
-	auto scn = ent->scene;
-	auto feetPos = ent->position - vec3{0, ent->extents.y-0.02f, 0};
-	auto groundHit = Raycast(scn, feetPos, vec3{0,-1,0}, 3.f, ent->layers);
-	f32 gndHitUpDot = glm::dot(groundHit.hitNormal, vec3{0,1,0});
+	// Cheat keys
+	if(Input::GetKeyDown(SDLK_F2)) {
+		flyMode ^= true;
 
-	f32 mspd = GetFloatOption("input.mousespeed");
-
-	pl->mouseRot += Input::GetMouseDelta() * mspd;
-	pl->mouseRot.y = glm::clamp<f32>(pl->mouseRot.y, -PI/2.f, PI/2.f);
-
-	ent->rotation = glm::angleAxis(-pl->mouseRot.x, vec3{0,1,0});
-
-	vec3 vel {};
-	if(Input::GetMapped(Input::Forward))	vel += ent->rotation * vec3{0,0,-1};
-	if(Input::GetMapped(Input::Backward))	vel += ent->rotation * vec3{0,0, 1};
-	if(Input::GetMapped(Input::Left))		vel += ent->rotation * vec3{-1,0,0};
-	if(Input::GetMapped(Input::Right))		vel += ent->rotation * vec3{ 1,0,0};
-
-	if(glm::length(vel) > 1.f){
-		vel = glm::normalize(vel);
+		SetEntityKinematic(ent, flyMode, false /* Don't change activation state */);
 	}
-
-	// Slow player when moving up a slope
-	auto gndHitFwdDot = glm::dot(vel, groundHit.hitNormal);
-	f32 slopeSpeedAdjust = glm::clamp(gndHitUpDot+gndHitFwdDot, 0.7f, 1.f);
-
-	// Only allow speed adjustment to change while on ground
-	if(groundHit.distance < groundDistTolerance){
-		pl->slopeSpeedAdjustSmooth = glm::mix(pl->slopeSpeedAdjustSmooth, slopeSpeedAdjust, 6.f*dt);
-	}
-
-	pl->slopeJumpAdjustSmooth = glm::mix(pl->slopeJumpAdjustSmooth, glm::max(slopeSpeedAdjust, 0.85f), 12.f*dt);
-
-	f32 speed = 8.f;
-	if(Input::GetMapped(Input::Boost)) speed *= 2.f;
-	if(Input::GetKey(SDLK_LCTRL)) speed *= 0.1f;
-	vel *= speed * pl->slopeSpeedAdjustSmooth;
-
-	vel.y = GetEntityVelocity(ent).y;
-
-	pl->jumpTimeout -= dt;
-	if(pl->jumpTimeout < 0.f
-	&& gndHitUpDot > 0.707f // At least 45° slope
-	&& groundHit.distance < groundDistTolerance) {
-		pl->canJump = true;
-	}
-
-	if(pl->canJump && Input::GetMappedDown(Input::Jump)) {
-		// TODO: Math to figure out how high this is
-		vel.y = glm::sqrt(30.f)*2.f*pl->slopeJumpAdjustSmooth;
-		pl->canJump = false;
-		pl->jumpTimeout = playerJumpTimeout;
-	}
-
-	SetEntityVelocity(ent, vel);
 
 	if(Input::GetKeyDown('1')) { ent->layers = 1<<0; RefilterEntity(ent); }
 	if(Input::GetKeyDown('2')) { ent->layers = 1<<1; RefilterEntity(ent); }
@@ -162,32 +114,106 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	if(Input::GetKeyDown('c')) Input::doCapture ^= true;
 	if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
 
+	auto scn = ent->scene;
+	auto feetPos = ent->position - vec3{0, ent->extents.y-0.02f, 0};
+	auto groundHit = Raycast(scn, feetPos, vec3{0,-1,0}, 3.f, ent->layers);
+	f32 gndHitUpDot = glm::dot(groundHit.hitNormal, vec3{0,1,0});
+
+	f32 mspd = GetFloatOption("input.mousespeed");
+
+	pl->mouseRot += Input::GetMouseDelta() * mspd;
+	pl->mouseRot.y = glm::clamp<f32>(pl->mouseRot.y, -PI/2.f, PI/2.f);
+
+	ent->rotation = glm::angleAxis(-pl->mouseRot.x, vec3{0,1,0});
+
+	if(!flyMode) {
+		vec3 vel {};
+		if(Input::GetMapped(Input::Forward))	vel += ent->rotation * vec3{0,0,-1};
+		if(Input::GetMapped(Input::Backward))	vel += ent->rotation * vec3{0,0, 1};
+		if(Input::GetMapped(Input::Left))		vel += ent->rotation * vec3{-1,0,0};
+		if(Input::GetMapped(Input::Right))		vel += ent->rotation * vec3{ 1,0,0};
+
+		if(glm::length(vel) > 1.f){
+			vel = glm::normalize(vel);
+		}
+
+		// Slow player when moving up a slope
+		auto gndHitFwdDot = glm::dot(vel, groundHit.hitNormal);
+		f32 slopeSpeedAdjust = glm::clamp(gndHitUpDot+gndHitFwdDot, 0.7f, 1.f);
+
+		// Only allow speed adjustment to change while on ground
+		if(groundHit.distance < groundDistTolerance){
+			pl->slopeSpeedAdjustSmooth = glm::mix(pl->slopeSpeedAdjustSmooth, slopeSpeedAdjust, 6.f*dt);
+		}
+
+		pl->slopeJumpAdjustSmooth = glm::mix(pl->slopeJumpAdjustSmooth, glm::max(slopeSpeedAdjust, 0.85f), 12.f*dt);
+
+		f32 speed = 8.f;
+		if(Input::GetMapped(Input::Boost)) speed *= 2.f;
+		if(Input::GetKey(SDLK_LCTRL)) speed *= 0.1f;
+		vel *= speed * pl->slopeSpeedAdjustSmooth;
+
+		vel.y = GetEntityVelocity(ent).y;
+
+		pl->jumpTimeout -= dt;
+		if(pl->jumpTimeout < 0.f
+		&& gndHitUpDot > 0.707f // At least 45° slope
+		&& groundHit.distance < groundDistTolerance) {
+			pl->canJump = true;
+		}
+
+		if(pl->canJump && Input::GetMappedDown(Input::Jump)) {
+			// TODO: Math to figure out how high this is
+			vel.y = glm::sqrt(30.f)*2.f*pl->slopeJumpAdjustSmooth;
+			pl->canJump = false;
+			pl->jumpTimeout = playerJumpTimeout;
+		}
+
+		SetEntityVelocity(ent, vel);
+	}else{
+		auto moveRot = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0});
+
+		vec3 vel {};
+		if(Input::GetMapped(Input::Forward))	vel += moveRot * vec3{0,0,-1};
+		if(Input::GetMapped(Input::Backward))	vel += moveRot * vec3{0,0, 1};
+		if(Input::GetMapped(Input::Left))		vel += moveRot * vec3{-1,0,0};
+		if(Input::GetMapped(Input::Right))		vel += moveRot * vec3{ 1,0,0};
+
+		f32 speed = 8.f;
+		if(Input::GetMapped(Input::Boost)) speed *= 2.f;
+		if(Input::GetKey(SDLK_LCTRL)) speed *= 0.1f;
+
+		ent->position += vel * dt * speed;
+	}
+
 	auto eye = ent->position + pl->eyeOffset;
 	auto eyeFwd = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
 	auto eyeHit = Raycast(scn, eye, eyeFwd, 5.f, ent->layers);
 
-	pl->lookingAtInteractive = eyeHit.entity && (eyeHit.entity->flags & Entity::FlagInteractive);
+	pl->lookingAtInteractive = eyeHit.entity && (eyeHit.entity->entityType == Entity::TypeInteractive);
 	if(pl->lookingAtInteractive && Input::GetMappedDown(Input::Interact)) {
-		// TODO: Frob thing when frobbing becomes a thing
 		auto e = eyeHit.entity;
 		fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 
-		if(!strcmp(e->name, "Cube.002")) {
+		if(e->interact.frobAction) {
+			RunCallback(e->interact.frobAction);
+		}
+
+		// if(!strcmp(e->name, "Cube.002")) {
 			// SetTargetFogParameters(vec3{.5, .75, .9}*0.3f, 220.f, 0.4f);
 			// SetTargetFogParameters(vec3{0.2, 0.4, 0.6}*0.2f, 220.f, 0.4f);
-			// SetTargetFogParameters(
-			// 	glm::gaussRand(vec3{0.1f}, vec3{glm::sqrt(0.1f)}),
-			// 	glm::linearRand(50.f, 240.f), 
-			// 	glm::linearRand(0.1f, 0.7f));
+			SetTargetFogParameters(
+				glm::gaussRand(vec3{0.1f}, vec3{glm::sqrt(0.1f)}),
+				glm::linearRand(50.f, 240.f), 
+				glm::linearRand(0.1f, 0.7f));
 
-			static u32 it = 0;
-			if(it == 0) {
-				SetTargetFogParameters(vec3{.06, .08, .1}, 240.f, 0.5f);
-			}else{
-				SetTargetFogParameters(vec3{0.05}, 50.f, 0.15f);
-			}
-
-			it = (it+1)%2;
-		}
+			// static u32 it = 0;
+			// if(it == 0) {
+			// 	SetTargetFogParameters(vec3{.06, .08, .1}, 240.f, 0.5f);
+			// }else{
+			// 	SetTargetFogParameters(vec3{0.05}, 50.f, 0.15f);
+			// }
+			// it = (it+1)%2;
+		// }
 	}
 }

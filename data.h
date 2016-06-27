@@ -2,11 +2,12 @@
 #define DATA_H
 
 #include "common.h"
+#include "voigl.h"
 #include <vector>
 
 class btRigidBody;
 class btCollisionShape;
-class btDbvtBroadphase;
+struct btDbvtBroadphase;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
@@ -107,6 +108,7 @@ struct Entity {
 		TypeGeometry,
 		TypePortal,
 		TypeMirror,
+		TypeInteractive,
 		TypeTrigger,
 
 		// NOTE: Nothing from this point onwards
@@ -119,7 +121,7 @@ struct Entity {
 	enum : u8 {
 		FlagHidden		= 1<<0,
 		FlagStatic		= 1<<1,
-		FlagInteractive = 1<<2,
+		// FlagInteractive = 1<<2,
 	};
 
 	u16 id;
@@ -173,6 +175,10 @@ struct Entity {
 			// TODO: Change this, I don't like it
 			Camera* camera;
 		} player;
+
+		struct {
+			s32 frobAction;
+		} interact;
 	};
 
 	// So I can use the union for things with non-trivial constructors (glm vectors)

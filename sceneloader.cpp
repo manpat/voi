@@ -184,6 +184,8 @@ SceneData LoadSceneData(const char* fname) {
 			"Geometry",
 			"Portal",
 			"Mirror",
+			"Interactive",
+			"Trigger",
 		};
 
 		SCENEPRINT("\tentityName: %.*s\n", nameLength, ent->name);

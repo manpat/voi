@@ -109,6 +109,11 @@ class ExportVoiScene(bpy.types.Operator):
 				if type in [1, 2]: # Portal, Mirror
 					out.write(struct.pack('=H', 12)) # Size
 					out.write(struct.pack('=fff', *e['planeNormal']))
+				elif type == 3:
+					ostr = bytes(e['action'], 'utf-8')
+					out.write(struct.pack('=H', len(ostr)+1))
+					out.write(struct.pack('=B', len(ostr))) # This might be overkill but whatever
+					out.write(ostr)
 				else:
 					out.write(struct.pack('=H', 0))
 
@@ -243,6 +248,8 @@ class ExportVoiScene(bpy.types.Operator):
 				accum /= len(obj.data.polygons)
 
 				data['planeNormal'] = swapCoords(accum)
+			elif type == 3:
+				data['action'] = obj.get("voi_entityaction", "")
 
 			self.entities.append(data)
 

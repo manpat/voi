@@ -40,7 +40,4 @@ using f64 = double;
 #define PI M_PI
 #endif
 
-#define GLEW_STATIC
-#include "ext/glew.h"
-
 #endif

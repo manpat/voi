@@ -1,6 +1,8 @@
 #include "voi.h"
+#include "ext/stb.h"
 #include "sceneloader.h"
 
+#include <map>
 #include <algorithm>
 #include <SDL2/SDL.h>
 
@@ -124,6 +126,8 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		// TODO: Shader stuff when added
 	}
 
+	std::map<u32, s32> loadedScripts {};
+
 	// Do entity stuff
 	for(u32 i = 0; i < data->numEntities; i++) {
 		auto to = &scene->entities[i];
@@ -183,6 +187,30 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			to->planeNormal = glm::normalize((const vec3&) entitySpecificData[0]);
 			break;
 
+		case Entity::TypeInteractive: {
+			u8 actionlen = *entitySpecificData++;
+			*(entitySpecificData+actionlen) = 0;
+			auto scriptFile = entitySpecificData;
+			auto action = std::strchr(scriptFile, ':');
+			if(!action){
+				printf("File: %s\n", scriptFile);
+			}else{
+				*action++ = 0;
+				printf("File: %s    Action: %s\n", scriptFile, action);
+				static char buf[256];
+				std::snprintf(buf, 256, "scripts/%s", scriptFile);
+				s32* script = &loadedScripts[stb_hash(scriptFile)];
+				if(!*script) *script = LoadScript(buf);
+				if(*script) {
+					to->interact.frobAction = GetCallbackFromScript(*script, action);
+				}
+			}
+		} // Fallthrough
+
+		case Entity::TypeTrigger:
+			to->flags |= Entity::FlagStatic; // TODO: Make kinematic instead, just in case we want to move 'em
+			break;
+			
 		case Entity::TypeGeometry:
 		default:
 			break;
@@ -203,6 +231,11 @@ bool InitScene(Scene* scene, const SceneData* data) {
 
 		InitEntity(to);
 	}
+
+	// We don't need to hold onto a script reference once we have references 
+	//	to the callbacks
+	for(auto sc: loadedScripts)
+		UnloadScript(sc.second);
 
 	// Do portal stuff
 	scene->numPortals = 0;
@@ -294,7 +327,9 @@ struct PortalGraph {
 };
 
 // Breadth first search of potentially visible portals
-void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, vec3 pos, vec3 fwd, u16 firstPortalID) {
+void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, vec3 pos, vec3 fwd, u16 firstPortalID, bool inMirror = false) {
+	DebugLine(pos, pos+fwd);
+
 	if(graph->nodeCount >= PortalGraph::MaxNumPortalNodes) return;
 	if(parentNodeID >= PortalGraph::MaxNumPortalNodes) return;
 	if(firstPortalID >= scene->numPortals) return;
@@ -303,13 +338,17 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 	if(parentNode->depth >= 7) return;
 
 	u32 startCount = graph->nodeCount;
-	for(u16 pid = firstPortalID; pid < scene->numPortals; pid++) {
+	u16 begin = firstPortalID;
+	u16 end = scene->numPortals;
+
+	for(u16 pid = begin; pid < end; pid++) {
 		u32 entID = scene->portals[pid];
 		auto e = &scene->entities[entID];
 		bool isPortal = e->entityType == Entity::TypePortal;
 		bool isMirror = e->entityType == Entity::TypeMirror;
 
 		if(!isPortal && !isMirror) continue;
+		if(isMirror && inMirror) continue;
 
 		static vec3 layerColors[] = {
 			vec3{1,0,0},
@@ -365,7 +404,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 			node->targetLayerMask = e->layers & parentNode->targetLayerMask;
 			node->childrenCount = 0;
 			node->depth = parentNode->depth+1;
-			node->order = pid+1;
+			node->order = 0; //pid+1;
 			parentNode->childrenCount++;
 		}
 
@@ -388,12 +427,12 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		vec3 ecenter = e->position + e->rotation*e->centerOffset;
 		auto diff = ecenter - pos;
 		
-		if(e->entityType == Entity::TypeMirror)
-			planeNormal.y *= 1.f;
-		else if(glm::dot(planeNormal, diff) < 0.f)
+		bool isMirror = e->entityType == Entity::TypeMirror;
+
+		if(glm::dot(planeNormal, diff) * (isMirror?-1:1) < 0.f)
 			planeNormal = -planeNormal;
 
-		ConstructPortalGraph(graph, scene, startCount, ecenter, planeNormal, node->order);
+		ConstructPortalGraph(graph, scene, startCount, ecenter, planeNormal, node->order, isMirror || inMirror);
 	}
 }
 
@@ -626,10 +665,25 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 		stackSlot->isMirror = ent->entityType == Entity::TypeMirror;
 		if(stackSlot->isMirror) {
-			stackSlot->viewProjection = stackSlot->viewProjection 
-				* glm::translate<f32>(-dir*plane.w*2.f)
-				* glm::scale<f32>(vec3{1,-1,1})
-				;
+			// https://en.wikipedia.org/wiki/Transformation_matrix#Reflection_2
+			f32 a = plane.x;
+			f32 b = plane.y;
+			f32 c = plane.z;
+			f32 d = plane.w;
+
+			f32 ab2 = -2.f*a*b;
+			f32 ac2 = -2.f*a*c;
+			f32 bc2 = -2.f*b*c;
+			f32 d2  = -2.f*d;
+
+			mat4 reflection {
+				1-2*a*a, ab2, ac2, 0,
+				ab2, 1-2*b*b, bc2, 0,
+				ac2, bc2, 1-2*c*c, 0,
+				a*d2, b*d2, c*d2, 1
+			};
+
+			stackSlot->viewProjection = stackSlot->viewProjection * reflection;
 
 			// Limit to one reflection
 			if(isInMirror) continue;
@@ -702,7 +756,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glEnable(GL_CLIP_DISTANCE0);
 		glEnable(GL_CULL_FACE);
 
-		if(ent->entityType == Entity::TypePortal && glm::dot(dir, ecenter - cam.position) < 0.f) {
+		// Make sure to clip the right side
+		if(glm::dot(dir, ecenter - cam.position) * (ent->entityType == Entity::TypeMirror?-1.f:1.f) < 0.f) {
 			plane = -plane;
 		}
 

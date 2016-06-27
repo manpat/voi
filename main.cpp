@@ -112,18 +112,40 @@ void GameInit();
 void GameDeinit();
 void GameUpdate(Scene*, Camera*, Framebuffer*, f32);
 
-s32 main(s32 ac, const char** av) {
+s32 main(s32 ac, char** av) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
 		return 1;
 	}
 
-	ParseCLOptions(ac, av);
+	{	SDL_version compiledVersion;
+		SDL_version linkedVersion;
+		SDL_VERSION(&compiledVersion);
+		SDL_GetVersion(&linkedVersion);
+
+		assert(compiledVersion.major == linkedVersion.major);
+		assert(compiledVersion.minor == linkedVersion.minor);
+		assert(compiledVersion.patch == linkedVersion.patch);
+	}
+
+	ParseCLOptions(ac, (const char**)av);
 	LoadOptions();
 
 	windowWidth = GetIntOption("window.width");
 	windowHeight = GetIntOption("window.height");
 	bool fullscreen = GetBoolOption("window.fullscreen");
+
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
 	auto window = SDL_CreateWindow("Voi", 
 		SDL_WINDOWPOS_CENTERED_DISPLAY(1), SDL_WINDOWPOS_UNDEFINED, 
@@ -144,6 +166,11 @@ s32 main(s32 ac, const char** av) {
 
 	if(!InitDebug()) {
 		puts("Warning! Debug draw init failed");
+	}
+
+	if(!InitScripting()) {
+		puts("Error! Scripting init failed!");
+		return 1;
 	}
 
 	Camera camera;
@@ -190,16 +217,6 @@ s32 main(s32 ac, const char** av) {
 			return 1;
 		}
 
-		// TODO: Fuck this off. I'm just testing the crosshair
-		for(u32 i = 0; i < scene.numEntities; i++) {
-			if(scene.entities[i].colliderType == ColliderCube
-				&& scene.entities[i].entityType == Entity::TypeGeometry){
-				printf("Entity [%u] %.*s was made interactive\n", i, 
-					(u32)scene.entities[i].nameLength, scene.entities[i].name);
-				scene.entities[i].flags |= Entity::FlagInteractive;
-			}	
-		}
-
 		playerEntity->scene = &scene;
 		if(!InitEntityPhysics(playerEntity, nullptr)) {
 			puts("Error! Entity physics init failed for player!");
@@ -226,9 +243,9 @@ s32 main(s32 ac, const char** av) {
 		return 1;
 	}
 
-	CreateNamedShaderProgram(ShaderIDDefault,		defaultShaderSrc[0], defaultShaderSrc[1]);
+	CreateNamedShaderProgram(ShaderIDDefault,	defaultShaderSrc[0], defaultShaderSrc[1]);
 	CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], particleShaderSrc[1]);
-	CreateNamedShaderProgram(ShaderIDUI,			uiShaderSrc[0], uiShaderSrc[1]);
+	CreateNamedShaderProgram(ShaderIDUI,		uiShaderSrc[0], uiShaderSrc[1]);
 
 	f32 dt = 1.f/60.f;
 	f32 fpsTimeAccum = 0.f;
@@ -352,7 +369,7 @@ s32 main(s32 ac, const char** av) {
 
 			char titleBuffer[256];
 			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %u primitives", fps, renderdt*1000.f, primitiveCount);
-			std::fprintf(stderr, "%.ffps   |   %.2fms\n", fps, dt*1000.f);
+			// std::fprintf(stderr, "%.ffps   |   %.2fms\n", fps, dt*1000.f);
 			SDL_SetWindowTitle(window, titleBuffer);
 		}
 
@@ -375,50 +392,16 @@ s32 main(s32 ac, const char** av) {
 	return 0;
 }
 
-void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
-	if(type != GL_DEBUG_TYPE_ERROR_ARB && type != GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB) return;
-
-	fprintf(stderr, "GLERROR: %.*s\n", length, msg);
-}
-
-SDL_GLContext glctx = nullptr;
-
-bool InitGL(SDL_Window* window) {
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-	glctx = SDL_GL_CreateContext(window);
-	if(!glctx) {
-		puts("OpenGL context creation failed");
-		return false;
+void GameInit() {
+	if(!InitParticleSystem(&particleSystem, 10000)) {
+		puts("Warning! Particle system init failed");
 	}
 
-	glewExperimental = true;
-	auto glewerr = glewInit();
-	if(glewerr != GLEW_OK) {
-		printf("GLEW init failed: %s\n", glewGetErrorString(glewerr));
-		return false;
+	// Simulate 3s of dust
+	for(u32 i = 0; i < 60*3; i++){
+		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), playerEntity->position);
+		UpdateParticleSystem(&particleSystem, 1.f/60.f);
 	}
-
-	// TODO: Check to make sure that we can use all the things we are using
-	// TODO: Possibly fuck glew off and get fptrs ourselves, or at least cut down glew
-	// Try to enable debug output
-	if(GLEW_ARB_debug_output){
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-		glDebugMessageCallbackARB((GLDEBUGPROCARB) DebugCallback, nullptr);
-	}else{
-		puts("Warning! Debug output not supported");
-	}
-
-	// *Required* as of like OpenGL 3.something 
-	u32 vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
 	cursorTextures[0] = LoadTexture("GameData/UI/cursor.png");
 	cursorTextures[1] = LoadTexture("GameData/UI/cursor2.png");
@@ -445,32 +428,12 @@ bool InitGL(SDL_Window* window) {
 	glBindBuffer(GL_ARRAY_BUFFER, cursorUVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	SDL_GL_SetSwapInterval(1);
-
-	return true;
-}
-
-void DeinitGL() {
-	glDeleteTextures(2, cursorTextures);
-
-	SDL_GL_DeleteContext(glctx);
-}
-
-void GameInit() {
-	if(!InitParticleSystem(&particleSystem, 10000)) {
-		puts("Warning! Particle system init failed");
-	}
-
-	// Simulate 3s of dust
-	for(u32 i = 0; i < 60*3; i++){
-		EmitParticles(&particleSystem, 1, glm::linearRand(4.f, 20.f), playerEntity->position);
-		UpdateParticleSystem(&particleSystem, 1.f/60.f);
-	}
 }
 
 void GameDeinit() {
 	DeinitParticleSystem(&particleSystem);
+
+	glDeleteTextures(2, cursorTextures);
 }
 
 void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
@@ -536,7 +499,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 	glUseProgram(uiShader->program);
 	glEnableVertexAttribArray(1);
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTextureVoi(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cursorTextures[playerEntity->player.lookingAtInteractive?1:0]);
 
 	f32 a = camera->aspect;

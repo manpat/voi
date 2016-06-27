@@ -18,6 +18,8 @@ voi_obtypes = [
 	('g', "Geometry", "Shit that doesn't do much"),
 	('p', "Portal", "Goes places"),
 	('m', "Mirror", "Shiny"),
+	('i', "Interactive", "Frob da thing"),
+	('t', "Trigger", "Touch da thing"),
 ]
 
 voi_coltypes = [
@@ -61,6 +63,9 @@ class ObjectPanel(bpy.types.Panel):
 
 		layout.row().prop(o, "voi_collidertype")
 
+		if type == 3: # Interact
+			layout.row().prop(o, "voi_entityaction")
+
 class ScriptPanel(bpy.types.Panel):
 	bl_label = "Voi Script"
 	bl_idname = "TEXT_PT_voi"
@@ -85,6 +90,8 @@ def register():
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
 	obj.voi_entitystatic = BoolProperty(name="Static", default=True)
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
+
+	obj.voi_entityaction = StringProperty(name="Action", description="What to run when object is frobbed. file.lua:function_name")
 
 	obj = bpy.types.Text
 	obj.voi_scripttype = EnumProperty(items=voi_scrtypes, name="Script Type", default='c')

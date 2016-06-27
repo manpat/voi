@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "data.h"
+#include "voigl.h"
 
 struct MeshData {
 	u32 numVertices;

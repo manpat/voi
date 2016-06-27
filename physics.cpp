@@ -350,7 +350,7 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 		}
 
 		// TODO: Look into btGimpactTriangleMeshShape for moving mesh colliders
-		ent->collider = new btBvhTriangleMeshShape{btmesh, ent->flags & Entity::FlagStatic};
+		ent->collider = new btBvhTriangleMeshShape{btmesh, bool(ent->flags & Entity::FlagStatic)};
 	}	break;
 
 	case ColliderNone:
@@ -466,4 +466,20 @@ vec3 GetEntityCenterOfMass(const Entity* e) {
 
 void ConstrainEntityUpright(Entity* e) {
 	e->rigidbody->setAngularFactor(0.f);
+}
+
+void SetEntityKinematic(Entity* e, bool k, bool setActivationState) {
+	auto flags = e->rigidbody->getCollisionFlags();
+	if(k){
+		flags |= btCollisionObject::CF_KINEMATIC_OBJECT;
+	}else{
+		flags &= ~btCollisionObject::CF_KINEMATIC_OBJECT;
+	}
+	e->rigidbody->setCollisionFlags(flags);
+
+	if(setActivationState){
+		e->rigidbody->setActivationState(k?DISABLE_DEACTIVATION:ACTIVE_TAG);
+	}
+
+	RefilterEntity(e);
 }

@@ -1,7 +1,7 @@
 #include "voi.h"
 
 namespace {
-	#define SHADER(x) "#version 150\n" #x
+	#define SHADER(x) "#version 130\n" #x
 	const char* postShaderSrc[] = {
 		SHADER(
 			in vec2 vertex;
@@ -144,7 +144,7 @@ bool InitEffects() {
 
 void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	// TODO: Adjustable lerp time would be nice
-	effectLerp = glm::clamp(effectLerp+dt/8.f, 0.f, 1.f);
+	effectLerp = glm::clamp(effectLerp+dt/4.f, 0.f, 1.f);
 
 	actualState.fogColor = glm::mix(initialState.fogColor, targetState.fogColor, effectLerp);
 	actualState.fogDensity = glm::mix(initialState.fogDensity, targetState.fogDensity, effectLerp);
@@ -153,11 +153,11 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	glUseProgram(shaderProgram->program);
 
 	// Draw scene with post effects
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTextureVoi(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, fb->targets[FBTargetDepthStencil]);
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTextureVoi(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, fb->targets[FBTargetColor]);
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTextureVoi(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, fb->targets[FBTargetGeneral0]);
 
 	glUniform1i(shaderProgram->depthTexLoc, 0);
