@@ -59,8 +59,7 @@ Framebuffer CreateColorFramebuffer(u32 width, u32 height, bool filter) {
 
 	glGenTextures(1, &fb.targets[FBTargetColor]);
 	glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetColor]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, 
-		GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter?GL_LINEAR:GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter?GL_LINEAR:GL_NEAREST);
