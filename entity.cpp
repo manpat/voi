@@ -196,7 +196,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		// fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 
 		if(e->interact.frobAction) {
-			RunCallback(ent->id, e->interact.frobAction);
+			RunCallback(e->id, e->interact.frobAction);
 		}
 	}
 }

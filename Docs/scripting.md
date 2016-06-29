@@ -35,5 +35,8 @@ API Reference
 			- `mean` and `deviation` can be either scalar or vector
 
 	- Effects
-		- `effects.fog(color, distance, density)` - Begins an interpolation toward specified fog settings
-		- `effects.fog_interpolation(x)` - Sets the duration of fog interpolations
+		- `effects.fog(color, distance, density[, duration])` - Begins an interpolation toward specified fog settings over `duration` seconds
+		- `effects.fog_color(color[, duration])` - Begins interpolating fog color toward `color` over `duration` seconds
+		- `effects.fog_density(density[, duration])` - Begins interpolating fog density toward `density` over `duration` seconds
+		- `effects.fog_distance(distance[, duration])` - Begins interpolating fog distance toward `distance` over `duration` seconds
+		- `effects.vignette(intensity[, duration])` - Begins interpolating vignette intensity toward `intensity` over `duration` seconds

@@ -131,71 +131,95 @@ namespace {
 	ShaderProgram* shaderProgram;
 	ShaderProgram ditherProgram;
 
-	struct EffectState {
-		vec3 fogColor;
-		f32 fogDistance;
-		f32 fogDensity;
+	template<class T>
+	struct Lerpable {
+		T initial;
+		T target;
+		T actual;
+		f32 lerpAmt;
+		f32 lerpTime = 4.f;
+
+		void operator=(T o) {
+			initial = target = actual = o;
+		}
+
+		operator T() {
+			return actual;
+		}
+
+		void Update(f32 dt) {
+			lerpAmt = glm::clamp(lerpAmt+dt/lerpTime, 0.f, 1.f);
+			f32 term = lerpAmt*lerpAmt*(3.f - 2.f*lerpAmt); // Smoothstep
+			actual = glm::mix(initial, target, term);
+		}
+
+		void SetTarget(T o) {
+			target = o;
+			initial = actual;
+			lerpAmt = 0.f;
+		}
+
+		void SetDuration(f32 o) {
+			lerpTime = std::max(o, 0.0001f);
+		}
 	};
 
-	EffectState initialState;
-	EffectState targetState;
-	EffectState actualState;
-	f32 fogLerp;
-	f32 fogLerpTime;
+	Lerpable<vec3> fogColor;
+	Lerpable<f32> fogDistance;
+	Lerpable<f32> fogDensity;
+
+	Lerpable<f32> vignetteLevel;
 
 	u32 ditherTex;
 
 	Framebuffer secondaryFbo;
 }
 
+extern u32 windowWidth, windowHeight;
+
 bool InitEffects() {
 	shaderProgram = CreateNamedShaderProgram(ShaderIDPost, vertSrc, postShaderSrc);
 	ditherProgram = CreateShaderProgram(vertSrc, ditherFragSrc);
-	initialState.fogColor = vec3{0.4, 0.0, 0.2}*0.2f;
-	initialState.fogDistance = 30.f;
-	initialState.fogDensity = 0.2f;
+	fogColor = vec3{0.1};
+	fogDistance = 200.f;
+	fogDensity = 0.5f;
 
-	initialState.fogColor = vec3{0.1};
-	initialState.fogDistance = 200.f;
-	initialState.fogDensity = 0.5f;
+	vignetteLevel = 0.1f;
 
-	targetState = actualState = initialState;
-	fogLerp = 0.f;
-	fogLerpTime = 4.f;
-	
-	// TODO: Proper tex and framebuffer size
-	u8* ditherPattern = new u8[1366*768];
-	for(u32 i = 0; i < 1366*768; i++)
+	return ReinitEffects();
+}
+
+bool ReinitEffects() {
+	u8* ditherPattern = new u8[windowWidth*windowHeight];
+	for(u32 i = 0; i < windowWidth*windowHeight; i++)
 		ditherPattern[i] = (u8)std::rand();
 
+	if(ditherTex) glDeleteTextures(1, &ditherTex);
 	glGenTextures(1, &ditherTex);
 	glBindTexture(GL_TEXTURE_2D, ditherTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 1366, 768, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, ditherPattern);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, windowWidth, windowHeight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, ditherPattern);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	secondaryFbo = CreateColorFramebuffer(1366, 768, false);
+	DestroyFramebuffer(&secondaryFbo);
+	secondaryFbo = CreateColorFramebuffer(windowWidth, windowHeight, false);
 	if(!secondaryFbo.valid) {
 		fprintf(stderr, "Effect framebuffer init failed\n");
 		return false;
 	}
 
 	delete[] ditherPattern;
-
 	return true;
 }
 
 void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
-	fogLerp = glm::clamp(fogLerp+dt/fogLerpTime, 0.f, 1.f);
-
-	// Smoothstep
-	f32 term = fogLerp*fogLerp*(3.f - 2.f*fogLerp);
-	actualState.fogColor = glm::mix(initialState.fogColor, targetState.fogColor, term);
-	actualState.fogDensity = glm::mix(initialState.fogDensity, targetState.fogDensity, term);
-	actualState.fogDistance = glm::mix(initialState.fogDistance, targetState.fogDistance, term);
+	fogColor.Update(dt);
+	fogDensity.Update(dt);
+	fogDistance.Update(dt);
+	vignetteLevel.Update(dt);
 
 	glUseProgram(shaderProgram->program);
 
@@ -219,8 +243,8 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	u32 prevProjViewLoc = glGetUniformLocation(shaderProgram->program, "prevProjView");
 	u32 vignettePowerLoc = glGetUniformLocation(shaderProgram->program, "vignettePower");
 	u32 vignetteStrengthLoc = glGetUniformLocation(shaderProgram->program, "vignetteStrength");
-	glUniform4fv(fogColorLoc, 1, glm::value_ptr(vec4{actualState.fogColor, actualState.fogDensity}));
-	glUniform1f(fogDistanceLoc, actualState.fogDistance);
+	glUniform4fv(fogColorLoc, 1, glm::value_ptr(vec4{fogColor.actual, fogDensity.actual}));
+	glUniform1f(fogDistanceLoc, fogDistance.actual);
 
 	static mat4 prevView = camera->view;
 	glUniformMatrix4fv(prevProjViewLoc, 1, false, glm::value_ptr(/*camera->projection * */prevView));
@@ -229,17 +253,14 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	static f32 time = 0.f;
 	glUniform1f(timeLoc, time += dt);
 
-	f32 vignetteLevel = sin(time*PI/3.f)*0.5f+0.5f;
-
-	glUniform1f(vignettePowerLoc, 3.3f - vignetteLevel*1.6f);
-	glUniform1f(vignetteStrengthLoc, 0.1f + vignetteLevel * 0.8f);
+	glUniform1f(vignettePowerLoc, 3.5f - vignetteLevel*1.2f);
+	glUniform1f(vignetteStrengthLoc, 0.1f + vignetteLevel * 1.2f);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, secondaryFbo.fbo);
 	glViewport(0,0,secondaryFbo.width, secondaryFbo.height);
 	DrawFullscreenQuad();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	extern u32 windowWidth, windowHeight;
 	glViewport(0,0,windowWidth, windowHeight);
 
 	glUseProgram(ditherProgram.program);
@@ -257,14 +278,31 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	//http://www.gamedev.net/topic/580517-nfaa---a-post-process-anti-aliasing-filter-results-implementation-details/
 }
 
-void SetTargetFogParameters(const vec3& color, f32 distance, f32 density) {
-	initialState = actualState;
-	targetState.fogColor = color;
-	targetState.fogDistance = distance;
-	targetState.fogDensity = density;
-	fogLerp = 0.f;
+void SetTargetFogParameters(const vec3& color, f32 distance, f32 density, f32 duration) {
+	fogColor.SetTarget(color);
+	fogDensity.SetTarget(density);
+	fogDistance.SetTarget(distance);
+	fogColor.SetDuration(duration);
+	fogDensity.SetDuration(duration);
+	fogDistance.SetDuration(duration);
 }
 
-void SetFogInterpolateTime(f32 t) {
-	fogLerpTime = glm::max(t, 0.01f);
+void SetTargetFogColor(const vec3& color, f32 duration) {
+	fogColor.SetTarget(color);
+	fogColor.SetDuration(duration);
+}
+
+void SetTargetFogDensity(f32 density, f32 duration) {
+	fogDensity.SetTarget(density);
+	fogDensity.SetDuration(duration);
+}
+
+void SetTargetFogDistance(f32 distance, f32 duration) {
+	fogDistance.SetTarget(distance);
+	fogDistance.SetDuration(duration);
+}
+
+void SetTargetVignetteLevel(f32 lvl, f32 duration) {
+	vignetteLevel.SetTarget(lvl);
+	vignetteLevel.SetDuration(duration);
 }

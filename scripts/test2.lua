@@ -3,12 +3,13 @@
 local a = 1;
 function fog(id)
 	print(("Fog callback run %g by %d"):format(a, id))
-	effects.fog(rand.gauss(vec(0.1), vec(math.sqrt(0.1))), rand.linear(50, 240), rand.linear(0.1, 0.7))
-	-- effects.fog(vec(0.1), 50, 0.1)
+	local color = rand.gauss(vec(0.1), vec(math.sqrt(0.1)))
+	local distance = rand.linear(50, 240)
+	local density = rand.linear(0.1, 0.7)
+	effects.fog(color, distance, density, rand.linear(1,6))
+	effects.vignette(1 - color:dot(vec(1,0,0)), rand.linear(1,4))
 	a = a + 1
 end
-
-effects.fog_interpolation(4)
 
 print("Script run")
 print("Vec:")

@@ -271,6 +271,8 @@ s32 main(s32 ac, char** av) {
 			return false;
 		}
 
+		ReinitEffects();
+
 		camera.aspect = (f32) windowWidth / windowHeight;
 		camera.projection = glm::perspective(camera.fov, camera.aspect, camera.nearDist, camera.farDist);
 

@@ -302,12 +302,28 @@ static void InitEffectLib() {
 			auto col = lCheckVecRef(1);
 			f32 dist = luaL_checknumber(l, 2);
 			f32 dens = luaL_checknumber(l, 3);
-			SetTargetFogParameters(*col, dist, dens);
+			f32 dura = luaL_optnumber(l, 4, 4.f);
+			SetTargetFogParameters(*col, dist, dens, dura);
 			return 0;
 		}},
 
-		{"fog_interpolation", [](lua_State* l) {
-			SetFogInterpolateTime(luaL_checknumber(l, 1));
+		{"fog_color", [](lua_State* l) {
+			SetTargetFogColor(*lCheckVecRef(1), luaL_optnumber(l, 2, 4.f));
+			return 0;
+		}},
+
+		{"fog_density", [](lua_State* l) {
+			SetTargetFogDensity(luaL_checknumber(l, 1), luaL_optnumber(l, 2, 4.f));
+			return 0;
+		}},
+
+		{"fog_distance", [](lua_State* l) {
+			SetTargetFogDistance(luaL_checknumber(l, 1), luaL_optnumber(l, 2, 4.f));
+			return 0;
+		}},
+
+		{"vignette", [](lua_State* l) {
+			SetTargetVignetteLevel(luaL_checknumber(l, 1), luaL_optnumber(l, 2, 4.f));
 			return 0;
 		}},
 

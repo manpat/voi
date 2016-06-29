@@ -44,9 +44,13 @@ void DrawFullscreenQuad();
 void DrawQuadAtFarPlane(const mat4& projection);
 
 bool InitEffects();
+bool ReinitEffects();
 void ApplyEffectsAndDraw(Framebuffer*, const Camera*, f32 dt);
-void SetTargetFogParameters(const vec3& color, f32 distance = 100.f, f32 density = 0.3f);
-void SetFogInterpolateTime(f32);
+void SetTargetFogParameters(const vec3& color, f32 distance, f32 density, f32 duration);
+void SetTargetFogColor(const vec3&, f32 duration = 4.f);
+void SetTargetFogDistance(f32, f32 duration = 4.f);
+void SetTargetFogDensity(f32, f32 duration = 4.f);
+void SetTargetVignetteLevel(f32, f32 duration = 4.f);
 
 bool InitScripting();
 s32 LoadScript(const char* fname);
