@@ -12,6 +12,7 @@ bl_info = {
 import mathutils
 import struct
 import bpy
+import bmesh
 from bpy import context
 
 # https://docs.python.org/2/library/struct.html
@@ -39,6 +40,7 @@ class ExportVoiScene(bpy.types.Operator):
 
 		if(fname[-4:].lower() != ".voi"):
 			fname += ".voi"
+			self.filepath += ".voi"
 
 		self.compileMaterials()
 		self.compileMeshes()
@@ -159,15 +161,22 @@ class ExportVoiScene(bpy.types.Operator):
 				odata = obj.data
 				if odata.name in self.meshIDs: continue
 
+				bm = bmesh.new()
+				bm.from_mesh(odata)
+				bmesh.ops.triangulate(bm, faces=bm.faces)
+
+				bm.verts.ensure_lookup_table()
+				bm.faces.ensure_lookup_table()
+
 				vs = []
 				ts = []
 				ms = []
 				numTriangles = 0
 
-				for v in odata.vertices:
+				for v in bm.verts:
 					vs.extend(swapCoords(v.co))
 
-				for p in odata.polygons:
+				for p in bm.faces:
 					midx = p.material_index
 					mid = 0
 
@@ -175,19 +184,15 @@ class ExportVoiScene(bpy.types.Operator):
 						mat = odata.materials[midx]
 						mid = self.materialIDs.get(mat.name, 0)
 
-					if len(p.vertices) == 3:
-						ts.extend(p.vertices[:])
-						ms.append(mid)
-						numTriangles += 1
-					elif len(p.vertices) >= 4:
-						tvs = p.vertices
-						for i in range(1, len(tvs)-1):
-							ts.extend([tvs[0], tvs[i], tvs[i+1]])
+					# Assumes there are always 3 verts
+					for v in p.verts:
+						ts.append(v.index)
 
-						ms.extend([mid] * (len(tvs)-2))
-						numTriangles += len(tvs)-2
-					# else:
-						# ERROR
+					ms.append(mid)
+					numTriangles += 1
+
+				bm.free()
+				del bm
 
 				mesh = {
 					'numVertices': len(odata.vertices),

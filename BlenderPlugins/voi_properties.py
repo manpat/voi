@@ -1,9 +1,12 @@
+#!BPY
 
 import bpy
 import sys
 import math
 import mathutils
 from bpy.props import *
+
+# http://blender.stackexchange.com/questions/21463/draw-points-on-screen-with-bgl-python
 
 bl_info = {
 	"name": "Voi Properties",
