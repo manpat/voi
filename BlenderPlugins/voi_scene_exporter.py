@@ -106,11 +106,15 @@ class ExportVoiScene(bpy.types.Operator):
 				out.write(struct.pack('=B', col))
 				# TODO: collider data
 
+				ucbstr = bytes(e['update'], 'utf-8')
+				out.write(struct.pack('=B', len(ucbstr)))
+				out.write(ucbstr)
+
 				if type in [1, 2]: # Portal, Mirror
 					out.write(struct.pack('=H', 12)) # Size
 					out.write(struct.pack('=fff', *e['planeNormal']))
 				elif type == 3:
-					ostr = bytes(e['action'], 'utf-8')
+					ostr = bytes(e['frob'], 'utf-8')
 					out.write(struct.pack('=H', len(ostr)+1))
 					out.write(struct.pack('=B', len(ostr))) # This might be overkill but whatever
 					out.write(ostr)
@@ -239,6 +243,8 @@ class ExportVoiScene(bpy.types.Operator):
 
 				'entityType': type,
 				'colliderType': col,
+
+				'update': obj.get("voi_entityupdatecb", ""),
 			}
 
 			if type in [1, 2]:
@@ -249,7 +255,7 @@ class ExportVoiScene(bpy.types.Operator):
 
 				data['planeNormal'] = swapCoords(accum)
 			elif type == 3:
-				data['action'] = obj.get("voi_entityaction", "")
+				data['frob'] = obj.get("voi_entityfrobcb", "")
 
 			self.entities.append(data)
 

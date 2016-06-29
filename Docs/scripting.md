@@ -40,3 +40,8 @@ API Reference
 		- `effects.fog_density(density[, duration])` - Begins interpolating fog density toward `density` over `duration` seconds
 		- `effects.fog_distance(distance[, duration])` - Begins interpolating fog distance toward `distance` over `duration` seconds
 		- `effects.vignette(intensity[, duration])` - Begins interpolating vignette intensity toward `intensity` over `duration` seconds
+
+	- Debug
+		- `debug.point(pos[, color])` - Attempts drawing a debug point at `pos` in `color` if provided
+		- `debug.line(p0, p1[, color])` - Attempts drawing a debug line from `p0` to `p1` in `color` if provided
+		- `debug.line(p0, p1, c0, c1])` - Attempts drawing a debug line from `p0` to `p1` using the gradient `c0` -> `c1`

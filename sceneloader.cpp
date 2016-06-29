@@ -172,6 +172,12 @@ SceneData LoadSceneData(const char* fname) {
 		u8  entityType = ent->entityType = *it++;
 		u8  colliderType = ent->colliderType = *it++;
 
+		u8 updateCallbackLen = ent->updateCallbackLen = *it++;
+		if(updateCallbackLen){
+			std::memcpy(ent->updateCallback, it, updateCallbackLen);
+			it += updateCallbackLen;
+		}
+
 		u16 entDataSize = Read<u16>(&it);
 		assert(entDataSize <= EntityData::MaxEntitySpecificData, "Too much entity specific data!");
 

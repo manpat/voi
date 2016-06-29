@@ -39,6 +39,9 @@ struct EntityData {
 	u8 entityType;
 	u8 colliderType;
 
+	u8 updateCallbackLen;
+	char updateCallback[256];
+
 	// TODO: MORE
 	
 	static constexpr u32 MaxEntitySpecificData = 1024;

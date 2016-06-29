@@ -11,6 +11,17 @@ function fog(id)
 	a = a + 1
 end
 
+function update(id)
+	for i=1,20 do
+		debug.point(vec(0,i/3,0))
+	end
+	debug.line(vec(-1,0,0), vec(-1,10,0), vec(1,0,1))
+end
+
+function fog_update(id)
+	-- print("Update callback!")
+end
+
 print("Script run")
 print("Vec:")
 for k,v in pairs(vec) do print(k) end

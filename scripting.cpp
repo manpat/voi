@@ -10,7 +10,7 @@ namespace {
 
 static void InitVecLib();
 static void InitRandLib();
-static void InitEntLib();
+static void InitEntityLib();
 static void InitEffectLib();
 static void InitDebugLib();
 
@@ -21,6 +21,7 @@ bool InitScripting() {
 	InitVecLib();
 	InitRandLib();
 	InitEffectLib();
+	InitDebugLib();
 
 	return true;
 }
@@ -138,6 +139,9 @@ void stackdump(){
 static vec3* lCheckVecRef(s32 s) {
 	return (vec3*)luaL_checkudata(l, s, "vecmt");
 }
+static vec3* lTestVecRef(s32 s) {
+	return (vec3*)luaL_testudata(l, s, "vecmt");
+}
 
 static vec3* lNewVecUD() {
 	auto ud = (vec3*) lua_newuserdata(l, sizeof(vec3));
@@ -157,7 +161,7 @@ static void InitVecLib() {
 		{"__" #name, [](lua_State* l){ \
 			auto v = lCheckVecRef(1); \
 			auto ud = lNewVecUD(); \
-			if(auto v2 = (vec3*)luaL_testudata(l, 2, "vecmt")) { \
+			if(auto v2 = lTestVecRef(2)) { \
 				*ud = *v op *v2; \
 			}else if(lua_isnumber(l, 2)) { \
 				*ud = *v op f32(lua_tonumber(l, 2)); \
@@ -239,7 +243,7 @@ static void InitVecLib() {
 			ud->y = luaL_checknumber(l, 3);
 			ud->z = 0.f;
 		}else if(numArgs == 1) {
-			if(auto o = (vec3*)luaL_testudata(l, 2, "vecmt")) {
+			if(auto o = lTestVecRef(2)) {
 				*ud = *o;
 			}else if(lua_isnumber(l, 2)){
 				ud->x = ud->y = ud->z = lua_tonumber(l, 2);
@@ -267,7 +271,7 @@ static void InitRandLib() {
 			return 1;
 		}},
 		{"gauss", [](lua_State* l) {
-			if(auto mean = (vec3*)luaL_testudata(l, 1, "vecmt")) {
+			if(auto mean = lTestVecRef(1)) {
 				*lNewVecUD() = glm::gaussRand(*mean, *lCheckVecRef(2));
 			}else if(lua_isnumber(l, 1)) {
 				lua_pushnumber(l, glm::gaussRand(lua_tonumber(l, 1), luaL_checknumber(l, 2)));
@@ -275,7 +279,7 @@ static void InitRandLib() {
 			return 1;
 		}},
 		{"linear", [](lua_State* l) {
-			if(auto min = (vec3*)luaL_testudata(l, 1, "vecmt")) {
+			if(auto min = lTestVecRef(1)) {
 				*lNewVecUD() = glm::linearRand(*min, *lCheckVecRef(2));
 			}else if(lua_isnumber(l, 1)) {
 				lua_pushnumber(l, glm::linearRand(lua_tonumber(l, 1), luaL_checknumber(l, 2)));
@@ -334,4 +338,43 @@ static void InitEffectLib() {
 	luaL_setfuncs(l, fxlib, 0);
 
 	lua_setglobal(l, "effects");
+}
+
+static void InitDebugLib() {
+	static const luaL_Reg lib[] = {
+		{"point", [](lua_State*) {
+			auto p = lCheckVecRef(1);
+			if(auto col = lTestVecRef(2)) {
+				DebugPoint(*p, *col);
+			}else{
+				DebugPoint(*p);
+			}
+
+			return 0;
+		}},
+
+		{"line", [](lua_State*){
+			auto p1 = lCheckVecRef(1);
+			auto p2 = lCheckVecRef(2);
+			auto c1 = lTestVecRef(3);
+			auto c2 = lTestVecRef(4);
+
+			if(c1 && c2) {
+				DebugLine(*p1, *p2, *c1, *c2);
+			}else if(c1) {
+				DebugLine(*p1, *p2, *c1);
+			}else{
+				DebugLine(*p1, *p2);
+			}
+
+			return 0;
+		}},
+
+		{nullptr, nullptr}
+	};
+
+	lua_newtable(l); // lib
+	luaL_setfuncs(l, lib, 0);
+
+	lua_setglobal(l, "debug");
 }

@@ -127,6 +127,14 @@ bool InitScene(Scene* scene, const SceneData* data) {
 	}
 
 	std::map<u32, s32> loadedScripts {};
+	auto GetScript = [&loadedScripts](const char* fname) {
+		static char buf[512];
+		std::snprintf(buf, 512, "scripts/%s", fname);
+		s32* script = &loadedScripts[stb_hash(fname)];
+		s32 tmpscript = *script;
+		if(!tmpscript) tmpscript = LoadScript(buf);
+		return *script = tmpscript;
+	};
 
 	// Do entity stuff
 	for(u32 i = 0; i < data->numEntities; i++) {
@@ -176,6 +184,22 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			return false;	
 		}
 
+		if(from->updateCallbackLen) {
+			char* scriptFile = from->updateCallback;
+			scriptFile[std::min<u16>(from->updateCallbackLen, 255)] = 0;
+			auto action = std::strchr(scriptFile, ':');
+
+			if(action) {
+				*action++ = 0;
+				if(auto script = GetScript(scriptFile)){
+					to->updateCallback = GetCallbackFromScript(script, action);
+				}
+			}else{
+				fprintf(stderr, "Warning! Update callback for %.*s missing action\n", 
+					(u32)to->nameLength, to->name);
+			}
+		}
+
 		// NOTE: Gets around strict aliasing rule (actually probably not but stops the warning)
 		// 	Would be better to either figure out exactly why this breaks the strict aliasing rule
 		//	and fix it, or disable optimisations based on the strict aliasing rule (-fno-strict-alias)
@@ -193,16 +217,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			auto scriptFile = entitySpecificData;
 			auto action = std::strchr(scriptFile, ':');
 			if(!action){
-				printf("File: %s\n", scriptFile);
+				fprintf(stderr, "Warning! Frob callback for '%.*s' missing action\n", 
+					(u32)to->nameLength, to->name);
 			}else{
 				*action++ = 0;
-				printf("File: %s    Action: %s\n", scriptFile, action);
-				static char buf[256];
-				std::snprintf(buf, 256, "scripts/%s", scriptFile);
-				s32* script = &loadedScripts[stb_hash(scriptFile)];
-				if(!*script) *script = LoadScript(buf);
-				if(*script) {
-					to->interact.frobAction = GetCallbackFromScript(*script, action);
+				if(auto script = GetScript(scriptFile)){
+					to->interact.frobCallback = GetCallbackFromScript(script, action);
 				}
 			}
 		} // Fallthrough

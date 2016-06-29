@@ -49,11 +49,11 @@ namespace {
 			// return;
 			vec3 wp = wpw.xyz;
 
-			float dd = 2.f;
-			vec2 texSize = dd/textureSize(depthTex, 0);
+			// float dd = 2.f;
+			// vec2 texSize = dd/textureSize(depthTex, 0);
 			vec2 uv0 = uv; // + uvvel.xy*0.1f;
-			vec2 uv1 = uv0+vec2(texSize.x,0);
-			vec2 uv2 = uv0+vec2(0,texSize.y);
+			// vec2 uv1 = uv0+vec2(texSize.x,0);
+			// vec2 uv2 = uv0+vec2(0,texSize.y);
 			// depth0 = texture2D(depthTex, uv0).r;
 			// float depth1 = texture2D(depthTex, uv1).r;
 			// float depth2 = texture2D(depthTex, uv2).r;

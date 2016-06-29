@@ -27,6 +27,10 @@ void UpdateEntity(Entity* e, f32 dt) {
 		case Entity::TypePlayer: UpdatePlayer(e, dt); break;
 		default: break;
 	}
+
+	if(e->updateCallback) {
+		RunCallback(e->id, e->updateCallback);
+	}
 }
 
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
@@ -195,8 +199,8 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		auto e = eyeHit.entity;
 		// fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
 
-		if(e->interact.frobAction) {
-			RunCallback(e->id, e->interact.frobAction);
+		if(e->interact.frobCallback) {
+			RunCallback(e->id, e->interact.frobCallback);
 		}
 	}
 }

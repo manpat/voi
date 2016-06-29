@@ -142,6 +142,8 @@ struct Entity {
 	u8 entityType; // Type*
 	u8 colliderType;
 
+	s32 updateCallback;
+
 	btRigidBody* rigidbody;
 	btCollisionShape* collider;
 
@@ -177,7 +179,7 @@ struct Entity {
 		} player;
 
 		struct {
-			s32 frobAction;
+			s32 frobCallback;
 		} interact;
 	};
 

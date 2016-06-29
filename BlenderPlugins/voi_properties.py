@@ -62,9 +62,10 @@ class ObjectPanel(bpy.types.Panel):
 		row.prop(o, "voi_entityhidden")
 
 		layout.row().prop(o, "voi_collidertype")
+		layout.row().prop(o, "voi_entityupdatecb")
 
 		if type == 3: # Interact
-			layout.row().prop(o, "voi_entityaction")
+			layout.row().prop(o, "voi_entityfrobcb")
 
 class ScriptPanel(bpy.types.Panel):
 	bl_label = "Voi Script"
@@ -91,7 +92,8 @@ def register():
 	obj.voi_entitystatic = BoolProperty(name="Static", default=True)
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
 
-	obj.voi_entityaction = StringProperty(name="Action", description="What to run when object is frobbed. file.lua:function_name")
+	obj.voi_entityupdatecb = StringProperty(name="Update Callback", description="What to run when object is updated. file.lua:function_name")
+	obj.voi_entityfrobcb = StringProperty(name="Frob Callback", description="What to run when object is frobbed. file.lua:function_name")
 
 	obj = bpy.types.Text
 	obj.voi_scripttype = EnumProperty(items=voi_scrtypes, name="Script Type", default='c')
