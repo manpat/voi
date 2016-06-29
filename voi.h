@@ -95,6 +95,8 @@ void EntityOnCollisionLeave(Entity*, Entity*);
 void EntityOnTriggerEnter(Entity*, Entity*);
 void EntityOnTriggerLeave(Entity*, Entity*);
 
+const char* GetEntityTypeName(u8);
+
 Entity* AllocateSceneEntities(u16 count);
 Entity* AllocateEntity();
 void FreeSceneEntities(Entity* se);

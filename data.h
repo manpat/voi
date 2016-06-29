@@ -121,7 +121,6 @@ struct Entity {
 	enum : u8 {
 		FlagHidden		= 1<<0,
 		FlagStatic		= 1<<1,
-		// FlagInteractive = 1<<2,
 	};
 
 	u16 id;
@@ -138,7 +137,6 @@ struct Entity {
 	u8 nameLength;
 	const char* name;
 
-	// u16 scriptID; // TODO
 	u8 entityType; // Type*
 	u8 colliderType;
 

@@ -9,10 +9,11 @@ namespace {
 }
 
 static void InitVecLib();
+static void InitQuatLib();
 static void InitRandLib();
-static void InitEntityLib();
 static void InitEffectLib();
 static void InitDebugLib();
+static void InitEntityLib();
 
 bool InitScripting() {
 	l = luaL_newstate();
@@ -22,6 +23,7 @@ bool InitScripting() {
 	InitRandLib();
 	InitEffectLib();
 	InitDebugLib();
+	InitEntityLib();
 
 	return true;
 }
@@ -377,4 +379,91 @@ static void InitDebugLib() {
 	luaL_setfuncs(l, lib, 0);
 
 	lua_setglobal(l, "debug");
+}
+
+static Entity* lCheckEnt(s32 s) {
+	return *(Entity**) luaL_checkudata(l, s, "entmt");
+}
+static Entity* lTestEnt(s32 s) {
+	auto e = (Entity**) luaL_testudata(l, s, "entmt");
+	return (e)?*e:nullptr;
+}
+
+static Entity** lNewEntUD(Entity* e) {
+	auto ud = (Entity**) lua_newuserdata(l, sizeof(Entity*));
+	luaL_setmetatable(l, "entmt");
+	*ud = e;
+	return ud;	
+}
+
+static void InitEntityLib() {
+	static const luaL_Reg mt[] = {
+		{"__tostring", [](lua_State* l){
+			auto e = lCheckEnt(1);
+			luaL_Buffer b;
+			luaL_buffinit(l, &b);
+			auto buf = luaL_prepbuffsize(&b, e->nameLength+sizeof("entity()")-1);
+			size_t size = std::sprintf(buf, "entity(%.*s)", e->nameLength, e->name);
+			luaL_pushresultsize(&b, size);
+			return 1;
+		}},
+	};
+
+	static const luaL_Reg lib[] = {
+		{"lookup", [](lua_State* l) {
+			u32 id = luaL_checkinteger(l, 1);
+			if(id > 65535) return 0;
+
+			auto ent = GetEntity(id);
+			if(ent) {
+				lNewEntUD(ent);
+			}else{
+				lua_pushnil(l);
+			}
+
+			return 1;
+		}},
+
+		{"name", [](lua_State* l) {
+			auto e = lCheckEnt(1);
+			if(e) lua_pushlstring(l, e->name, e->nameLength);
+			return e?1:0;
+		}},
+
+		{"id", [](lua_State* l) {
+			auto e = lCheckEnt(1);
+			if(e) lua_pushinteger(l, e->id);
+			return e?1:0;
+		}},
+
+		{"type", [](lua_State* l) {
+			auto e = lCheckEnt(1);
+			if(e) lua_pushinteger(l, e->entityType);
+			return e?1:0;
+		}},
+		{"type_name", [](lua_State* l) {
+			auto e = lCheckEnt(1);
+			if(e) lua_pushstring(l, GetEntityTypeName(e->entityType));
+			return e?1:0;
+		}},
+
+		{"pos", [](lua_State*) {
+			auto e = lCheckEnt(1);
+			if(e) *lNewVecUD() = e->position;
+			return e?1:0;
+		}},
+
+		{nullptr, nullptr}
+	};
+
+	luaL_newmetatable(l, "entmt");
+	luaL_setfuncs(l, mt, 0);
+
+	lua_newtable(l);
+	luaL_setfuncs(l, lib, 0);
+
+	lua_pushvalue(l, -1);
+	lua_setglobal(l, "entity");
+	lua_setfield(l, -2, "__index");
+	lua_pop(l, 1);
 }

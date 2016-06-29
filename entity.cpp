@@ -204,3 +204,28 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		}
 	}
 }
+
+const char* GetEntityTypeName(u8 type) {
+	static const char* names[] = {
+		"Geometry",
+		"Portal",
+		"Mirror",
+		"Interactive",
+		"Trigger",
+	};
+
+	static const char* neNames[] = {
+		"Player",
+	};
+
+	if(type < Entity::TypeNonExportable && type < sizeof(names)/sizeof(names[0])) {
+		return names[type];
+	}
+
+	type -= Entity::TypeNonExportable;
+	if(type < sizeof(neNames)/sizeof(neNames[0])) {
+		return neNames[type];
+	}
+
+	return "<unknown>";
+}

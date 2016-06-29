@@ -1,4 +1,5 @@
 #include "sceneloader.h"
+#include "voi.h"
 #include <fstream>
 #include <vector>
 
@@ -186,14 +187,6 @@ SceneData LoadSceneData(const char* fname) {
 			it += entDataSize;
 		}
 
-		static const char* entityTypeStrings[] = {
-			"Geometry",
-			"Portal",
-			"Mirror",
-			"Interactive",
-			"Trigger",
-		};
-
 		SCENEPRINT("\tentityName: %.*s\n", nameLength, ent->name);
 		SCENEPRINT("\tflags:  o%.2o\n", flags);
 		SCENEPRINT("\tlayers: o%.2o\n", layers);
@@ -202,7 +195,7 @@ SceneData LoadSceneData(const char* fname) {
 		SCENEPRINT("\tscale: (%.1f, %.1f, %.1f)\n", scale.x, scale.y, scale.z);
 		SCENEPRINT("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);
 		SCENEPRINT("\tscriptID: %hu\n", scriptID);
-		SCENEPRINT("\tentityType: %s\n\tcolliderType: %hhu\n\n", entityTypeStrings[entityType], colliderType);
+		SCENEPRINT("\tentityType: %s\n\tcolliderType: %hhu\n\n", GetEntityTypeName(entityType), colliderType);
 	}
 
 	scene.numScripts = Read<u16>(&it);
