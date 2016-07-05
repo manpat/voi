@@ -6,8 +6,8 @@ namespace {
 }
 
 Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
-	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGB8, GL_RGBA8};
-	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGB, GL_RGBA};
+	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGBA8, GL_RGBA8};
+	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGBA, GL_RGBA};
 	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
 	static u32 fbTargetIntType[] {GL_UNSIGNED_INT_24_8, GL_UNSIGNED_BYTE, GL_UNSIGNED_BYTE};
 

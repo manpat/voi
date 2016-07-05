@@ -162,7 +162,7 @@ class ExportVoiScene(bpy.types.Operator):
 				if odata.name in self.meshIDs: continue
 
 				bm = bmesh.new()
-				bm.from_mesh(odata)
+				bm.from_object(obj, scene, deform=True)
 				bmesh.ops.triangulate(bm, faces=bm.faces)
 
 				bm.verts.ensure_lookup_table()
@@ -191,16 +191,16 @@ class ExportVoiScene(bpy.types.Operator):
 					ms.append(mid)
 					numTriangles += 1
 
-				bm.free()
-				del bm
-
 				mesh = {
-					'numVertices': len(odata.vertices),
+					'numVertices': len(bm.verts),
 					'vertices': vs,
 					'numTriangles': numTriangles,
 					'triangles': ts,
 					'materialIDs': ms,
 				}
+
+				bm.free()
+				del bm
 
 				self.meshes.append(mesh)
 				self.meshIDs[odata.name] = len(self.meshes) # ids start at 1
@@ -228,6 +228,9 @@ class ExportVoiScene(bpy.types.Operator):
 
 			if obj.get("voi_entitystatic", True) and type==0:
 				flags |= 1<<1
+
+			if obj.get("voi_entityignorefog", False):
+				flags |= 1<<2
 
 			scale = obj.scale
 			scale = [scale.x, scale.z, scale.y]

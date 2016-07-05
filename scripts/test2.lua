@@ -19,8 +19,12 @@ function update(id)
 end
 
 function fog_update(id)
-	local e = entity.lookup(id)
-	print(("Update callback! %s %s %d %d %s %s"):format(e, e:name(), e:id(), e:type(), e:type_name(), e:pos()))
+	-- local e = entity.lookup(id)
+	-- print(("Update callback! %s %s %d %d %s %s"):format(e, e:name(), e:id(), e:type(), e:type_name(), e:pos()))
+end
+
+function outside_fog()
+	effects.fog(vec(.5,.6,.9), 120, 0.5, 5)
 end
 
 print("Script run")

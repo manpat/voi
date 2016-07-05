@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <SDL2/SDL.h>
 
-void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1});
+void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1}, bool ignoreFog = false);
 
 bool InitScene(Scene* scene, const SceneData* data) {
 	// NOTE: THIS IS WAY OVERKILL!!
@@ -294,7 +294,7 @@ void DeinitScene(Scene* scene) {
 	std::memset(scene, 0, sizeof(Scene));
 }
 
-void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale) {
+void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale, bool ignoreFog) {
 	auto program = GetNamedShaderProgram(ShaderIDDefault); // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
@@ -314,9 +314,9 @@ void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, cons
 		if(program->materialColorLoc) {
 			if(sms[i].materialID > 0) {
 				auto mat = &scene->materials[sms[i].materialID-1];
-				glUniform3fv(program->materialColorLoc, 1, glm::value_ptr(mat->color));
+				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{mat->color, ignoreFog?0:1}));
 			}else{
-				glUniform3fv(program->materialColorLoc, 1, glm::value_ptr(vec3{1,0,1}));
+				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{1,0,1, ignoreFog?0:1}));
 			}
 		}
 
@@ -614,7 +614,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			glEnable(GL_CULL_FACE);
 		}
 
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
+		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
 	}
 
 	glEnable(GL_STENCIL_TEST);
@@ -762,15 +762,15 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(cam.projection));
 		glUniformMatrix4fv(sh->modelLoc, 1, false, glm::value_ptr(mat4{}));
 
-		// NOTE: This does nothing with posteffects on, otherwise it's clear color
-		glUniform3fv(sh->materialColorLoc, 1, glm::value_ptr(vec3{.9f}));
-
-		DrawQuadAtFarPlane(cam.projection);
+		glColorMask(true,true,true,true);
+		// NOTE: If fog is disabled, this sets the clear color for the portal.
+		//	If a colour is associated with each layer, they can effectively have their own sky colors
+		glUniform4fv(sh->materialColorLoc, 1, glm::value_ptr(vec4{0,0,0,1 /*fog*/}));
+		DrawQuadAtFarPlane(cam.projection); // Mixes sky with fog
 
 		// Reset render state and prepare to render target scene
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(stackSlot->viewProjection));
 		glDepthFunc(GL_LEQUAL);
-		glColorMask(true,true,true,true);
 		glFrontFace(isInMirror?GL_CW:GL_CCW);
 
 		glEnable(GL_CLIP_DISTANCE0);
@@ -798,7 +798,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 				glEnable(GL_CULL_FACE);
 			}
 
-			RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
+			RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
 		}
 
 		glFrontFace(GL_CCW);

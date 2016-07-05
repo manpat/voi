@@ -121,6 +121,7 @@ struct Entity {
 	enum : u8 {
 		FlagHidden		= 1<<0,
 		FlagStatic		= 1<<1,
+		FlagIgnoreFog	= 1<<2,
 	};
 
 	u16 id;

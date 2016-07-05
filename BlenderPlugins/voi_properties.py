@@ -69,6 +69,8 @@ class ObjectPanel(bpy.types.Panel):
 
 		if type == 3: # Interact
 			layout.row().prop(o, "voi_entityfrobcb")
+			
+		layout.row().prop(o, "voi_entityignorefog")
 
 class ScriptPanel(bpy.types.Panel):
 	bl_label = "Voi Script"
@@ -94,6 +96,7 @@ def register():
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
 	obj.voi_entitystatic = BoolProperty(name="Static", default=True)
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
+	obj.voi_entityignorefog = BoolProperty(name="Ignore Fog", default=False)
 
 	obj.voi_entityupdatecb = StringProperty(name="Update Callback", description="What to run when object is updated. file.lua:function_name")
 	obj.voi_entityfrobcb = StringProperty(name="Frob Callback", description="What to run when object is frobbed. file.lua:function_name")

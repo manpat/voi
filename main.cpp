@@ -23,12 +23,12 @@ const char* defaultShaderSrc[] = {
 		}
 	),
 	SHADER(
-		uniform vec3 materialColor;
+		uniform vec4 materialColor;
 		out vec4 outcolor;
 		out vec4 outgeneral0;
 
 		void main() {
-			outcolor = vec4(materialColor, 1);
+			outcolor = materialColor;
 			outgeneral0 = vec4(0);
 		}
 	)
@@ -203,7 +203,6 @@ s32 main(s32 ac, char** av) {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	glFrontFace(GL_CCW);
@@ -469,11 +468,20 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 	// Draw scene into framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, fb->fbo);
 		glViewport(0,0, fb->width, fb->height);
+		glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_BLEND);
 
 		glUseProgram(forwardShader->program);
+
+		glUniformMatrix4fv(forwardShader->viewProjectionLoc, 1, false, glm::value_ptr(camera->projection));
+		glUniformMatrix4fv(forwardShader->modelLoc, 1, false, glm::value_ptr(mat4{}));
+		glUniform4fv(forwardShader->materialColorLoc, 1, glm::value_ptr(vec4{0,0,0,1 /*fog*/}));
+		DrawQuadAtFarPlane(camera->projection); // Mixes sky with fog
+
 		RenderScene(scene, *camera, playerEntity->layers);
 
+		glEnable(GL_BLEND);
 		glUseProgram(particleShader->program);
 		glUniform3fv(particleShader->materialColorLoc, 1, glm::value_ptr(vec3{.5}));
 		glUniformMatrix4fv(particleShader->viewProjectionLoc, 1, false, 

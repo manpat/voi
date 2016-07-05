@@ -67,10 +67,10 @@ namespace {
 			// vec3 cp2 = cpw2.xyz/cpw2.w;
 
 			vec4 color = texture2D(colorTex, uv0);
-			vec4 particle = texture2D(general0Tex, uv0); //*length(cp0);
+			vec4 particle = texture2D(general0Tex, uv0);
 
 			float fogdepth = length(cp0); // Distance from eye
-			float fogmix = 1-clamp(pow(fogdepth / fogDistance, fogColor.a), 0, 1);
+			float fogmix = 1-clamp(pow(fogdepth / fogDistance, fogColor.a), 0, 1) * color.a;
 
 			outcolor.rgb = clamp(color.rgb*fogmix + fogColor.rgb*(1-fogmix), 0, 1);
 			outcolor.rgb += particle.rgb * particle.a;
