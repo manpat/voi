@@ -35,7 +35,6 @@ struct EntityData {
 	u32 flags;
 	u16 parentID;
 	u16 meshID;
-	u16 scriptID;
 	u8 entityType;
 	u8 colliderType;
 
@@ -57,8 +56,6 @@ struct SceneData {
 
 	u16 numEntities = 0;
 	EntityData* entities = nullptr;
-
-	u16 numScripts = 0;
 };
 
 SceneData LoadSceneData(const char* fname);

@@ -16,6 +16,7 @@ namespace {
 		uniform sampler2D depthTex;
 		uniform sampler2D colorTex;
 		uniform sampler2D general0Tex;
+		uniform mat4 invProjection;
 		uniform mat4 prevProjView;
 		uniform mat4 projection;
 		uniform mat4 view;
@@ -32,9 +33,9 @@ namespace {
 			float depth0 = texture2D(depthTex, uv).r;
 
 			// mat4 invVP = inverse(projection*view);
-			vec4 cpw = inverse(projection) * vec4(uv*2 - 1, depth0*2-1, 1);
-			cpw /= cpw.w;
-			vec4 wpw = inverse(view) * cpw;
+			// vec4 cpw = inverse(projection) * vec4(uv*2 - 1, depth0*2-1, 1);
+			// cpw /= cpw.w;
+			// vec4 wpw = inverse(view) * cpw;
 			// vec4 oldwp = inverse(prevProjView) * cpw;
 
 			// vec3 wsvel = vec3(sin(time+wpw.y*0.1),cos(time*3+wpw.y+wpw.z),0) * cpw.z*0.02; //wpw.xyz - oldwp.xyz;
@@ -47,7 +48,7 @@ namespace {
 			// outcolor.rgb = wsvel*.5 + .5;
 			// outcolor.a = 1.f;
 			// return;
-			vec3 wp = wpw.xyz;
+			// vec3 wp = wpw.xyz;
 
 			// float dd = 2.f;
 			// vec2 texSize = dd/textureSize(depthTex, 0);
@@ -58,8 +59,7 @@ namespace {
 			// float depth1 = texture2D(depthTex, uv1).r;
 			// float depth2 = texture2D(depthTex, uv2).r;
 
-			mat4 invProj = inverse(projection);
-			vec4 cpw0 = invProj * vec4(uv0*2 - 1, depth0*2-1, 1);
+			vec4 cpw0 = invProjection * vec4(uv0*2 - 1, depth0*2-1, 1);
 			// vec4 cpw1 = invProj * vec4(uv1*2 - 1, depth1*2-1, 1);
 			// vec4 cpw2 = invProj * vec4(uv2*2 - 1, depth2*2-1, 1);
 			vec3 cp0 = cpw0.xyz/cpw0.w;
@@ -85,6 +85,7 @@ namespace {
 			// float normLen = length(norm);
 			// norm = normalize(mat3(inverse(view)) * norm);
 
+			/*
 			vec3 lightDiff = vec3(0,3,-210) - wp;
 			float dist = length(lightDiff);
 			float minDist = time*0.f + 20.f
@@ -106,6 +107,7 @@ namespace {
 			}else if(dist < minDist + 100) {
 				outcolor.rgb = mix(outcolor.rgb, vec3(0), (minDist+100-dist)/10.f);
 			}
+			*/
 
 			// outcolor.rgb += csvel;
 
@@ -236,6 +238,8 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	glUniform1i(shaderProgram->general0TexLoc, 2);
 	glUniformMatrix4fv(shaderProgram->projectionLoc, 1, false, glm::value_ptr(camera->projection));
 	glUniformMatrix4fv(shaderProgram->viewLoc, 1, false, glm::value_ptr(camera->view));
+	u32 invProjectionLoc = glGetUniformLocation(shaderProgram->program, "invProjection");
+	glUniformMatrix4fv(invProjectionLoc, 1, false, glm::value_ptr(glm::inverse(camera->projection)));
 
 	u32 timeLoc = glGetUniformLocation(shaderProgram->program, "time");
 	u32 fogColorLoc = glGetUniformLocation(shaderProgram->program, "fogColor");

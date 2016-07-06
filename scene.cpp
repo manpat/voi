@@ -225,11 +225,43 @@ bool InitScene(Scene* scene, const SceneData* data) {
 					to->interact.frobCallback = GetCallbackFromScript(script, action);
 				}
 			}
-		} // Fallthrough
 
-		case Entity::TypeTrigger:
 			to->flags |= Entity::FlagStatic; // TODO: Make kinematic instead, just in case we want to move 'em
-			break;
+		} break;
+
+		case Entity::TypeTrigger:{
+			to->flags |= Entity::FlagStatic; // TODO: Make kinematic instead, just in case we want to move 'em
+			char actionBuffer[257];
+
+			u8 enterlen = *entitySpecificData++;
+			std::memcpy(actionBuffer, entitySpecificData, enterlen);
+			actionBuffer[enterlen] = 0;
+
+			if(auto enterAction = std::strchr(actionBuffer, ':')) {
+				*enterAction++ = 0;
+				if(auto script = GetScript(actionBuffer)){
+					to->trigger.enterCallback = GetCallbackFromScript(script, enterAction);
+				}
+			}else if(enterlen){
+				fprintf(stderr, "Warning! Enter callback for '%.*s' missing action\n", 
+					(u32)to->nameLength, to->name);
+			}
+
+			entitySpecificData += enterlen;
+			u8 leavelen = *entitySpecificData++;
+			std::memcpy(actionBuffer, entitySpecificData, leavelen);
+			actionBuffer[leavelen] = 0;
+
+			if(auto leaveAction = std::strchr(actionBuffer, ':')) {
+				*leaveAction++ = 0;
+				if(auto script = GetScript(actionBuffer)){
+					to->trigger.leaveCallback = GetCallbackFromScript(script, leaveAction);
+				}
+			}else if(leavelen){
+				fprintf(stderr, "Warning! Leave callback for '%.*s' missing action\n", 
+					(u32)to->nameLength, to->name);
+			}
+		} break;
 			
 		case Entity::TypeGeometry:
 		default:
@@ -606,6 +638,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		if(ent->flags & Entity::FlagHidden) continue;
 		if(~ent->layers & layerMask) continue;
 
+		if(ent->entityType == Entity::TypeTrigger) continue;
+
 		// Render both sides of portals and mirrors
 		if(ent->entityType == Entity::TypePortal
 		|| ent->entityType == Entity::TypeMirror) {
@@ -790,6 +824,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			if(!ent->meshID) continue;
 			if(ent->flags & Entity::FlagHidden) continue;
 			if(~ent->layers & targetLayer) continue;
+
+			if(ent->entityType == Entity::TypeTrigger) continue;
 
 			if(ent->entityType == Entity::TypePortal
 			|| ent->entityType == Entity::TypeMirror) {

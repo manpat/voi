@@ -92,8 +92,6 @@ void DeinitEntity(Entity*);
 void UpdateEntity(Entity*, f32 dt);
 void EntityOnCollisionEnter(Entity*, Entity*);
 void EntityOnCollisionLeave(Entity*, Entity*);
-void EntityOnTriggerEnter(Entity*, Entity*);
-void EntityOnTriggerLeave(Entity*, Entity*);
 
 const char* GetEntityTypeName(u8);
 

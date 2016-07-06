@@ -103,7 +103,6 @@ class ExportVoiScene(bpy.types.Operator):
 				out.write(struct.pack('=I', e['flags']))
 				out.write(struct.pack('=H', e['parentID']))
 				out.write(struct.pack('=H', e['meshID']))
-				out.write(struct.pack('=H', e['scriptID']))
 				out.write(struct.pack('=B', type))
 				out.write(struct.pack('=B', col))
 				# TODO: collider data
@@ -116,22 +115,20 @@ class ExportVoiScene(bpy.types.Operator):
 					out.write(struct.pack('=H', 12)) # Size
 					out.write(struct.pack('=fff', *e['planeNormal']))
 				elif type == 3:
-					ostr = bytes(e['frob'], 'utf-8')
+					ostr = bytes(e['frobcb'], 'utf-8')
 					out.write(struct.pack('=H', len(ostr)+1))
 					out.write(struct.pack('=B', len(ostr))) # This might be overkill but whatever
 					out.write(ostr)
+				elif type == 4:
+					enterstr = bytes(e['entercb'], 'utf-8')
+					leavestr = bytes(e['leavecb'], 'utf-8')
+					out.write(struct.pack('=H', len(enterstr)+len(leavestr)+2))
+					out.write(struct.pack('=B', len(enterstr)))
+					out.write(enterstr)
+					out.write(struct.pack('=B', len(leavestr)))
+					out.write(leavestr)
 				else:
 					out.write(struct.pack('=H', 0))
-
-			out.write(struct.pack('=H', len(bpy.data.texts)))
-			for s in bpy.data.texts:
-				out.write(b"CODE")
-				out.write(struct.pack('=B', len(s.name)))
-				out.write(bytes(s.name, 'utf-8'))
-
-				str = s.as_string()
-				out.write(struct.pack('=I', len(str)))
-				out.write(bytes(str, 'utf-8'))
 
 		return {'FINISHED'}
 
@@ -247,7 +244,6 @@ class ExportVoiScene(bpy.types.Operator):
 
 				'parentID': 0, # TODO
 				'meshID': mid,
-				'scriptID': 0, # TODO
 
 				'entityType': type,
 				'colliderType': col,
@@ -263,7 +259,10 @@ class ExportVoiScene(bpy.types.Operator):
 
 				data['planeNormal'] = swapCoords(accum)
 			elif type == 3:
-				data['frob'] = obj.get("voi_entityfrobcb", "")
+				data['frobcb'] = obj.get("voi_entityfrobcb", "")
+			elif type == 4:
+				data['entercb'] = obj.get("voi_entityentercb", "")
+				data['leavecb'] = obj.get("voi_entityleavecb", "")
 
 			self.entities.append(data)
 

@@ -53,9 +53,6 @@ Format
 
 		u16						numEntities
 		Entity[numEntities]		entities
-
-		u16						numScripts
-		Scripts[numScripts]		scripts
 	}
 
 	Material {
@@ -104,7 +101,6 @@ Format
 		u32					flags
 		u16					parentID (can be zero)
 		u16					meshID (can be zero)
-		u16					scriptID (can be zero)
 		u8					entityType
 		u8					colliderType
 
@@ -118,18 +114,4 @@ Format
 			bool			isTrigger
 			bool			isKinematic
 		}
-	}
-
-	// Could reuse for shader definition
-	Script {
-		"CODE"
-		// u16				id
-
-		u8					nameLength
-		char[nameLength]	name
-
-		u32					scriptLength
-		char[scriptLength]	scriptText
-
-		// Any metadata
 	}

@@ -169,7 +169,6 @@ SceneData LoadSceneData(const char* fname) {
 		u32 flags = ent->flags = Read<u32>(&it);
 		u16 parentID = ent->parentID = Read<u16>(&it);
 		u16 meshID = ent->meshID = Read<u16>(&it);
-		u16 scriptID = ent->scriptID = Read<u16>(&it);
 		u8  entityType = ent->entityType = *it++;
 		u8  colliderType = ent->colliderType = *it++;
 
@@ -194,23 +193,7 @@ SceneData LoadSceneData(const char* fname) {
 		SCENEPRINT("\trotation: (%.1f, %.1f, %.1f)\n", rotation.x, rotation.y, rotation.z);
 		SCENEPRINT("\tscale: (%.1f, %.1f, %.1f)\n", scale.x, scale.y, scale.z);
 		SCENEPRINT("\tparentID: %hu\n\tmeshID: %hu\n", parentID, meshID);
-		SCENEPRINT("\tscriptID: %hu\n", scriptID);
 		SCENEPRINT("\tentityType: %s\n\tcolliderType: %hhu\n\n", GetEntityTypeName(entityType), colliderType);
-	}
-
-	scene.numScripts = Read<u16>(&it);
-	SCENEPRINT("numScripts: %hu\n", scene.numScripts);
-	for(u16 i = 0; i < scene.numScripts; i++) {
-		if(!CheckStamp(&it, "CODE")) goto error;
-
-		u8 nameLength = *it++;
-		SCENEPRINT("\tscriptName: %.*s\n", (u32)nameLength, it);
-		it += nameLength;
-
-		u32 scriptLength = Read<u32>(&it);
-		SCENEPRINT("\tscriptText:\n----------------\n%.*s\n-----------------\n\n", 
-			scriptLength, it);
-		it += scriptLength;
 	}
 
 error:

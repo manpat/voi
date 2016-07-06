@@ -180,6 +180,11 @@ struct Entity {
 		struct {
 			s32 frobCallback;
 		} interact;
+
+		struct {
+			s32 enterCallback;
+			s32 leaveCallback;
+		} trigger;
 	};
 
 	// So I can use the union for things with non-trivial constructors (glm vectors)

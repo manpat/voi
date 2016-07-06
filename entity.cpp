@@ -54,6 +54,12 @@ void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 		auto sidef = glm::dot(diff, e0->rotation * e0->planeNormal);
 		e1->player.portalSide = (s8)(sidef/glm::abs(sidef));
 	}
+
+	if(e0->entityType == Entity::TypeTrigger && e1->entityType == Entity::TypePlayer) {
+		if(e0->trigger.enterCallback){
+			RunCallback(e0->id, e0->trigger.enterCallback);
+		}
+	}
 }
 
 void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
@@ -62,14 +68,12 @@ void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
 			e1->player.collidingPortalID = 0;
 		}
 	}
-}
 
-void EntityOnTriggerEnter(Entity*, Entity*) {
-
-}
-
-void EntityOnTriggerLeave(Entity*, Entity*) {
-
+	if(e0->entityType == Entity::TypeTrigger && e1->entityType == Entity::TypePlayer) {
+		if(e0->trigger.leaveCallback){
+			RunCallback(e0->id, e0->trigger.leaveCallback);
+		}
+	}
 }
 
 extern bool debugDrawEnabled;

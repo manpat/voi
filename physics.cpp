@@ -22,7 +22,6 @@ inline quat bt2o(const btQuaternion& o){
 
 void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo);
 void ProcessCollision(PhysicsContext*, Entity*, Entity*);
-void ProcessTriggerCollision(PhysicsContext*, Entity*, Entity*);
 
 bool InitPhysics(PhysicsContext* ctx) {
 	auto collisionConfig = new btDefaultCollisionConfiguration{};
@@ -71,13 +70,7 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 		for (s32 j = 0; j < numContacts; j++) {
 			btManifoldPoint& pt = contactManifold->getContactPoint(j);
 			if(pt.getDistance() < 0.5f) {
-				if(ent0->entityType == Entity::TypeTrigger) {
-					ProcessTriggerCollision(ctx, ent0, ent1);
-				}else if(ent1->entityType == Entity::TypeTrigger) {
-					ProcessTriggerCollision(ctx, ent1, ent0);
-				}else{
-					ProcessCollision(ctx, ent0, ent1);
-				}
+				ProcessCollision(ctx, ent0, ent1);
 				break;
 			}
 		}
@@ -93,14 +86,8 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 			auto ent1 = GetEntity(cp.entityID1);
 
 			if(ent0 && ent1) {
-				if(ent0->entityType == Entity::TypeTrigger
-				|| ent1->entityType == Entity::TypeTrigger){
-					EntityOnTriggerLeave(ent0, ent1);
-					EntityOnTriggerLeave(ent1, ent0);
-				}else{
-					EntityOnCollisionLeave(ent0, ent1);
-					EntityOnCollisionLeave(ent1, ent0);
-				}
+				EntityOnCollisionLeave(ent0, ent1);
+				EntityOnCollisionLeave(ent1, ent0);
 			}
 
 			// Setting these to 0 flags them for cleanup
@@ -217,30 +204,6 @@ void ProcessCollision(PhysicsContext* ctx, Entity* ent0, Entity* ent1){
 	// Notify relevant entities
 	EntityOnCollisionEnter(ent0, ent1);
 	EntityOnCollisionEnter(ent1, ent0);
-}
-
-void ProcessTriggerCollision(PhysicsContext* ctx, Entity* trigger, Entity* entity){
-	// Test if this collision is already being tracked
-	auto begin = ctx->activeColliderPairs.begin();
-	auto end = ctx->activeColliderPairs.end();
-	auto it = std::find_if(begin, end,
-		[trigger, entity](const PhysicsColliderPair& cp){
-			return (cp.entityID0 == trigger->id && cp.entityID1 == entity->id)
-				|| (cp.entityID0 == entity->id && cp.entityID1 == trigger->id);
-		});
-
-	// If it already exists, update stamp and stop
-	if(it != end) {
-		it->stamp = ctx->currentStamp;
-		return;
-	}
-
-	// Otherwise register new pair
-	ctx->activeColliderPairs.push_back({trigger->id, entity->id, ctx->currentStamp});
-
-	// Notify relevant entities
-	EntityOnTriggerEnter(trigger, entity);
-	EntityOnTriggerEnter(entity, trigger);
 }
 
 struct EntityMotionState : public btMotionState {
@@ -421,14 +384,8 @@ void DeinitEntityPhysics(Entity* ent) {
 			continue;
 		}
 
-		if(ent0->entityType == Entity::TypeTrigger
-		|| ent1->entityType == Entity::TypeTrigger){
-			EntityOnTriggerLeave(ent0, ent1);
-			EntityOnTriggerLeave(ent1, ent0);
-		}else{
-			EntityOnCollisionLeave(ent0, ent1);
-			EntityOnCollisionLeave(ent1, ent0);
-		}
+		EntityOnCollisionLeave(ent0, ent1);
+		EntityOnCollisionLeave(ent1, ent0);
 
 		// Setting these to 0 flags them for cleanup
 		cp.entityID0 = 0;

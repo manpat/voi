@@ -63,7 +63,7 @@ bool InitGL(SDL_Window* window) {
 		glBindVertexArray(vao);
 	}
 
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(0);
 
 	return true;
 }

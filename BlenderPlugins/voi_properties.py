@@ -69,7 +69,10 @@ class ObjectPanel(bpy.types.Panel):
 
 		if type == 3: # Interact
 			layout.row().prop(o, "voi_entityfrobcb")
-			
+		elif type == 4: # Trigger
+			layout.row().prop(o, "voi_entityentercb")
+			layout.row().prop(o, "voi_entityleavecb")
+
 		layout.row().prop(o, "voi_entityignorefog")
 
 class ScriptPanel(bpy.types.Panel):
@@ -98,8 +101,10 @@ def register():
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
 	obj.voi_entityignorefog = BoolProperty(name="Ignore Fog", default=False)
 
-	obj.voi_entityupdatecb = StringProperty(name="Update Callback", description="What to run when object is updated. file.lua:function_name")
-	obj.voi_entityfrobcb = StringProperty(name="Frob Callback", description="What to run when object is frobbed. file.lua:function_name")
+	obj.voi_entityupdatecb = StringProperty(name="Update Callback", description="What to run when object is updated.")
+	obj.voi_entityfrobcb = StringProperty(name="Frob Callback", description="What to run when object is frobbed.")
+	obj.voi_entityentercb = StringProperty(name="Enter Callback", description="What to run when trigger is entered.")
+	obj.voi_entityleavecb = StringProperty(name="Leave Callback", description="What to run when trigger is left.")
 
 	obj = bpy.types.Text
 	obj.voi_scripttype = EnumProperty(items=voi_scrtypes, name="Script Type", default='c')

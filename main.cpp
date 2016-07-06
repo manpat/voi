@@ -353,6 +353,7 @@ s32 main(s32 ac, char** av) {
 
 		auto endFrameTime = std::chrono::high_resolution_clock::now();
 
+		SDL_Delay(1);
 		SDL_GL_SwapWindow(window);
 
 		auto endTime = std::chrono::high_resolution_clock::now();
