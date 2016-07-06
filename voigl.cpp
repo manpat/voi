@@ -27,7 +27,6 @@ bool InitGL(SDL_Window* window) {
 	InitGLBindings();
 	
 	// TODO: Check to make sure that we can use all the things we are using
-	// TODO: Possibly fuck glew off and get fptrs ourselves, or at least cut down glew
 
 	const char* requiredExtensions[] {
 		"GL_ARB_vertex_program",
@@ -38,11 +37,6 @@ bool InitGL(SDL_Window* window) {
 	for(auto ext: requiredExtensions) {
 		if(!SDL_GL_ExtensionSupported(ext)) {
 			printf("Required extension missing! %s\n", ext);
-
-			if(!strcmp(ext, "GL_ARB_vertex_array_object")) {
-				glGenVertexArrays = nullptr;
-				glBindVertexArray = nullptr;
-			}
 		}
 	}
 

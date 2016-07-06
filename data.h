@@ -44,13 +44,6 @@ struct Mesh {
 	vec3 center;
 };
 
-struct Material {
-	const char* name;
-	vec3 color;
-	u32 flags = 0;
-	u32 shaderID = 0;
-};
-
 struct EntityManager {
 	enum {
 		FreeEntityBucketSize = 512,
@@ -227,7 +220,7 @@ struct Scene {
 
 	Entity* entities;
 	Mesh* meshes;
-	Material materials[256];
+	vec3 materials[256];
 	ShaderProgram shaders[256];
 
 	u32 portals[256];
@@ -252,6 +245,7 @@ struct Camera {
 };
 
 // NOTE: In OpenGL 3.x+ the minimum available number of color attachments and draw buffers is 8
+// TODO: Check how many are available to us
 enum {
 	FBTargetDepthStencil,
 	FBTargetColor,

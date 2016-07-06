@@ -11,7 +11,7 @@ void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3
 bool InitScene(Scene* scene, const SceneData* data) {
 	// NOTE: THIS IS WAY OVERKILL!!
 	// It would be better to actually figure out how long the names are
-	scene->nameArenaSize = (data->numMaterials + data->numEntities) * 256u;
+	scene->nameArenaSize = (data->numEntities) * 256u;
 	scene->nameArena = new char[scene->nameArenaSize];
 	scene->nameArenaFree = scene->nameArena;
 	std::memset(scene->nameArena, 0, scene->nameArenaSize);
@@ -114,16 +114,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 
 	// Do material stuff
 	for(u16 i = 0; i < data->numMaterials; i++){
-		auto to = &scene->materials[i];
-		auto from = &data->materials[i];
-
-		std::memcpy(scene->nameArenaFree, from->name, from->nameLength);
-		to->name = scene->nameArenaFree;
-		scene->nameArenaFree += from->nameLength;
-		*scene->nameArenaFree++ = '\0';
-
-		to->color = from->color;
-		// TODO: Shader stuff when added
+		scene->materials[i] = data->materials[i];
 	}
 
 	std::map<u32, s32> loadedScripts {};
@@ -345,8 +336,8 @@ void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, cons
 	for(u32 i = 0; i < mesh->numSubmeshes; i++) {
 		if(program->materialColorLoc) {
 			if(sms[i].materialID > 0) {
-				auto mat = &scene->materials[sms[i].materialID-1];
-				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{mat->color, ignoreFog?0:1}));
+				auto mat = scene->materials[sms[i].materialID-1];
+				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{mat, ignoreFog?0:1}));
 			}else{
 				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{1,0,1, ignoreFog?0:1}));
 			}

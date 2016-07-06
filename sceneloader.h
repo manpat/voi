@@ -18,12 +18,6 @@ struct MeshData {
 	u8* materialIDs;
 };
 
-struct MaterialData {
-	u8 nameLength;
-	char name[256];
-	vec3 color;
-};
-
 struct EntityData {
 	u8 nameLength;
 	char name[256];
@@ -52,7 +46,7 @@ struct SceneData {
 	MeshData* meshes = nullptr;
 
 	u8  numMaterials = 0;
-	MaterialData* materials = nullptr;
+	vec3* materials = nullptr;
 
 	u16 numEntities = 0;
 	EntityData* entities = nullptr;

@@ -48,6 +48,7 @@ Format
 		u16						numMeshes
 		Mesh[numMeshes]			meshes
 
+		"MATL"
 		u8						numMaterials
 		Material[numMaterials]	materials
 
@@ -56,15 +57,7 @@ Format
 	}
 
 	Material {
-		"MATL"
-		// u8				id
-
-		u8					nameLength
-		char[nameLength]	name
-
-		f32[3]				color
-		// Extra material data
-		//	shaded? different shaders?
+		f32[3]				 	color
 	}
 
 	Mesh {

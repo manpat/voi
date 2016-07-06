@@ -134,18 +134,14 @@ SceneData LoadSceneData(const char* fname) {
 		SCENEPRINT("\n");
 	}
 
+	if(!CheckStamp(&it, "MATL")) goto error;
+	
 	scene.numMaterials = *it++;
-	scene.materials = new MaterialData[scene.numMaterials];
+	scene.materials = new vec3[scene.numMaterials];
 	SCENEPRINT("numMaterials: %hhu\n", scene.numMaterials);
 
 	for(u8 i = 0; i < scene.numMaterials; i++) {
-		if(!CheckStamp(&it, "MATL")) goto error;
-
-		u8 nameLength = scene.materials[i].nameLength = *it++;
-		std::memcpy(scene.materials[i].name, it, nameLength);
-		SCENEPRINT("\tmaterialName: %.*s\n", nameLength, it);
-		it += nameLength;
-		vec3 color = scene.materials[i].color = Read<vec3>(&it);
+		vec3 color = scene.materials[i] = Read<vec3>(&it);
 		SCENEPRINT("\tmaterialColor: (%.2f, %.2f, %.2f)\n\n", color.r, color.g, color.b);
 	}
 

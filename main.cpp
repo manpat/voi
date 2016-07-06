@@ -11,6 +11,7 @@ const char* defaultShaderSrc[] = {
 	SHADER(
 		in vec3 vertex;
 		out float gl_ClipDistance[1];
+		flat out int vertexID;
 
 		uniform mat4 viewProjection;
 		uniform mat4 model;
@@ -20,15 +21,28 @@ const char* defaultShaderSrc[] = {
 		void main() {
 			gl_Position = viewProjection * model * vec4(vertex, 1);
 			gl_ClipDistance[0] = dot(model * vec4(vertex, 1), clipPlane);
+			vertexID = int(gl_VertexID/3);
 		}
 	),
 	SHADER(
 		uniform vec4 materialColor;
+		flat in int vertexID;
 		out vec4 outcolor;
 		out vec4 outgeneral0;
 
 		void main() {
 			outcolor = materialColor;
+
+			vec3 col;
+			float val = vertexID;
+			float div = 2.f;
+			val /= div;
+			col.r = mod(val, 1.f);
+			val /= div;
+			col.g = mod(val, 1.f);
+			val /= div;
+			col.b = mod(val, 1.f);
+			outcolor.rgb = col*.5f +.5f;
 			outgeneral0 = vec4(0);
 		}
 	)

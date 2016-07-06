@@ -80,11 +80,9 @@ class ExportVoiScene(bpy.types.Operator):
 				for mid in m['materialIDs']:
 					out.write(struct.pack('=B', mid))
 
+			out.write(b"MATL")
 			out.write(struct.pack('=B', len(self.materials)))
 			for m in self.materials:
-				out.write(b"MATL")
-				out.write(struct.pack('=B', len(m['name'])))
-				out.write(bytes(m['name'], 'utf-8'))
 				out.write(struct.pack('=fff', *m['color']))
 
 			out.write(struct.pack('=H', len(self.entities)))
