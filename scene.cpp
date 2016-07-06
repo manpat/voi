@@ -3,10 +3,14 @@
 #include "sceneloader.h"
 
 #include <map>
+#include <vector>
 #include <algorithm>
 #include <SDL2/SDL.h>
 
-void RenderMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1}, bool ignoreFog = false);
+void RenderSceneMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1}, bool ignoreFog = false);
+
+static u32 vertVBO = 0;
+static u32 idxVBO = 0;
 
 bool InitScene(Scene* scene, const SceneData* data) {
 	// NOTE: THIS IS WAY OVERKILL!!
@@ -29,6 +33,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 	std::memset(scene->materials, 0, sizeof(scene->materials));
 	std::memset(scene->entities, 0, scene->numEntities * sizeof(Entity));
 	std::memset(scene->meshes, 0, scene->numMeshes * sizeof(Mesh));
+
+	if(!vertVBO) glGenBuffers(1, &vertVBO);
+	if(!idxVBO) glGenBuffers(1, &idxVBO);
+
+	std::vector<vec3> vertices;
+	std::vector<u32> indices;
 
 	// NOTE: It's possible that not all meshes will be drawn,
 	//	e.g., simplified physics meshes
@@ -87,14 +97,35 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			SCENEPRINT("\tsm: start: %u\tid: %hhu\n", submeshes[i].triangleCount, submeshes[i].materialID);
 		}
 
-		glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-		glBufferData(GL_ARRAY_BUFFER, meshData->numVertices*sizeof(vec3), meshData->vertices, GL_STATIC_DRAW);
+		mesh->offset = indices.size();
+		u32 vertOffset = vertices.size();
 
-		u8 elementSize = 1<<mesh->elementType;
+		vertices.insert(vertices.end(), meshData->vertices, meshData->vertices+meshData->numVertices);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, meshData->triangles8, GL_STATIC_DRAW);
+		switch(mesh->elementType) {
+		default:
+		case 0:
+			for(u32 i = 0; i < meshData->numTriangles*3u; i++)
+				indices.push_back(vertOffset + meshData->triangles8[i]);
+			break;
+		case 1:
+			for(u32 i = 0; i < meshData->numTriangles*3u; i++)
+				indices.push_back(vertOffset + meshData->triangles16[i]);
+			break;
+		case 2:
+			for(u32 i = 0; i < meshData->numTriangles*3u; i++)
+				indices.push_back(vertOffset + meshData->triangles32[i]);
+			break;
+		}
+
+		// glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
+		// glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+		// glBufferData(GL_ARRAY_BUFFER, meshData->numVertices*sizeof(vec3), meshData->vertices, GL_STATIC_DRAW);
+
+		// u8 elementSize = 1<<mesh->elementType;
+
+		// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+		// glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, meshData->triangles8, GL_STATIC_DRAW);
 
 		// Calculate stuff for physics/portals
 		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
@@ -108,6 +139,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		mesh->center = (maxPoint + minPoint)/2.f;
 		mesh->extents = (maxPoint - minPoint)/2.f;
 	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxVBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32)*indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -317,13 +354,10 @@ void DeinitScene(Scene* scene) {
 	std::memset(scene, 0, sizeof(Scene));
 }
 
-void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale, bool ignoreFog) {
+// NOTE: This assumes vertVBO and idxVBO are bound
+void RenderSceneMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale, bool ignoreFog) {
 	auto program = GetNamedShaderProgram(ShaderIDDefault); // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
 	mat4 modelMatrix = glm::translate<f32>(pos) * glm::mat4_cast(rot) * glm::scale<f32>(scale);
 	glUniformMatrix4fv(program->modelLoc, 1, false, glm::value_ptr(modelMatrix));
@@ -343,15 +377,10 @@ void RenderMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, cons
 			}
 		}
 
-		auto triangleSize = 3ull<<mesh->elementType;
-		glDrawElements(GL_TRIANGLES, sms[i].triangleCount*3, Mesh::ElementTypeToGL[mesh->elementType], 
-			(void*) (begin*triangleSize));
+		glDrawElements(GL_TRIANGLES, sms[i].triangleCount*3, GL_UNSIGNED_INT, (void*) ((begin*3ull + mesh->offset)*sizeof(u32)));
 
 		begin += sms[i].triangleCount;
 	}
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 struct PortalNode {
@@ -623,6 +652,10 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		}
 	}
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, vertVBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+
 	for(u32 entID = 0; entID < scene->numEntities; entID++) {
 		auto ent = &scene->entities[entID];
 		if(!ent->meshID) continue;
@@ -639,7 +672,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			glEnable(GL_CULL_FACE);
 		}
 
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
+		RenderSceneMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
 	}
 
 	glEnable(GL_STENCIL_TEST);
@@ -750,13 +783,17 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		glClear(GL_STENCIL_BUFFER_BIT);
 		glStencilMask(depthBit);
 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, vertVBO);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+
 		// Write portal to stencil
 		// NOTE: Polygon offset fixes z-fighting issues on some portals
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(0.f, -1.f);
 		glDepthFunc(GL_LEQUAL);
 		glUniformMatrix4fv(sh->viewProjectionLoc, 1, false, glm::value_ptr(parent->viewProjection));
-		RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
+		RenderSceneMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale);
 
 		if(intPtl && (u32(portalNode->entityID+1u) == cam.intersectingPortalId)) {
 			glDepthFunc(GL_ALWAYS);
@@ -808,6 +845,10 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 		glUniform4fv(sh->clipPlaneLoc, 1, glm::value_ptr(plane));
 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, vertVBO);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+
 		for(u32 entID = 0; entID < scene->numEntities; entID++) {
 			if(entID == portalNode->entityID) continue;
 
@@ -825,7 +866,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 				glEnable(GL_CULL_FACE);
 			}
 
-			RenderMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
+			RenderSceneMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
 		}
 
 		glFrontFace(GL_CCW);
