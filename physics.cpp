@@ -23,6 +23,8 @@ inline quat bt2o(const btQuaternion& o){
 void LayerNearCollisionFilterCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo);
 void ProcessCollision(PhysicsContext*, Entity*, Entity*);
 
+void PhysicsTick(btDynamicsWorld*, btScalar);
+
 bool InitPhysics(PhysicsContext* ctx) {
 	auto collisionConfig = new btDefaultCollisionConfiguration{};
 	ctx->broadphase = new btDbvtBroadphase{};
@@ -31,6 +33,7 @@ bool InitPhysics(PhysicsContext* ctx) {
 
 	ctx->world = new btDiscreteDynamicsWorld{ctx->dispatcher, ctx->broadphase, ctx->solver, collisionConfig};
 	ctx->world->setGravity({0, -30., 0});
+	ctx->world->setInternalTickCallback(PhysicsTick, ctx);
 	ctx->dispatcher->setNearCallback(LayerNearCollisionFilterCallback);
 
 	return true;
@@ -38,8 +41,12 @@ bool InitPhysics(PhysicsContext* ctx) {
 
 void UpdatePhysics(Scene* scene, f32 dt) {
 	auto ctx = &scene->physicsContext;
-
 	ctx->world->stepSimulation((btScalar)dt, 10);
+}
+
+// This gets run for each internal bullet fixed timestep
+void PhysicsTick(btDynamicsWorld* world, btScalar) {
+	auto ctx = (PhysicsContext*) world->getWorldUserInfo();
 	ctx->currentStamp++;
 
 	auto begin = ctx->activeColliderPairs.begin();

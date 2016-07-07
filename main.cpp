@@ -31,11 +31,13 @@ const char* defaultShaderSrc[] = {
 		out vec4 outgeneral0;
 
 		void main() {
-			outcolor = materialColor;
+			// outcolor = materialColor;
+			outcolor.a = materialColor.a;
+			outcolor.rgb = pow(materialColor.rgb, vec3(0.5f));
 
 			// vec3 col;
 			// float val = vertexID;
-			// float div = 10.f;
+			// float div = 50.f;
 			// val /= div;
 			// col.r = mod(val, 1.f);
 			// val /= div;
@@ -303,7 +305,8 @@ s32 main(s32 ac, char** av) {
 	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
 	// {	auto sceneData = LoadSceneData("export.voi");
 	// {	auto sceneData = LoadSceneData("Testing/test.voi");
-	{	auto sceneData = LoadSceneData("Testing/test2.voi");
+	// {	auto sceneData = LoadSceneData("Testing/test2.voi");
+	{	auto sceneData = LoadSceneData("Testing/test3.voi");
 	// {	auto sceneData = LoadSceneData("Testing/meshbatchtest.voi");
 	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
 		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {

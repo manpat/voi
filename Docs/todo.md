@@ -13,10 +13,7 @@ Shit To Do
 	- Control entities
 		- Movement
 	- Trigger audio events
-	- Change fog settings, etc.
 
-	- Trigger enter/leave/stay? callbacks
-	- Update callbacks
 	- Event scheduling?
 
 - Config

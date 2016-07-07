@@ -97,7 +97,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			SCENEPRINT("\tsm: start: %u\tid: %hhu\n", submeshes[i].triangleCount, submeshes[i].materialID);
 		}
 
-		mesh->offset = indices.size();
+		mesh->indexOffset = indices.size();
 		u32 vertOffset = vertices.size();
 
 		vertices.insert(vertices.end(), meshData->vertices, meshData->vertices+meshData->numVertices);
@@ -117,15 +117,6 @@ bool InitScene(Scene* scene, const SceneData* data) {
 				indices.push_back(vertOffset + meshData->triangles32[i]);
 			break;
 		}
-
-		// glGenBuffers(2, &mesh->vbo); // I know vbo and ebo are adjacent
-		// glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-		// glBufferData(GL_ARRAY_BUFFER, meshData->numVertices*sizeof(vec3), meshData->vertices, GL_STATIC_DRAW);
-
-		// u8 elementSize = 1<<mesh->elementType;
-
-		// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-		// glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numTriangles*3*elementSize, meshData->triangles8, GL_STATIC_DRAW);
 
 		// Calculate stuff for physics/portals
 		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
@@ -377,7 +368,7 @@ void RenderSceneMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot,
 			}
 		}
 
-		glDrawElements(GL_TRIANGLES, sms[i].triangleCount*3, GL_UNSIGNED_INT, (void*) ((begin*3ull + mesh->offset)*sizeof(u32)));
+		glDrawElements(GL_TRIANGLES, sms[i].triangleCount*3, GL_UNSIGNED_INT, (void*) ((begin*3ull + mesh->indexOffset)*sizeof(u32)));
 
 		begin += sms[i].triangleCount;
 	}
