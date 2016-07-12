@@ -6,10 +6,14 @@ Testing/
 # Ignore Pat's build stuff
 makefile
 build
+builds/
 lib/
 *.so*
 *.o
 *.log
+
+stdout.txt
+stderr.txt
 
 # I'm declaring *.shit to be the extention for reference code from other branches
 *.shit

@@ -32,13 +32,19 @@ bool InitGL(SDL_Window* window) {
 		"GL_ARB_vertex_program",
 		"GL_ARB_fragment_program",
 		"GL_ARB_framebuffer_object",
+		"GL_ARB_vertex_buffer_object",
 	};
+
+	bool missingRequiredExtensions = false;
 
 	for(auto ext: requiredExtensions) {
 		if(!SDL_GL_ExtensionSupported(ext)) {
 			printf("Required extension missing! %s\n", ext);
+			missingRequiredExtensions = true;
 		}
 	}
+
+	if(missingRequiredExtensions) return false;
 
 	// Try to enable debug output
 	auto glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC) SDL_GL_GetProcAddress("glDebugMessageCallbackARB");

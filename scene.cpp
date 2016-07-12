@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 
 void RenderSceneMesh(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1}, bool ignoreFog = false);
+void RenderSceneMeshAlpha(Scene*, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale = vec3{1,1,1}, f32 alpha = 1.f);
 
 static u32 vertVBO = 0;
 static u32 idxVBO = 0;
@@ -347,6 +348,10 @@ void DeinitScene(Scene* scene) {
 
 // NOTE: This assumes vertVBO and idxVBO are bound
 void RenderSceneMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale, bool ignoreFog) {
+	RenderSceneMeshAlpha(scene, meshID, pos, rot, scale, ignoreFog?0:1);
+}
+
+void RenderSceneMeshAlpha(Scene* scene, u16 meshID, const vec3& pos, const quat& rot, const vec3& scale, f32 alpha) {
 	auto program = GetNamedShaderProgram(ShaderIDDefault); // TODO: Obvs nope
 	auto mesh = &scene->meshes[meshID-1];
 
@@ -362,9 +367,9 @@ void RenderSceneMesh(Scene* scene, u16 meshID, const vec3& pos, const quat& rot,
 		if(program->materialColorLoc) {
 			if(sms[i].materialID > 0) {
 				auto mat = scene->materials[sms[i].materialID-1];
-				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{mat, ignoreFog?0:1}));
+				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{mat, alpha}));
 			}else{
-				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{1,0,1, ignoreFog?0:1}));
+				glUniform4fv(program->materialColorLoc, 1, glm::value_ptr(vec4{1,0,1, alpha}));
 			}
 		}
 
@@ -646,6 +651,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, vertVBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
+	glDisable(GL_BLEND);
 
 	for(u32 entID = 0; entID < scene->numEntities; entID++) {
 		auto ent = &scene->entities[entID];
@@ -860,7 +866,18 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			RenderSceneMesh(scene, ent->meshID, ent->position, ent->rotation, ent->scale, bool(ent->flags&Entity::FlagIgnoreFog));
 		}
 
+		glDisable(GL_CLIP_DISTANCE0);
 		glFrontFace(GL_CCW);
+
+		if(isInMirror) {
+			glEnable(GL_BLEND);
+			glDepthMask(false);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			// NOTE: Setting alpha means mirrors mess with fog in post
+			RenderSceneMeshAlpha(scene, ent->meshID, ent->position, ent->rotation, ent->scale, 0.1f);
+			glDepthMask(true);
+			glDisable(GL_BLEND);
+		}
 	}
 
 	if(recurseGuard > PortalGraph::MaxNumPortalNodes) {

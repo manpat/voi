@@ -5,6 +5,7 @@ import sys
 import math
 import mathutils
 from bpy.props import *
+from bpy.app.handlers import persistent
 
 # http://blender.stackexchange.com/questions/21463/draw-points-on-screen-with-bgl-python
 
@@ -32,12 +33,6 @@ voi_coltypes = [
 	('p', "Capsule", "Itsa capsule"),
 	('h', "Convex Hull", "Clingwrap"),
 	('m', "Mesh", "Itsa mesh. Kinda expensive"),
-]
-
-voi_scrtypes = [
-	('c', "Script", "Shit that does shit"),
-	('s', "Shader", "Looks good"),
-	('d', "Synth Def", "Makes a bleep"),
 ]
 
 class ObjectPanel(bpy.types.Panel):
@@ -75,23 +70,107 @@ class ObjectPanel(bpy.types.Panel):
 
 		layout.row().prop(o, "voi_entityignorefog")
 
-class ScriptPanel(bpy.types.Panel):
-	bl_label = "Voi Script"
-	bl_idname = "TEXT_PT_voi"
+def get_trigger_material():
+	m = bpy.data.materials.get("_Trigger")
+	if m == None:
+		m = bpy.data.materials.new("_Trigger")
+		m.use_transparency = True
+		m.diffuse_color = (1,0,0)
+		m.alpha = 0.6
 
-	bl_space_type = "TEXT_EDITOR"
-	# bl_region_type = "WINDOW"
-	bl_region_type = "UI"
-	bl_context = "object"
+	return m
 
-	def draw(self, context):
-		layout = self.layout
-		o = context.object
-		layout.row().prop(o, "voi_scripttype") # TODO This pls
+def get_portal_material():
+	m = bpy.data.materials.get("_Portal")
+	if m == None:
+		m = bpy.data.materials.new("_Portal")
+		m.diffuse_color = (1,0,1)
+
+	return m
+
+tracked_portals = []
+tracked_triggers = []
+
+def update_voi_object(o):
+	global tracked_portals, tracked_triggers
+
+	if o == None: return
+	if o.type != 'MESH': return
+	etype = o.get("voi_entitytype", 0)
+
+	if etype == 4:
+		o.show_transparent = True
+		o.show_wire = True
+		o.active_material = get_trigger_material()
+		o.draw_type = 'SOLID'
+		tracked_triggers.append(o)
+		if o in tracked_portals: tracked_portals.remove(o)
+
+	elif etype == 1:
+		o.show_wire = True
+		o.active_material = get_portal_material()
+		tracked_portals.append(o)
+		if o in tracked_triggers: tracked_triggers.remove(o)
+
+	elif o in tracked_portals: # Was a portal
+		tracked_portals.remove(o)
+		o.show_wire = False
+		o.active_material = None
+
+	elif o in tracked_triggers: # Was a trigger
+		tracked_triggers.remove(o)
+		o.draw_type = 'TEXTURED'
+		o.show_wire = False
+		o.show_transparent = False
+		o.active_material = None
+
+	else: return
+
+	scene = bpy.context.scene
+	if o.mode != 'EDIT':
+		ao = scene.objects.active 
+		scene.objects.active = o
+		scene.objects.active = ao
+
+@persistent
+def voi_update_ui(x):
+	scene = bpy.context.scene
+	for o in scene.objects:
+		update_voi_object(o)
+
+prev_selected_obj = None
+prev_selobj_type = 0
+
+@persistent
+def test_object_changes(x):
+	global prev_selected_obj, prev_selobj_type
+
+	scene = bpy.context.scene
+	if scene.objects.active != prev_selected_obj:
+		update_voi_object(prev_selected_obj)
+		prev_selected_obj = scene.objects.active
+		prev_selobj_type = prev_selected_obj.get("voi_entitytype", 0)
+		return
+
+	otype = prev_selected_obj.get("voi_entitytype", 0)
+	if prev_selobj_type != otype:
+		update_voi_object(prev_selected_obj)
+		prev_selobj_type = otype
+		return
+
+# This is to avoid dangling references
+@persistent
+def voi_load(x):
+	global prev_selected_obj, prev_selobj_type
+	global tracked_portals, tracked_triggers
+	prev_selected_obj = None
+	prev_selobj_type = 0
+	tracked_portals = []
+	tracked_triggers = []
+	voi_update_ui(x)
 
 def register():
 	bpy.utils.register_class(ObjectPanel)
-	bpy.utils.register_class(ScriptPanel)
 
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=voi_obtypes, name="Entity Type", default='g')
@@ -106,10 +185,12 @@ def register():
 	obj.voi_entityentercb = StringProperty(name="Enter Callback", description="What to run when trigger is entered.")
 	obj.voi_entityleavecb = StringProperty(name="Leave Callback", description="What to run when trigger is left.")
 
-	obj = bpy.types.Text
-	obj.voi_scripttype = EnumProperty(items=voi_scrtypes, name="Script Type", default='c')
+	bpy.app.handlers.save_post.append(voi_update_ui)
+	bpy.app.handlers.load_post.append(voi_load)
+	bpy.app.handlers.scene_update_post.append(test_object_changes)
 
 def unregister():
 	bpy.utils.unregister_class(ObjectPanel)
-	bpy.utils.unregister_class(ScriptPanel)
-
+	bpy.app.handlers.save_post.remove(voi_update_ui)
+	bpy.app.handlers.load_post.remove(voi_load)
+	bpy.app.handlers.scene_update_post.remove(test_object_changes)

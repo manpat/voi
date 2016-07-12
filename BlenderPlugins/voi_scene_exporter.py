@@ -27,10 +27,6 @@ class ExportVoiScene(bpy.types.Operator):
 
 	filepath = bpy.props.StringProperty(subtype="FILE_PATH")
 
-	# @classmethod
-	# def poll(cls, context):
-	# 	return context.object is not None
-
 	def execute(self, context):
 		debugRun = False
 
@@ -114,13 +110,13 @@ class ExportVoiScene(bpy.types.Operator):
 					out.write(struct.pack('=fff', *e['planeNormal']))
 				elif type == 3:
 					ostr = bytes(e['frobcb'], 'utf-8')
-					out.write(struct.pack('=H', len(ostr)+1))
+					out.write(struct.pack('=H', len(ostr)+1)) # Size
 					out.write(struct.pack('=B', len(ostr))) # This might be overkill but whatever
 					out.write(ostr)
 				elif type == 4:
 					enterstr = bytes(e['entercb'], 'utf-8')
 					leavestr = bytes(e['leavecb'], 'utf-8')
-					out.write(struct.pack('=H', len(enterstr)+len(leavestr)+2))
+					out.write(struct.pack('=H', len(enterstr)+len(leavestr)+2)) # Size
 					out.write(struct.pack('=B', len(enterstr)))
 					out.write(enterstr)
 					out.write(struct.pack('=B', len(leavestr)))
@@ -138,6 +134,9 @@ class ExportVoiScene(bpy.types.Operator):
 		self.materials.append(defaultMat)
 
 		for m in bpy.data.materials:
+			if m.name[0] == '_':
+				continue
+
 			mat = {}
 			mat['name'] = m.name
 			mat['color'] = m.diffuse_color
@@ -150,7 +149,7 @@ class ExportVoiScene(bpy.types.Operator):
 		self.meshes = []
 		self.meshIDs = {}
 
-		scene = bpy.data.scenes[0]
+		scene = bpy.context.scene
 		for obj in scene.objects:
 			if obj.type == 'MESH':
 				odata = obj.data
@@ -199,13 +198,11 @@ class ExportVoiScene(bpy.types.Operator):
 
 				self.meshes.append(mesh)
 				self.meshIDs[odata.name] = len(self.meshes) # ids start at 1
-			# else:
-			# 	print("Unknown type: " + obj.type)
 
 	def compileEntities(self):
 		self.entities = []
 
-		scene = bpy.data.scenes[0]
+		scene = bpy.context.scene
 		for obj in scene.objects:
 			if not obj.get("voi_entitydoexport", True):
 				continue

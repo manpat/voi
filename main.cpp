@@ -129,7 +129,16 @@ void GameInit();
 void GameDeinit();
 void GameUpdate(Scene*, Camera*, Framebuffer*, f32);
 
+FILE* fout, *ferr;
+
 s32 main(s32 ac, char** av) {
+	fout = freopen("stdout.txt", "wb", stdout);
+	ferr = freopen("stderr.txt", "wb", stderr);
+	atexit([]{
+		fclose(fout);
+		fclose(ferr);
+	});
+
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
 		puts("SDL Init failed");
 		return 1;
@@ -220,7 +229,6 @@ s32 main(s32 ac, char** av) {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	glFrontFace(GL_CCW);
 	glDepthFunc(GL_LEQUAL);
@@ -424,8 +432,8 @@ void GameInit() {
 		UpdateParticleSystem(&particleSystem, 1.f/60.f);
 	}
 
-	cursorTextures[0] = LoadTexture("GameData/UI/cursor.png");
-	cursorTextures[1] = LoadTexture("GameData/UI/cursor2.png");
+	cursorTextures[0] = LoadTexture("data/cursor.png");
+	cursorTextures[1] = LoadTexture("data/cursor2.png");
 
 	f32 s = GetFloatOption("graphics.cursorsize")/100.f;
 	vec3 verts[] = {
@@ -502,6 +510,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 		RenderScene(scene, *camera, playerEntity->layers);
 
 		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		glUseProgram(particleShader->program);
 		glUniform3fv(particleShader->materialColorLoc, 1, glm::value_ptr(vec3{.5}));
 		glUniformMatrix4fv(particleShader->viewProjectionLoc, 1, false, 
