@@ -62,14 +62,14 @@ void PhysicsTick(btDynamicsWorld* world, btScalar) {
 		auto obA = (btCollisionObject*)contactManifold->getBody0();
 		auto obB = (btCollisionObject*)contactManifold->getBody1();
 		if(!obA || !obB) {
-			puts("Warning! Contact manifold found with invalid rigidbody!");
+			LogError("Warning! Contact manifold found with invalid rigidbody!\n");
 			continue;
 		}
 
 		auto ent0 = (Entity*) obA->getUserPointer();
 		auto ent1 = (Entity*) obB->getUserPointer();
 		if(!ent0 || !ent1) {
-			puts("Warning! Rigidbody found without user pointer set!");
+			LogError("Warning! Rigidbody found without user pointer set!\n");
 			continue;
 		}
 		
@@ -120,7 +120,7 @@ void DeinitPhysics(PhysicsContext* ctx) {
 void RefilterEntity(Entity* e) {
 	if(!e->rigidbody) return;
 	if(!e->scene) {
-		printf("Warning! Tried to refilter entity \"%.*s\" that doesn't belong to a scene\n",
+		LogError("Warning! Tried to refilter entity \"%.*s\" that doesn't belong to a scene\n",
 			(u32)e->nameLength, e->name);
 		return;
 	}
@@ -253,13 +253,13 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 
 	case ColliderConvex: {
 		if(!ent->meshID || !meshdata) {
-			printf("Error! Entity '%.*s' has Mesh collider type but no mesh!\n",
+			LogError("Error! Entity '%.*s' has Mesh collider type but no mesh!\n",
 				(u32)ent->nameLength, ent->name);
 			return false;
 		}
 
 		if(ent->meshID > scene->numMeshes) {
-			printf("Error! Entity '%.*s' has Mesh collider type but has an invalid mesh ID!\n",
+			LogError("Error! Entity '%.*s' has Mesh collider type but has an invalid mesh ID!\n",
 				(u32)ent->nameLength, ent->name);
 			return false;
 		}
@@ -276,13 +276,13 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 
 	case ColliderMesh:{
 		if(!ent->meshID || !meshdata) {
-			printf("Error! Entity '%.*s' has Mesh collider type but no mesh!\n",
+			LogError("Error! Entity '%.*s' has Mesh collider type but no mesh!\n",
 				(u32)ent->nameLength, ent->name);
 			return false;
 		}
 
 		if(ent->meshID > scene->numMeshes) {
-			printf("Error! Entity '%.*s' has Mesh collider type but has an invalid mesh ID!\n",
+			LogError("Error! Entity '%.*s' has Mesh collider type but has an invalid mesh ID!\n",
 				(u32)ent->nameLength, ent->name);
 			return false;
 		}
@@ -327,7 +327,7 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 		ent->collider = nullptr;
 		return true;
 	default:
-		printf("Error! Entity '%.*s' has unknown collider type!",
+		LogError("Error! Entity '%.*s' has unknown collider type!",
 			(u32)ent->nameLength, ent->name);
 		ent->collider = nullptr;
 		return false;
@@ -385,7 +385,7 @@ void DeinitEntityPhysics(Entity* ent) {
 		auto ent1 = GetEntity(cp.entityID1);
 
 		if(!ent0 || !ent1){
-			printf("Warning! An active collider pair was found with an invalid entity ID!\n");
+			LogError("Warning! An active collider pair was found with an invalid entity ID!\n");
 			cp.entityID0 = 0;
 			cp.entityID1 = 0;
 			continue;

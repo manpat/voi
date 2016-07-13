@@ -7,13 +7,26 @@
 
 struct SDL_Window;
 
-void ParseCLOptions(s32, const char**);
+void ParseCLOptions(s32, char**);
 void LoadOptions();
 
 bool GetBoolOption(const char*);
 s64 GetIntOption(const char*);
 f64 GetFloatOption(const char*);
 const char* GetStringOption(const char*);
+
+// Enables warnings for format params on GCC
+#ifdef __GNUC__
+#define FORMATARGS(f,s) __attribute__((format(printf, (f), (s))))
+#else
+#define FORMATARGS(f,s)
+#endif
+
+bool InitLog();
+void Log(const char*, ...) FORMATARGS(1,2);
+void LogError(const char*, ...) FORMATARGS(1,2);
+
+#undef FORMATARGS
 
 bool InitGL(SDL_Window*);
 void DeinitGL();

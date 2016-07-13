@@ -30,7 +30,7 @@ bool InitScripting() {
 
 s32 LoadScript(const char* fname) {
 	if(luaL_loadfile(l, fname)) {
-		fprintf(stderr, "Error loading script '%s': %s\n", fname, luaL_checkstring(l, -1));
+		LogError("Error loading script '%s': %s\n", fname, luaL_checkstring(l, -1));
 		return 0;
 	}
 	lua_newtable(l); // env
@@ -44,7 +44,7 @@ s32 LoadScript(const char* fname) {
 
 	lua_pushvalue(l, -1);
 	if(lua_pcall(l, 0, 0, 0)) {
-		fprintf(stderr, "Error running script '%s': %s\n", fname, luaL_checkstring(l, -1));
+		LogError("Error running script '%s': %s\n", fname, luaL_checkstring(l, -1));
 		lua_pop(l, 2);
 		return 0;
 	}
@@ -58,13 +58,13 @@ void UnloadScript(s32 s) {
 
 s32 GetCallbackFromScript(s32 script, const char* funcName) {
 	if(!script) {
-		fprintf(stderr, "Warning! Tried to get a function '%s' from invalid script\n", funcName);
+		LogError("Warning! Tried to get a function '%s' from invalid script\n", funcName);
 		return 0;
 	}
 
 	lua_rawgeti(l, LUA_REGISTRYINDEX, script);
 	if(lua_isnil(l, -1)) {
-		fprintf(stderr, "Warning! Tried to get a function '%s' from invalid script (%d)\n", funcName, script);
+		LogError("Warning! Tried to get a function '%s' from invalid script (%d)\n", funcName, script);
 		lua_pop(l, 1);
 		return 0;
 	}
@@ -72,7 +72,7 @@ s32 GetCallbackFromScript(s32 script, const char* funcName) {
 	lua_getupvalue(l, -1, 1); // Get ENV
 	lua_getfield(l, -1, funcName);
 	if(!lua_isfunction(l, -1)) {
-		fprintf(stderr, "Warning! Tried to get non-existant function '%s' from script (%d)\n", funcName, script);
+		LogError("Warning! Tried to get non-existant function '%s' from script (%d)\n", funcName, script);
 		lua_pop(l, 3);
 		return 0;
 	}
@@ -85,13 +85,13 @@ s32 GetCallbackFromScript(s32 script, const char* funcName) {
 
 void RunCallback(u32 entId, s32 func) {
 	if(!func) {
-		fprintf(stderr, "Warning! Tried to run invalid script callback\n");
+		LogError("Warning! Tried to run invalid script callback\n");
 		return;
 	}
 
 	lua_rawgeti(l, LUA_REGISTRYINDEX, func);
 	if(!lua_isfunction(l, -1)) {
-		fprintf(stderr, "Warning! Tried to run a non-function object (%d) as a callback (type: %s)\n", 
+		LogError("Warning! Tried to run a non-function object (%d) as a callback (type: %s)\n", 
 			func, lua_typename(l, lua_type(l, -1)));
 		lua_pop(l, 1);
 		return;
@@ -99,7 +99,7 @@ void RunCallback(u32 entId, s32 func) {
 
 	lua_pushinteger(l, entId);
 	if(lua_pcall(l, 1, 0, 0)) {
-		fprintf(stderr, "Error running script callback: %s\n", luaL_checkstring(l, -1));
+		LogError("Error running script callback: %s\n", luaL_checkstring(l, -1));
 		lua_pop(l, 1);
 	}
 }
@@ -111,31 +111,31 @@ void RunCallback(u32 entId, s32 func) {
 void stackdump(){
 	int i;
 	int top = lua_gettop(l);
-	printf("[LuaStack] ");
+	LogError("[LuaStack] ");
 	for (i = 1; i <= top; i++) {  /* repeat for each level */
 		int t = lua_type(l, i);
 		switch (t) {
 
 			case LUA_TSTRING:  /* strings */
-			printf("'%s'", lua_tostring(l, i));
+			LogError("'%s'", lua_tostring(l, i));
 			break;
 
 			case LUA_TBOOLEAN:  /* booleans */
-			printf(lua_toboolean(l, i) ? "true" : "false");
+			LogError(lua_toboolean(l, i) ? "true" : "false");
 			break;
 
 			case LUA_TNUMBER:  /* numbers */
-			printf("%g", lua_tonumber(l, i));
+			LogError("%g", lua_tonumber(l, i));
 			break;
 
 			default:  /* other values */
-			printf("%s", lua_typename(l, t));
+			LogError("%s", lua_typename(l, t));
 			break;
 
 		}
-		printf("  ");  /* put a separator */
+		LogError("  ");  /* put a separator */
 	}
-	printf("\n");  /* end the listing */
+	LogError("\n");  /* end the listing */
 }
 
 static vec3* lCheckVecRef(s32 s) {

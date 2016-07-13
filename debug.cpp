@@ -42,7 +42,7 @@ bool InitDebug() {
 	debugProgram = CreateShaderProgram(debugShaderSrc[0], debugShaderSrc[1]);
 
 	if(!debugProgram.program) {
-		puts("WARNING! Debug draw shader compilation failed!");
+		LogError("WARNING! Debug draw shader compilation failed!\n");
 		return false;
 	}
 

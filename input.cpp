@@ -28,20 +28,20 @@ bool Input::doCapture = true;
 bool Input::isFocussed = true;
 
 void Input::Init(){
-	SDL_Init(SDL_INIT_JOYSTICK);
+	// SDL_Init(SDL_INIT_JOYSTICK);
 
-	printf("Joysticks found: %d\n", SDL_NumJoysticks());
+	// Log("Joysticks found: %d\n", SDL_NumJoysticks());
 
-	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-		if ((controller = SDL_JoystickOpen(i))) {
-			printf("Joystick %d connect\n", i);
-			break;
-		}
-	}
+	// for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+	// 	if ((controller = SDL_JoystickOpen(i))) {
+	// 		Log("Joystick %d connect\n", i);
+	// 		break;
+	// 	}
+	// }
 
-	if(!controller){
-		puts("Unable to connect joystick");
-	}
+	// if(!controller){
+	// 	LogError("Unable to connect joystick\n");
+	// }
 }
 
 void Input::Deinit(){

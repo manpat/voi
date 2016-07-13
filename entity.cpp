@@ -40,7 +40,7 @@ void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 		if(e1->player.collidingPortalID) {
 			auto ptl = GetEntity(e1->player.collidingPortalID);
 
-			fprintf(stderr, "Warning! Ignoring portal collision because a portal is already being tracked!\n"
+			LogError("Warning! Ignoring portal collision because a portal is already being tracked!\n"
 				"Portals %.*s and %.*s are probably too close together!\n", 
 				ptl->nameLength, ptl->name,
 				e0->nameLength, e0->name);
@@ -201,7 +201,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	pl->lookingAtInteractive = eyeHit.entity && (eyeHit.entity->entityType == Entity::TypeInteractive);
 	if(pl->lookingAtInteractive && Input::GetMappedDown(Input::Interact)) {
 		auto e = eyeHit.entity;
-		// fprintf(stderr, "Frob %.*s\n", e->nameLength, e->name);
+		// LogError("Frob %.*s\n", e->nameLength, e->name);
 
 		if(e->interact.frobCallback) {
 			RunCallback(e->id, e->interact.frobCallback);

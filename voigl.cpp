@@ -7,7 +7,7 @@ SDL_GLContext glctx = nullptr;
 void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
 	if(type != GL_DEBUG_TYPE_ERROR_ARB && type != GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB) return;
 
-	fprintf(stderr, "GLERROR: %.*s\n", length, msg);
+	LogError("GLERROR: %.*s\n", length, msg);
 }
 
 static void InitGLBindings();
@@ -15,14 +15,14 @@ static void InitGLBindings();
 bool InitGL(SDL_Window* window) {
 	glctx = SDL_GL_CreateContext(window);
 	if(!glctx) {
-		fprintf(stderr, "OpenGL context creation failed: %s\n", SDL_GetError());
+		LogError("OpenGL context creation failed: %s\n", SDL_GetError());
 		return false;
 	}
 
-	fprintf(stderr, "Version : %s\n", glGetString(GL_VERSION));
-	fprintf(stderr, "GLSL    : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	fprintf(stderr, "Vendor  : %s\n", glGetString(GL_VENDOR));
-	fprintf(stderr, "Renderer: %s\n", glGetString(GL_RENDERER));
+	Log("Version : %s\n", glGetString(GL_VERSION));
+	Log("GLSL    : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	Log("Vendor  : %s\n", glGetString(GL_VENDOR));
+	Log("Renderer: %s\n", glGetString(GL_RENDERER));
 
 	InitGLBindings();
 	
@@ -39,7 +39,7 @@ bool InitGL(SDL_Window* window) {
 
 	for(auto ext: requiredExtensions) {
 		if(!SDL_GL_ExtensionSupported(ext)) {
-			printf("Required extension missing! %s\n", ext);
+			LogError("Required extension missing! %s\n", ext);
 			missingRequiredExtensions = true;
 		}
 	}
@@ -53,7 +53,7 @@ bool InitGL(SDL_Window* window) {
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 		glDebugMessageCallback((GLDEBUGPROCARB) DebugCallback, nullptr);
 	}else{
-		puts("Warning! Debug output not supported");
+		LogError("Warning! Debug output not supported\n");
 	}
 
 	if(SDL_GL_ExtensionSupported("GL_ARB_vertex_array_object")) {

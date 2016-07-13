@@ -209,7 +209,7 @@ bool ReinitEffects() {
 	DestroyFramebuffer(&secondaryFbo);
 	secondaryFbo = CreateColorFramebuffer(windowWidth, windowHeight, false);
 	if(!secondaryFbo.valid) {
-		fprintf(stderr, "Effect framebuffer init failed\n");
+		LogError("Effect framebuffer init failed\n");
 		return false;
 	}
 

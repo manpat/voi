@@ -56,7 +56,7 @@ SceneData LoadSceneData(const char* fname);
 void FreeSceneData(SceneData*);
 
 #if 0
-#define SCENEPRINT(...) printf(__VA_ARGS__)
+#define SCENEPRINT(...) Log(__VA_ARGS__)
 #else
 #define SCENEPRINT(...) [](...){}(__VA_ARGS__) // Get rid of warnings
 #endif

@@ -6,7 +6,7 @@
 #undef assert
 void assert(bool c, const char* s) {
 	if(!c) {
-		puts(s);
+		LogError("%s\n", s);
 		std::exit(0);
 	}
 }
@@ -28,7 +28,7 @@ bool CheckStamp(u8** it, const char* stamp) {
 		return true;
 	}
 
-	printf("Error! Expected %.*s stamp but didn't get one!\n", 4, stamp);
+	LogError("Error! Expected %.*s stamp but didn't get one!\n", 4, stamp);
 	return false;
 }
 
@@ -36,7 +36,7 @@ template<class El>
 void SortMeshData(MeshData* md);
 
 SceneData LoadSceneData(const char* fname) {
-	printf("Loading %s ...\n", fname);
+	Log("Loading %s ...\n", fname);
 
 	u8* data = nullptr;
 	u64 size = 0;
@@ -55,7 +55,7 @@ SceneData LoadSceneData(const char* fname) {
 	if(*it++ != 'V'
 	|| *it++ != 'O'
 	|| *it++ != 'I') {
-		puts("Invalid filestamp!");
+		LogError("Invalid filestamp!\n");
 		return {};
 	}
 

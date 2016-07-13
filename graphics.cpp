@@ -37,7 +37,7 @@ Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
 
 	fb.valid = true;
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		puts("Warning! Framebuffer incomplete!");
+		LogError("Warning! Framebuffer incomplete!\n");
 		fb.valid = false;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -71,7 +71,7 @@ Framebuffer CreateColorFramebuffer(u32 width, u32 height, bool filter) {
 
 	fb.valid = true;
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		puts("Warning! Framebuffer incomplete!");
+		LogError("Warning! Framebuffer incomplete!\n");
 		fb.valid = false;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -102,7 +102,7 @@ static u32 CreateShader(const char* src, u32 type) {
 		auto infoLog = new char[logLength];
 		glGetShaderInfoLog(id, logLength, nullptr, infoLog);
 
-		fprintf(stderr, "%s\n", infoLog);
+		LogError("%s\n", infoLog);
 		delete[] infoLog;
 
 		glDeleteShader(id);
@@ -119,7 +119,7 @@ ShaderProgram CreateShaderProgram(const char* vsrc, const char* fsrc) {
 	u32 fsh = CreateShader(fsrc, GL_FRAGMENT_SHADER);
 
 	if(!vsh || !fsh) {
-		fprintf(stderr, "Shader compilation failed\n");
+		LogError("Shader compilation failed\n");
 		goto error;
 	}
 
@@ -146,7 +146,7 @@ ShaderProgram CreateShaderProgram(const char* vsrc, const char* fsrc) {
 		auto infoLog = new char[logLength];
 		glGetProgramInfoLog(ret.program, logLength, nullptr, infoLog);
 
-		fprintf(stderr, "%s\n", infoLog);
+		LogError("%s\n", infoLog);
 		delete[] infoLog;
 
 		glDeleteProgram(ret.program);
@@ -177,7 +177,7 @@ ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs
 	
 	auto prog = &shaderPrograms[shId];
 	if(prog->program) {
-		fprintf(stderr, "Warning! Overriding already initialised shader program (%u)!\n", shId);
+		LogError("Warning! Overriding already initialised shader program (%u)!\n", shId);
 	}
 
 	*prog = CreateShaderProgram(vs, fs);
@@ -189,7 +189,7 @@ ShaderProgram* GetNamedShaderProgram(u32 shId) {
 	
 	auto prog = &shaderPrograms[shId];
 	if(!prog->program) {
-		fprintf(stderr, "Warning! Tried to get uninitialised named shader program (%u)!\n", shId);
+		LogError("Warning! Tried to get uninitialised named shader program (%u)!\n", shId);
 		return nullptr;
 	}
 	
@@ -200,7 +200,7 @@ u32 LoadTexture(const char* fname) {
 	s32 texWidth, texHeight, numComponents;
 	u8* texData = stbi_load(fname, &texWidth, &texHeight, &numComponents, STBI_default);
 	if(!texData) {
-		printf("Warning! Unable to load texture \"%s\"\n", fname);
+		LogError("Warning! Unable to load texture \"%s\"\n", fname);
 		return 0u;
 	}
 	

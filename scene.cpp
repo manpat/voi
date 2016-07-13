@@ -199,7 +199,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		}
 
 		if(to->entityType >= Entity::TypeNonExportable) {
-			printf("Error: Entity '%.*s' has non exportable type!\n",
+			LogError("Error! Entity '%.*s' has non exportable type!\n",
 				(u32)to->nameLength, to->name);
 			return false;	
 		}
@@ -215,7 +215,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 					to->updateCallback = GetCallbackFromScript(script, action);
 				}
 			}else{
-				fprintf(stderr, "Warning! Update callback for %.*s missing action\n", 
+				LogError("Warning! Update callback for %.*s missing action\n", 
 					(u32)to->nameLength, to->name);
 			}
 		}
@@ -237,7 +237,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 			auto scriptFile = entitySpecificData;
 			auto action = std::strchr(scriptFile, ':');
 			if(!action){
-				fprintf(stderr, "Warning! Frob callback for '%.*s' missing action\n", 
+				LogError("Warning! Frob callback for '%.*s' missing action\n", 
 					(u32)to->nameLength, to->name);
 			}else{
 				*action++ = 0;
@@ -263,7 +263,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 					to->trigger.enterCallback = GetCallbackFromScript(script, enterAction);
 				}
 			}else if(enterlen){
-				fprintf(stderr, "Warning! Enter callback for '%.*s' missing action\n", 
+				LogError("Warning! Enter callback for '%.*s' missing action\n", 
 					(u32)to->nameLength, to->name);
 			}
 
@@ -278,7 +278,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 					to->trigger.leaveCallback = GetCallbackFromScript(script, leaveAction);
 				}
 			}else if(leavelen){
-				fprintf(stderr, "Warning! Leave callback for '%.*s' missing action\n", 
+				LogError("Warning! Leave callback for '%.*s' missing action\n", 
 					(u32)to->nameLength, to->name);
 			}
 		} break;
@@ -296,7 +296,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 
 		auto meshData = (to->meshID>0)? &data->meshes[to->meshID-1] : nullptr;
 		if(!InitEntityPhysics(to, meshData)) {
-			printf("Error! Entity '%.*s' physics init failed!\n",
+			LogError("Error! Entity '%.*s' physics init failed!\n",
 				(u32)to->nameLength, to->name);
 			return false;
 		}
@@ -315,11 +315,11 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		auto e = &scene->entities[i];
 		if(e->entityType != Entity::TypePortal && e->entityType != Entity::TypeMirror) continue;
 		if(!e->meshID) {
-			printf("Warning! Portal/Mirror '%.*s' doesn't have a mesh. That's kinda useless\n", e->nameLength, e->name);
+			LogError("Warning! Portal/Mirror '%.*s' doesn't have a mesh. That's kinda useless\n", e->nameLength, e->name);
 			continue;
 		}
 		if(e->entityType == Entity::TypePortal && (!e->layers || !(e->layers & (e->layers-1)))) {
-			printf("Warning! Portal '%.*s' only occupies zero or one layers\n", e->nameLength, e->name);
+			LogError("Warning! Portal '%.*s' only occupies zero or one layers\n", e->nameLength, e->name);
 			continue;
 		}
 
@@ -604,7 +604,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 				intPoint.x = 0.f;
 			}
 
-			// fprintf(stderr, "(%7.2f %7.2f) -> (%7.2f %7.2f) (%3.2f %3.2f)\n", projpoint.x, projpoint.y, intPoint.x, intPoint.y, projdir.x, projdir.y);
+			// LogError("(%7.2f %7.2f) -> (%7.2f %7.2f) (%3.2f %3.2f)\n", projpoint.x, projpoint.y, intPoint.x, intPoint.y, projdir.x, projdir.y);
 
 			intPoint.z = -cam.nearDist - 1e-5;
 			projdir.z = 0.f;
@@ -621,7 +621,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 			glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STREAM_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}else{
-			// fprintf(stderr, "NO INTERSECT\n");
+			// LogError("NO INTERSECT\n");
 			// NOTE: None of this has been tested.
 			// 	This is very much a corner case
 
@@ -702,7 +702,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 		if(stackPos >= 8) {
 			parent->remainingChildren = 0;
-			puts("WARNING! Render stack overflow!");
+			LogError("Warning! Render stack overflow!\n");
 			continue;
 		}
 
@@ -713,7 +713,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 				isInMirror = false;
 			}
 			stackPos--;
-			puts("WARNING! Portal graph overflow!");
+			LogError("Warning! Portal graph overflow!\n");
 			continue;			
 		}
 
@@ -881,7 +881,7 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 	}
 
 	if(recurseGuard > PortalGraph::MaxNumPortalNodes) {
-		puts("Warning! Portal render recurse guard hit!");
+		LogError("Warning! Portal render recurse guard hit!\n");
 	}
 
 	glDisable(GL_STENCIL_TEST);

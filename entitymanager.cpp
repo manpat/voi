@@ -21,7 +21,7 @@ Entity* AllocateSceneEntities(u16 count) {
 	if(seb->entities) {
 		seb = &entityManager.sceneEntityBuckets[1];
 		if(seb->entities) {
-			puts("Error! No free scene entity buckets!");
+			LogError("Error! No free scene entity buckets!\n");
 			return nullptr;
 		}
 	}
@@ -45,7 +45,7 @@ void FreeSceneEntities(Entity* se) {
 		}
 	}
 
-	puts("Warning! Tried to free scene entities that the entity manager doesn't own!");
+	LogError("Warning! Tried to free scene entities that the entity manager doesn't own!\n");
 }
 
 Entity* AllocateEntity() {
@@ -133,7 +133,7 @@ Entity* GetEntity(u16 id) {
 	auto bucket = &buckets[bucketID];
 	auto ent = &bucket->entities[idx];
 	if(ent->id != id) {
-		printf("Error! Entity ID mismatch in GetEntity (%u != %u)\n", ent->id, id);
+		LogError("Error! Entity ID mismatch in GetEntity (%u != %u)\n", ent->id, id);
 		return nullptr;
 	}
 	return ent;

@@ -129,18 +129,14 @@ void GameInit();
 void GameDeinit();
 void GameUpdate(Scene*, Camera*, Framebuffer*, f32);
 
-FILE* fout, *ferr;
-
 s32 main(s32 ac, char** av) {
-	fout = freopen("stdout.txt", "wb", stdout);
-	ferr = freopen("stderr.txt", "wb", stderr);
-	atexit([]{
-		fclose(fout);
-		fclose(ferr);
-	});
+	if(!InitLog()) {
+		fprintf(stderr, "Error! Unable to init logging!\n");
+		return 2;
+	}
 
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0){
-		puts("SDL Init failed");
+		LogError("SDL Init failed\n");
 		return 1;
 	}
 
@@ -154,7 +150,7 @@ s32 main(s32 ac, char** av) {
 		assert(compiledVersion.patch == linkedVersion.patch);
 	}
 
-	ParseCLOptions(ac, (const char**)av);
+	ParseCLOptions(ac, av);
 	LoadOptions();
 
 	windowWidth = GetIntOption("window.width");
@@ -178,7 +174,7 @@ s32 main(s32 ac, char** av) {
 		windowWidth, windowHeight, SDL_WINDOW_OPENGL);
 
 	if(!window) {
-		puts("Window creation failed");
+		LogError("Window creation failed\n");
 		return 1;
 	}
 
@@ -191,11 +187,11 @@ s32 main(s32 ac, char** av) {
 	SDL_ShowCursor(0);
 
 	if(!InitDebug()) {
-		puts("Warning! Debug draw init failed");
+		LogError("Warning! Debug draw init failed\n");
 	}
 
 	if(!InitScripting()) {
-		puts("Error! Scripting init failed!");
+		LogError("Error! Scripting init failed!\n");
 		return 1;
 	}
 
@@ -219,11 +215,10 @@ s32 main(s32 ac, char** av) {
 	playerEntity->extents = vec3{2.f, 3.f, 2.f}/2.f;
 	playerEntity->player.eyeOffset = vec3{0, 1.2f, 0};
 	playerEntity->player.camera = &camera;
-	printf("Player id: %u\n", playerEntity->id);
 
 	Scene scene;
 	if(!InitPhysics(&scene.physicsContext)) {
-		puts("Error! Physics init failed!");
+		LogError("Error! Physics init failed!\n");
 		return 1;
 	}
 
@@ -236,7 +231,7 @@ s32 main(s32 ac, char** av) {
 	glEnableVertexAttribArray(0);
 
 	if(!InitEffects()) {
-		puts("Error! Effects init failed!");
+		LogError("Error! Effects init failed!\n");
 		return 1;
 	}
 
@@ -268,7 +263,7 @@ s32 main(s32 ac, char** av) {
 	// TODO: Better antialiasing method
 	Framebuffer fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 	if(!fb.valid) {
-		puts("Error! Framebuffer creation failed!");
+		LogError("Error! Framebuffer creation failed!\n");
 		return 1;
 	}
 
@@ -291,7 +286,7 @@ s32 main(s32 ac, char** av) {
 
 		fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
 		if(!fb.valid) {
-			puts("Error! Framebuffer recreation failed!");
+			LogError("Error! Framebuffer recreation failed!\n");
 			return false;
 		}
 
@@ -309,27 +304,23 @@ s32 main(s32 ac, char** av) {
 
 	if(!SetFullscreen(fullscreen)) return 1;
 	
-	// {	auto sceneData = LoadSceneData("Testing/temple.voi");
-	// {	auto sceneData = LoadSceneData("Testing/portals.voi");
-	// {	auto sceneData = LoadSceneData("export.voi");
-	// {	auto sceneData = LoadSceneData("Testing/test.voi");
-	// {	auto sceneData = LoadSceneData("Testing/test2.voi");
-	{	auto sceneData = LoadSceneData("Testing/test3.voi");
-	// {	auto sceneData = LoadSceneData("Testing/meshbatchtest.voi");
-	// {	auto sceneData = LoadSceneData("Testing/scaletest.voi");
+	auto filename = GetStringOption("level.override");
+	if(!filename[0]) filename = "export.voi";
+
+	{	auto sceneData = LoadSceneData(filename);
 		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
-			puts("Error! Empty scene!");
+			LogError("Error! Empty scene!\n");
 			return 1;
 		}
 
 		if(!InitScene(&scene, &sceneData)) {
-			puts("Error! Scene init failed!");
+			LogError("Error! Scene init failed!\n");
 			return 1;
 		}
 
 		playerEntity->scene = &scene;
 		if(!InitEntityPhysics(playerEntity, nullptr)) {
-			puts("Error! Entity physics init failed for player!");
+			LogError("Error! Entity physics init failed for player!\n");
 			return 1;
 		}
 
@@ -398,7 +389,7 @@ s32 main(s32 ac, char** av) {
 
 			char titleBuffer[256];
 			std::snprintf(titleBuffer, 256, "Voi   |   %.ffps   |   %.2fms   |   %u primitives", fps, renderdt*1000.f, primitiveCount);
-			// std::fprintf(stderr, "%.ffps   |   %.2fms\n", fps, dt*1000.f);
+			// LogError("%.ffps   |   %.2fms\n", fps, dt*1000.f);
 			SDL_SetWindowTitle(window, titleBuffer);
 		}
 
@@ -423,7 +414,7 @@ s32 main(s32 ac, char** av) {
 
 void GameInit() {
 	if(!InitParticleSystem(&particleSystem, 10000)) {
-		puts("Warning! Particle system init failed");
+		LogError("Warning! Particle system init failed\n");
 	}
 
 	// Simulate 3s of dust
