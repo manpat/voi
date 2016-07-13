@@ -98,6 +98,7 @@ vec3 GetEntityVelocity(const Entity*);
 vec3 GetEntityCenterOfMass(const Entity*);
 void ConstrainEntityUpright(Entity*);
 void SetEntityKinematic(Entity*, bool, bool = true);
+void WakeUpEntity(Entity*);
 
 void InitEntity(Entity*);
 void DeinitEntity(Entity*);
@@ -112,6 +113,12 @@ Entity* AllocateEntity();
 void FreeSceneEntities(Entity* se);
 void FreeEntity(Entity* e);
 Entity* GetEntity(u16 id);
+Entity* FindEntity(const char* name);
 void UpdateAllEntities(f32 dt);
+
+bool InitEntityAnimator();
+void UpdateEntityAnimator(f32 dt);
+
+void QueueEntityMoveToAnimation(Entity*, vec3 target, f32 duration);
 
 #endif

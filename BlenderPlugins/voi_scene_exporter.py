@@ -176,7 +176,8 @@ class ExportVoiScene(bpy.types.Operator):
 
 					if midx < len(odata.materials):
 						mat = odata.materials[midx]
-						mid = self.materialIDs.get(mat.name, 0)
+						if mat:
+							mid = self.materialIDs.get(mat.name, 0)
 
 					# Assumes there are always 3 verts
 					for v in p.verts:

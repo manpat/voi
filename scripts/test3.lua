@@ -31,3 +31,10 @@ function initial_fog()
 	color, dist, dens = table.unpack(settings[1])
 	effects.fog(color, dist, dens, .01)
 end
+
+function animation_test()
+	local e = entity.lookup("Platform")
+	if not e then return end
+
+	e:move_to(e:pos() + vec(0, 8, 0), 5)
+end

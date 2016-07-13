@@ -76,7 +76,11 @@ const char* particleShaderSrc[] = {
 		void main() {
 			if(vlifetime <= 0.f) discard;
 
-			float a = sin(radians(vlifetime*180.f)) * 0.35f;
+			// vec2 diff = vec2(.5f) - gl_PointCoord;
+			// float dist = .6f-(abs(diff.x)+abs(diff.y))/*.5f - length()*/;
+			// dist = pow(clamp(dist, 0.f, 1.f), 0.9f);
+			float dist = 0.35f;
+			float a = sin(radians(vlifetime*180.f)) * dist;
 			outgeneral0 = vec4(materialColor*a, a);
 			outcolor = vec4(0);
 		}
@@ -110,6 +114,7 @@ const char* uiShaderSrc[] = {
 };
 
 extern bool debugDrawEnabled;
+extern bool transformFeedbackAvailable;
 
 u32 windowWidth;
 u32 windowHeight;
@@ -195,6 +200,11 @@ s32 main(s32 ac, char** av) {
 		return 1;
 	}
 
+	if(!InitEntityAnimator()) {
+		LogError("Error! Entity Animator init failed!\n");
+		return 1;
+	}
+
 	Camera camera;
 	camera.fov = glm::radians<f32>(GetFloatOption("graphics.fov"));
 	camera.aspect = (f32) windowWidth / windowHeight;
@@ -245,10 +255,14 @@ s32 main(s32 ac, char** av) {
 
 	auto beginTime = std::chrono::high_resolution_clock::now();
 
-	bool queryingPrimitives = true;
+	bool queryingPrimitives = false;
 	u32 primitiveCount = 0;
 	u32 primCountQuery;
-	glGenQueries(1, &primCountQuery);
+	if(transformFeedbackAvailable) {
+		glGenQueries(1, &primCountQuery);
+		glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
+		queryingPrimitives = true;
+	}
 
 	f32 multisampleLevel = 1.;
 	bool filter = true;
@@ -352,26 +366,26 @@ s32 main(s32 ac, char** av) {
 			SetFullscreen(fullscreen ^= true);
 		}
 
-		if(queryingPrimitives) glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
-
 		GameUpdate(&scene, &camera, &fb, dt);
 
-		if(queryingPrimitives) {
-			glEndQuery(GL_PRIMITIVES_GENERATED);
-			queryingPrimitives = false;
-		}else{
-			u32 available = 0;
-			glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT_AVAILABLE, &available);
+		if(transformFeedbackAvailable) {
+			if(queryingPrimitives) {
+				glEndQuery(GL_PRIMITIVES_GENERATED);
+				queryingPrimitives = false;
+			}else{
+				u32 available = 0;
+				glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT_AVAILABLE, &available);
 
-			if(available) {
-				glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT, &primitiveCount);
-				queryingPrimitives = true;
+				if(available) {
+					glGetQueryObjectuiv(primCountQuery, GL_QUERY_RESULT, &primitiveCount);
+					glBeginQuery(GL_PRIMITIVES_GENERATED, primCountQuery);
+					queryingPrimitives = true;
+				}
 			}
 		}
 
 		auto endFrameTime = std::chrono::high_resolution_clock::now();
 
-		SDL_Delay(1);
 		SDL_GL_SwapWindow(window);
 
 		auto endTime = std::chrono::high_resolution_clock::now();
@@ -470,6 +484,8 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 	UpdateParticleSystem(&particleSystem, dt);
 
 	UpdateAllEntities(dt);
+
+	UpdateEntityAnimator(dt);
 
 	// Update camera position BEFORE updating physics!
 	//	Player determines what layer to render based on position. 

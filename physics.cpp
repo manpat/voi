@@ -140,7 +140,7 @@ struct RaycastCallback : btCollisionWorld::ClosestRayResultCallback {
 		auto body = (btRigidBody*)proxy0->m_clientObject;
 		auto ent = (Entity*)(body?body->getUserPointer():nullptr);
 
-		return ent && (ent->layers & layerMask);
+		return ent && (ent->layers & layerMask) && (ent->entityType != Entity::TypeTrigger);
 	}
 };
 
@@ -433,6 +433,8 @@ void ConstrainEntityUpright(Entity* e) {
 }
 
 void SetEntityKinematic(Entity* e, bool k, bool setActivationState) {
+	if(!e || !e->rigidbody) return;
+
 	auto flags = e->rigidbody->getCollisionFlags();
 	if(k){
 		flags |= btCollisionObject::CF_KINEMATIC_OBJECT;
@@ -446,4 +448,11 @@ void SetEntityKinematic(Entity* e, bool k, bool setActivationState) {
 	}
 
 	RefilterEntity(e);
+}
+
+void WakeUpEntity(Entity* e) {
+	if(!e || !e->rigidbody) return;
+	if(e->rigidbody->getActivationState() == DISABLE_DEACTIVATION) return;
+
+	e->rigidbody->setActivationState(ACTIVE_TAG);
 }

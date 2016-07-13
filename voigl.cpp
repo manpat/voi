@@ -4,6 +4,11 @@
 
 SDL_GLContext glctx = nullptr;
 
+bool transformFeedbackAvailable = false;
+bool framebuffersAvailable = false;
+bool debugOutputAvailable = false;
+bool vertexArrayAvailable = false;
+
 void GLAPIENTRY DebugCallback(u32, u32 type, u32, u32, s32 length, const char* msg, void*) {
 	if(type != GL_DEBUG_TYPE_ERROR_ARB && type != GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB) return;
 
@@ -29,34 +34,40 @@ bool InitGL(SDL_Window* window) {
 	// TODO: Check to make sure that we can use all the things we are using
 
 	const char* requiredExtensions[] {
-		"GL_ARB_vertex_program",
-		"GL_ARB_fragment_program",
-		"GL_ARB_framebuffer_object",
 		"GL_ARB_vertex_buffer_object",
+	};
+
+	std::pair<const char*, bool*> optionalExtensions[] {
+		{"GL_ARB_framebuffer_object", &framebuffersAvailable},
+		{"GL_ARB_debug_output", &debugOutputAvailable},
+		{"GL_ARB_vertex_array_object", &vertexArrayAvailable},
+		{"GL_ARB_transform_feedback3", &transformFeedbackAvailable} // For primitive queries
 	};
 
 	bool missingRequiredExtensions = false;
 
 	for(auto ext: requiredExtensions) {
 		if(!SDL_GL_ExtensionSupported(ext)) {
-			LogError("Required extension missing! %s\n", ext);
+			LogError("Error! Required extension missing! %s\n", ext);
 			missingRequiredExtensions = true;
 		}
+	}
+
+	for(auto ext: optionalExtensions) {
+		if(!(*ext.second = SDL_GL_ExtensionSupported(ext.first)))
+			LogError("Warning! Optional extension missing! %s\n", ext.first);
 	}
 
 	if(missingRequiredExtensions) return false;
 
 	// Try to enable debug output
-	auto glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC) SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
-
-	if(SDL_GL_ExtensionSupported("GL_ARB_debug_output") && glDebugMessageCallback) {
+	if(debugOutputAvailable) {
+		auto glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKARBPROC) SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 		glDebugMessageCallback((GLDEBUGPROCARB) DebugCallback, nullptr);
-	}else{
-		LogError("Warning! Debug output not supported\n");
 	}
 
-	if(SDL_GL_ExtensionSupported("GL_ARB_vertex_array_object")) {
+	if(vertexArrayAvailable) {
 		// *Required* as of like OpenGL 3.something 
 		u32 vao;
 		glGenVertexArrays(1, &vao);

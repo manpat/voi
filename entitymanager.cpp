@@ -139,6 +139,34 @@ Entity* GetEntity(u16 id) {
 	return ent;
 }
 
+Entity* FindEntity(const char* name) {
+	if(!name) return nullptr;
+
+	auto& buckets = entityManager.entityBuckets;
+	auto sbucket = &entityManager.sceneEntityBuckets[0];
+
+	for(u32 i = 0; i < buckets.size(); i++) {
+		auto bucket = &buckets[i];
+		if(!bucket->entities || !bucket->capacity) continue;
+		for(u32 e = 0; e < bucket->used; e++) {
+			auto ent = &bucket->entities[e];
+			if(!std::strncmp(name, ent->name, ent->nameLength)) {
+				return ent;
+			}
+		}
+	}
+
+	if(!sbucket->entities || !sbucket->capacity) return nullptr;
+	for(u32 e = 0; e < sbucket->used; e++) {
+		auto ent = &sbucket->entities[e];
+		if(!std::strncmp(name, ent->name, ent->nameLength)) {
+			return ent;
+		}
+	}
+
+	return nullptr;
+}
+
 void UpdateAllEntities(f32 dt) {
 	auto& buckets = entityManager.entityBuckets;
 	auto sbucket = &entityManager.sceneEntityBuckets[0];

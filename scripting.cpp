@@ -411,6 +411,17 @@ static void InitEntityLib() {
 
 	static const luaL_Reg lib[] = {
 		{"lookup", [](lua_State* l) {
+			if(lua_type(l, 1) == LUA_TSTRING) {
+				auto e = FindEntity(lua_tostring(l, 1));
+				if(e) {
+					lNewEntUD(e);
+				}else{
+					lua_pushnil(l);
+				}
+
+				return 1;
+			}
+
 			u32 id = luaL_checkinteger(l, 1);
 			if(id > 65535) return 0;
 
@@ -451,6 +462,15 @@ static void InitEntityLib() {
 			auto e = lCheckEnt(1);
 			if(e) *lNewVecUD() = e->position;
 			return e?1:0;
+		}},
+
+		// Actions
+		{"move_to", [](lua_State*) {
+			auto e = lCheckEnt(1);
+			auto t = *lCheckVecRef(2);
+			f32 dur = luaL_optnumber(l, 3, 1.f);
+			QueueEntityMoveToAnimation(e, t, dur);
+			return 0;
 		}},
 
 		{nullptr, nullptr}
