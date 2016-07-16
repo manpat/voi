@@ -8,6 +8,14 @@ namespace {
 	lua_State* l;
 }
 
+#ifdef __GNUC__
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
+#endif
+
+#define LUALAMBDA [](UNUSED lua_State* l) -> s32
+
 static void InitVecLib();
 static void InitQuatLib();
 static void InitRandLib();
@@ -153,14 +161,14 @@ static vec3* lNewVecUD() {
 
 static void InitVecLib() {
 	static const luaL_Reg vecmt[] = {
-		{"__tostring", [](lua_State* l){
+		{"__tostring", LUALAMBDA {
 			auto v = lCheckVecRef(1);
 			lua_pushfstring(l, "vec(%f, %f, %f)", v->x, v->y, v->z);
 			return 1;
 		}},
 
 		#define OP(name, op) \
-		{"__" #name, [](lua_State* l){ \
+		{"__" #name, LUALAMBDA { \
 			auto v = lCheckVecRef(1); \
 			auto ud = lNewVecUD(); \
 			if(auto v2 = lTestVecRef(2)) { \
@@ -178,7 +186,7 @@ static void InitVecLib() {
 		OP(div, /),
 		#undef OP
 
-		{"__unm", [](lua_State*){
+		{"__unm", LUALAMBDA {
 			*lNewVecUD() = -*lCheckVecRef(1);
 			return 1;
 		}},
@@ -187,25 +195,25 @@ static void InitVecLib() {
 	};
 
 	static const luaL_Reg veclib[] = {
-		{"normalize", [](lua_State*) {
+		{"normalize", LUALAMBDA {
 			*lNewVecUD() = glm::normalize(*lCheckVecRef(1));
 			return 1;
 		}},
-		{"dot", [](lua_State* l) {
+		{"dot", LUALAMBDA {
 			lua_pushnumber(l, glm::dot(*lCheckVecRef(1), *lCheckVecRef(2)));
 			return 1;
 		}},
-		{"cross", [](lua_State*) {
+		{"cross", LUALAMBDA {
 			*lNewVecUD() = glm::cross(*lCheckVecRef(1), *lCheckVecRef(2));
 			return 1;
 		}},
-		{"length", [](lua_State*) {
+		{"length", LUALAMBDA {
 			lua_pushnumber(l, glm::length(*lCheckVecRef(1)));
 			return 1;
 		}},
 
 		#define ACCESSOR(x) \
-		{#x, [](lua_State*){ \
+		{#x, LUALAMBDA { \
 			s32 args = lua_gettop(l); \
 			auto v = lCheckVecRef(1); \
 			if(args == 1) { \
@@ -232,7 +240,7 @@ static void InitVecLib() {
 	luaL_setfuncs(l, veclib, 0);
 
 	lua_newtable(l); // mt
-	lua_pushcfunction(l, [](lua_State* l) {
+	lua_pushcfunction(l, LUALAMBDA {
 		s32 numArgs = lua_gettop(l)-1; // First arg is the veclib
 		auto ud = lNewVecUD();
 
@@ -268,11 +276,11 @@ static void InitVecLib() {
 
 static void InitRandLib() {
 	static const luaL_Reg randlib[] = {
-		{"ball", [](lua_State* l) {
+		{"ball", LUALAMBDA {
 			*lNewVecUD() = glm::ballRand(luaL_checknumber(l, 1));
 			return 1;
 		}},
-		{"gauss", [](lua_State* l) {
+		{"gauss", LUALAMBDA {
 			if(auto mean = lTestVecRef(1)) {
 				*lNewVecUD() = glm::gaussRand(*mean, *lCheckVecRef(2));
 			}else if(lua_isnumber(l, 1)) {
@@ -280,7 +288,7 @@ static void InitRandLib() {
 			}else return 0;
 			return 1;
 		}},
-		{"linear", [](lua_State* l) {
+		{"linear", LUALAMBDA {
 			if(auto min = lTestVecRef(1)) {
 				*lNewVecUD() = glm::linearRand(*min, *lCheckVecRef(2));
 			}else if(lua_isnumber(l, 1)) {
@@ -288,7 +296,7 @@ static void InitRandLib() {
 			}else return 0;
 			return 1;
 		}},
-		{"spherical", [](lua_State* l) {
+		{"spherical", LUALAMBDA {
 			*lNewVecUD() = glm::sphericalRand(luaL_checknumber(l, 1));
 			return 1;
 		}},
@@ -304,7 +312,7 @@ static void InitRandLib() {
 
 static void InitEffectLib() {
 	static const luaL_Reg fxlib[] = {
-		{"fog", [](lua_State* l) {
+		{"fog", LUALAMBDA {
 			auto col = lCheckVecRef(1);
 			f32 dist = luaL_checknumber(l, 2);
 			f32 dens = luaL_checknumber(l, 3);
@@ -313,22 +321,22 @@ static void InitEffectLib() {
 			return 0;
 		}},
 
-		{"fog_color", [](lua_State* l) {
+		{"fog_color", LUALAMBDA {
 			SetTargetFogColor(*lCheckVecRef(1), luaL_optnumber(l, 2, 4.f));
 			return 0;
 		}},
 
-		{"fog_density", [](lua_State* l) {
+		{"fog_density", LUALAMBDA {
 			SetTargetFogDensity(luaL_checknumber(l, 1), luaL_optnumber(l, 2, 4.f));
 			return 0;
 		}},
 
-		{"fog_distance", [](lua_State* l) {
+		{"fog_distance", LUALAMBDA {
 			SetTargetFogDistance(luaL_checknumber(l, 1), luaL_optnumber(l, 2, 4.f));
 			return 0;
 		}},
 
-		{"vignette", [](lua_State* l) {
+		{"vignette", LUALAMBDA {
 			SetTargetVignetteLevel(luaL_checknumber(l, 1), luaL_optnumber(l, 2, 4.f));
 			return 0;
 		}},
@@ -344,7 +352,7 @@ static void InitEffectLib() {
 
 static void InitDebugLib() {
 	static const luaL_Reg lib[] = {
-		{"point", [](lua_State*) {
+		{"point", LUALAMBDA {
 			auto p = lCheckVecRef(1);
 			if(auto col = lTestVecRef(2)) {
 				DebugPoint(*p, *col);
@@ -355,7 +363,7 @@ static void InitDebugLib() {
 			return 0;
 		}},
 
-		{"line", [](lua_State*){
+		{"line", LUALAMBDA {
 			auto p1 = lCheckVecRef(1);
 			auto p2 = lCheckVecRef(2);
 			auto c1 = lTestVecRef(3);
@@ -398,7 +406,7 @@ static Entity** lNewEntUD(Entity* e) {
 
 static void InitEntityLib() {
 	static const luaL_Reg mt[] = {
-		{"__tostring", [](lua_State* l){
+		{"__tostring", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			luaL_Buffer b;
 			luaL_buffinit(l, &b);
@@ -410,7 +418,7 @@ static void InitEntityLib() {
 	};
 
 	static const luaL_Reg lib[] = {
-		{"lookup", [](lua_State* l) {
+		{"lookup", LUALAMBDA {
 			if(lua_type(l, 1) == LUA_TSTRING) {
 				auto e = FindEntity(lua_tostring(l, 1));
 				if(e) {
@@ -435,37 +443,77 @@ static void InitEntityLib() {
 			return 1;
 		}},
 
-		{"name", [](lua_State* l) {
+		{"name", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			if(e) lua_pushlstring(l, e->name, e->nameLength);
 			return e?1:0;
 		}},
 
-		{"id", [](lua_State* l) {
+		{"id", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			if(e) lua_pushinteger(l, e->id);
 			return e?1:0;
 		}},
 
-		{"type", [](lua_State* l) {
+		{"type", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			if(e) lua_pushinteger(l, e->entityType);
 			return e?1:0;
 		}},
-		{"type_name", [](lua_State* l) {
+		{"type_name", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			if(e) lua_pushstring(l, GetEntityTypeName(e->entityType));
 			return e?1:0;
 		}},
 
-		{"pos", [](lua_State*) {
+		{"pos", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			if(e) *lNewVecUD() = e->position;
 			return e?1:0;
 		}},
 
+		{"size", LUALAMBDA {
+			auto e = lCheckEnt(1);
+			if(e) *lNewVecUD() = e->extents * 2.f;
+			return e?1:0;
+		}},
+
+		{"hidden", LUALAMBDA {
+			auto e = lCheckEnt(1);
+			if(e) lua_pushboolean(l, bool(e->flags&Entity::FlagHidden));
+			return e?1:0;
+		}},
+
+		{"set_hidden", LUALAMBDA {
+			if(auto e = lCheckEnt(1)) {
+				if(lua_toboolean(l, 2)) {
+					e->flags |= Entity::FlagHidden;
+				}else{
+					e->flags &= ~Entity::FlagHidden;
+				}
+			}
+
+			return 0;
+		}},
+
+		{"layers", LUALAMBDA {
+			if(auto e = lCheckEnt(1)) {
+				u32 layers = e->layers;
+				u32 numPushed = 0;
+				for(u32 i = 0; i < 32; i++) {
+					if((1<<i)&layers) {
+						lua_pushinteger(l, i);
+						numPushed++;
+					}
+				}
+				return numPushed;
+			}
+
+			return 0;
+		}},
+
 		// Actions
-		{"move_to", [](lua_State*) {
+		{"move_to", LUALAMBDA {
 			auto e = lCheckEnt(1);
 			auto t = *lCheckVecRef(2);
 			f32 dur = luaL_optnumber(l, 3, 1.f);

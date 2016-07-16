@@ -10,9 +10,9 @@ Shit To Do
 		- Configurable sizes in blender
 - Lua
 	- Enumerate entities
-	- Control entities
-		- Movement
 	- Trigger audio events
+	- Change material properties?
+	- Change entity/mesh materials?
 
 	- Event scheduling?
 
@@ -51,4 +51,5 @@ Shit To Do
 		- Simple solution: Move it into voi_scene_exporter.py
 
 	- Optional flag for portals that bails from recursion
-	- Improve portal visibility algorithm 
+	- Improve portal visibility algorithm
+	- Chunk scene into sections that can be skipped when known to not be visible

@@ -36,5 +36,31 @@ function animation_test()
 	local e = entity.lookup("Platform")
 	if not e then return end
 
-	e:move_to(e:pos() + vec(0, 8, 0), 5)
+	e:move_to(e:pos() + vec(0, e:size():y()+1, 0), 5)
+end
+
+local gate_open = false
+local gate_start = nil
+function open_gate()
+	local e = entity.lookup("Gate")
+	if not e then return end
+
+	if not gate_start then
+		gate_start = e:pos()
+	end
+
+	if gate_open then 
+		e:move_to(gate_start, 5)
+	else
+		e:move_to(gate_start + vec(0, e:size():y()+1, 0), 5)
+	end
+
+	gate_open = not gate_open
+end
+
+function change_destination(id)
+	local e = entity.lookup("Gate.Portal")
+	if not e then return end
+
+	print("Gate layers:", e:layers())
 end

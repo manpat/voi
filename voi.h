@@ -118,7 +118,6 @@ void UpdateAllEntities(f32 dt);
 
 bool InitEntityAnimator();
 void UpdateEntityAnimator(f32 dt);
-
 void QueueEntityMoveToAnimation(Entity*, vec3 target, f32 duration);
 
 #endif

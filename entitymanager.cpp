@@ -144,12 +144,14 @@ Entity* FindEntity(const char* name) {
 
 	auto& buckets = entityManager.entityBuckets;
 	auto sbucket = &entityManager.sceneEntityBuckets[0];
+	u32 nameLength = strlen(name);
 
 	for(u32 i = 0; i < buckets.size(); i++) {
 		auto bucket = &buckets[i];
 		if(!bucket->entities || !bucket->capacity) continue;
 		for(u32 e = 0; e < bucket->used; e++) {
 			auto ent = &bucket->entities[e];
+			if(ent->nameLength != nameLength) continue;
 			if(!std::strncmp(name, ent->name, ent->nameLength)) {
 				return ent;
 			}
@@ -159,6 +161,7 @@ Entity* FindEntity(const char* name) {
 	if(!sbucket->entities || !sbucket->capacity) return nullptr;
 	for(u32 e = 0; e < sbucket->used; e++) {
 		auto ent = &sbucket->entities[e];
+		if(ent->nameLength != nameLength) continue;
 		if(!std::strncmp(name, ent->name, ent->nameLength)) {
 			return ent;
 		}
