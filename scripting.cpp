@@ -9,12 +9,11 @@ namespace {
 }
 
 #ifdef __GNUC__
-#define UNUSED __attribute__((unused))
+#define LUALAMBDA [](__attribute__((unused)) lua_State* l) -> s32
 #else
-#define UNUSED
+#define LUALAMBDA [](lua_State* l) -> s32
 #endif
 
-#define LUALAMBDA [](UNUSED lua_State* l) -> s32
 
 static void InitVecLib();
 static void InitQuatLib();
@@ -509,6 +508,20 @@ static void InitEntityLib() {
 				return numPushed;
 			}
 
+			return 0;
+		}},
+
+		{"set_layers", LUALAMBDA {
+			if(auto e = lCheckEnt(1)) {
+				u32 nargs = lua_gettop(l);
+				u32 layers = 0;
+				for(u32 i = 2; i <= nargs; i++) {
+					u32 ly = lua_tointeger(l, i);
+					layers |= 1<<ly;
+				}
+				e->layers = layers;
+				RefilterEntity(e);
+			}
 			return 0;
 		}},
 

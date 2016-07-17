@@ -45,3 +45,25 @@ API Reference
 	- `debug.point(pos[, color])` - Attempts drawing a debug point at `pos` using `color` if provided
 	- `debug.line(p0, p1[, color])` - Attempts drawing a debug line from `p0` to `p1` using `color` if provided
 	- `debug.line(p0, p1, c0, c1)` - Attempts drawing a debug line from `p0` to `p1` using the gradient `c0` -> `c1`
+
+- Entity
+	- `entity.lookup(id)` - Tries to find an entity with ID `id`
+	- `entity.lookup(name)` - Tries to find an entity with name `name`
+	- `entity.name(ent)` - Returns the name of entity `ent`
+	- `entity.id(ent)` - Returns the id of entity `ent`
+	- `entity.type(ent)` - Returns the entity type of entity `ent` in integer form
+	- `entity.type_name(ent)` - Returns the entity type of entity `ent` in string form
+	- `entity.pos(ent)` - Returns the position of entity `ent`
+	- `entity.size(ent)` - Returns the unrotated bounding box size of entity `ent`
+	- `entity.hidden(ent)` - Returns whether or not entity `ent` is hidden
+	- `entity.layers(ent)` - Returns the layers that entity `ent` occupies
+		- This can return multiple values
+		
+	- `entity.set_hidden(ent, h)` - Sets whether entity `ent` is hidden
+	- `entity.set_layers(ent, ...)` - Sets the layers that entity `ent` occupies
+		- Example invocation: `ent:set_layers(0, 2)` - causes ent to occupy layers 0 and 2
+
+	- `entity.move_to(ent, target[, duration])` - Queues entity `ent` for an animation of movement towards vec `target` optionally over `duration` seconds (defaults to 1 second)
+
+	- Note: Above functions can be rewriten as methods
+		- `entity.function(e, a) -> e:function(a)`

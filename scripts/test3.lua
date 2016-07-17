@@ -63,4 +63,5 @@ function change_destination(id)
 	if not e then return end
 
 	print("Gate layers:", e:layers())
+	e:set_layers(e:layers())
 end
