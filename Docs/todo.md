@@ -3,6 +3,8 @@ Shit To Do
 
 - Rendering
 	- Mirrors
+	- Better, more configurable framebuffers?
+	- Fog ignoring as part of material, rather than object
 - Physics
 	- Colliders
 	- Collider info

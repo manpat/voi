@@ -18,8 +18,6 @@ struct Scene;
 struct Mesh {
 	enum { MaxInlineSubmeshes = 4 };
 
-	static constexpr u32 ElementTypeToGL[] = {GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT, GL_UNSIGNED_INT};
-
 	u32 numTriangles = 0;
 	u32 indexOffset = 0;
 	u8 elementType = 0; // 0,1,2

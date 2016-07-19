@@ -23,6 +23,10 @@ function enter_layer2()
 	effects.fog(vec(.5,1.,.7), 150, 0.8, 3)
 end
 
+function enter_layer3()
+	effects.fog(vec(.8), 120, 0.4, 3)
+end
+
 local initial_fog_run = false
 function initial_fog()
 	if start_trigger_run then return end

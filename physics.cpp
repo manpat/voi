@@ -236,19 +236,24 @@ struct EntityMotionState : public btMotionState {
 
 bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 	auto scene = ent->scene;
-	// bool scaled = glm::length(ent->scale-1.f) < 1e-9;
+	auto extents = ent->extents/ent->scale;
+	bool offcenter = glm::length(ent->centerOffset) > 1e-4f;
+	bool primitiveCollider = false;
 
 	switch(ent->colliderType) {
 	case ColliderCube:
-		ent->collider = new btBoxShape{o2bt(ent->extents)};
+		ent->collider = new btBoxShape{o2bt(extents)};
+		primitiveCollider = true;
 		break;
 	case ColliderCylinder:
-		ent->collider = new btCylinderShape{o2bt(ent->extents)};
+		ent->collider = new btCylinderShape{o2bt(extents)};
+		primitiveCollider = true;
 		break;
 	case ColliderCapsule:{
 		// NOTE: Caps aren't included in height. Total height = height + 2*radius
-		auto radius = glm::max(ent->extents.x, ent->extents.z);
-		ent->collider = new btCapsuleShape{radius, (ent->extents.y-radius)*2.f};
+		auto radius = glm::max(extents.x, extents.z);
+		ent->collider = new btCapsuleShape{radius, (extents.y-radius)*2.f};
+		primitiveCollider = true;
 	}	break;
 
 	case ColliderConvex: {
@@ -333,6 +338,18 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 		return false;
 	}
 
+	ent->collider->setLocalScaling(o2bt(ent->scale));
+
+	if(offcenter && primitiveCollider) {
+		auto parent = new btCompoundShape{false /*dynamic aabb*/};
+		
+		btTransform trans{};
+		trans.setFromOpenGLMatrix(glm::value_ptr(glm::translate<f32>(ent->centerOffset)));
+		parent->addChildShape(trans, ent->collider);
+
+		ent->collider = parent;
+	}
+
 	btScalar mass = 0.f;
 	btVector3 inertia {0,0,0};
 	if(~ent->flags & Entity::FlagStatic) {
@@ -365,8 +382,6 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 		ent->rigidbody->setActivationState(DISABLE_DEACTIVATION);
 		ent->rigidbody->setFriction(0.f);
 	}
-
-	ent->collider->setLocalScaling(o2bt(ent->scale));
 
 	scene->physicsContext.world->addRigidBody(ent->rigidbody);
 
@@ -404,7 +419,18 @@ void DeinitEntityPhysics(Entity* ent) {
 		delete ent->rigidbody->getMotionState();
 		delete ent->rigidbody;
 	}
-	delete ent->collider;
+
+	if(ent->collider) {
+		if(ent->collider->isCompound()) {
+			auto comp = (btCompoundShape*) ent->collider;
+			for(u32 i = comp->getNumChildShapes(); i > 0; i--) {
+				auto ch = comp->getChildShape(i-1);
+				comp->removeChildShapeByIndex(i-1);
+				delete ch;
+			}
+		}
+		delete ent->collider;
+	}
 
 	ent->rigidbody = nullptr;
 	ent->collider = nullptr;
