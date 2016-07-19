@@ -20,7 +20,6 @@ struct Mesh {
 
 	u32 numTriangles = 0;
 	u32 indexOffset = 0;
-	u8 elementType = 0; // 0,1,2
 
 	struct Submesh {
 		u32 triangleCount;

@@ -78,20 +78,30 @@ SceneData LoadSceneData(const char* fname) {
 
 		mesh->numTriangles = Read<u32>(&it);
 
+		mesh->elementType = 2;
 		if(mesh->numVertices < 256) {
+			mesh->elementType = 0;
+		}else if(mesh->numVertices < 65536) {
+			mesh->elementType = 1;
+		}
+
+		switch(mesh->elementType) {
+		default:
+		case 0:
 			mesh->triangles8 = new u8[mesh->numTriangles*3];
 			std::memcpy(mesh->triangles8, it, mesh->numTriangles*3);
 			it += mesh->numTriangles*3;
-
-		}else if(mesh->numVertices < 65536) {
+			break;
+		case 1:
 			mesh->triangles16 = new u16[mesh->numTriangles*3];
 			std::memcpy(mesh->triangles16, it, mesh->numTriangles*6);
 			it += mesh->numTriangles*3*2;
-
-		}else{
+			break;
+		case 2:
 			mesh->triangles32 = new u32[mesh->numTriangles*3];
 			std::memcpy(mesh->triangles32, it, mesh->numTriangles*12);
 			it += mesh->numTriangles*3*4;
+			break;
 		}
 
 		mesh->materialIDs = new u8[mesh->numTriangles];
@@ -101,34 +111,11 @@ SceneData LoadSceneData(const char* fname) {
 		SCENEPRINT("\tnumVertices: %u\n", mesh->numVertices);
 		SCENEPRINT("\tnumTriangles: %u\n", mesh->numTriangles);
 
-		for(u32 j = 0; j < mesh->numVertices; j++) {
-			auto v = &mesh->vertices[j];
-			SCENEPRINT("\t\tv: (%.1f, %.1f, %.1f)\n", v->x, v->y, v->z);
-		}
-
-		if(mesh->numVertices < 256) {
-			SortMeshData<u8>(mesh);
-			for(u32 j = 0; j < mesh->numTriangles; j++) {
-				auto v = &mesh->triangles8[j*3];
-				auto m = mesh->materialIDs[j];
-				SCENEPRINT("\t\tf: (%hhu, %hhu, %hhu) %hhu\n", v[0], v[1], v[2], m);
-			}
-
-		}else if(mesh->numVertices < 65536) {
-			SortMeshData<u16>(mesh);
-			for(u32 j = 0; j < mesh->numTriangles; j++) {
-				auto v = &mesh->triangles16[j*3];
-				auto m = mesh->materialIDs[j];
-				SCENEPRINT("\t\tf: (%hu, %hu, %hu) %hhu\n", v[0], v[1], v[2], m);
-			}
-
-		}else{
-			SortMeshData<u32>(mesh);
-			for(u32 j = 0; j < mesh->numTriangles; j++) {
-				auto v = &mesh->triangles32[j*3];
-				auto m = mesh->materialIDs[j];
-				SCENEPRINT("\t\tf: (%u, %u, %u) %hhu\n", v[0], v[1], v[2], m);
-			}
+		switch(mesh->elementType) {
+		default:
+		case 0: SortMeshData<u8>(mesh); break;
+		case 1: SortMeshData<u16>(mesh); break;
+		case 2: SortMeshData<u32>(mesh); break;
 		}
 
 		SCENEPRINT("\n");

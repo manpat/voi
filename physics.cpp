@@ -299,7 +299,7 @@ bool InitEntityPhysics(Entity* ent, const MeshData* meshdata) {
 		for(u32 i = 0; i < mesh->numTriangles; i++) {
 			u32 idx[3] = {0};
 
-			switch(mesh->elementType) {
+			switch(meshdata->elementType) {
 			case 0:
 				idx[0] = meshdata->triangles8[i*3+0];
 				idx[1] = meshdata->triangles8[i*3+1];

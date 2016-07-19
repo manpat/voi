@@ -16,6 +16,7 @@ struct MeshData {
 		u32* triangles32;
 	};
 	u8* materialIDs;
+	u8 elementType;
 };
 
 struct EntityData {

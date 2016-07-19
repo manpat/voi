@@ -49,12 +49,12 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		auto mesh = &scene->meshes[meshID];
 		mesh->numTriangles = meshData->numTriangles;
 
-		mesh->elementType = 2;
-		if(meshData->numVertices < 256) {
-			mesh->elementType = 0;
-		}else if(meshData->numVertices < 65536) {
-			mesh->elementType = 1;
-		}
+		// mesh->elementType = 2;
+		// if(meshData->numVertices < 256) {
+		// 	mesh->elementType = 0;
+		// }else if(meshData->numVertices < 65536) {
+		// 	mesh->elementType = 1;
+		// }
 
 		// Figure out submeshes
 		{	mesh->numSubmeshes = 0;
@@ -103,7 +103,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 
 		vertices.insert(vertices.end(), meshData->vertices, meshData->vertices+meshData->numVertices);
 
-		switch(mesh->elementType) {
+		switch(meshData->elementType) {
 		default:
 		case 0:
 			for(u32 i = 0; i < meshData->numTriangles*3u; i++)
@@ -120,7 +120,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		}
 
 		// Calculate stuff for physics/portals
-		vec3 minPoint{FLT_MAX}, maxPoint{FLT_MIN};
+		vec3 minPoint{std::numeric_limits<f32>::max()}, maxPoint{std::numeric_limits<f32>::lowest()};
 
 		for(u32 vid = 0; vid < meshData->numVertices; vid++) {
 			auto v = meshData->vertices[vid];
