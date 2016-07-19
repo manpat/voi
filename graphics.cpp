@@ -1,37 +1,60 @@
 #include "voi.h"
 #include "ext/stb_image.h"
 
+#include <algorithm>
+
 namespace {
 	ShaderProgram shaderPrograms[256];
 }
 
-Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
-	static u32 fbTargetTypes[] {GL_DEPTH24_STENCIL8, GL_RGBA8, GL_RGBA8};
-	static u32 fbTargetFormats[] {GL_DEPTH_STENCIL, GL_RGBA, GL_RGBA};
-	static u32 fbTargetAttach[] {GL_DEPTH_STENCIL_ATTACHMENT, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-	static u32 fbTargetIntType[] {GL_UNSIGNED_INT_24_8, GL_UNSIGNED_BYTE, GL_UNSIGNED_BYTE};
-
+Framebuffer CreateFramebuffer(FramebufferSettings settings) {
 	Framebuffer fb;
-	fb.width = width;
-	fb.height = height;
+	fb.width = settings.width;
+	fb.height = settings.height;
+	fb.targetCount = settings.numColorBuffers;
+
+	if(settings.hasStencil && !settings.hasDepth) {
+		// NOTE: This could be fine, but I cbf googling for stencil only formats 
+		LogError("Warning! Tried to create a framebuffer with stencil but no depth\n");
+		settings.hasDepth = true;
+	}
+
 	glGenFramebuffers(1, &fb.fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-	glDrawBuffers(2, &fbTargetAttach[1]);
 
-	glGenTextures(3, fb.targets);
-	for(u8 i = 0; i < 3; i++) {
-		glBindTexture(GL_TEXTURE_2D, fb.targets[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, fbTargetTypes[i], width, height, 0, 
-			fbTargetFormats[i], fbTargetIntType[i], nullptr);
+	if(settings.hasDepth) {
+		glGenTextures(1, &fb.depthStencilTarget);
+		glBindTexture(GL_TEXTURE_2D, fb.depthStencilTarget);
+		
+		if(settings.hasStencil) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, fb.width, fb.height, 0, 
+				GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+		}else{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, fb.width, fb.height, 0, 
+				GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);			
+		}
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter?GL_LINEAR:GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter?GL_LINEAR:GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.filter?GL_LINEAR:GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.filter?GL_LINEAR:GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, fbTargetAttach[i], GL_TEXTURE_2D, fb.targets[i], 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, settings.hasStencil?GL_DEPTH_STENCIL_ATTACHMENT:GL_DEPTH_ATTACHMENT, 
+			GL_TEXTURE_2D, fb.depthStencilTarget, 0);
+	}
+
+	glGenTextures(settings.numColorBuffers, fb.colorTargets);
+	for(u32 i = 0; i < settings.numColorBuffers; i++) {
+		glBindTexture(GL_TEXTURE_2D, fb.colorTargets[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fb.width, fb.height, 0, 
+			GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.filter?GL_LINEAR:GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.filter?GL_LINEAR:GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, fb.colorTargets[i], 0);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -45,42 +68,38 @@ Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
 	return fb;
 }
 
-Framebuffer CreateColorFramebuffer(u32 width, u32 height, bool filter) {
-	Framebuffer fb;
-	fb.width = width;
-	fb.height = height;
-	for(u8 i = 0; i < FBTargetCount; i++) fb.targets[i] = 0;
+Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
+	FramebufferSettings settings {
+		.width = width,
+		.height = height,
+		.numColorBuffers = 2,
+		.hasStencil = true,
+		.hasDepth = true,
+		.filter = filter
+	};
 
-	glGenFramebuffers(1, &fb.fbo);
+	// TODO: Maybe enable targets by default
+	auto fb = CreateFramebuffer(settings);
 	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-
-	u32 fbTargetAttach[] {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, fbTargetAttach);
-
-	glGenTextures(1, &fb.targets[FBTargetColor]);
-	glBindTexture(GL_TEXTURE_2D, fb.targets[FBTargetColor]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter?GL_LINEAR:GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter?GL_LINEAR:GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb.targets[FBTargetColor], 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	fb.valid = true;
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LogError("Warning! Framebuffer incomplete!\n");
-		fb.valid = false;
-	}
+	EnableTargets({0,1});
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	return fb;
+}
+
+void EnableTargets(std::initializer_list<u32> cb) {
+	u32 tmp[8] {0};
+
+	std::copy(cb.begin(), cb.end(), tmp);
+	std::transform(tmp, tmp + cb.size(), tmp, [](u32 i) {
+		return GL_COLOR_ATTACHMENT0 + i;
+	});
+
+	glDrawBuffers(cb.size(), tmp);
 }
 
 void DestroyFramebuffer(Framebuffer* fb) {
-	glDeleteTextures(FBTargetCount, fb->targets);
+	glDeleteTextures(1, &fb->depthStencilTarget);
+	glDeleteTextures(fb->targetCount, fb->colorTargets);
 	glDeleteFramebuffers(1, &fb->fbo);
 	fb->fbo = 0u;
 }

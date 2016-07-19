@@ -250,10 +250,20 @@ enum {
 	FBTargetCount
 };
 
+struct FramebufferSettings {
+	u32 width, height;
+	u32 numColorBuffers;
+	bool hasStencil;
+	bool hasDepth;
+	bool filter;
+};
+
 struct Framebuffer {
 	u32 fbo;
-	u32 targets[FBTargetCount];
 	u32 width, height;
+	u32 depthStencilTarget;
+	u32 colorTargets[8];
+	u8 targetCount;
 	bool valid;
 };
 

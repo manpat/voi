@@ -4,6 +4,7 @@
 #include "common.h"
 #include "data.h"
 #include "voigl.h"
+#include <initializer_list>
 
 struct SDL_Window;
 
@@ -47,8 +48,9 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 ShaderProgram CreateShaderProgram(const char* vs, const char* fs);
 ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs);
 ShaderProgram* GetNamedShaderProgram(u32 shId);
+Framebuffer CreateFramebuffer(FramebufferSettings);
 Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool=true);
-Framebuffer CreateColorFramebuffer(u32 width, u32 height, bool=true);
+void EnableTargets(std::initializer_list<u32>);
 
 void DestroyFramebuffer(Framebuffer*);
 u32 LoadTexture(const char* fname);

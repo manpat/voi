@@ -4,6 +4,7 @@
 
 #include <map>
 #include <vector>
+#include <limits>
 #include <algorithm>
 #include <SDL2/SDL.h>
 

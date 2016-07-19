@@ -27,6 +27,10 @@ function enter_layer3()
 	effects.fog(vec(.8), 120, 0.4, 3)
 end
 
+function enter_layer4()
+	effects.fog(vec(.1), 60, 0.4, 3)
+end
+
 local initial_fog_run = false
 function initial_fog()
 	if start_trigger_run then return end
@@ -62,10 +66,16 @@ function open_gate()
 	gate_open = not gate_open
 end
 
+local gate_switch = false
 function change_destination(id)
 	local e = entity.lookup("Gate.Portal")
 	if not e then return end
 
-	print("Gate layers:", e:layers())
-	e:set_layers(e:layers())
+	if not gate_layers then
+		e:set_layers(1, 3)
+	else
+		e:set_layers(1, 2)
+	end
+
+	gate_switch = not gate_switch
 end
