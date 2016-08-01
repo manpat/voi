@@ -45,7 +45,7 @@ void UpdatePhysics(Scene* scene, f32 dt) {
 }
 
 // This gets run for each internal bullet fixed timestep
-void PhysicsTick(btDynamicsWorld* world, btScalar) {
+void PhysicsTick(btDynamicsWorld* world, btScalar dt) {
 	auto ctx = (PhysicsContext*) world->getWorldUserInfo();
 	ctx->currentStamp++;
 
@@ -101,6 +101,10 @@ void PhysicsTick(btDynamicsWorld* world, btScalar) {
 			cp.entityID0 = 0;
 			cp.entityID1 = 0;
 		}
+	}
+
+	for(auto e: GetEntityIterator()) {
+		UpdateEntityPhysicsRate(e, dt);
 	}
 }
 

@@ -70,6 +70,36 @@ class ObjectPanel(bpy.types.Panel):
 
 		layout.row().prop(o, "voi_entityignorefog")
 
+class VoiBoolBrush(bpy.types.Operator):
+	"""Makes a mesh a boolean operator and applies it to the active object"""
+	bl_idname = "voi.boolify"
+	bl_label = "Voi Boolify"
+
+	def execute(self, context):
+		o = context.active_object
+		bs = context.selected_objects
+		if o == None: return
+		if o.type != 'MESH': return
+
+		already_applied = []
+		for b in o.modifiers:
+			if b.type != 'BOOLEAN': continue
+			if b.object != None:
+				already_applied.append(b.object)
+
+		for b in bs:
+			if b == o: continue
+			if b == None: continue
+			if b.type != 'MESH': continue
+			if not b in already_applied:
+				b.draw_type = 'WIRE'
+				b.voi_entitydoexport = False
+				m = o.modifiers.new('Boolean', 'BOOLEAN')
+				m.object = b
+				m.operation = 'INTERSECT'
+
+		return {'FINISHED'}
+
 def get_trigger_material():
 	m = bpy.data.materials.get("_Trigger")
 	if m == None:
@@ -171,6 +201,7 @@ def voi_load(x):
 
 def register():
 	bpy.utils.register_class(ObjectPanel)
+	bpy.utils.register_class(VoiBoolBrush)
 
 	obj = bpy.types.Object
 	obj.voi_entitytype = EnumProperty(items=voi_obtypes, name="Entity Type", default='g')
@@ -191,6 +222,7 @@ def register():
 
 def unregister():
 	bpy.utils.unregister_class(ObjectPanel)
+	bpy.utils.unregister_class(VoiBoolBrush)
 	bpy.app.handlers.save_post.remove(voi_update_ui)
 	bpy.app.handlers.load_post.remove(voi_load)
 	bpy.app.handlers.scene_update_post.remove(test_object_changes)

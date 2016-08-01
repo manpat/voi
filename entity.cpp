@@ -2,6 +2,7 @@
 #include "input.h"
 
 void UpdatePlayer(Entity*, f32);
+void UpdatePlayerPhysics(Entity*, f32);
 
 void InitEntity(Entity* e) {
 	if(!e) return;
@@ -31,6 +32,10 @@ void UpdateEntity(Entity* e, f32 dt) {
 	if(e->updateCallback) {
 		RunCallback(e->id, e->updateCallback);
 	}
+}
+
+void UpdateEntityPhysicsRate(Entity* e, f32 dt) {
+	// TODO: Any player physics stuff
 }
 
 void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
@@ -161,14 +166,14 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		if(Input::GetKey(SDLK_LCTRL)) speed *= 0.1f;
 		vel *= speed * pl->slopeSpeedAdjustSmooth;
 
-		vel.y = GetEntityVelocity(ent).y;
-
 		pl->jumpTimeout -= dt;
 		if(pl->jumpTimeout < 0.f
 		&& gndHitUpDot > 0.707f // At least 45° slope
 		&& groundHit.distance < groundDistTolerance) {
 			pl->canJump = true;
 		}
+
+		vel.y = GetEntityVelocity(ent).y;
 
 		if(pl->canJump && Input::GetMappedDown(Input::Jump)) {
 			// TODO: Math to figure out how high this is

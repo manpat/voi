@@ -3,8 +3,10 @@ Shit To Do
 
 - Rendering
 	- Mirrors
-	- Better, more configurable framebuffers?
 	- Fog ignoring as part of material, rather than object
+	- Materials in texture buffers, rather than uniforms.
+		- Enables batching mesh draw calls
+		- More memory use but potentially not a problem
 - Physics
 	- Colliders
 	- Collider info
@@ -55,3 +57,7 @@ Shit To Do
 	- Optional flag for portals that bails from recursion
 	- Improve portal visibility algorithm
 	- Chunk scene into sections that can be skipped when known to not be visible
+
+
+Remember
+carlos scarpa cemetery

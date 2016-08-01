@@ -52,7 +52,7 @@ void UpdateEntityAnimator(f32 dt) {
 			continue;
 		}
 
-		cmd.progress += glm::clamp(dt/cmd.duration, 0.f, 1.f);
+		cmd.progress = glm::clamp(cmd.progress + dt/cmd.duration, 0.f, 1.f);
 
 		switch(cmd.type) {
 			case AnimationCommand::TypePosition: {

@@ -58,6 +58,9 @@ Framebuffer CreateFramebuffer(FramebufferSettings settings) {
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	static u32 targetIDs[8] {0,1,2,3,4,5,6,7};
+	EnableTargets(settings.numColorBuffers, targetIDs);
+
 	fb.valid = true;
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		LogError("Warning! Framebuffer incomplete!\n");
@@ -68,33 +71,19 @@ Framebuffer CreateFramebuffer(FramebufferSettings settings) {
 	return fb;
 }
 
-Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool filter) {
-	FramebufferSettings settings {
-		.width = width,
-		.height = height,
-		.numColorBuffers = 2,
-		.hasStencil = true,
-		.hasDepth = true,
-		.filter = filter
-	};
-
-	// TODO: Maybe enable targets by default
-	auto fb = CreateFramebuffer(settings);
-	glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-	EnableTargets({0,1});
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	return fb;
+void EnableTargets(std::initializer_list<u32> cb) {
+	EnableTargets(cb.size(), cb.begin());
 }
 
-void EnableTargets(std::initializer_list<u32> cb) {
+void EnableTargets(u32 count, const u32* const begin) {
 	u32 tmp[8] {0};
 
-	std::copy(cb.begin(), cb.end(), tmp);
-	std::transform(tmp, tmp + cb.size(), tmp, [](u32 i) {
+	std::copy(begin, begin+std::min(count, 8u), tmp);
+	std::transform(tmp, tmp + count, tmp, [](u32 i) {
 		return GL_COLOR_ATTACHMENT0 + i;
 	});
 
-	glDrawBuffers(cb.size(), tmp);
+	glDrawBuffers(count, tmp);
 }
 
 void DestroyFramebuffer(Framebuffer* fb) {

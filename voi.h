@@ -49,8 +49,8 @@ ShaderProgram CreateShaderProgram(const char* vs, const char* fs);
 ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs);
 ShaderProgram* GetNamedShaderProgram(u32 shId);
 Framebuffer CreateFramebuffer(FramebufferSettings);
-Framebuffer CreateMainFramebuffer(u32 width, u32 height, bool=true);
 void EnableTargets(std::initializer_list<u32>);
+void EnableTargets(u32, const u32* const);
 
 void DestroyFramebuffer(Framebuffer*);
 u32 LoadTexture(const char* fname);
@@ -105,6 +105,7 @@ void WakeUpEntity(Entity*);
 void InitEntity(Entity*);
 void DeinitEntity(Entity*);
 void UpdateEntity(Entity*, f32 dt);
+void UpdateEntityPhysicsRate(Entity*, f32 dt);
 void EntityOnCollisionEnter(Entity*, Entity*);
 void EntityOnCollisionLeave(Entity*, Entity*);
 
@@ -116,7 +117,7 @@ void FreeSceneEntities(Entity* se);
 void FreeEntity(Entity* e);
 Entity* GetEntity(u16 id);
 Entity* FindEntity(const char* name);
-void UpdateAllEntities(f32 dt);
+EntityIterator GetEntityIterator();
 
 bool InitEntityAnimator();
 void UpdateEntityAnimator(f32 dt);

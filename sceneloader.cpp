@@ -38,18 +38,22 @@ void SortMeshData(MeshData* md);
 SceneData LoadSceneData(const char* fname) {
 	Log("Loading %s ...\n", fname);
 
+	SceneData scene{};
+
 	u8* data = nullptr;
 	u64 size = 0;
 
 	{	std::ifstream file{fname, file.binary};
+		if(!file) {
+			LogError("Error! Scene load failed\n");
+			return scene;
+		}
 		file.seekg(0, file.end);
 		size = file.tellg();
 		data = new u8[size];
 		file.seekg(0, file.beg);
 		file.read((char*)data, size);
 	}
-
-	SceneData scene{};
 
 	u8* it = data;
 	if(*it++ != 'V'

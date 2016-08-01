@@ -40,6 +40,5 @@ void LogError(const char* fmt, ...) {
 
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
-
 }
 

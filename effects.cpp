@@ -16,6 +16,7 @@ namespace {
 		uniform sampler2D depthTex;
 		uniform sampler2D colorTex;
 		uniform sampler2D general0Tex;
+		uniform sampler2D general1Tex;
 		uniform mat4 invProjection;
 		uniform mat4 prevProjView;
 		uniform mat4 projection;
@@ -72,8 +73,19 @@ namespace {
 			float fogdepth = length(cp0); // Distance from eye
 			float fogmix = 1-clamp(pow(fogdepth / fogDistance, fogColor.a), 0, 1) * color.a;
 
+			vec4 bloom = texture2D(general1Tex, uv);
+			bloom += textureLod(general1Tex, uv, 1);
+			bloom += textureLod(general1Tex, uv, 2);
+			bloom += textureLod(general1Tex, uv, 3);
+			bloom += textureLod(general1Tex, uv, 4);
+			bloom += textureLod(general1Tex, uv, 5);
+			// outcolor = bloom;
+			// outcolor.a = 1.f;
+			// return;
+
 			outcolor.rgb = clamp(color.rgb*fogmix + fogColor.rgb*(1-fogmix), 0, 1);
 			outcolor.rgb += particle.rgb * particle.a;
+			outcolor.rgb += bloom.rgb * 0.05;
 			
 			float vignette = clamp(1 - pow(length(uv-.5), vignettePower) * vignetteStrength, 0.3, 1);
 			outcolor.rgb *= vignette;
@@ -142,24 +154,25 @@ namespace {
 		}
 
 		void main() {
-			vec4 mainSample = sample(uv, 0);
-
-			float sum = 256.f;
-			vec4 accum = mainSample* 70.f/sum;
-			accum += sample(uv, 1) * 56.f/sum;
-			accum += sample(uv,-1) * 56.f/sum;
-			accum += sample(uv, 2) * 28.f/sum;
-			accum += sample(uv,-2) * 28.f/sum;
-			accum += sample(uv, 3) * 8.f/sum;
-			accum += sample(uv,-3) * 8.f/sum;
-			accum += sample(uv, 4) * 1.f/sum;
-			accum += sample(uv,-4) * 1.f/sum;
+			// float sum = 256.f;
+			// vec4 accum = sample(uv, 0) * 70.f/sum;
+			// accum += sample(uv, 1) * 56.f/sum;
+			// accum += sample(uv,-1) * 56.f/sum;
+			// accum += sample(uv, 2) * 28.f/sum;
+			// accum += sample(uv,-2) * 28.f/sum;
+			// accum += sample(uv, 3) * 8.f/sum;
+			// accum += sample(uv,-3) * 8.f/sum;
+			// accum += sample(uv, 4) * 1.f/sum;
+			// accum += sample(uv,-4) * 1.f/sum;
+			float sum = 16.f;
+			vec4 accum = sample(uv, 0) * 6.f/sum;
+			accum += sample(uv, 1) * 4.f/sum;
+			accum += sample(uv,-1) * 4.f/sum;
+			accum += sample(uv, 2) * 1.f/sum;
+			accum += sample(uv,-2) * 1.f/sum;
 			accum.a = clamp(accum.a, 0, 1);
 
-			// outcolor.rgb = mix(accum.rgb, mainSample.rgb, vec3(accum.a));
-			// outcolor.rgb = accum.rgb;
-			outcolor.rgb = mainSample.rgb + accum.rgb * (1-accum.a) * 0.9f;
-			outcolor.a = accum.a;
+			outcolor = accum;
 		}
 	);
 
@@ -209,7 +222,7 @@ namespace {
 	u32 ditherTex;
 
 	Framebuffer secondaryFbo;
-	Framebuffer tertiaryFbo;
+	// Framebuffer tertiaryFbo;
 }
 
 extern u32 windowWidth, windowHeight;
@@ -258,12 +271,12 @@ bool ReinitEffects() {
 		return false;
 	}
 
-	DestroyFramebuffer(&tertiaryFbo);
-	tertiaryFbo = CreateFramebuffer(settings);
-	if(!tertiaryFbo.valid) {
-		LogError("Effect framebuffer init failed\n");
-		return false;
-	}
+	// DestroyFramebuffer(&tertiaryFbo);
+	// tertiaryFbo = CreateFramebuffer(settings);
+	// if(!tertiaryFbo.valid) {
+	// 	LogError("Effect framebuffer init failed\n");
+	// 	return false;
+	// }
 
 	delete[] ditherPattern;
 	return true;
@@ -275,19 +288,52 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	fogDistance.Update(dt);
 	vignetteLevel.Update(dt);
 
+	glUseProgram(bloomProgram.program);
+	u32 stepLoc = glGetUniformLocation(bloomProgram.program, "step");
+
+	// Apply bloom
+	glBindFramebuffer(GL_FRAMEBUFFER, fb->fbo);
+		EnableTargets({2});
+		glActiveTextureVoi(GL_TEXTURE0);
+		glUniform1i(bloomProgram.colorTexLoc, 0);
+		// constexpr f32 stepsize[] = {11.f, 5.f, 2.f};
+		constexpr f32 stepsize[] = {/*31.f, */11.f, 5.f};
+		// constexpr f32 stepsize[] = {100.f, 31.f, 11.f, 5.f};
+		// constexpr f32 stepsize[] = {101.f/glm::sqrt(2.f), 41.f/glm::sqrt(2.f), 17.f/glm::sqrt(2.f), 2.f/glm::sqrt(2.f)};
+
+		for(u32 i = 0; i < sizeof(stepsize)/sizeof(f32); i++) {
+			glBindFramebuffer(GL_FRAMEBUFFER, secondaryFbo.fbo);
+			// glUniform2f(stepLoc, 0.f, stepsize[i]/fb->height);
+			glUniform2f(stepLoc, stepsize[i]/fb->width, stepsize[i]/fb->height);
+			glBindTexture(GL_TEXTURE_2D, fb->colorTargets[2]);
+			glClear(GL_COLOR_BUFFER_BIT);
+			DrawFullscreenQuad();
+			
+			glBindFramebuffer(GL_FRAMEBUFFER, fb->fbo);
+			// glUniform2f(stepLoc, stepsize[i]/secondaryFbo.width, 0.f);
+			glUniform2f(stepLoc, stepsize[i]/secondaryFbo.width,-stepsize[i]/secondaryFbo.height);
+			glBindTexture(GL_TEXTURE_2D, secondaryFbo.colorTargets[0]);
+			glClear(GL_COLOR_BUFFER_BIT);
+			DrawFullscreenQuad();
+		}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	glUseProgram(shaderProgram->program);
 
-	// Draw scene with post effects
+	// Apply fog and various effects
 	glActiveTextureVoi(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, fb->depthStencilTarget);
 	glActiveTextureVoi(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[0]);
 	glActiveTextureVoi(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[1]);
+	glActiveTextureVoi(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[2]);
 
 	glUniform1i(shaderProgram->depthTexLoc, 0);
 	glUniform1i(shaderProgram->colorTexLoc, 1);
 	glUniform1i(shaderProgram->general0TexLoc, 2);
+	glUniform1i(shaderProgram->general1TexLoc, 3);
 	glUniformMatrix4fv(shaderProgram->projectionLoc, 1, false, glm::value_ptr(camera->projection));
 	glUniformMatrix4fv(shaderProgram->viewLoc, 1, false, glm::value_ptr(camera->view));
 	u32 invProjectionLoc = glGetUniformLocation(shaderProgram->program, "invProjection");
@@ -313,33 +359,14 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	glUniform1f(vignetteStrengthLoc, 0.1f + vignetteLevel * 1.2f);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, secondaryFbo.fbo);
-	glViewport(0,0, secondaryFbo.width, secondaryFbo.height);
-	glClear(GL_COLOR_BUFFER_BIT);
-	DrawFullscreenQuad();
-
-	glUseProgram(bloomProgram.program);
-	u32 stepLoc = glGetUniformLocation(bloomProgram.program, "step");
-	glActiveTextureVoi(GL_TEXTURE0);
-	glUniform1i(bloomProgram.colorTexLoc, 0);
-	constexpr f32 stepsize = 4.f;
-
-	for(u32 i = 0; i < 2; i++) {
-		glBindFramebuffer(GL_FRAMEBUFFER, tertiaryFbo.fbo);
-		glUniform2f(stepLoc, stepsize/secondaryFbo.width, 0.f);
-		glBindTexture(GL_TEXTURE_2D, secondaryFbo.colorTargets[0]);
+		glViewport(0,0, secondaryFbo.width, secondaryFbo.height);
 		glClear(GL_COLOR_BUFFER_BIT);
 		DrawFullscreenQuad();
-		
-		glBindFramebuffer(GL_FRAMEBUFFER, secondaryFbo.fbo);
-		glUniform2f(stepLoc, 0.f, stepsize/tertiaryFbo.height);
-		glBindTexture(GL_TEXTURE_2D, tertiaryFbo.colorTargets[0]);
-		glClear(GL_COLOR_BUFFER_BIT);
-		DrawFullscreenQuad();
-	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0,0, windowWidth, windowHeight);
 
+	// Apply dithering and render
 	glUseProgram(ditherProgram.program);
 	glActiveTextureVoi(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, secondaryFbo.colorTargets[0]);

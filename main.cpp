@@ -11,7 +11,7 @@ const char* defaultShaderSrc[] = {
 	SHADER(
 		in vec3 vertex;
 		out float gl_ClipDistance[1];
-		// flat out int vertexID;
+		flat out int faceID;
 
 		uniform mat4 viewProjection;
 		uniform mat4 model;
@@ -21,22 +21,33 @@ const char* defaultShaderSrc[] = {
 		void main() {
 			gl_Position = viewProjection * model * vec4(vertex, 1);
 			gl_ClipDistance[0] = dot(model * vec4(vertex, 1), clipPlane);
-			// vertexID = int(gl_VertexID/3);
+			faceID = int(gl_VertexID/3);
 		}
 	),
 	SHADER(
 		uniform vec4 materialColor;
-		// flat in int vertexID;
+		flat in int faceID;
 		out vec4 outcolor;
 		out vec4 outgeneral0;
+
+		// const vec3 cols[] = vec3[](
+		// 	vec3(1,0,0),
+		// 	vec3(0,1,0),
+		// 	vec3(0,0,1),
+		// 	vec3(1,1,0),
+		// 	vec3(1,0,1),
+		// 	vec3(0,1,1),
+		// 	vec3(0,0,0)
+		// );
 
 		void main() {
 			// outcolor = materialColor;
 			outcolor.a = materialColor.a;
 			outcolor.rgb = pow(materialColor.rgb, vec3(0.5f));
+			// outcolor.rgb = cols[faceID%cols.length()];
 
 			// vec3 col;
-			// float val = vertexID;
+			// float val = faceID;
 			// float div = 50.f;
 			// val /= div;
 			// col.r = mod(val, 1.f);
@@ -46,7 +57,10 @@ const char* defaultShaderSrc[] = {
 			// col.b = mod(val, 1.f);
 			// outcolor.rgb = col*.5f +.5f;
 
-			outgeneral0 = vec4(0);
+			float luminance = dot(outcolor.rgb, vec3(0.2125, 0.7154, 0.0721));
+			// outgeneral0 = vec4(outcolor.rgb, (1-outcolor.a) * pow(luminance, 1.0f));
+			outgeneral0 = vec4(outcolor.rgb, 1) * (1-outcolor.a) * pow(luminance, 1.0f);
+			// outgeneral0 = vec4(pow(luminance, 2.f));
 		}
 	)
 };
@@ -71,7 +85,6 @@ const char* particleShaderSrc[] = {
 		in float vlifetime;
 
 		out vec4 outcolor;
-		out vec4 outgeneral0;
 
 		void main() {
 			if(vlifetime <= 0.f) discard;
@@ -81,8 +94,7 @@ const char* particleShaderSrc[] = {
 			// dist = pow(clamp(dist, 0.f, 1.f), 0.9f);
 			float dist = 0.35f;
 			float a = sin(radians(vlifetime*180.f)) * dist;
-			outgeneral0 = vec4(materialColor*a, a);
-			outcolor = vec4(0);
+			outcolor = vec4(materialColor*a, a);
 		}
 	)
 };
@@ -274,8 +286,17 @@ s32 main(s32 ac, char** av) {
 		multisampleLevel = 2.;
 	}
 
+	FramebufferSettings mainFramebufferSettings {
+		.width = u32(windowWidth*multisampleLevel),
+		.height = u32(windowHeight*multisampleLevel),
+		.numColorBuffers = 3,
+		.hasStencil = true,
+		.hasDepth = true,
+		.filter = filter
+	};
+
 	// TODO: Better antialiasing method
-	Framebuffer fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
+	Framebuffer fb = CreateFramebuffer(mainFramebufferSettings);
 	if(!fb.valid) {
 		LogError("Error! Framebuffer creation failed!\n");
 		return 1;
@@ -298,7 +319,16 @@ s32 main(s32 ac, char** av) {
 
 		if(fb.fbo) DestroyFramebuffer(&fb);
 
-		fb = CreateMainFramebuffer(windowWidth*multisampleLevel, windowHeight*multisampleLevel, filter);
+		FramebufferSettings mainFramebufferSettings {
+			.width = u32(windowWidth*multisampleLevel),
+			.height = u32(windowHeight*multisampleLevel),
+			.numColorBuffers = 3,
+			.hasStencil = true,
+			.hasDepth = true,
+			.filter = filter
+		};
+
+		fb = CreateFramebuffer(mainFramebufferSettings);
 		if(!fb.valid) {
 			LogError("Error! Framebuffer recreation failed!\n");
 			return false;
@@ -427,7 +457,7 @@ s32 main(s32 ac, char** av) {
 }
 
 void GameInit() {
-	if(!InitParticleSystem(&particleSystem, 10000)) {
+	if(!InitParticleSystem(&particleSystem, 6000)) {
 		LogError("Warning! Particle system init failed\n");
 	}
 
@@ -483,7 +513,9 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 	EmitParticles(&particleSystem, numParticlesEmit, glm::linearRand(4.f, 20.f), playerEntity->position + vel*2.f);
 	UpdateParticleSystem(&particleSystem, dt);
 
-	UpdateAllEntities(dt);
+	for(auto e: GetEntityIterator()) {
+		UpdateEntity(e, dt);
+	}
 
 	UpdateEntityAnimator(dt);
 
@@ -502,12 +534,14 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 
 	// Draw scene into framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, fb->fbo);
+		EnableTargets({0, 1, 2});
 		glViewport(0,0, fb->width, fb->height);
 		glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_BLEND);
 
 		glUseProgram(forwardShader->program);
+		EnableTargets({0, 2});
 
 		glUniformMatrix4fv(forwardShader->viewProjectionLoc, 1, false, glm::value_ptr(camera->projection));
 		glUniformMatrix4fv(forwardShader->modelLoc, 1, false, glm::value_ptr(mat4{}));
@@ -528,6 +562,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 		glUniform1f(glGetUniformLocation(particleShader->program, "pixelSize"), 
 			fb->height*50.f/600.f);
 
+		EnableTargets({1});
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		glDepthMask(false);
 		RenderParticleSystem(&particleSystem);

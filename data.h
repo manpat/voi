@@ -40,24 +40,6 @@ struct Mesh {
 	vec3 center;
 };
 
-struct EntityManager {
-	enum {
-		FreeEntityBucketSize = 512,
-		FreeEntityIDOffset = 0x8000 // ~32k
-	};
-
-	struct Bucket {
-		Entity* entities;
-		u16 capacity;
-		u16 used;
-		u8 id;
-	};
-
-	std::vector<Bucket> entityBuckets;
-	Bucket sceneEntityBuckets[2];
-	// NOTE: sceneEntityBuckets[1] is for temp storage and won't be updated
-};
-
 enum ColliderType {
 	ColliderNone,
 	ColliderCube,
@@ -178,6 +160,38 @@ struct Entity {
 
 	// So I can use the union for things with non-trivial constructors (glm vectors)
 	Entity() {}
+};
+
+struct EntityManager {
+	enum {
+		FreeEntityBucketSize = 512,
+		FreeEntityIDOffset = 0x8000 // ~32k
+	};
+
+	struct Bucket {
+		Entity* entities;
+		u16 capacity;
+		u16 used;
+		u8 id;
+	};
+
+	std::vector<Bucket> entityBuckets;
+	Bucket sceneEntityBuckets[2];
+	// NOTE: sceneEntityBuckets[1] is for temp storage and won't be updated
+};
+
+struct EntityIterator {
+	s32 bucketID; // <0 is scene entity bucket
+	s32 entityOffset; // <0 is invalid
+
+	static EntityIterator begin();
+	static EntityIterator end();
+	EntityIterator& operator++();
+	EntityIterator operator++(int);
+	bool operator!=(const EntityIterator&);
+	bool operator==(const EntityIterator&);
+	Entity* operator*();
+	Entity* operator->();
 };
 
 struct ShaderProgram {

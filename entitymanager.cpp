@@ -189,3 +189,69 @@ void UpdateAllEntities(f32 dt) {
 		UpdateEntity(&sbucket->entities[e], dt);
 	}
 }
+
+EntityIterator GetEntityIterator() {
+	return EntityIterator::begin();
+}
+
+EntityIterator EntityIterator::begin() { return EntityIterator{0, 0}; }
+EntityIterator EntityIterator::end() { return EntityIterator{-1, -1}; }
+
+EntityManager::Bucket* GetBucket(s32 bucketID){
+	if(bucketID < 0) {
+		return &entityManager.sceneEntityBuckets[0];
+	}else{
+		assert(bucketID < (s32)entityManager.entityBuckets.size());
+		return &entityManager.entityBuckets[bucketID];
+	}
+}
+
+EntityIterator& EntityIterator::operator++() {
+	if(entityOffset == -1) return *this;
+
+	auto bucket = GetBucket(bucketID);
+	if(++entityOffset >= bucket->used) {
+		if(bucketID < 0) {
+			entityOffset = -1;
+			return *this;
+		}
+
+		entityOffset = 0;
+		if(++bucketID >= (s32)entityManager.entityBuckets.size())
+			bucketID = -1;
+
+		bucket = GetBucket(bucketID);
+		if(bucket->used == 0) {
+			entityOffset = -1;
+			return *this;
+		}
+	}
+
+	return *this;
+}
+
+EntityIterator EntityIterator::operator++(int) {
+	auto cpy = *this;
+	++*this;
+	return cpy;
+}
+
+bool EntityIterator::operator!=(const EntityIterator& o) {
+	return !(*this == o);
+}
+bool EntityIterator::operator==(const EntityIterator& o) {
+	return (bucketID == o.bucketID) && (entityOffset == o.entityOffset);
+}
+
+Entity* EntityIterator::operator*() {
+	assert(entityOffset > -1);
+
+	auto bucket = GetBucket(bucketID);
+	assert(entityOffset < bucket->used);
+
+	return &bucket->entities[entityOffset];
+}
+
+Entity* EntityIterator::operator->() {
+	return **this;
+}
