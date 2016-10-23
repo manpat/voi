@@ -1,0 +1,3 @@
+[submodule "lua-synth"]
+	path = lua-synth
+	url = https://github.com/manpat/lua-synth.git

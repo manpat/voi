@@ -39,6 +39,11 @@ void DebugLine(const vec3& a, const vec3& b, const vec3& col = vec3{1});
 void DebugLine(const vec3& a, const vec3& b, const vec3& cola, const vec3& colb);
 void DebugPoint(const vec3& pos, const vec3& col = vec3{1});
 
+bool InitAudio();
+void DeinitAudio();
+void UpdateAudio();
+void AttachSynthToEntity(u32 entID, u32 synthID);
+
 struct SceneData; // In sceneloader.h
 
 bool InitScene(Scene*, const SceneData*);

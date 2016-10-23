@@ -1,4 +1,5 @@
 #include "voi.h"
+#include "lua-synth/synth.h"
 #include <lua.hpp>
 #include <vector>
 
@@ -13,7 +14,6 @@ namespace {
 #else
 #define LUALAMBDA [](lua_State* l) -> s32
 #endif
-
 
 static void InitVecLib();
 static void InitQuatLib();
@@ -31,6 +31,9 @@ bool InitScripting() {
 	InitEffectLib();
 	InitDebugLib();
 	InitEntityLib();
+
+	if(!synth::InitLuaLib(l))
+		return false;
 
 	return true;
 }
@@ -208,6 +211,26 @@ static void InitVecLib() {
 		}},
 		{"length", LUALAMBDA {
 			lua_pushnumber(l, glm::length(*lCheckVecRef(1)));
+			return 1;
+		}},
+		{"from_hsv", LUALAMBDA {
+			auto hsv = *lCheckVecRef(1);
+
+			hsv.r = std::fmod(hsv.r*360.f, 360.f);
+			if(hsv.r < 0.f)
+				hsv.r = 360.f + hsv.r;
+
+			*lNewVecUD() = glm::rgbColor(hsv);
+			return 1;
+		}},
+		{"to_hsv", LUALAMBDA {
+			auto hsv = glm::hsvColor(*lCheckVecRef(1));
+
+			hsv.r = std::fmod(hsv.r/360.f, 1.f);
+			if(hsv.r < 0.f)
+				hsv.r = 1.f + hsv.r;
+
+			*lNewVecUD() = hsv;
 			return 1;
 		}},
 
@@ -521,6 +544,14 @@ static void InitEntityLib() {
 				}
 				e->layers = layers;
 				RefilterEntity(e);
+			}
+			return 0;
+		}},
+
+		{"attach_synth", LUALAMBDA {
+			auto e = lCheckEnt(1);
+			if(auto s = e?synth::GetSynthLua(l, 2):nullptr) {
+				AttachSynthToEntity(e->id, s->id);
 			}
 			return 0;
 		}},

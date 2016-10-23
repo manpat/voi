@@ -207,6 +207,11 @@ s32 main(s32 ac, char** av) {
 		LogError("Warning! Debug draw init failed\n");
 	}
 
+	if(!InitAudio()) {
+		LogError("Error! Audio init failed\n");
+		return 1;
+	}
+
 	if(!InitScripting()) {
 		LogError("Error! Scripting init failed!\n");
 		return 1;
@@ -448,6 +453,8 @@ s32 main(s32 ac, char** av) {
 	DeinitScene(&scene);
 	DestroyFramebuffer(&fb);
 
+	DeinitAudio();
+
 	Input::Deinit();
 	DeinitGL();
 	SDL_DestroyWindow(window);
@@ -518,6 +525,8 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 	}
 
 	UpdateEntityAnimator(dt);
+
+	UpdateAudio();
 
 	// Update camera position BEFORE updating physics!
 	//	Player determines what layer to render based on position. 
