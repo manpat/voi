@@ -29,6 +29,13 @@ void UpdateEntity(Entity* e, f32 dt) {
 		default: break;
 	}
 
+	if(e->initCallback) {
+		RunCallback(e->id, e->initCallback);
+		e->initCallback = 0;
+		// NOTE: I'm not sure I like modifying this but I see no reason
+		//	to keep it around
+	}
+
 	if(e->updateCallback) {
 		RunCallback(e->id, e->updateCallback);
 	}

@@ -112,6 +112,7 @@ struct Entity {
 	u8 entityType; // Type*
 	u8 colliderType;
 
+	s32 initCallback;
 	s32 updateCallback;
 
 	btRigidBody* rigidbody;
@@ -201,6 +202,7 @@ struct ShaderProgram {
 	u32 colorTexLoc = 0;
 	u32 general0TexLoc = 0;
 	u32 general1TexLoc = 0;
+	u32 ditherTexLoc = 0;
 	
 	u32 materialColorLoc = 0;
 	u32 clipPlaneLoc = 0;

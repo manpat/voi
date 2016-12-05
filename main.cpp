@@ -526,7 +526,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 
 	UpdateEntityAnimator(dt);
 
-	UpdateAudio();
+	UpdateAudio(scene);
 
 	// Update camera position BEFORE updating physics!
 	//	Player determines what layer to render based on position. 

@@ -1,10 +1,12 @@
 #include "common.h"
 #include "input.h"
+#include "voi.h"
 
 std::map<s32, u8> Input::keyStates;
 std::map<s32, u8> Input::mouseStates;
 std::map<s32, u8> Input::controllerStates;
 vec2 Input::mouseDelta = vec2{0,0};
+vec2 Input::actualMouseDelta = vec2{0,0};
 
 Input::MappedCode Input::mappings[MappingName::Count] = {
 	// Keyboard, Mouse, Controller
@@ -135,12 +137,14 @@ void Input::UpdateMouse(SDL_Window* window){
 		f32 xmod = static_cast<f32>(ww);
 		f32 ymod = static_cast<f32>(wh);
 
-		mouseDelta.x = mx / xmod * 2.f - 1.f;
-		mouseDelta.y =-my / ymod * 2.f + 1.f;
-		mouseDelta.x *= xmod / ymod; // Correct for aspect?
+		actualMouseDelta.x = mx / xmod * 2.f - 1.f;
+		actualMouseDelta.y =-my / ymod * 2.f + 1.f;
+		actualMouseDelta.x *= xmod / ymod; // Correct for aspect?
 		
 		SDL_WarpMouseInWindow(window, ww/2, wh/2);
 	}
+
+	mouseDelta += (actualMouseDelta-mouseDelta)*(f32)GetFloatOption("input.smoothing_coeff");
 }
 
 void Input::ClearFrameState(){

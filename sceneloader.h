@@ -33,6 +33,9 @@ struct EntityData {
 	u8 entityType;
 	u8 colliderType;
 
+	u8 initCallbackLen;
+	char initCallback[256];
+
 	u8 updateCallbackLen;
 	char updateCallback[256];
 

@@ -21,10 +21,12 @@ local ply = nil
 
 local dist_param = nil
 
-local hollowHasRun = false
-function hollow_update()
-	if not hollowHasRun then
-		ent = entity.lookup("Monolith")
+local monolith0HasRun = false
+function monolith0_update()
+	if not monolith0HasRun then
+		monolith0HasRun = true
+
+		ent = entity.lookup("Monolith.0")
 		ply = entity.lookup("Player")
 
 		local s = synth.new()
@@ -32,20 +34,18 @@ function hollow_update()
 
 		local dist2 = dist_param^2
 		local mod = (s:sin(12 * dist2) * 0.5 + 0.5) * dist2
-		local osc = s:lowpass(
+		local osc =
 			s:saw(dist2*4 + 35) 
 			+ s:sqr(dist2*4 + mod + 21) 
-			+ s:noise() * 0.8
-			+ s:saw(55),
-			10 + dist2*20)
+			+ s:noise() * 2
+			+ s:saw(55)
 
-		osc = s:lowpass(osc, 20 + dist2^2 *50) -- * dist2
+		osc = s:lowpass(osc, 20 + dist2 *50)
+		osc = s:lowpass(osc*0.8, 50 + dist2 *50)
 		s:output(osc)
 
 		ent:attach_synth(s)
 	end
-
-	hollowHasRun = true
 
 	if ply and ent then
 		local diff = ent:pos() - ply:pos()
@@ -54,6 +54,43 @@ function hollow_update()
 
 		if wind_amt then wind_amt:set(1-val*0.9, 0.1) end
 		dist_param:set(val, 0.1)
+	end
+end
+
+
+local trg = nil
+local dumb_time = 0
+local trg_count = 0
+
+local monolith1HasRun = false
+function monolith1_update()
+	if not monolith1HasRun then
+		monolith1HasRun = true
+
+		local s = synth.new()
+		trg = s:trigger("pulse")
+
+		local env = s:ar(0.3, 3, trg) ^ 2
+
+		local osc = s:sin(55)
+			+ s:tri(45 + env*10)
+			+ s:saw(220)
+			+ s:sqr(221 + env*3) * 0.3
+			+ s:noise() * 0.3
+
+		osc = s:lowpass(osc, 50)
+		osc = s:lowpass(osc, 50)
+		s:output(osc * env)
+
+		local ent = entity.lookup("Monolith.1")
+		ent:attach_synth(s)
+	end
+
+	local dt = 1/100
+	dumb_time = dumb_time + dt / 4
+	if math.floor(dumb_time) > trg_count then
+		trg:trigger()
+		trg_count = math.floor(dumb_time)
 	end
 end
 

@@ -60,6 +60,7 @@ class ObjectPanel(bpy.types.Panel):
 		row.prop(o, "voi_entityhidden")
 
 		layout.row().prop(o, "voi_collidertype")
+		layout.row().prop(o, "voi_entityinitcb")
 		layout.row().prop(o, "voi_entityupdatecb")
 
 		if type == 3: # Interact
@@ -211,6 +212,7 @@ def register():
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
 	obj.voi_entityignorefog = BoolProperty(name="Ignore Fog", default=False)
 
+	obj.voi_entityinitcb = StringProperty(name="Init Callback", description="What to run before object is first updated.")
 	obj.voi_entityupdatecb = StringProperty(name="Update Callback", description="What to run when object is updated.")
 	obj.voi_entityfrobcb = StringProperty(name="Frob Callback", description="What to run when object is frobbed.")
 	obj.voi_entityentercb = StringProperty(name="Enter Callback", description="What to run when trigger is entered.")

@@ -172,6 +172,7 @@ ShaderProgram CreateShaderProgram(const char* vsrc, const char* fsrc) {
 		ret.colorTexLoc = glGetUniformLocation(ret.program, "colorTex");
 		ret.general0TexLoc = glGetUniformLocation(ret.program, "general0Tex");
 		ret.general1TexLoc = glGetUniformLocation(ret.program, "general1Tex");
+		ret.ditherTexLoc = glGetUniformLocation(ret.program, "ditherTex");
 	}
 
 error:

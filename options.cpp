@@ -79,6 +79,7 @@ namespace {
 		Option::Bool ("graphics.multisample", false),
 		Option       (),
 		Option::Float("input.mousespeed", 1.f),
+		Option::Float("input.smoothing_coeff", 0.8f),
 	};
 
 	std::vector<Option> options;
@@ -241,7 +242,10 @@ static void WriteAndSetDefaultOptions() {
 		it += written;
 	}
 
-	if(!stb_filewritestr(cfgName, buffer)) {
+	if(auto f = fopen(cfgName, "wb")) {
+		fwrite(buffer, strlen(buffer), 1, f);
+		fclose(f);
+	}else{
 		LogError("Warning! Unable to open %s to write defaults\n", cfgName);
 	}
 }

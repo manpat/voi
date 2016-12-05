@@ -4,7 +4,6 @@
 
 namespace {
 	std::map<u32, u32> synthToEntity;
-	std::map<u32, vec2> synthToParams;
 }
 
 bool InitAudio() {
@@ -20,9 +19,12 @@ void DeinitAudio() {
 	synth::DeinitAudio();
 }
 
-void UpdateAudio() {
+void UpdateAudio(Scene* scene) {
 	extern Entity* playerEntity;
 	if(!playerEntity) return;
+
+	const auto right = playerEntity->rotation*vec3{1, 0, 0};
+	const auto fwd = playerEntity->rotation*vec3{0, 0,-1};
 	
 	for(auto se: synthToEntity) {
 		auto s = synth::GetSynth(se.first);
@@ -31,26 +33,63 @@ void UpdateAudio() {
 		auto e = GetEntity(se.second);
 		if(!e) continue;
 
-		// const auto ear1 = playerEntity->position + playerEntity->rotation*vec3{-0.5, 0, 0};
-		// const auto ear2 = playerEntity->position + playerEntity->rotation*vec3{ 0.5, 0, 0};
+		if(playerEntity->layers & e->layers) {
+			// They occupy the same layers, so proceed normally
+			const auto diff = e->position - playerEntity->position;
+			const auto dir = glm::normalize(diff);
+			const f32 dist = glm::length(diff);
 
-		// const auto diff1 = e->position - ear1;
-		// const auto diff2 = e->position - ear2;
+			const auto rightness = glm::dot(dir, right);
+			const auto behindness = glm::clamp(-glm::dot(dir, fwd), 0.f, 1.f);
 
-		const auto diff = e->position - playerEntity->position;
-		const auto dir = glm::normalize(diff);
-		const f32 dist = glm::length(diff);
+			// TODO: Make this configurable
+			// auto gain = glm::clamp(60.f/(dist+1), 0.f, 1.f);
+			auto gain = glm::clamp(1-dist/60.f, 0.f, 1.f);
+			gain *= gain;
 
-		const auto right = playerEntity->rotation*vec3{1, 0, 0};
-		const auto fwd = playerEntity->rotation*vec3{0, 0,-1};
+			SetSynthPan(s, rightness * 0.5f);
+			SetSynthGain(s, (1.f - behindness*behindness*0.5) * gain);
+		}else{
+			// Find a portal that connects the player and audio source
+			// NOTE: This only goes one layer deep
+			// TODO: Find a way to average several nearby portals, instead of just using nearest
 
-		const auto rightness = glm::dot(dir, right);
-		const auto behindness = glm::clamp(-glm::dot(dir, fwd), 0.f, 1.f);
+			f32 bestCompoundDistance = std::numeric_limits<f32>::max();
+			vec3 bestPlayerDiff{fwd};
 
-		const auto gain = glm::clamp(100.f/(dist+1), 0.f, 1.f);
+			for(u16 i = 0; i < scene->numPortals; i++) {
+				const auto pIdx = scene->portals[i];
+				const auto portal = &scene->entities[pIdx];
+				if(portal->entityType != Entity::TypePortal)
+					continue;
 
-		SetSynthPan(s, rightness * 0.5f);
-		SetSynthGain(s, (1.f - behindness*behindness*0.5) * gain);
+				const u32 layers = portal->layers;
+				if(!(layers&playerEntity->layers) || !(layers&e->layers))
+					continue;
+
+				const auto playerDiff = portal->position - playerEntity->position;
+				const auto audioDiff = portal->position - e->position;
+				const auto compoundDist = glm::length(playerDiff) + glm::length(audioDiff); 
+
+				if(compoundDist < bestCompoundDistance) {
+					bestCompoundDistance = compoundDist;
+					bestPlayerDiff = playerDiff;
+				}
+			}
+
+			const auto dir = glm::normalize(bestPlayerDiff);
+
+			const auto rightness = glm::dot(dir, right);
+			const auto behindness = glm::clamp(-glm::dot(dir, fwd), 0.f, 1.f);
+
+			// TODO: Make this configurable
+			// auto gain = glm::clamp(60.f/(dist+1), 0.f, 1.f);
+			auto gain = glm::clamp(1-bestCompoundDistance/60.f, 0.f, 1.f);
+			gain *= gain;
+
+			SetSynthPan(s, rightness * 0.5f);
+			SetSynthGain(s, (1.f - behindness*behindness*0.5) * gain);
+		}
 	}
 }
 

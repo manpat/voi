@@ -202,7 +202,23 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		if(to->entityType >= Entity::TypeNonExportable) {
 			LogError("Error! Entity '%.*s' has non exportable type!\n",
 				(u32)to->nameLength, to->name);
-			return false;	
+			return false;
+		}
+
+		if(from->initCallbackLen) {
+			char* scriptFile = from->initCallback;
+			scriptFile[std::min<u16>(from->initCallbackLen, 255)] = 0;
+			auto action = std::strchr(scriptFile, ':');
+
+			if(action) {
+				*action++ = 0;
+				if(auto script = GetScript(scriptFile)){
+					to->initCallback = GetCallbackFromScript(script, action);
+				}
+			}else{
+				LogError("Warning! Update callback for %.*s missing action\n", 
+					(u32)to->nameLength, to->name);
+			}
 		}
 
 		if(from->updateCallbackLen) {

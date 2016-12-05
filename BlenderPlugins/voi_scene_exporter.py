@@ -101,6 +101,10 @@ class ExportVoiScene(bpy.types.Operator):
 				out.write(struct.pack('=B', col))
 				# TODO: collider data
 
+				icbstr = bytes(e['init'], 'utf-8')
+				out.write(struct.pack('=B', len(icbstr)))
+				out.write(icbstr)
+
 				ucbstr = bytes(e['update'], 'utf-8')
 				out.write(struct.pack('=B', len(ucbstr)))
 				out.write(ucbstr)
@@ -244,6 +248,7 @@ class ExportVoiScene(bpy.types.Operator):
 				'entityType': type,
 				'colliderType': col,
 
+				'init': obj.get("voi_entityinitcb", ""),
 				'update': obj.get("voi_entityupdatecb", ""),
 			}
 

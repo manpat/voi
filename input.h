@@ -62,6 +62,7 @@ public:
 	static std::map<s32, u8> keyStates;
 	static std::map<s32, u8> mouseStates;
 	static std::map<s32, u8> controllerStates;
+	static vec2 actualMouseDelta;
 	static vec2 mouseDelta;
 	static MappedCode mappings[MappingName::Count];
 	static SDL_Joystick* controller;

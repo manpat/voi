@@ -159,6 +159,12 @@ SceneData LoadSceneData(const char* fname) {
 		u8  entityType = ent->entityType = *it++;
 		u8  colliderType = ent->colliderType = *it++;
 
+		u8 initCallbackLen = ent->initCallbackLen = *it++;
+		if(initCallbackLen){
+			std::memcpy(ent->initCallback, it, initCallbackLen);
+			it += initCallbackLen;
+		}
+
 		u8 updateCallbackLen = ent->updateCallbackLen = *it++;
 		if(updateCallbackLen){
 			std::memcpy(ent->updateCallback, it, updateCallbackLen);

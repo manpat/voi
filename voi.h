@@ -41,7 +41,7 @@ void DebugPoint(const vec3& pos, const vec3& col = vec3{1});
 
 bool InitAudio();
 void DeinitAudio();
-void UpdateAudio();
+void UpdateAudio(Scene*);
 void AttachSynthToEntity(u32 entID, u32 synthID);
 
 struct SceneData; // In sceneloader.h
