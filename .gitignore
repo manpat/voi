@@ -12,6 +12,8 @@ lib/
 *.o
 *.log
 
+.lock-waf*
+
 stdout.txt
 stderr.txt
 

@@ -1,5 +1,8 @@
 import sys, subprocess
 
+top = '.'
+out = 'build'
+
 def options(cnf):
 	cnf.load('compiler_c compiler_cxx')
 	cnf.add_option('-w', '--windows', dest='windows_build', default=False, action='store_true', help='Enables windows builds')
@@ -31,10 +34,7 @@ def configure(cnf):
 def build(bld):
 	sflags = ['-O2', '-g', '-std=c++11', '-Wall', '-Wextra']
 	includes = ['.']
-	libs = ['synth']
-
-	# omg why
-	libpath = ['lua-synth'] + bld.env.ACTUAL_LIBDIR
+	libs = []
 
 	if bld.env.DEST_OS.find("linux") >= 0:
 		libs += ['dl', 'GL']
@@ -44,9 +44,9 @@ def build(bld):
 	# Build dependencies
 	bld.objects(
 		target		=	'ext',
-		# source		=	bld.path.ant_glob("ext/*.c*"),
+		# source	=	bld.path.ant_glob("ext/*.c*"),
 		source		=	bld.path.ant_glob("ext/stb_stub.c"),
-		features	=	'c cxx'
+		features	=	'c'
 	)
 
 	bld.recurse("lua-synth")
@@ -58,9 +58,9 @@ def build(bld):
 
 		includes	=	includes,
 		lib			=	libs,
-		libpath		=	libpath,
+		libpath		=	bld.env.ACTUAL_LIBDIR,
 
-		use			=	'SDL2 ext lua bullet',
+		use			=	'SDL2 ext lua bullet synth',
 
 		cxxflags	=	sflags
 	)
