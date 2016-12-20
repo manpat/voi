@@ -11,14 +11,6 @@ Active
 - bullet >= 2.84
 	- [https://github.com/bulletphysics/bullet3.git]
 	- zlib
-
-Eventually
-----------
-- fmod >= 1.6.5
-	- (INDIE LICENCE) [https://www.fmod.org/files/public/LICENSE.TXT]
-
-Maybe
------
 - lua 5.2
 	- MIT
 	- NOTE: There are fairly large incompatibilities between 5.1 and 5.2
@@ -30,3 +22,5 @@ Once Upon a Time
 	- [http://glew.sourceforge.net/]
 	- MIT
 	- This was fucked off to reduce dependencies and to simplify shit (kind of)
+- fmod >= 1.6.5
+	- (INDIE LICENCE) [https://www.fmod.org/files/public/LICENSE.TXT]

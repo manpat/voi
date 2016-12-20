@@ -25,21 +25,17 @@ def configure(cnf):
 	cnf.check_cfg(path=cnf.env.BINPREFIX + 'sdl2-config', args='--cflags --libs',
 				package='', uselib_store='SDL2')
 
+	cnf.check_cfg(args='--cflags --libs', package='lua5.2', uselib_store='lua')
+	cnf.check_cfg(args='--cflags --libs', package='bullet', uselib_store='bullet')
+
 def build(bld):
 	sflags = ['-O2', '-g', '-std=c++11', '-Wall', '-Wextra']
 	includes = ['.']
-	libs = [
-		'lua', 'synth',
-		'BulletDynamics', 'BulletCollision', 'LinearMath'
-	]
+	libs = ['synth']
 
 	# omg why
-	libpath = ['../lua-synth'] + bld.env.ACTUAL_LIBDIR
+	libpath = ['lua-synth'] + bld.env.ACTUAL_LIBDIR
 
-	relative_include_dirs = ['bullet']
-	for dir in relative_include_dirs:
-		includes += [bld.env.PREFIX + '/include/' + dir]
-	
 	if bld.env.DEST_OS.find("linux") >= 0:
 		libs += ['dl', 'GL']
 	elif bld.env.DEST_OS.find("win32") >= 0 or bld.env.WINDOWS_BUILD:
@@ -64,7 +60,7 @@ def build(bld):
 		lib			=	libs,
 		libpath		=	libpath,
 
-		use			=	'SDL2 ext',
+		use			=	'SDL2 ext lua bullet',
 
 		cxxflags	=	sflags
 	)

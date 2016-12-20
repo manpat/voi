@@ -354,7 +354,7 @@ s32 main(s32 ac, char** av) {
 	if(!SetFullscreen(fullscreen)) return 1;
 	
 	auto filename = GetStringOption("level.override");
-	if(!filename[0]) filename = "export.voi";
+	if(!filename[0]) filename = "scene.voi";
 
 	{	auto sceneData = LoadSceneData(filename);
 		if(sceneData.numMeshes == 0 || sceneData.numEntities == 0) {
@@ -459,6 +459,8 @@ s32 main(s32 ac, char** av) {
 	DeinitGL();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+
+	Log("Shutdown successful");
 
 	return 0;
 }
