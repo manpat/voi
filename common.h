@@ -33,12 +33,14 @@ using s64 = int64_t;
 using f32 = float;
 using f64 = double;
 
-#ifndef M_PI
-#define M_PI glm::pi<f64>()
-#endif
+template<class F>
+struct constant_template {
+	static constexpr F infinity = std::numeric_limits<F>::infinity();
+	static constexpr F nan = std::numeric_limits<F>::quiet_NaN();
+	static constexpr F pi = glm::pi<F>();
+};
 
-#ifndef PI
-#define PI M_PI
-#endif
+using constant = constant_template<f32>;
+using constant64 = constant_template<f64>;
 
 #endif

@@ -149,7 +149,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	const f32 mspd = GetFloatOption("input.mousespeed");
 
 	pl->mouseRot += Input::GetMouseDelta() * mspd;
-	pl->mouseRot.y = glm::clamp<f32>(pl->mouseRot.y, -PI/2.f, PI/2.f);
+	pl->mouseRot.y = glm::clamp<f32>(pl->mouseRot.y, -constant::pi/2.f, constant::pi/2.f);
 
 	ent->rotation = glm::angleAxis(-pl->mouseRot.x, vec3{0,1,0});
 

@@ -37,6 +37,9 @@ function monolith0_init()
 	s:output(osc)
 
 	ent:attach_synth(s)
+
+	s:set_falloff("linear")
+	s:set_falloff_distance(60)
 end
 
 function monolith0_update()

@@ -43,6 +43,8 @@ bool InitAudio();
 void DeinitAudio();
 void UpdateAudio(Scene*);
 void AttachSynthToEntity(u32 entID, u32 synthID);
+void SetSynthFalloffMode(u32 synthID, SynthFalloffMode falloffMode);
+void SetSynthFalloffDistance(u32 synthID, f32);
 
 struct SceneData; // In sceneloader.h
 
@@ -94,7 +96,7 @@ void DeinitPhysics(PhysicsContext*);
 void UpdatePhysics(Scene*, f32 dt);
 void RefilterEntity(Entity*);
 
-RaycastResult Raycast(Scene*, const vec3&, const vec3&, f32 = std::numeric_limits<f32>::infinity(), u32 layermask = ~0u);
+RaycastResult Raycast(Scene*, const vec3&, const vec3&, f32 = constant::infinity, u32 layermask = ~0u);
 RaycastResult Linecast(Scene*, const vec3&, const vec3&, u32 layermask = ~0u);
 
 // NOTE: Using MeshData here is kinda dirty and

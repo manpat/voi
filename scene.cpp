@@ -121,7 +121,7 @@ bool InitScene(Scene* scene, const SceneData* data) {
 		}
 
 		// Calculate stuff for physics/portals
-		vec3 minPoint{std::numeric_limits<f32>::max()}, maxPoint{std::numeric_limits<f32>::lowest()};
+		vec3 minPoint{constant::infinity}, maxPoint{-constant::infinity};
 
 		for(u32 vid = 0; vid < meshData->numVertices; vid++) {
 			auto v = meshData->vertices[vid];
@@ -454,24 +454,24 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		if(isPortal) {
 			if(~e->layers & parentNode->targetLayerMask) continue;
 
-			auto gextents = e->rotation*e->extents;
-			auto gext2 = glm::cross(planeNormal, gextents);
-			auto diff = ecenter - pos;
+			const auto gextents = e->rotation*e->extents;
+			const auto gext2 = glm::cross(planeNormal, gextents);
+			const auto diff = ecenter - pos;
 
-			auto d0 = diff;
-			auto d1 = diff + gextents;
-			auto d2 = diff - gextents;
-			auto d3 = diff + gext2;
-			auto d4 = diff - gext2;
+			const auto d0 = diff;
+			const auto d1 = diff + gextents;
+			const auto d2 = diff - gextents;
+			const auto d3 = diff + gext2;
+			const auto d4 = diff - gext2;
 
-			bool fvis = glm::dot(d0, fwd) < 0.f
+			const bool fvis = glm::dot(d0, fwd) < 0.f
 				&& glm::dot(d1, fwd) < 0.f
 				&& glm::dot(d2, fwd) < 0.f
 				&& glm::dot(d3, fwd) < 0.f
 				&& glm::dot(d4, fwd) < 0.f;
 			if(fvis) continue;
 
-			auto nodeID = graph->nodeCount++;
+			const auto nodeID = graph->nodeCount++;
 			auto node = &graph->nodes[nodeID];
 			node->entityID = entID;
 			node->targetLayerMask = e->layers & ~parentNode->targetLayerMask;
@@ -483,7 +483,7 @@ void ConstructPortalGraph(PortalGraph* graph, Scene* scene, u16 parentNodeID, ve
 		}else if(isMirror) {
 			if(!(e->layers & parentNode->targetLayerMask)) continue;
 
-			auto nodeID = graph->nodeCount++;
+			const auto nodeID = graph->nodeCount++;
 			auto node = &graph->nodes[nodeID];
 			node->entityID = entID; 
 			node->targetLayerMask = e->layers & parentNode->targetLayerMask;

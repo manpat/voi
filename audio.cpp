@@ -2,8 +2,14 @@
 #include "lua-synth/synth.h"
 #include <map>
 
-namespace {
-	std::map<u32, u32> synthToEntity;
+namespace {	
+	struct ExtraSynthData {
+		u32					entityID = 0;
+		SynthFalloffMode	falloffMode = FalloffLinear;
+		f32					falloffDist = 30.f;
+	};
+
+	std::map<u32, ExtraSynthData> synthData;
 }
 
 bool InitAudio() {
@@ -26,11 +32,12 @@ void UpdateAudio(Scene* scene) {
 	const auto right = playerEntity->rotation*vec3{1, 0, 0};
 	const auto fwd = playerEntity->rotation*vec3{0, 0,-1};
 	
-	for(auto se: synthToEntity) {
+	for(auto se: synthData) {
 		auto s = synth::GetSynth(se.first);
 		if(!s) continue;
 
-		auto e = GetEntity(se.second);
+		const auto sdata = se.second;
+		const auto e = GetEntity(sdata.entityID);
 		if(!e) continue;
 
 		if(playerEntity->layers & e->layers) {
@@ -54,7 +61,7 @@ void UpdateAudio(Scene* scene) {
 			// NOTE: This only goes one layer deep
 			// TODO: Find a way to average several nearby portals, instead of just using nearest
 
-			f32 bestCompoundDistance = std::numeric_limits<f32>::max();
+			f32 bestCompoundDistance = constant::infinity;
 			vec3 bestPlayerDiff{fwd};
 
 			for(u16 i = 0; i < scene->numPortals; i++) {
@@ -94,5 +101,13 @@ void UpdateAudio(Scene* scene) {
 }
 
 void AttachSynthToEntity(u32 entID, u32 synthID) {
-	synthToEntity[synthID] = entID;
+	synthData[synthID].entityID = entID;
+}
+
+void SetSynthFalloffMode(u32 synthID, SynthFalloffMode mode) {
+	synthData[synthID].falloffMode = mode;
+}
+
+void SetSynthFalloffDistance(u32 synthID, f32 dist) {
+	synthData[synthID].falloffDist = dist;
 }

@@ -6,24 +6,8 @@
 // http://www.lua.org/manual/5.2/manual.html
 
 namespace {
-	struct LuaValue {
-		union {
-			const char*		v_str;
-			u32 			v_u32;
-			s32 			v_s32;
-			f32 			v_f32;
-			bool 			v_bool;
-		};
-
-		enum {
-			TYPE_NIL, TYPE_STR, 
-			TYPE_U32, TYPE_S32,
-			TYPE_F32, TYPE_BOOL
-		} type;
-	};
-
 	lua_State* l;
-	u32 numCallbackParameters;
+	s32 numCallbackParameters;
 }
 
 #ifdef __GNUC__
@@ -39,6 +23,8 @@ static void InitEffectLib();
 static void InitDebugLib();
 static void InitEntityLib();
 
+static void InitSynthExtensionLib();
+
 bool InitScripting() {
 	l = luaL_newstate();
 	luaL_openlibs(l);
@@ -51,6 +37,8 @@ bool InitScripting() {
 
 	if(!synth::InitLuaLib(l))
 		return false;
+
+	InitSynthExtensionLib();
 
 	return true;
 }
@@ -146,6 +134,7 @@ void RunCallback(s32 func) {
 		return;
 	}
 
+	// Get function from registry
 	lua_rawgeti(l, LUA_REGISTRYINDEX, func);
 	if(!lua_isfunction(l, -1)) {
 		LogError("Warning! Tried to run a non-function object (%d) as a callback (type: %s)\n", 
@@ -154,6 +143,7 @@ void RunCallback(s32 func) {
 		return;
 	}
 
+	// Move function underneath arguments on stack
 	lua_insert(l, -numCallbackParameters-1);
 
 	if(lua_pcall(l, numCallbackParameters, 0, 0)) {
@@ -628,4 +618,39 @@ static void InitEntityLib() {
 	lua_setglobal(l, "entity");
 	lua_setfield(l, -2, "__index");
 	lua_pop(l, 1);
+}
+
+void InitSynthExtensionLib() {
+	static const luaL_Reg synthext[] = {
+		{"set_falloff", LUALAMBDA {
+			auto synth = synth::GetSynthLua(l, 1);
+			const char* str = luaL_checkstring(l, 2);
+
+			if(!strcmp(str, "constant")) {
+				SetSynthFalloffMode(synth->id, FalloffConstant);
+			}else if(!strcmp(str, "linear")) {
+				SetSynthFalloffMode(synth->id, FalloffLinear);
+			}else if(!strcmp(str, "exponential")) {
+				SetSynthFalloffMode(synth->id, FalloffExponential);
+			}else if(!strcmp(str, "logarithmic")) {
+				SetSynthFalloffMode(synth->id, FalloffLogarithmic);
+			}else{
+				luaL_argerror(l, 2, "Unrecognised falloff mode");
+			}
+
+			return 0;
+		}},
+
+		{"set_falloff_distance", LUALAMBDA {
+			auto synth = synth::GetSynthLua(l, 1);
+			f32 dist = luaL_checknumber(l, 2);
+
+			SetSynthFalloffDistance(synth->id, dist);
+			return 0;
+		}},
+
+		{nullptr, nullptr}
+	};
+
+	synth::ExtendSynthLib(synthext);
 }

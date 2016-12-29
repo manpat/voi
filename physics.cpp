@@ -169,7 +169,7 @@ RaycastResult Linecast(Scene* scn, const vec3& s, const vec3& e, u32 layermask) 
 		return {col, bt2o(end), bt2o(normal), frac*dist};
 	}
 
-	return {nullptr, vec3{0.f}, vec3{0.f}, std::numeric_limits<f32>::infinity()};
+	return {nullptr, vec3{0.f}, vec3{0.f}, constant::infinity};
 }
 
 

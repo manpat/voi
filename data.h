@@ -295,4 +295,11 @@ struct ParticleSystem {
 	u32 vertexBuffer;
 };
 
+enum SynthFalloffMode {
+	FalloffConstant,
+	FalloffLinear,
+	FalloffLogarithmic,
+	FalloffExponential,
+};
+
 #endif
