@@ -1,10 +1,6 @@
 local wind_amt = nil
 
-local mainHasRun = false
-function main_update()
-	if mainHasRun then return end
-	mainHasRun = true
-
+function main_init()
 	local s = synth.new()
 	wind_amt = s:value("wind_amt")
 
@@ -21,32 +17,29 @@ local ply = nil
 
 local dist_param = nil
 
-local monolith0HasRun = false
+function monolith0_init()
+	ent = entity.lookup("Monolith.0")
+	ply = entity.lookup("Player")
+
+	local s = synth.new()
+	dist_param = s:value("dist")
+
+	local dist2 = dist_param^2
+	local mod = (s:sin(12 * dist2) * 0.5 + 0.5) * dist2
+	local osc =
+		s:saw(dist2*4 + 35) 
+		+ s:sqr(dist2*4 + mod + 21) 
+		+ s:noise() * 2
+		+ s:saw(55)
+
+	osc = s:lowpass(osc, 20 + dist2 *50)
+	osc = s:lowpass(osc*0.8, 50 + dist2 *50)
+	s:output(osc)
+
+	ent:attach_synth(s)
+end
+
 function monolith0_update()
-	if not monolith0HasRun then
-		monolith0HasRun = true
-
-		ent = entity.lookup("Monolith.0")
-		ply = entity.lookup("Player")
-
-		local s = synth.new()
-		dist_param = s:value("dist")
-
-		local dist2 = dist_param^2
-		local mod = (s:sin(12 * dist2) * 0.5 + 0.5) * dist2
-		local osc =
-			s:saw(dist2*4 + 35) 
-			+ s:sqr(dist2*4 + mod + 21) 
-			+ s:noise() * 2
-			+ s:saw(55)
-
-		osc = s:lowpass(osc, 20 + dist2 *50)
-		osc = s:lowpass(osc*0.8, 50 + dist2 *50)
-		s:output(osc)
-
-		ent:attach_synth(s)
-	end
-
 	if ply and ent then
 		local diff = ent:pos() - ply:pos()
 		local dist = diff:length()
@@ -62,32 +55,28 @@ local trg = nil
 local dumb_time = 0
 local trg_count = 0
 
-local monolith1HasRun = false
-function monolith1_update()
-	if not monolith1HasRun then
-		monolith1HasRun = true
+function monolith1_init()
+	local s = synth.new()
+	trg = s:trigger("pulse")
 
-		local s = synth.new()
-		trg = s:trigger("pulse")
+	local env = s:ar(0.3, 3, trg) ^ 2
 
-		local env = s:ar(0.3, 3, trg) ^ 2
+	local osc = s:sin(55)
+		+ s:tri(45 + env*10)
+		+ s:saw(220)
+		+ s:sqr(221 + env*3) * 0.3
+		+ s:noise() * 0.3
 
-		local osc = s:sin(55)
-			+ s:tri(45 + env*10)
-			+ s:saw(220)
-			+ s:sqr(221 + env*3) * 0.3
-			+ s:noise() * 0.3
+	osc = s:lowpass(osc, 50)
+	osc = s:lowpass(osc, 50)
+	s:output(osc * env)
 
-		osc = s:lowpass(osc, 50)
-		osc = s:lowpass(osc, 50)
-		s:output(osc * env)
+	local ent = entity.lookup("Monolith.1")
+	ent:attach_synth(s)
+end
 
-		local ent = entity.lookup("Monolith.1")
-		ent:attach_synth(s)
-	end
-
-	local dt = 1/100
-	dumb_time = dumb_time + dt / 4
+function monolith1_update(id, dt)
+	dumb_time = dumb_time + dt / 3
 	if math.floor(dumb_time) > trg_count then
 		trg:trigger()
 		trg_count = math.floor(dumb_time)

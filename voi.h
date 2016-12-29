@@ -74,7 +74,13 @@ void SetTargetVignetteLevel(f32, f32 duration = 4.f);
 bool InitScripting();
 s32 LoadScript(const char* fname);
 s32 GetCallbackFromScript(s32 script, const char* funcName);
-void RunCallback(u32 entId, s32 func);
+void PushCallbackParameter(std::nullptr_t);
+void PushCallbackParameter(u32);
+void PushCallbackParameter(s32);
+void PushCallbackParameter(f32);
+void PushCallbackParameter(bool);
+void PushCallbackParameter(const char*);
+void RunCallback(s32 func);
 void UnloadScript(s32 script);
 
 bool InitParticleSystem(ParticleSystem*, u32 maxParticles);
@@ -127,5 +133,14 @@ EntityIterator GetEntityIterator();
 bool InitEntityAnimator();
 void UpdateEntityAnimator(f32 dt);
 void QueueEntityMoveToAnimation(Entity*, vec3 target, f32 duration);
+
+// Helpers
+
+#include <vector>
+
+template<class T, class Func>
+void RemoveFromVectorIf(std::vector<T>*, Func&&);
+
+#include "helpers.inl"
 
 #endif

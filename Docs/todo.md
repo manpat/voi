@@ -14,7 +14,6 @@ Shit To Do
 		- Configurable sizes in blender
 - Lua
 	- Enumerate entities
-	- Trigger audio events
 	- Change material properties?
 	- Change entity/mesh materials?
 
@@ -30,8 +29,7 @@ Shit To Do
 			- This can control sample rate and wave table granularity
 	- Save config after modification in game
 - Sound
-	- Lua synth def
-	- Sound through portals
+	- Sound through portals (wip)
 - UI
 	- Menu system
 		- Main menu

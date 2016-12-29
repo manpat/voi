@@ -6,10 +6,13 @@ out = 'build'
 def options(cnf):
 	cnf.load('compiler_c compiler_cxx')
 	cnf.add_option('-w', '--windows', dest='windows_build', default=False, action='store_true', help='Enables windows builds')
+	cnf.add_option('-d', '--debug', dest='debug_build', default=False, action='store_true', help='Enables debug info')
 	
 def configure(cnf):
 	cnf.env.BINPREFIX = ''
 	cnf.env.ACTUAL_LIBDIR = []
+
+	cnf.env.DEBUG_BUILD = cnf.options.debug_build
 
 	if cnf.options.windows_build:
 		cnf.env.WINDOWS_BUILD = True
@@ -32,9 +35,12 @@ def configure(cnf):
 	cnf.check_cfg(args='--cflags --libs', package='bullet', uselib_store='bullet')
 
 def build(bld):
-	sflags = ['-O2', '-g', '-std=c++11', '-Wall', '-Wextra']
+	sflags = ['-O2', '-std=c++11', '-Wall', '-Wextra']
 	includes = ['.']
 	libs = []
+
+	if bld.env.DEBUG_BUILD:
+		sflags += ['-g']
 
 	if bld.env.DEST_OS.find("linux") >= 0:
 		libs += ['dl', 'GL']

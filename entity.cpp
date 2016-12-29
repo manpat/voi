@@ -30,14 +30,17 @@ void UpdateEntity(Entity* e, f32 dt) {
 	}
 
 	if(e->initCallback) {
-		RunCallback(e->id, e->initCallback);
+		PushCallbackParameter(e->id);
+		RunCallback(e->initCallback);
 		e->initCallback = 0;
 		// NOTE: I'm not sure I like modifying this but I see no reason
 		//	to keep it around
 	}
 
 	if(e->updateCallback) {
-		RunCallback(e->id, e->updateCallback);
+		PushCallbackParameter(e->id);
+		PushCallbackParameter(dt);
+		RunCallback(e->updateCallback);
 	}
 }
 
@@ -62,14 +65,16 @@ void EntityOnCollisionEnter(Entity* e0, Entity* e1) {
 		e1->player.collidingPortalID = e0->id;
 		e1->player.originalLayers = e1->layers;
 
-		auto diff = e1->position - e0->position;
-		auto sidef = glm::dot(diff, e0->rotation * e0->planeNormal);
+		const auto diff = e1->position - e0->position;
+		const auto sidef = glm::dot(diff, e0->rotation * e0->planeNormal);
 		e1->player.portalSide = (s8)(sidef/glm::abs(sidef));
 	}
 
 	if(e0->entityType == Entity::TypeTrigger && e1->entityType == Entity::TypePlayer) {
 		if(e0->trigger.enterCallback){
-			RunCallback(e0->id, e0->trigger.enterCallback);
+			PushCallbackParameter(e0->id); // 1st param: self
+			PushCallbackParameter(e1->id); // 2nd param: other
+			RunCallback(e0->trigger.enterCallback);
 		}
 	}
 }
@@ -83,7 +88,9 @@ void EntityOnCollisionLeave(Entity* e0, Entity* e1) {
 
 	if(e0->entityType == Entity::TypeTrigger && e1->entityType == Entity::TypePlayer) {
 		if(e0->trigger.leaveCallback){
-			RunCallback(e0->id, e0->trigger.leaveCallback);
+			PushCallbackParameter(e0->id); // 1st param: self
+			PushCallbackParameter(e1->id); // 2nd param: other
+			RunCallback(e0->trigger.leaveCallback);
 		}
 	}
 }
@@ -98,9 +105,9 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	auto pl = &ent->player;
 
 	if(auto ptl = GetEntity(pl->collidingPortalID)) {
-		vec3 ptlPos = ptl->position + ptl->rotation * ptl->centerOffset;
-		auto diff = ptlPos - ent->position;
-		auto sidef = glm::dot(diff, ptl->rotation * ptl->planeNormal)*pl->portalSide;
+		const vec3 ptlPos = ptl->position + ptl->rotation * ptl->centerOffset;
+		const auto diff = ptlPos - ent->position;
+		const auto sidef = glm::dot(diff, ptl->rotation * ptl->planeNormal)*pl->portalSide;
 
 		if(sidef > 0.f) {
 			ent->layers = pl->originalLayers ^ ptl->layers;
@@ -134,12 +141,12 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 	if(Input::GetKeyDown('c')) Input::doCapture ^= true;
 	if(Input::GetKeyDown(SDLK_F1)) debugDrawEnabled ^= true;
 
-	auto scn = ent->scene;
-	auto feetPos = ent->position - vec3{0, ent->extents.y-0.02f, 0};
-	auto groundHit = Raycast(scn, feetPos, vec3{0,-1,0}, 3.f, ent->layers);
-	f32 gndHitUpDot = glm::dot(groundHit.hitNormal, vec3{0,1,0});
+	const auto scn = ent->scene;
+	const auto feetPos = ent->position - vec3{0, ent->extents.y-0.02f, 0};
+	const auto groundHit = Raycast(scn, feetPos, vec3{0,-1,0}, 3.f, ent->layers);
+	const f32 gndHitUpDot = glm::dot(groundHit.hitNormal, vec3{0,1,0});
 
-	f32 mspd = GetFloatOption("input.mousespeed");
+	const f32 mspd = GetFloatOption("input.mousespeed");
 
 	pl->mouseRot += Input::GetMouseDelta() * mspd;
 	pl->mouseRot.y = glm::clamp<f32>(pl->mouseRot.y, -PI/2.f, PI/2.f);
@@ -158,8 +165,8 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		}
 
 		// Slow player when moving up a slope
-		auto gndHitFwdDot = glm::dot(vel, groundHit.hitNormal);
-		f32 slopeSpeedAdjust = glm::clamp(gndHitUpDot+gndHitFwdDot, 0.7f, 1.f);
+		const auto gndHitFwdDot = glm::dot(vel, groundHit.hitNormal);
+		const f32 slopeSpeedAdjust = glm::clamp(gndHitUpDot+gndHitFwdDot, 0.7f, 1.f);
 
 		// Only allow speed adjustment to change while on ground
 		if(groundHit.distance < groundDistTolerance){
@@ -191,7 +198,7 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 
 		SetEntityVelocity(ent, vel);
 	}else{
-		auto moveRot = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0});
+		const auto moveRot = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0});
 
 		vec3 vel {};
 		if(Input::GetMapped(Input::Forward))	vel += moveRot * vec3{0,0,-1};
@@ -206,17 +213,18 @@ void UpdatePlayer(Entity* ent, f32 dt) {
 		ent->position += vel * dt * speed;
 	}
 
-	auto eye = ent->position + pl->eyeOffset;
-	auto eyeFwd = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
-	auto eyeHit = Raycast(scn, eye, eyeFwd, 5.f, ent->layers);
+	const auto eye = ent->position + pl->eyeOffset;
+	const auto eyeFwd = ent->rotation * glm::angleAxis(pl->mouseRot.y, vec3{1,0,0}) * vec3{0,0,-1};
+	const auto eyeHit = Raycast(scn, eye, eyeFwd, 5.f, ent->layers);
 
 	pl->lookingAtInteractive = eyeHit.entity && (eyeHit.entity->entityType == Entity::TypeInteractive);
 	if(pl->lookingAtInteractive && Input::GetMappedDown(Input::Interact)) {
-		auto e = eyeHit.entity;
-		// LogError("Frob %.*s\n", e->nameLength, e->name);
+		auto frobbedEnt = eyeHit.entity;
+		// LogError("Frob %.*s\n", frobbedEnt->nameLength, frobbedEnt->name);
 
-		if(e->interact.frobCallback) {
-			RunCallback(e->id, e->interact.frobCallback);
+		if(frobbedEnt->interact.frobCallback) {
+			PushCallbackParameter(frobbedEnt->id);
+			RunCallback(frobbedEnt->interact.frobCallback);
 		}
 	}
 }

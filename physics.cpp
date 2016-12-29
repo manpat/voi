@@ -49,11 +49,9 @@ void PhysicsTick(btDynamicsWorld* world, btScalar dt) {
 	auto ctx = (PhysicsContext*) world->getWorldUserInfo();
 	ctx->currentStamp++;
 
-	auto begin = ctx->activeColliderPairs.begin();
-	auto end = ctx->activeColliderPairs.end();
-	ctx->activeColliderPairs.erase(std::remove_if(begin, end, [](const PhysicsColliderPair& cp) {
+	RemoveFromVectorIf(&ctx->activeColliderPairs, [](const PhysicsColliderPair& cp) {
 		return !cp.entityID0 || !cp.entityID1;
-	}), end);
+	});
 
 	// Find all collisions between colliders and collider triggers
 	s32 numManifolds = ctx->dispatcher->getNumManifolds();

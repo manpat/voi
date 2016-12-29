@@ -39,11 +39,9 @@ bool InitEntityAnimator() {
 }
 
 void UpdateEntityAnimator(f32 dt) {
-	auto nend = std::remove_if(animationCmds.begin(), animationCmds.end(), [](const AnimationCommand& cmd) {
+	RemoveFromVectorIf(&animationCmds, [](const AnimationCommand& cmd) {
 		return (cmd.progress > 1.f) || !cmd.entityID;
 	});
-
-	animationCmds.erase(nend, animationCmds.end());
 
 	for(auto& cmd: animationCmds) {
 		auto e = GetEntity(cmd.entityID);

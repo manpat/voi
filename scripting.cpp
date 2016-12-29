@@ -6,7 +6,24 @@
 // http://www.lua.org/manual/5.2/manual.html
 
 namespace {
+	struct LuaValue {
+		union {
+			const char*		v_str;
+			u32 			v_u32;
+			s32 			v_s32;
+			f32 			v_f32;
+			bool 			v_bool;
+		};
+
+		enum {
+			TYPE_NIL, TYPE_STR, 
+			TYPE_U32, TYPE_S32,
+			TYPE_F32, TYPE_BOOL
+		} type;
+	};
+
 	lua_State* l;
+	u32 numCallbackParameters;
 }
 
 #ifdef __GNUC__
@@ -93,7 +110,37 @@ s32 GetCallbackFromScript(s32 script, const char* funcName) {
 	return func;
 }
 
-void RunCallback(u32 entId, s32 func) {
+void PushCallbackParameter(std::nullptr_t) {
+	lua_pushnil(l);
+	numCallbackParameters++;
+}
+
+void PushCallbackParameter(u32 v) {
+	lua_pushunsigned(l, v);
+	numCallbackParameters++;
+}
+
+void PushCallbackParameter(s32 v) {
+	lua_pushinteger(l, v);
+	numCallbackParameters++;
+}
+
+void PushCallbackParameter(f32 v) {
+	lua_pushnumber(l, v);
+	numCallbackParameters++;
+}
+
+void PushCallbackParameter(bool v) {
+	lua_pushboolean(l, v);
+	numCallbackParameters++;
+}
+
+void PushCallbackParameter(const char* v) {
+	lua_pushstring(l, v);
+	numCallbackParameters++;
+}
+
+void RunCallback(s32 func) {
 	if(!func) {
 		LogError("Warning! Tried to run invalid script callback\n");
 		return;
@@ -107,11 +154,14 @@ void RunCallback(u32 entId, s32 func) {
 		return;
 	}
 
-	lua_pushinteger(l, entId);
-	if(lua_pcall(l, 1, 0, 0)) {
+	lua_insert(l, -numCallbackParameters-1);
+
+	if(lua_pcall(l, numCallbackParameters, 0, 0)) {
 		LogError("Error running script callback: %s\n", luaL_checkstring(l, -1));
 		lua_pop(l, 1);
 	}
+
+	numCallbackParameters = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
