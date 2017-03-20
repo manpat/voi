@@ -1,10 +1,7 @@
-uniform sampler2D depthTex;
 uniform sampler2D colorTex;
 uniform sampler2D general0Tex;
 uniform sampler2D general1Tex;
 uniform sampler2D ditherTex;
-uniform mat4 invProjection;
-uniform mat4 prevProjView;
 uniform mat4 projection;
 uniform mat4 view;
 uniform vec4 fogColor;
@@ -71,53 +68,17 @@ vec3 applyTonemap(vec3 color, float exposure) {
 }
 
 void main() {
-	float depth0 = texture2D(depthTex, uv).r;
 	float dither = texture2D(ditherTex, uv).r / 255.0 * 4.0;
 
-	// mat4 invVP = inverse(projection*view);
-	// vec4 cpw = inverse(projection) * vec4(uv*2 - 1, depth0*2-1, 1);
-	// cpw /= cpw.w;
-	// vec4 wpw = inverse(view) * cpw;
-	// vec4 oldwp = inverse(prevProjView) * cpw;
-
-	// vec3 wsvel = vec3(sin(time+wpw.y*0.1),cos(time*3+wpw.y+wpw.z),0) * cpw.z*0.02; //wpw.xyz - oldwp.xyz;
-	// if(length(wsvel) > 1.f) wsvel = normalize(wsvel);
-
-	// vec3 csvel = (view * vec4(wsvel*0.1, 0)).xyz;
-	// vec4 uvvel = projection * vec4(csvel, 0);
-	// uvvel /= uvvel.w;
-
-	// outcolor.rgb = wsvel*.5 + .5;
-	// outcolor.a = 1.f;
-	// return;
-	// vec3 wp = wpw.xyz;
-
-	// float dd = 2.f;
-	// vec2 texSize = dd/textureSize(depthTex, 0);
-	vec2 uv0 = uv; // + uvvel.xy*0.1f;
-	// vec2 uv1 = uv0+vec2(texSize.x,0);
-	// vec2 uv2 = uv0+vec2(0,texSize.y);
-	// depth0 = texture2D(depthTex, uv0).r;
-	// float depth1 = texture2D(depthTex, uv1).r;
-	// float depth2 = texture2D(depthTex, uv2).r;
-
-	vec4 cpw0 = invProjection * vec4(uv0*2 - 1, depth0*2-1, 1);
-	vec3 cp0 = cpw0.xyz/cpw0.w;
-
-	vec4 color = texture2D(colorTex, uv0);
-	vec4 particle = texture2D(general0Tex, uv0);
-
-	float fogdepth = length(cp0) + dither; // Distance from eye
-	// float fogmix = 1-clamp(pow(fogdepth / fogDistance, fogColor.a), 0, 1) * color.a;
-	float fogmix = 1-min(pow(fogdepth / fogDistance, fogColor.a), 1) * color.a;
+	vec4 color = texture2D(colorTex, uv);
+	vec4 particle = texture2D(general0Tex, uv);
 
 	vec3 bloom = texture2D(general1Tex, uv).rgb;
 
-	// outcolor.rgb = clamp(color.rgb*fogmix + fogColor.rgb*(1-fogmix), 0, 1);
-	outcolor.rgb = color.rgb*fogmix + fogColor.rgb*(1-fogmix);
+	outcolor.rgb = color.rgb;
 	outcolor.rgb += particle.rgb * particle.a;
 
-	outcolor.rgb += bloom * 0.03;
+	outcolor.rgb += bloom;
 	outcolor.rgb = applyTonemap(outcolor.rgb, 7.0 + 0.0*pow(2.0 + sin(time * 0.1), 2.0));
 
 	float vignette = clamp(1 - pow(length(uv-.5), vignettePower) * vignetteStrength, 0.3, 1);

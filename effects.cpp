@@ -15,9 +15,10 @@ namespace {
 		}
 	);
 
-	ShaderProgram* shaderProgram;
+	ShaderProgram* finalComposeProgram;
 	ShaderProgram thresholdProgram;
 	ShaderProgram blurProgram;
+	ShaderProgram fogProgram;
 
 	template<class T>
 	struct Lerpable {
@@ -134,9 +135,10 @@ namespace {
 extern u32 windowWidth, windowHeight;
 
 bool InitEffects() {
-	shaderProgram = CreateNamedShaderProgram(ShaderIDPost, vertSrc, LoadFileStatically("data/shaders/post.frag"));
+	finalComposeProgram = CreateNamedShaderProgram(ShaderIDPost, vertSrc, LoadFileStatically("data/shaders/post.frag"));
 	thresholdProgram = CreateShaderProgram(vertSrc, LoadFileStatically("data/shaders/threshold.frag"));
 	blurProgram = CreateShaderProgram(vertSrc, LoadFileStatically("data/shaders/blur.frag"));
+	fogProgram = CreateShaderProgram(vertSrc, LoadFileStatically("data/shaders/fog.frag"));
 	fogColor = vec3{0.};
 	fogDistance = 200.f;
 	fogDensity = 0.5f;
@@ -207,16 +209,44 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	fogDistance.Update(dt);
 	vignetteLevel.Update(dt);
 
+	// Apply fog and sky
+	glBindFramebuffer(GL_FRAMEBUFFER, secondaryFbo.fbo);
+	glViewport(0, 0, secondaryFbo.width, secondaryFbo.height);
+	UseShaderProgram(&fogProgram);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glActiveTextureVoi(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fb->depthStencilTarget);
+	glActiveTextureVoi(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[FBTargetColor]);
+	glActiveTextureVoi(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, ditherTex);
+
+	const u32 fogColorLoc = glGetUniformLocation(fogProgram.program, "fogColor");
+	const u32 fogDistanceLoc = glGetUniformLocation(fogProgram.program, "fogDistance");
+	const u32 invProjectionLoc = glGetUniformLocation(fogProgram.program, "invProjection");
+
+	glUniform1i(fogProgram.depthTexLoc, 0);
+	glUniform1i(fogProgram.colorTexLoc, 1);
+	glUniform1i(fogProgram.ditherTexLoc, 2);
+	glUniformMatrix4fv(invProjectionLoc, 1, false, glm::value_ptr(glm::inverse(camera->projection)));
+
+	glUniform4fv(fogColorLoc, 1, glm::value_ptr(vec4{fogColor.actual, fogDensity.actual}));
+	glUniform1f(fogDistanceLoc, fogDistance.actual);
+
+	DrawUnitQuad();
+
 	// Take threshold
 	glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[0].fbo);
 	glViewport(0, 0, blurFBOs[0].width, blurFBOs[0].height);
 	UseShaderProgram(&thresholdProgram);
 	glActiveTextureVoi(GL_TEXTURE0);
 	glUniform1i(thresholdProgram.colorTexLoc, 0);
-	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[FBTargetColor]);
+	glBindTexture(GL_TEXTURE_2D, secondaryFbo.colorTargets[FBTargetColor]);
 
 	DrawUnitQuad();
 
+	// Blur threshold
 	UseShaderProgram(&blurProgram);
 	u32 stepLoc = glGetUniformLocation(blurProgram.program, "step");
 	glUniform1i(blurProgram.colorTexLoc, 0);
@@ -241,15 +271,16 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 		glBindTexture(GL_TEXTURE_2D, blurFBOs[1].colorTargets[FBTargetColor]);
 		DrawUnitQuad();
 	}
+
+	// Compose final image
+	UseShaderProgram(finalComposeProgram);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0,0, windowWidth, windowHeight);
 
-	UseShaderProgram(shaderProgram);
-
-	// Apply fog and various effects
 	glActiveTextureVoi(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, fb->depthStencilTarget);
 	glActiveTextureVoi(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[FBTargetColor]);
+	glBindTexture(GL_TEXTURE_2D, secondaryFbo.colorTargets[FBTargetColor]);
 	glActiveTextureVoi(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, fb->colorTargets[FBTargetGeneral0]);
 	glActiveTextureVoi(GL_TEXTURE3);
@@ -257,29 +288,17 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	glActiveTextureVoi(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, ditherTex);
 
-	glUniform1i(shaderProgram->depthTexLoc, 0);
-	glUniform1i(shaderProgram->colorTexLoc, 1);
-	glUniform1i(shaderProgram->general0TexLoc, 2);
-	glUniform1i(shaderProgram->general1TexLoc, 3);
-	glUniform1i(shaderProgram->ditherTexLoc, 4);
-	glUniformMatrix4fv(shaderProgram->projectionLoc, 1, false, glm::value_ptr(camera->projection));
-	glUniformMatrix4fv(shaderProgram->viewLoc, 1, false, glm::value_ptr(camera->view));
-	u32 invProjectionLoc = glGetUniformLocation(shaderProgram->program, "invProjection");
-	glUniformMatrix4fv(invProjectionLoc, 1, false, glm::value_ptr(glm::inverse(camera->projection)));
+	glUniform1i(finalComposeProgram->depthTexLoc, 0);
+	glUniform1i(finalComposeProgram->colorTexLoc, 1);
+	glUniform1i(finalComposeProgram->general0TexLoc, 2);
+	glUniform1i(finalComposeProgram->general1TexLoc, 3);
+	glUniform1i(finalComposeProgram->ditherTexLoc, 4);
+	glUniformMatrix4fv(finalComposeProgram->projectionLoc, 1, false, glm::value_ptr(camera->projection));
+	glUniformMatrix4fv(finalComposeProgram->viewLoc, 1, false, glm::value_ptr(camera->view));
 
-	u32 timeLoc = glGetUniformLocation(shaderProgram->program, "time");
-	u32 fogColorLoc = glGetUniformLocation(shaderProgram->program, "fogColor");
-	u32 fogDistanceLoc = glGetUniformLocation(shaderProgram->program, "fogDistance");
-	u32 prevProjViewLoc = glGetUniformLocation(shaderProgram->program, "prevProjView");
-	u32 vignettePowerLoc = glGetUniformLocation(shaderProgram->program, "vignettePower");
-	u32 vignetteStrengthLoc = glGetUniformLocation(shaderProgram->program, "vignetteStrength");
-
-	glUniform4fv(fogColorLoc, 1, glm::value_ptr(vec4{fogColor.actual, fogDensity.actual}));
-	glUniform1f(fogDistanceLoc, fogDistance.actual);
-
-	static mat4 prevView = camera->view;
-	glUniformMatrix4fv(prevProjViewLoc, 1, false, glm::value_ptr(/*camera->projection * */prevView));
-	prevView = camera->view;
+	u32 timeLoc = glGetUniformLocation(finalComposeProgram->program, "time");
+	u32 vignettePowerLoc = glGetUniformLocation(finalComposeProgram->program, "vignettePower");
+	u32 vignetteStrengthLoc = glGetUniformLocation(finalComposeProgram->program, "vignetteStrength");
 
 	static f32 time = 0.f;
 	glUniform1f(timeLoc, time += dt);
@@ -287,8 +306,6 @@ void ApplyEffectsAndDraw(Framebuffer* fb, const Camera* camera, f32 dt) {
 	glUniform1f(vignettePowerLoc, 3.5f - vignetteLevel*1.2f);
 	glUniform1f(vignetteStrengthLoc, 0.1f + vignetteLevel * 1.2f);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0,0, windowWidth, windowHeight);
 	glClear(GL_COLOR_BUFFER_BIT);
 	DrawUnitQuad();
 

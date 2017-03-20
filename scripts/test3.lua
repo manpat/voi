@@ -48,7 +48,7 @@ function enter_layer2()
 end
 
 function enter_layer3()
-	effects.fog(vec(.8), 120, 0.4, 3)
+	effects.fog(vec(.9), 120, 0.4, 3)
 end
 
 function enter_layer4()

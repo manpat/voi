@@ -7,7 +7,7 @@ void main() {
 	outcolor = materialColor;
 
 	if(outcolor.a < 0.5)
-		outcolor.rgb *= 50.0;
+		outcolor.rgb *= 1.4;
 
 	outcolor.rgb = pow(outcolor.rgb, vec3(1.0));
 }
