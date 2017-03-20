@@ -69,7 +69,9 @@ class ObjectPanel(bpy.types.Panel):
 			layout.row().prop(o, "voi_entityentercb")
 			layout.row().prop(o, "voi_entityleavecb")
 
-		layout.row().prop(o, "voi_entityignorefog")
+		row = layout.row()
+		row.prop(o, "voi_entityignorefog")
+		row.prop(o, "voi_entitydoublesided")
 
 class VoiBoolBrush(bpy.types.Operator):
 	"""Makes a mesh a boolean operator and applies it to the active object"""
@@ -209,6 +211,7 @@ def register():
 	obj.voi_collidertype = EnumProperty(items=voi_coltypes, name="Collider Type", default='_')
 	obj.voi_entityhidden = BoolProperty(name="Hidden")
 	obj.voi_entitystatic = BoolProperty(name="Static", default=True)
+	obj.voi_entitydoublesided = BoolProperty(name="Double Sided", default=False)
 	obj.voi_entitydoexport = BoolProperty(name="Export", default=True)
 	obj.voi_entityignorefog = BoolProperty(name="Ignore Fog", default=False)
 

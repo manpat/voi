@@ -229,6 +229,9 @@ class ExportVoiScene(bpy.types.Operator):
 			if obj.get("voi_entityignorefog", False):
 				flags |= 1<<2
 
+			if obj.get("voi_entitydoublesided", False):
+				flags |= 1<<3
+
 			scale = obj.scale
 			scale = [scale.x, scale.z, scale.y]
 

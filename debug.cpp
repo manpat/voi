@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#define SHADER(x) "#version 130\n" #x
+#define SHADER(x) #x
 namespace {
 	const char* debugShaderSrc[] = {
 		SHADER(
@@ -58,7 +58,7 @@ void DrawDebug(const mat4& viewProjection) {
 	glLineWidth(4);
 	glPointSize(4);
 	
-	glUseProgram(debugProgram.program);
+	UseShaderProgram(&debugProgram);
 	glUniformMatrix4fv(debugProgram.viewProjectionLoc, 1, false, glm::value_ptr(viewProjection));
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);

@@ -13,6 +13,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/color_space.hpp>
 
+using glm::ivec2;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;

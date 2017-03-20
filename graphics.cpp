@@ -43,11 +43,14 @@ Framebuffer CreateFramebuffer(FramebufferSettings settings) {
 			GL_TEXTURE_2D, fb.depthStencilTarget, 0);
 	}
 
+	const u32 internalFormat = settings.hdrColorBuffers? GL_RGBA16F : GL_RGBA8;
+	const u32 formatType = settings.hdrColorBuffers? GL_FLOAT : GL_UNSIGNED_BYTE;
+
 	glGenTextures(settings.numColorBuffers, fb.colorTargets);
 	for(u32 i = 0; i < settings.numColorBuffers; i++) {
 		glBindTexture(GL_TEXTURE_2D, fb.colorTargets[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fb.width, fb.height, 0, 
-			GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, fb.width, fb.height, 0, 
+			GL_RGBA, formatType, nullptr);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.filter?GL_LINEAR:GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.filter?GL_LINEAR:GL_NEAREST);
@@ -96,7 +99,12 @@ void DestroyFramebuffer(Framebuffer* fb) {
 static u32 CreateShader(const char* src, u32 type) {
 	u32 id = glCreateShader(type);
 
-	glShaderSource(id, 1, &src, nullptr);
+	const char* shaderSrc[] {
+		"#version 130\n",
+		src
+	};
+
+	glShaderSource(id, GetArraySize(shaderSrc), shaderSrc, nullptr);
 	glCompileShader(id);
 
 	s32 status = 0;
@@ -205,6 +213,11 @@ ShaderProgram* GetNamedShaderProgram(u32 shId) {
 	return prog;
 }
 
+void UseShaderProgram(const ShaderProgram* sh) {
+	assert(sh && sh->program);
+	glUseProgram(sh->program);
+}
+
 u32 LoadTexture(const char* fname) {
 	s32 texWidth, texHeight, numComponents;
 	u8* texData = stbi_load(fname, &texWidth, &texHeight, &numComponents, STBI_default);
@@ -236,7 +249,7 @@ u32 LoadTexture(const char* fname) {
 	return tex;
 }
 
-void DrawFullscreenQuad() {
+void DrawUnitQuad() {
 	static u32 vbo = 0;
 	if(!vbo) {
 		vec2 verts[] = {
@@ -283,4 +296,22 @@ void DrawQuadAtFarPlane(const mat4& projection) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, nullptr);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+vec3 RGBToHSV(vec3 rgb) {
+	auto hsv = glm::hsvColor(rgb);
+
+	hsv.r = std::fmod(hsv.r/360.f, 1.f);
+	if(hsv.r < 0.f)
+		hsv.r = 1.f + hsv.r;
+
+	return hsv;
+}
+
+vec3 HSVToRGB(vec3 hsv) {
+	hsv.r = std::fmod(hsv.r*360.f, 360.f);
+	if(hsv.r < 0.f)
+		hsv.r = 360.f + hsv.r;
+
+	return glm::rgbColor(hsv);
 }

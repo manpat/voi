@@ -29,6 +29,10 @@ void LogError(const char*, ...) FORMATARGS(1,2);
 
 #undef FORMATARGS
 
+FileData LoadFile(const char* filename, bool nullTerminate);
+char* LoadFileStatically(const char* filename, bool nullTerminate = true);
+void CleanupStaticallyLoadedFiles();
+
 bool InitGL(SDL_Window*);
 void DeinitGL();
 
@@ -55,23 +59,28 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask);
 ShaderProgram CreateShaderProgram(const char* vs, const char* fs);
 ShaderProgram* CreateNamedShaderProgram(u32 shId, const char* vs, const char* fs);
 ShaderProgram* GetNamedShaderProgram(u32 shId);
+void UseShaderProgram(const ShaderProgram*);
+
 Framebuffer CreateFramebuffer(FramebufferSettings);
 void EnableTargets(std::initializer_list<u32>);
 void EnableTargets(u32, const u32* const);
 
 void DestroyFramebuffer(Framebuffer*);
 u32 LoadTexture(const char* fname);
-void DrawFullscreenQuad();
+void DrawUnitQuad();
 void DrawQuadAtFarPlane(const mat4& projection);
 
 bool InitEffects();
 bool ReinitEffects();
 void ApplyEffectsAndDraw(Framebuffer*, const Camera*, f32 dt);
-void SetTargetFogParameters(const vec3& color, f32 distance, f32 density, f32 duration);
-void SetTargetFogColor(const vec3&, f32 duration = 4.f);
+void SetTargetFogParameters(vec3 color, f32 distance, f32 density, f32 duration);
+void SetTargetFogColor(vec3, f32 duration = 4.f);
 void SetTargetFogDistance(f32, f32 duration = 4.f);
 void SetTargetFogDensity(f32, f32 duration = 4.f);
 void SetTargetVignetteLevel(f32, f32 duration = 4.f);
+
+vec3 RGBToHSV(vec3);
+vec3 HSVToRGB(vec3);
 
 bool InitScripting();
 s32 LoadScript(const char* fname);
@@ -142,6 +151,9 @@ void QueueEntityMoveToAnimation(Entity*, vec3 target, f32 duration);
 
 template<class T, class Func>
 void RemoveFromVectorIf(std::vector<T>*, Func&&);
+
+template<class T, u64 size>
+constexpr u64 GetArraySize(const T (&)[size]);
 
 #include "helpers.inl"
 

@@ -5,7 +5,6 @@
 SDL_GLContext glctx = nullptr;
 
 bool transformFeedbackAvailable = false;
-bool framebuffersAvailable = false;
 bool debugOutputAvailable = false;
 bool vertexArrayAvailable = false;
 
@@ -35,10 +34,10 @@ bool InitGL(SDL_Window* window) {
 
 	const char* requiredExtensions[] {
 		"GL_ARB_vertex_buffer_object",
+		"GL_ARB_framebuffer_object",
 	};
 
 	std::pair<const char*, bool*> optionalExtensions[] {
-		{"GL_ARB_framebuffer_object", &framebuffersAvailable},
 		{"GL_ARB_debug_output", &debugOutputAvailable},
 		{"GL_ARB_vertex_array_object", &vertexArrayAvailable},
 		{"GL_ARB_transform_feedback3", &transformFeedbackAvailable} // For primitive queries

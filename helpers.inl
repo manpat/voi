@@ -1,7 +1,4 @@
 #pragma once
-#ifndef HELPERS_INL
-#define HELPERS_INL
-
 #include <algorithm>
 
 template<class T, class F>
@@ -11,4 +8,7 @@ void RemoveFromVectorIf(std::vector<T>* v, F&& f) {
 	v->erase(it, end);
 }
 
-#endif
+template<class T, u64 size>
+constexpr u64 GetArraySize(const T (&)[size]) {
+	return size;
+}

@@ -93,6 +93,7 @@ struct Entity {
 		FlagHidden		= 1<<0,
 		FlagStatic		= 1<<1,
 		FlagIgnoreFog	= 1<<2,
+		FlagDoubleSided	= 1<<3,
 	};
 
 	u16 id;
@@ -259,11 +260,10 @@ struct Camera {
 // NOTE: In OpenGL 3.x+ the minimum available number of color attachments and draw buffers is 8
 // TODO: Check how many are available to us
 enum {
-	FBTargetDepthStencil,
 	FBTargetColor,
 	FBTargetGeneral0,
-	FBTargetGeneral1, // NOTE: This is never initialised, probably do that before using it
-	FBTargetCount
+	FBTargetGeneral1,
+	FBTargetCount = 8
 };
 
 struct FramebufferSettings {
@@ -272,13 +272,14 @@ struct FramebufferSettings {
 	bool hasStencil;
 	bool hasDepth;
 	bool filter;
+	bool hdrColorBuffers;
 };
 
 struct Framebuffer {
 	u32 fbo;
 	u32 width, height;
 	u32 depthStencilTarget;
-	u32 colorTargets[8];
+	u32 colorTargets[FBTargetCount];
 	u8 targetCount;
 	bool valid;
 };
@@ -300,6 +301,11 @@ enum SynthFalloffMode {
 	FalloffLinear,
 	FalloffLogarithmic,
 	FalloffExponential,
+};
+
+struct FileData {
+	char* data;
+	u64 size;
 };
 
 #endif

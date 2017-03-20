@@ -6,7 +6,7 @@
 #include <chrono>
 #include <SDL2/SDL.h>
 
-#define SHADER(x) "#version 130\n" #x
+#define SHADER(x) #x
 const char* defaultShaderSrc[] = {
 	SHADER(
 		in vec3 vertex;
@@ -22,45 +22,6 @@ const char* defaultShaderSrc[] = {
 			gl_Position = viewProjection * model * vec4(vertex, 1);
 			gl_ClipDistance[0] = dot(model * vec4(vertex, 1), clipPlane);
 			faceID = int(gl_VertexID/3);
-		}
-	),
-	SHADER(
-		uniform vec4 materialColor;
-		flat in int faceID;
-		out vec4 outcolor;
-		out vec4 outgeneral0;
-
-		// const vec3 cols[] = vec3[](
-		// 	vec3(1,0,0),
-		// 	vec3(0,1,0),
-		// 	vec3(0,0,1),
-		// 	vec3(1,1,0),
-		// 	vec3(1,0,1),
-		// 	vec3(0,1,1),
-		// 	vec3(0,0,0)
-		// );
-
-		void main() {
-			// outcolor = materialColor;
-			outcolor.a = materialColor.a;
-			outcolor.rgb = pow(materialColor.rgb, vec3(0.5f));
-			// outcolor.rgb = cols[faceID%cols.length()];
-
-			// vec3 col;
-			// float val = faceID;
-			// float div = 50.f;
-			// val /= div;
-			// col.r = mod(val, 1.f);
-			// val /= div;
-			// col.g = mod(val, 1.f);
-			// val /= div;
-			// col.b = mod(val, 1.f);
-			// outcolor.rgb = col*.5f +.5f;
-
-			float luminance = dot(outcolor.rgb, vec3(0.2125, 0.7154, 0.0721));
-			// outgeneral0 = vec4(outcolor.rgb, (1-outcolor.a) * pow(luminance, 1.0f));
-			outgeneral0 = vec4(outcolor.rgb, 1) * (1-outcolor.a) * pow(luminance, 1.0f);
-			// outgeneral0 = vec4(pow(luminance, 2.f));
 		}
 	)
 };
@@ -78,23 +39,6 @@ const char* particleShaderSrc[] = {
 			gl_Position = viewProjection * vec4(vertex, 1);
 			gl_PointSize = pixelSize/gl_Position.z;
 			vlifetime = lifetime;
-		}
-	),
-	SHADER(
-		uniform vec3 materialColor;
-		in float vlifetime;
-
-		out vec4 outcolor;
-
-		void main() {
-			if(vlifetime <= 0.f) discard;
-
-			// vec2 diff = vec2(.5f) - gl_PointCoord;
-			// float dist = .6f-(abs(diff.x)+abs(diff.y))/*.5f - length()*/;
-			// dist = pow(clamp(dist, 0.f, 1.f), 0.9f);
-			float dist = 0.35f;
-			float a = sin(radians(vlifetime*180.f)) * dist;
-			outcolor = vec4(materialColor*a, a);
 		}
 	)
 };
@@ -262,8 +206,8 @@ s32 main(s32 ac, char** av) {
 		return 1;
 	}
 
-	CreateNamedShaderProgram(ShaderIDDefault,	defaultShaderSrc[0], defaultShaderSrc[1]);
-	CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], particleShaderSrc[1]);
+	CreateNamedShaderProgram(ShaderIDDefault,	defaultShaderSrc[0], LoadFileStatically("data/shaders/main.frag"));
+	CreateNamedShaderProgram(ShaderIDParticles,	particleShaderSrc[0], LoadFileStatically("data/shaders/particle.frag"));
 	CreateNamedShaderProgram(ShaderIDUI,		uiShaderSrc[0], uiShaderSrc[1]);
 
 	f32 dt = 1.f/60.f;
@@ -297,7 +241,8 @@ s32 main(s32 ac, char** av) {
 		.numColorBuffers = 3,
 		.hasStencil = true,
 		.hasDepth = true,
-		.filter = filter
+		.filter = filter,
+		.hdrColorBuffers = true
 	};
 
 	// TODO: Better antialiasing method
@@ -307,7 +252,7 @@ s32 main(s32 ac, char** av) {
 		return 1;
 	}
 
-	auto SetFullscreen = [window, &fb, multisampleLevel, filter, &camera] (bool fullscreen) {
+	const auto SetFullscreen = [window, &fb, multisampleLevel, filter, &camera] (bool fullscreen) {
 		// TODO: Choose between native and fake fullscreen based on resolution?
 		//	or have an option?
 		if(SDL_SetWindowFullscreen(window, fullscreen? SDL_WINDOW_FULLSCREEN_DESKTOP: 0) < 0) 
@@ -330,7 +275,8 @@ s32 main(s32 ac, char** av) {
 			.numColorBuffers = 3,
 			.hasStencil = true,
 			.hasDepth = true,
-			.filter = filter
+			.filter = filter,
+			.hdrColorBuffers = true
 		};
 
 		fb = CreateFramebuffer(mainFramebufferSettings);
@@ -379,6 +325,7 @@ s32 main(s32 ac, char** av) {
 	}
 
 	GameInit();
+	CleanupStaticallyLoadedFiles();
 
 	SDL_Event e;
 	bool running = true;
@@ -551,7 +498,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_BLEND);
 
-		glUseProgram(forwardShader->program);
+		UseShaderProgram(forwardShader);
 		EnableTargets({0, 2});
 
 		glUniformMatrix4fv(forwardShader->viewProjectionLoc, 1, false, glm::value_ptr(camera->projection));
@@ -563,7 +510,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		glUseProgram(particleShader->program);
+		UseShaderProgram(particleShader);
 		glUniform3fv(particleShader->materialColorLoc, 1, glm::value_ptr(vec3{.5}));
 		glUniformMatrix4fv(particleShader->viewProjectionLoc, 1, false, 
 			glm::value_ptr(viewProjection));
@@ -588,7 +535,7 @@ void GameUpdate(Scene* scene, Camera* camera, Framebuffer* fb, f32 dt) {
 	ApplyEffectsAndDraw(fb, camera, dt);
 
 	// Draw cursor
-	glUseProgram(uiShader->program);
+	UseShaderProgram(uiShader);
 	glEnableVertexAttribArray(1);
 
 	glActiveTextureVoi(GL_TEXTURE0);

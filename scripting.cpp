@@ -5,9 +5,27 @@
 
 // http://www.lua.org/manual/5.2/manual.html
 
+struct CoroutineState {
+	enum {
+		StateDead,
+		StateYielded,
+		StateWaiting,
+	};
+
+	lua_State* th;
+	s32 thidx;
+	s32 state;
+
+	union {
+		f32 timeout;
+	};
+};
+
 namespace {
 	lua_State* l;
 	s32 numCallbackParameters;
+
+	std::vector<CoroutineState> coroutineStates;
 }
 
 #ifdef __GNUC__
@@ -16,6 +34,7 @@ namespace {
 #define LUALAMBDA [](lua_State* l) -> s32
 #endif
 
+static void InitCoLib();
 static void InitVecLib();
 static void InitQuatLib();
 static void InitRandLib();
@@ -29,6 +48,7 @@ bool InitScripting() {
 	l = luaL_newstate();
 	luaL_openlibs(l);
 
+	InitCoLib();
 	InitVecLib();
 	InitRandLib();
 	InitEffectLib();
@@ -158,7 +178,7 @@ void RunCallback(s32 func) {
 // Library /////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
-void stackdump(){
+void stackdump(lua_State* l){
 	int i;
 	int top = lua_gettop(l);
 	LogError("[LuaStack] ");
@@ -186,6 +206,72 @@ void stackdump(){
 		LogError("  ");  /* put a separator */
 	}
 	LogError("\n");  /* end the listing */
+}
+
+static void InitCoLib() {
+	static const luaL_Reg colib[] = {
+		{"start", LUALAMBDA {
+			auto th = lua_newthread(l);
+			lua_insert(l, 1);
+			lua_xmove(l, th, 1);
+
+			CoroutineState state {};
+			switch(lua_resume(th, l, 0)) {
+				case LUA_OK: break;
+				case LUA_YIELD:
+					state.th = th;
+					state.thidx = luaL_ref(l, LUA_REGISTRYINDEX);
+					state.state = CoroutineState::StateYielded;
+
+					if(lua_gettop(th) > 1) {
+						auto st = *(s32*) luaL_checkudata(th, 1, "yieldmt");
+						state.state = st;
+						switch(st) {
+							case CoroutineState::StateWaiting:
+								state.timeout = luaL_checknumber(th, 2);
+								break;
+
+							default: break;
+						}
+					}
+
+					coroutineStates.push_back(state);
+					break;
+
+				default:
+					LogError("ERROR DURING StartCo: %s\n", lua_tostring(l, 1));
+					break;
+			}
+			
+			return 0;
+		}},
+
+		{"wait", LUALAMBDA {
+			luaL_checknumber(l, 1);
+
+			if(auto st = (s32*) lua_newuserdata(l, sizeof(s32))) {
+				*st = CoroutineState::StateWaiting;
+				luaL_getmetatable(l, "yieldmt");
+				lua_setmetatable(l, -1);
+				lua_insert(l, 1);
+
+				return lua_yield(l, 2);
+			}
+
+			return 0;
+		}},
+
+		{"yield", LUALAMBDA {
+			return lua_yield(l, lua_gettop(l));
+		}},
+	};
+
+	luaL_newmetatable(l, "yieldmt");
+
+	lua_newtable(l); // colib
+	luaL_setfuncs(l, colib, 0);
+
+	lua_setglobal(l, "co");
 }
 
 static vec3* lCheckVecRef(s32 s) {
@@ -254,23 +340,11 @@ static void InitVecLib() {
 			return 1;
 		}},
 		{"from_hsv", LUALAMBDA {
-			auto hsv = *lCheckVecRef(1);
-
-			hsv.r = std::fmod(hsv.r*360.f, 360.f);
-			if(hsv.r < 0.f)
-				hsv.r = 360.f + hsv.r;
-
-			*lNewVecUD() = glm::rgbColor(hsv);
+			*lNewVecUD() = HSVToRGB(*lCheckVecRef(1));
 			return 1;
 		}},
 		{"to_hsv", LUALAMBDA {
-			auto hsv = glm::hsvColor(*lCheckVecRef(1));
-
-			hsv.r = std::fmod(hsv.r/360.f, 1.f);
-			if(hsv.r < 0.f)
-				hsv.r = 1.f + hsv.r;
-
-			*lNewVecUD() = hsv;
+			*lNewVecUD() = RGBToHSV(*lCheckVecRef(1));
 			return 1;
 		}},
 

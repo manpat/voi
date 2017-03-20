@@ -40,22 +40,13 @@ SceneData LoadSceneData(const char* fname) {
 
 	SceneData scene{};
 
-	u8* data = nullptr;
-	u64 size = 0;
-
-	{	std::ifstream file{fname, file.binary};
-		if(!file) {
-			LogError("Error! Scene load failed\n");
-			return scene;
-		}
-		file.seekg(0, file.end);
-		size = file.tellg();
-		data = new u8[size];
-		file.seekg(0, file.beg);
-		file.read((char*)data, size);
+	char* data = LoadFile(fname, false).data;
+	if(!data) {
+		LogError("Error! Scene load failed\n");
+		return scene;
 	}
 
-	u8* it = data;
+	u8* it = (u8*) data;
 	if(*it++ != 'V'
 	|| *it++ != 'O'
 	|| *it++ != 'I') {

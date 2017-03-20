@@ -682,6 +682,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 		if(ent->entityType == Entity::TypePortal
 		|| ent->entityType == Entity::TypeMirror) {
 			glDisable(GL_CULL_FACE);
+		}else if(ent->flags & Entity::FlagDoubleSided){
+			glDisable(GL_CULL_FACE);
 		}else{
 			glEnable(GL_CULL_FACE);
 		}
@@ -875,6 +877,8 @@ void RenderScene(Scene* scene, const Camera& cam, u32 layerMask) {
 
 			if(ent->entityType == Entity::TypePortal
 			|| ent->entityType == Entity::TypeMirror) {
+				glDisable(GL_CULL_FACE);
+			}else if(ent->flags & Entity::FlagDoubleSided){
 				glDisable(GL_CULL_FACE);
 			}else{
 				glEnable(GL_CULL_FACE);

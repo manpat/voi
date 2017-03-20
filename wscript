@@ -72,12 +72,8 @@ def build(bld):
 	)
 
 def run(ctx):
-	args = [
-		"window.fullscreen=false"
-	]
-
-	subprocess.Popen(["build/voi"] + args)
-	# subprocess.Popen(["optirun", "build/voi"] + args)
+	subprocess.Popen("build/voi")
+	# subprocess.Popen(["optirun", "build/voi"])
 
 def package(ctx):
 	# suffix = ''
